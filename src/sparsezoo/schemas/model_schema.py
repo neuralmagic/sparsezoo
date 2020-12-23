@@ -1,17 +1,21 @@
+"""
+Code related to a model repo model
+"""
+
 import os
 import logging
 from typing import Dict, List, Union
 
-from sparsezoo.schemas.file_schema import FileSchema
-from sparsezoo.schemas.tag_schema import TagSchema
-from sparsezoo.schemas.optimization_schema import OptimizationSchema
-from sparsezoo.schemas.release_version_schema import ReleaseVersionSchema
-from sparsezoo.schemas.result_schema import ResultSchema
-from sparsezoo.schemas.user_schema import UserSchema
-from sparsezoo.schemas.downloadable_schema import ModelDownloadableSchema
+from sparsezoo.schemas.file_schema import RepoFile
+from sparsezoo.schemas.tag_schema import RepoTag
+from sparsezoo.schemas.optimization_schema import RepoOptimization
+from sparsezoo.schemas.release_version_schema import RepoReleaseVersion
+from sparsezoo.schemas.result_schema import RepoResult
+from sparsezoo.schemas.user_schema import RepoUser
+from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 from sparsezoo.utils import create_dirs
 
-__all__ = ["ModelSchema"]
+__all__ = ["RepoModel"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,9 +25,34 @@ OPTIMIZATION_FILE_TYPE = "optimization"
 DATA_FILE_TYPES = set(["inputs", "outputs", "labels"])
 
 
-class ModelSchema(ModelDownloadableSchema):
+class RepoModel(RepoDownloadable):
+    """
+    A model repo model
+
+    :param model_id: the model id
+    :param domain: The domain of the models e.g. cv
+    :param sub_domain: The sub domain of the models e.g. classification
+    :param architecture: The architecture of the models e.g. mobilenet
+    :param sub_architecture: The sub architecture of the model e.g. 1.0
+    :param dataset: The dataset the model was trained on e.g. imagenet
+    :param framework: The framework the model was trained on e.g. pytorch
+    :param optimization_name: The level of optimization of the model e.g. base
+    :param display_name: the display name for the model
+    :param display_description: the description for the model
+    :param repo_source: the source repo for the model
+    :param user_id: the user id for the user who uploaded model
+    :param release_version_id: the release version id for the release version of the model
+    :param base_model: the model id of a model this model inherited from
+    :param files: a list of model repo files for this model
+    :param tags: a list of model repo tags for this model
+    :param user: the model repo user who uploaded this model
+    :param optimizations: a list of model repo optimizations for this model
+    :param results: a list of model repo results for this model
+    :param release_version: a model repo release version this model was released with
+    """
+
     def __init__(self, **kwargs):
-        super(ModelSchema, self).__init__(**kwargs)
+        super(RepoModel, self).__init__(**kwargs)
 
         self._model_id = kwargs["model_id"]
         self._domain = kwargs["domain"]
@@ -42,35 +71,35 @@ class ModelSchema(ModelDownloadableSchema):
         self._base_model = kwargs["base_model"]
 
         if "files" in kwargs:
-            self._files = [FileSchema(**file) for file in kwargs["files"]]
+            self._files = [RepoFile(**file) for file in kwargs["files"]]
         else:
             self._files = []
 
         if "tags" in kwargs:
-            self._tags = [TagSchema(**tag) for tag in kwargs["tags"]]
+            self._tags = [RepoTag(**tag) for tag in kwargs["tags"]]
         else:
             self._tags = []
 
         if "optimizations" in kwargs:
             self._optimizations = [
-                OptimizationSchema(**optimization)
+                RepoOptimization(**optimization)
                 for optimization in kwargs["optimizations"]
             ]
         else:
             self._optimizations = []
 
         if "results" in kwargs:
-            self._results = [ResultSchema(**result) for result in kwargs["results"]]
+            self._results = [RepoResult(**result) for result in kwargs["results"]]
         else:
             self._results = []
 
         if "release_version" in kwargs:
-            self._release_version = ReleaseVersionSchema(**kwargs["release_version"])
+            self._release_version = RepoReleaseVersion(**kwargs["release_version"])
         else:
             self._release_version = None
 
         if "user" in kwargs:
-            self._user = UserSchema(**kwargs["user"])
+            self._user = RepoUser(**kwargs["user"])
         else:
             self._user = None
 
@@ -131,27 +160,27 @@ class ModelSchema(ModelDownloadableSchema):
         return self._base_model
 
     @property
-    def files(self) -> List[FileSchema]:
+    def files(self) -> List[RepoFile]:
         return self._files
 
     @property
-    def tags(self) -> List[TagSchema]:
+    def tags(self) -> List[RepoTag]:
         return self._tags
 
     @property
-    def optimizations(self) -> List[OptimizationSchema]:
+    def optimizations(self) -> List[RepoOptimization]:
         return self._optimizations
 
     @property
-    def results(self) -> List[ResultSchema]:
+    def results(self) -> List[RepoResult]:
         return self._results
 
     @property
-    def release_version(self) -> Union[ReleaseVersionSchema, None]:
+    def release_version(self) -> Union[RepoReleaseVersion, None]:
         return self._release_version
 
     @property
-    def user(self) -> Union[UserSchema, None]:
+    def user(self) -> Union[RepoUser, None]:
         return self._user
 
     def _get_download_folder(
@@ -169,7 +198,7 @@ class ModelSchema(ModelDownloadableSchema):
         return save_folder
 
     @property
-    def framework_files(self) -> List[FileSchema]:
+    def framework_files(self) -> List[RepoFile]:
         return [
             file_obj
             for file_obj in self.files
@@ -177,7 +206,7 @@ class ModelSchema(ModelDownloadableSchema):
         ]
 
     @property
-    def optimization_files(self) -> List[FileSchema]:
+    def optimization_files(self) -> List[RepoFile]:
         return [
             file_obj
             for file_obj in self.files
@@ -185,13 +214,13 @@ class ModelSchema(ModelDownloadableSchema):
         ]
 
     @property
-    def onnx_files(self) -> List[FileSchema]:
+    def onnx_files(self) -> List[RepoFile]:
         return [
             file_obj for file_obj in self.files if file_obj.file_type == ONNX_FILE_TYPE
         ]
 
     @property
-    def data_files(self) -> List[FileSchema]:
+    def data_files(self) -> List[RepoFile]:
         return [
             file_obj for file_obj in self.files if file_obj.file_type in DATA_FILE_TYPES
         ]
@@ -201,7 +230,7 @@ class ModelSchema(ModelDownloadableSchema):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
-        files=List[FileSchema],
+        files=List[RepoFile],
     ) -> str:
         save_folder = self._get_download_folder(overwrite, save_dir, save_path)
 
@@ -218,6 +247,16 @@ class ModelSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads all files associated with this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the model files to
+            instead of the default cache dir
+        :param save_path: The exact path to save the model files to instead of
+            the default cache dir or save_dir
+        :return: the folder where the files were saved
+        """
         _LOGGER.info(f"Downloading model {self.model_id}.")
 
         return self._download_files(
@@ -233,6 +272,16 @@ class ModelSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads all onnx files associated with this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the model files to
+            instead of the default cache dir
+        :param save_path: The exact path to save the model files to instead of
+            the default cache dir or save_dir
+        :return: the folder where the files were saved
+        """
         _LOGGER.info(f"Downloading model {self.model_id} onnx files.")
 
         return self._download_files(
@@ -248,6 +297,16 @@ class ModelSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads all framework files associated with this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the model files to
+            instead of the default cache dir
+        :param save_path: The exact path to save the model files to instead of
+            the default cache dir or save_dir
+        :return: the folder where the files were saved
+        """
         _LOGGER.info(f"Downloading model {self.model_id} framework files.")
 
         return self._download_files(
@@ -263,6 +322,16 @@ class ModelSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads all data files associated with this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the model files to
+            instead of the default cache dir
+        :param save_path: The exact path to save the model files to instead of
+            the default cache dir or save_dir
+        :return: the folder where the files were saved
+        """
         _LOGGER.info(f"Downloading model {self.model_id} data files.")
 
         return self._download_files(
@@ -278,6 +347,16 @@ class ModelSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads all optimization files associated with this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the model files to
+            instead of the default cache dir
+        :param save_path: The exact path to save the model files to instead of
+            the default cache dir or save_dir
+        :return: the folder where the files were saved
+        """
         _LOGGER.info(f"Downloading model {self.model_id} optimization files.")
 
         return self._download_files(

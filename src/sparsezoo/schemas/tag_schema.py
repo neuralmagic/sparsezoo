@@ -1,13 +1,26 @@
+"""
+Code related to model repo tags
+"""
+
 from typing import Dict
 from sparsezoo.schemas.object_schema import ObjectSchema
 
 
-__all__ = ["TagSchema"]
+__all__ = ["RepoTag"]
 
 
-class TagSchema(ObjectSchema):
+class RepoTag(ObjectSchema):
+    """
+    A model repo tag
+
+    :param tag_id: the tag id
+    :param display_name: the display name for tag
+    :param model_id: the model id of the model the tag is for
+    :param name: the name for the ta
+    """
+
     def __init__(self, **kwargs):
-        super(TagSchema, self).__init__(**kwargs)
+        super(RepoTag, self).__init__(**kwargs)
         self._tag_id = kwargs["tag_id"]
         self._display_name = kwargs["display_name"]
         self._model_id = kwargs["model_id"]

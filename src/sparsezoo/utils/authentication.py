@@ -4,6 +4,7 @@ import logging
 import time
 from datetime import datetime, timezone
 import yaml
+from typing import Dict
 
 import requests
 from sparsezoo.utils.helpers import BASE_API_URL, clean_path
@@ -26,6 +27,10 @@ CREDENTIALS_YAML_TOKEN_KEY = "nm_api_token"
 
 
 class SparseZooCredentials:
+    """
+    Class wrapping around the sparse zoo credentials file.
+    """
+
     def __init__(self):
         if os.path.exists(CREDENTIALS_YAML):
             _LOGGER.info(f"Loading sparse zoo credentials from {CREDENTIALS_YAML}")
@@ -44,7 +49,14 @@ class SparseZooCredentials:
             self._token = None
             self._created = None
 
-    def save_token(self, token: str, created):
+    def save_token(self, token: str, created: float):
+        """
+        Save the jwt for accessing sparse zoo APIs. Will create the credentials file if it does
+        not exist already.
+
+        :param token: the jwt for accessing sparse zoo APIs
+        :param created: the approximate time the token was created
+        """
         _LOGGER.info(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
         with open(CREDENTIALS_YAML, "w+") as credentials_file:
             credentials_yaml = yaml.safe_load(credentials_file)
@@ -61,6 +73,9 @@ class SparseZooCredentials:
 
     @property
     def token(self):
+        """
+        :return: obtain the token if under 1 day old, else return None
+        """
         _LOGGER.info(f"Obtaining sparse zoo credentials from {CREDENTIALS_YAML}")
         if self._token and self._created is not None:
             creation_date = datetime.fromtimestamp(self._created, tz=timezone.utc)
@@ -76,11 +91,23 @@ class SparseZooCredentials:
 
 
 def get_auth_header(
+    authentication_type: str = PUBLIC_AUTH_TYPE,
     user_id: str = None,
     app_id: str = None,
-    authentication_type: str = PUBLIC_AUTH_TYPE,
     refresh_token: bool = False,
-) -> str:
+) -> Dict:
+    """
+    Obtain an authentication header token from either credentials file or from APIs
+    if token is over 1 day old. Location of credentials file can be changed by setting the
+    environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
+
+    Currently only 'public' authentication type is supported.
+
+    :param authentication_type: authentication type for generating token
+    :param user_id: user id if auth type requires user_id
+    :param app_id: app id if auth type requires app_id
+    :param refresh_token: forces a new token to be generated
+    """
     credentials = SparseZooCredentials()
     token = credentials.token
     if token and not refresh_token:

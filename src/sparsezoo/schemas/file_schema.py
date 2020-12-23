@@ -2,22 +2,39 @@ import os
 import logging
 
 from typing import Dict
-from sparsezoo.schemas.downloadable_schema import ModelDownloadableSchema
+from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 from sparsezoo.utils import download_file
 
-__all__ = ["FileSchema"]
+__all__ = ["RepoFile"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class FileSchema(ModelDownloadableSchema):
+class RepoFile(RepoDownloadable):
+    """
+    A model repo file.
+
+    :param file_id: the file id
+    :param model_id: the model id of the optimization
+    :param display_name: the display name for the optimization
+    :param file_type: the file type e.g. onnx
+    :param operator_version: Any operator version associated for the file e.g. onnx opset.
+        None if no operator version exists
+    :param optimization_id: An optimization id if this file is an optimization file, otherwise None
+    :param quantized: True if file is a quantized onnx model. False otherwise.
+    :param md5: The md5 hash of the file
+    :param file_size: The file size in bytes
+    :param downloads: The amount of times a download has been requested for this file
+    :param url: The signed url to retrieve the file.
+    """
+
     def __init__(self, **kwargs):
-        super(FileSchema, self).__init__(kwargs["display_name"], **kwargs)
+        super(RepoFile, self).__init__(kwargs["display_name"], **kwargs)
         self._file_id = kwargs["file_id"]
+        self._model_id = kwargs["model_id"]
         self._display_name = kwargs["display_name"]
         self._file_type = kwargs["file_type"]
         self._operator_version = kwargs["operator_version"]
-        self._model_id = kwargs["model_id"]
         self._optimization_id = kwargs["optimization_id"]
         self._quantized = kwargs["quantized"]
         self._md5 = kwargs["md5"]
@@ -78,10 +95,18 @@ class FileSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads a model repo file. Will fail if the file does not contain a signed url
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the file to instead of the default cache dir
+        :param save_path: The exact path to save the file to instead of the default cache dir or save_dir
+        :return: the folder where the file was saved
+        """
         if self.url is None:
             raise Exception(
-                "File {} has not been signed. Please use download API to obtain a signed version of this model.".format(
-                    self.model_id
+                "File {} from model {} has not been signed.".format(
+                    self.display_name, self.model_id
                 )
             )
         save_file = self._get_download_save_path(overwrite, save_dir, save_path)

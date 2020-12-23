@@ -1,12 +1,29 @@
+"""
+Code related to a model repo results
+"""
+
 from typing import Dict
 from sparsezoo.schemas.object_schema import ObjectSchema
 
-__all__ = ["ResultSchema"]
+__all__ = ["RepoResult"]
 
 
-class ResultSchema(ObjectSchema):
+class RepoResult(ObjectSchema):
+    """
+    A model repo result
+
+    :param result_id: the result id
+    :param display_name: the display name for the result
+    :param result_type: the result type e.g. benchmark or performance
+    :param result_category: the result category e.g. cpu or gpu
+    :param model_id: the model id of the model the result is for
+    :param recorded_value: the recorded value of the result
+    :param recorded_units: the units the recorded value was in
+    :param recorded_format: any information of recorded format
+    """
+
     def __init__(self, **kwargs):
-        super(ResultSchema, self).__init__(**kwargs)
+        super(RepoResult, self).__init__(**kwargs)
         self._result_id = kwargs["result_id"]
         self._display_name = kwargs["display_name"]
         self._result_type = kwargs["result_type"]

@@ -4,16 +4,16 @@ from setuptools import find_packages, setup
 
 def _setup_packages() -> List:
     return find_packages(
-        "ui", include=["sparsezoo", "sparsezoo.*"], exclude=["*.__pycache__.*"]
+        "src", include=["sparsezoo", "sparsezoo.*"], exclude=["*.__pycache__.*"]
     )
 
 
 def _setup_install_requires() -> List:
-    return []
+    return ["requests>=2.25.1", "PyYaml>=5.3.1", "tqdm>=4.54.1"]
 
 
-def _setup_extras() -> List:
-    return []
+def _setup_extras() -> Dict:
+    return {}
 
 
 def _setup_entry_points() -> Dict:
@@ -35,13 +35,11 @@ setup(
     keywords="[TODO]",
     license="[TODO]",
     url="https://github.com/neuralmagic/sparsezoo",
-    package_dir={"": "ui"},
+    package_dir={"": "src"},
     packages=_setup_packages(),
     install_requires=_setup_install_requires(),
     extras_require=_setup_extras(),
     entry_points=_setup_entry_points(),
     python_requires=">=3.6.0",
-    classifiers=[
-        "[TODO]"
-    ],
+    classifiers=["[TODO]"],
 )

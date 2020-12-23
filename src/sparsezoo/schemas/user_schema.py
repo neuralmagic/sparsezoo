@@ -1,12 +1,25 @@
+"""
+Code related to a model repo user
+"""
+
 from typing import Dict
 from sparsezoo.schemas.object_schema import ObjectSchema
 
-__all__ = ["UserSchema"]
+__all__ = ["RepoUser"]
 
 
-class UserSchema(ObjectSchema):
+class RepoUser(ObjectSchema):
+    """
+    A model repo user
+
+    :param email: contact email
+    :param name: name of user
+    :param user_id: user id
+    :param trusted: Whether the user is a trusted source
+    """
+
     def __init__(self, **kwargs):
-        super(UserSchema, self).__init__(**kwargs)
+        super(RepoUser, self).__init__(**kwargs)
         self._email = kwargs["email"]
         self._name = kwargs["name"]
         self._user_id = kwargs["user_id"]

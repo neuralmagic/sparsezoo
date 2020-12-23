@@ -1,17 +1,31 @@
+"""
+Code related to a model repo optimization file
+"""
 from typing import Dict
 import logging
 
-from sparsezoo.schemas.file_schema import FileSchema
-from sparsezoo.schemas.downloadable_schema import ModelDownloadableSchema
+from sparsezoo.schemas.file_schema import RepoFile
+from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 
-__all__ = ["OptimizationSchema"]
+__all__ = ["RepoOptimization"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class OptimizationSchema(ModelDownloadableSchema):
+class RepoOptimization(RepoDownloadable):
+    """
+    A model repo optimization.
+
+    :param optimization_id: the optimization id
+    :param model_id: the model id of the optimization
+    :param display_name: the display name for the optimization
+    :param display_description: the description for the optimization
+    :param optimization_type: the type of optimizations
+    :param file: the file object for the optimization
+    """
+
     def __init__(self, **kwargs):
-        super(OptimizationSchema, self).__init__(**kwargs)
+        super(RepoOptimization, self).__init__(**kwargs)
         self._optimization_id = kwargs["optimization_id"]
         self._model_id = kwargs["model_id"]
         self._display_name = kwargs["display_name"]
@@ -44,7 +58,7 @@ class OptimizationSchema(ModelDownloadableSchema):
         return self._optimization_type
 
     @property
-    def file(self) -> FileSchema:
+    def file(self) -> RepoFile:
         return self._file
 
     def download(
@@ -53,14 +67,20 @@ class OptimizationSchema(ModelDownloadableSchema):
         save_dir: str = None,
         save_path: str = None,
     ) -> str:
+        """
+        Downloads the optimization yaml file associated with this optimization
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param save_dir: The directory to save the optimization file to instead of the default cache dir
+        :param save_path: The exact path to save the optimization file to instead of the default cache dir or save_dir
+        :return: the folder where the file was saved
+        """
         _LOGGER.info(
             f"Downloading recipe files for {self.display_name} from model {self.model_id}."
         )
         if self.file is None:
             raise Exception(
-                "File {} has not been signed. Please use download API to obtain a signed version of this model.".format(
-                    self.model_id
-                )
+                "No file found for optimization {}".format(self.display_name)
             )
         else:
             self.file.download(
