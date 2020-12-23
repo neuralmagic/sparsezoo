@@ -94,7 +94,7 @@ def get_auth_header(
     authentication_type: str = PUBLIC_AUTH_TYPE,
     user_id: str = None,
     app_id: str = None,
-    refresh_token: bool = False,
+    force_token_refresh: bool = False,
 ) -> Dict:
     """
     Obtain an authentication header token from either credentials file or from APIs
@@ -106,11 +106,11 @@ def get_auth_header(
     :param authentication_type: authentication type for generating token
     :param user_id: user id if auth type requires user_id
     :param app_id: app id if auth type requires app_id
-    :param refresh_token: forces a new token to be generated
+    :param force_token_refresh: forces a new token to be generated
     """
     credentials = SparseZooCredentials()
     token = credentials.token
-    if token and not refresh_token:
+    if token and not force_token_refresh:
         return {NM_TOKEN_HEADER: token}
     elif authentication_type.lower() == PUBLIC_AUTH_TYPE:
         created = time.time()

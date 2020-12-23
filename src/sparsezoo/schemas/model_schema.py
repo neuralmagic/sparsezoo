@@ -6,14 +6,16 @@ import os
 import logging
 from typing import Dict, List, Union
 
-from sparsezoo.schemas.file_schema import RepoFile
+import requests
+
+from sparsezoo.schemas.file_schema import RepoFile, UnsignedFileError
 from sparsezoo.schemas.tag_schema import RepoTag
 from sparsezoo.schemas.optimization_schema import RepoOptimization
 from sparsezoo.schemas.release_version_schema import RepoReleaseVersion
 from sparsezoo.schemas.result_schema import RepoResult
 from sparsezoo.schemas.user_schema import RepoUser
 from sparsezoo.schemas.downloadable_schema import RepoDownloadable
-from sparsezoo.utils import create_dirs
+from sparsezoo.utils import create_dirs, BASE_API_URL, get_auth_header
 
 __all__ = ["RepoModel"]
 
@@ -102,6 +104,55 @@ class RepoModel(RepoDownloadable):
             self._user = RepoUser(**kwargs["user"])
         else:
             self._user = None
+
+    @staticmethod
+    def get_downloadable_model(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: str,
+        dataset: str,
+        framework: str,
+        optimization_name: str,
+        release_version: str = None,
+        force_token_refresh: bool = False,
+    ):
+        """
+        Obtains a RepoModel with signed files from the model repo
+
+        :param domain: The domain of the models e.g. cv
+        :param sub_domain: The sub domain of the models e.g. classification
+        :param architecture: The architecture of the models e.g. mobilenet
+        :param sub_architecture: The sub architecture of the model e.g. 1.0
+        :param dataset: The dataset the model was trained on e.g. imagenet
+        :param framework: The framework the model was trained on e.g. pytorch
+        :param optimization_name: The level of optimization of the model e.g. base
+        :param release_version: Optional param specifying the maximum supported release version for the models
+        :param force_token_refresh: Forces a refresh of the authentication token
+        :return: the RepoModel
+        """
+        header = get_auth_header(force_token_refresh=force_token_refresh)
+
+        url = os.path.join(
+            BASE_API_URL,
+            "download",
+            domain,
+            sub_domain,
+            architecture,
+            sub_architecture,
+            dataset,
+            framework,
+            optimization_name,
+        )
+        if release_version:
+            url += f"?release_version={release_version}"
+        _LOGGER.info(f"Obtaining model from {url}")
+
+        response = requests.get(url=url, headers=header)
+        response.raise_for_status()
+        response_json = response.json()
+
+        return RepoModel(**response_json["model"])
 
     @property
     def model_id(self) -> str:
@@ -231,14 +282,36 @@ class RepoModel(RepoDownloadable):
         save_dir: str = None,
         save_path: str = None,
         files=List[RepoFile],
+        force_download_on_unsigned: bool = False,
     ) -> str:
         save_folder = self._get_download_folder(overwrite, save_dir, save_path)
-
         for file_obj in files:
-            file_obj.download(
-                overwrite=overwrite,
-                save_dir=save_folder,
-            )
+            try:
+                file_obj.download(
+                    overwrite=overwrite,
+                    save_dir=save_folder,
+                )
+            except UnsignedFileError:
+                if force_download_on_unsigned:
+                    other_file = RepoFile.get_downloadable_file(
+                        self.domain,
+                        self.sub_domain,
+                        self.architecture,
+                        self.sub_architecture,
+                        self.dataset,
+                        self.framework,
+                        self.optimization_name,
+                        file_obj.display_name,
+                        str(self.release_version),
+                        force_token_refresh=True,
+                    )
+                    file_obj.url = other_file.url
+                    file_obj.download(
+                        overwrite=overwrite,
+                        save_dir=save_folder,
+                    )
+                else:
+                    raise
         return save_folder
 
     def download(
@@ -246,6 +319,7 @@ class RepoModel(RepoDownloadable):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
+        force_download_on_unsigned: bool = False,
     ) -> str:
         """
         Downloads all files associated with this model.
@@ -255,6 +329,8 @@ class RepoModel(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
+        :param force_download_on_unsigned: If files are unsigned, updates all the model to
+            contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id}.")
@@ -264,6 +340,7 @@ class RepoModel(RepoDownloadable):
             save_dir=save_dir,
             save_path=save_path,
             files=self.files,
+            force_download_on_unsigned=force_download_on_unsigned,
         )
 
     def download_onnx_files(
@@ -271,6 +348,7 @@ class RepoModel(RepoDownloadable):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
+        force_download_on_unsigned: bool = False,
     ) -> str:
         """
         Downloads all onnx files associated with this model.
@@ -280,6 +358,8 @@ class RepoModel(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
+        :param force_download_on_unsigned: If files are unsigned, updates all the model to
+            contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} onnx files.")
@@ -289,6 +369,7 @@ class RepoModel(RepoDownloadable):
             save_dir=save_dir,
             save_path=save_path,
             files=self.onnx_files,
+            force_download_on_unsigned=force_download_on_unsigned,
         )
 
     def download_framework_files(
@@ -296,6 +377,7 @@ class RepoModel(RepoDownloadable):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
+        force_download_on_unsigned: bool = False,
     ) -> str:
         """
         Downloads all framework files associated with this model.
@@ -305,6 +387,8 @@ class RepoModel(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
+        :param force_download_on_unsigned: If files are unsigned, updates all the model to
+            contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} framework files.")
@@ -314,6 +398,7 @@ class RepoModel(RepoDownloadable):
             save_dir=save_dir,
             save_path=save_path,
             files=self.framework_files,
+            force_download_on_unsigned=force_download_on_unsigned,
         )
 
     def download_data_files(
@@ -321,6 +406,7 @@ class RepoModel(RepoDownloadable):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
+        force_download_on_unsigned: bool = False,
     ) -> str:
         """
         Downloads all data files associated with this model.
@@ -330,6 +416,8 @@ class RepoModel(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
+        :param force_download_on_unsigned: If files are unsigned, updates all the model to
+            contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} data files.")
@@ -339,6 +427,7 @@ class RepoModel(RepoDownloadable):
             save_dir=save_dir,
             save_path=save_path,
             files=self.data_files,
+            force_download_on_unsigned=force_download_on_unsigned,
         )
 
     def download_optimization_files(
@@ -346,6 +435,7 @@ class RepoModel(RepoDownloadable):
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
+        force_download_on_unsigned: bool = False,
     ) -> str:
         """
         Downloads all optimization files associated with this model.
@@ -355,6 +445,8 @@ class RepoModel(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
+        :param force_download_on_unsigned: If files are unsigned, updates all the model to
+            contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} optimization files.")
@@ -364,6 +456,7 @@ class RepoModel(RepoDownloadable):
             save_dir=save_dir,
             save_path=save_path,
             files=self.optimization_files,
+            force_download_on_unsigned=force_download_on_unsigned,
         )
 
     def dict(self) -> Dict:

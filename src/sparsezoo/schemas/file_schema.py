@@ -1,13 +1,24 @@
 import os
 import logging
 
+import requests
+
 from typing import Dict
 from sparsezoo.schemas.downloadable_schema import RepoDownloadable
-from sparsezoo.utils import download_file
+from sparsezoo.utils import download_file, get_auth_header, BASE_API_URL
 
-__all__ = ["RepoFile"]
+__all__ = ["RepoFile", "UnsignedFileError"]
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class UnsignedFileError(Exception):
+    """
+    Error raised when a RepoFile does not contain signed url
+    """
+
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
 
 
 class RepoFile(RepoDownloadable):
@@ -44,6 +55,59 @@ class RepoFile(RepoDownloadable):
             self._url = kwargs["url"]
         else:
             self._url = None
+
+    @staticmethod
+    def get_downloadable_file(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: str,
+        dataset: str,
+        framework: str,
+        optimization_name: str,
+        file_name: str,
+        release_version: str = None,
+        force_token_refresh: bool = False,
+    ):
+        """
+        Creates a RepoFile with a signed url from specified model attributes in the model repo.
+
+        :param domain: The domain of the models e.g. cv
+        :param sub_domain: The sub domain of the models e.g. classification
+        :param architecture: The architecture of the models e.g. mobilenet
+        :param sub_architecture: The sub architecture of the model e.g. 1.0
+        :param dataset: The dataset the model was trained on e.g. imagenet
+        :param framework: The framework the model was trained on e.g. pytorch
+        :param optimization_name: The level of optimization of the model e.g. base
+        :param file_name: The name of the file being downloaded e.g. model.onnx
+        :param release_version: Optional param specifying the maximum supported release version for the models
+        :param force_token_refresh: Forces a refresh of the authentication token
+        :return: a RepoFile for the downloaded model file
+        """
+        header = get_auth_header(force_token_refresh=force_token_refresh)
+
+        url = os.path.join(
+            BASE_API_URL,
+            "download",
+            domain,
+            sub_domain,
+            architecture,
+            sub_architecture,
+            dataset,
+            framework,
+            optimization_name,
+            file_name,
+        )
+        _LOGGER.info(f"Obtaining model file at {url}")
+
+        if release_version:
+            url += f"?release_version={release_version}"
+
+        response = requests.get(url=url, headers=header)
+        response.raise_for_status()
+        response_json = response.json()
+
+        return RepoFile(**response_json["file"])
 
     @property
     def display_name(self) -> str:
@@ -89,6 +153,10 @@ class RepoFile(RepoDownloadable):
     def url(self) -> str:
         return self._url
 
+    @url.setter
+    def url(self, url):
+        self._url = url
+
     def download(
         self,
         overwrite: bool = False,
@@ -104,7 +172,7 @@ class RepoFile(RepoDownloadable):
         :return: the folder where the file was saved
         """
         if self.url is None:
-            raise Exception(
+            raise UnsignedFileError(
                 "File {} from model {} has not been signed.".format(
                     self.display_name, self.model_id
                 )

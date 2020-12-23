@@ -58,7 +58,7 @@ def search_models(
     release_version: str = None,
     page: int = 1,
     page_length: int = 20,
-    refresh_token: bool = False,
+    force_token_refresh: bool = False,
 ) -> List[RepoModel]:
     """
     Search model repo for any models matching the search criteria.
@@ -71,10 +71,10 @@ def search_models(
     :param framework: Optional param specifying the framework the models were trained on e.g. pytorch
     :param optimization_name: Optional param specifying the level of optimization of the models e.g. base
     :param release_version: Optional param specifying the maximum supported release version for the models
-    :param refresh_token: Forces a refresh of the authentication token
+    :param force_token_refresh: Forces a refresh of the authentication token
     :return: list of models matching provided criterias
     """
-    header = get_auth_header(refresh_token=refresh_token)
+    header = get_auth_header(force_token_refresh=force_token_refresh)
 
     url = os.path.join(BASE_API_URL, "search", domain, sub_domain)
 
@@ -93,8 +93,5 @@ def search_models(
     _LOGGER.info(f"Searching models from {url}")
 
     response_json = requests.get(url=url, headers=header).json()
-    if "models" in response_json:
-        models = [RepoModel(**model) for model in response_json["models"]]
-        return models
-    else:
-        raise Exception("Key 'models' not found in response")
+    models = [RepoModel(**model) for model in response_json["models"]]
+    return models

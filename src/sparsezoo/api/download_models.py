@@ -2,51 +2,16 @@
 Code related to wrapping around API calls under api.neuralmagic.com/models/download
 """
 
-import os
 import logging
 
-import requests
 
 from sparsezoo.schemas import RepoFile, RepoModel
-from sparsezoo.utils import get_auth_header, BASE_API_URL
 
 
-__all__ = ["download_model_file", "download_model", "convert_model_to_downloadable"]
+__all__ = ["download_model_file", "download_model"]
 
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def convert_model_to_downloadable(
-    model: RepoModel,
-    refresh_token: bool = False,
-) -> RepoModel:
-    """
-    Converts a model with unsigned files to a model with signed files
-
-    :return: a new version of the model with signed files
-    """
-    header = get_auth_header(refresh_token=refresh_token)
-
-    url = os.path.join(
-        BASE_API_URL,
-        "download",
-        model.domain,
-        model.sub_domain,
-        model.architecture,
-        model.sub_architecture,
-        model.dataset,
-        model.framework,
-        model.optimization_name,
-    )
-    url += f"?release_version={str(model.release_version)}"
-    _LOGGER.info(f"Obtaining model from {url}")
-
-    response = requests.get(url=url, headers=header)
-    response.raise_for_status()
-    response_json = response.json()
-
-    return RepoModel(**response_json["model"])
 
 
 def download_model(
@@ -61,7 +26,7 @@ def download_model(
     overwrite: bool = False,
     save_dir: str = None,
     save_path: str = None,
-    refresh_token: bool = False,
+    force_token_refresh: bool = False,
 ) -> RepoModel:
     """
     Downloads all files from specified model in the model repo.
@@ -74,7 +39,7 @@ def download_model(
     :param framework: The framework the model was trained on e.g. pytorch
     :param optimization_name: The level of optimization of the model e.g. base
     :param release_version: Optional param specifying the maximum supported release version for the models
-    :param refresh_token: Forces a refresh of the authentication token
+    :param force_token_refresh: Forces a refresh of the authentication token
     :param overwrite: True to overwrite the file if it exists, False otherwise
     :param save_dir: The directory to save the model files to
         instead of the default cache dir
@@ -82,11 +47,7 @@ def download_model(
         the default cache dir or save_dir
     :return: the downloaded model
     """
-    header = get_auth_header(refresh_token=refresh_token)
-
-    url = os.path.join(
-        BASE_API_URL,
-        "download",
+    model = RepoModel.get_downloadable_model(
         domain,
         sub_domain,
         architecture,
@@ -94,16 +55,9 @@ def download_model(
         dataset,
         framework,
         optimization_name,
+        release_version,
+        force_token_refresh,
     )
-    if release_version:
-        url += f"?release_version={release_version}"
-    _LOGGER.info(f"Obtaining model from {url}")
-
-    response = requests.get(url=url, headers=header)
-    response.raise_for_status()
-    response_json = response.json()
-
-    model = RepoModel(**response_json["model"])
     save_location = model.download(
         overwrite=overwrite, save_dir=save_dir, save_path=save_path
     )
@@ -124,7 +78,7 @@ def download_model_file(
     overwrite: bool = False,
     save_dir: str = None,
     save_path: str = None,
-    refresh_token: bool = False,
+    force_token_refresh: bool = False,
 ) -> RepoFile:
     """
     Downloads a file from specified model in the model repo.
@@ -138,7 +92,7 @@ def download_model_file(
     :param optimization_name: The level of optimization of the model e.g. base
     :param file_name: The name of the file being downloaded e.g. model.onnx
     :param release_version: Optional param specifying the maximum supported release version for the models
-    :param refresh_token: Forces a refresh of the authentication token
+    :param force_token_refresh: Forces a refresh of the authentication token
     :param overwrite: True to overwrite the file if it exists, False otherwise
     :param save_dir: The directory to save the model files to
         instead of the default cache dir
@@ -146,11 +100,7 @@ def download_model_file(
         the default cache dir or save_dir
     :return: a RepoFile for the downloaded model file
     """
-    header = get_auth_header(refresh_token=refresh_token)
-
-    url = os.path.join(
-        BASE_API_URL,
-        "download",
+    file_obj = RepoFile.get_downloadable_file(
         domain,
         sub_domain,
         architecture,
@@ -159,18 +109,9 @@ def download_model_file(
         framework,
         optimization_name,
         file_name,
+        release_version,
+        force_token_refresh,
     )
-    _LOGGER.info(f"Obtaining model file at {url}")
-
-    if release_version:
-        url += f"?release_version={release_version}"
-
-    response = requests.get(url=url, headers=header)
-    response.raise_for_status()
-    response_json = response.json()
-
-    file_obj = RepoFile(**response_json["file"])
-
     save_location = file_obj.download(
         overwrite=overwrite, save_dir=save_dir, save_path=save_path
     )
