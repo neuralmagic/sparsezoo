@@ -4,20 +4,20 @@ Code related to a model repo model
 
 import os
 import logging
-from typing import Dict, List, Union
+from typing import List, Union
 
 import requests
 
-from sparsezoo.schemas.file_schema import RepoFile, UnsignedFileError
-from sparsezoo.schemas.tag_schema import RepoTag
-from sparsezoo.schemas.optimization_schema import RepoOptimization
-from sparsezoo.schemas.release_version_schema import RepoReleaseVersion
-from sparsezoo.schemas.result_schema import RepoResult
-from sparsezoo.schemas.user_schema import RepoUser
+from sparsezoo.schemas.file_schema import File, UnsignedFileError
+from sparsezoo.schemas.tag_schema import Tag
+from sparsezoo.schemas.optimization_schema import OptimizationRecipe
+from sparsezoo.schemas.release_version_schema import ReleaseVersion
+from sparsezoo.schemas.result_schema import Result
+from sparsezoo.schemas.user_schema import User
 from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 from sparsezoo.utils import create_dirs, BASE_API_URL, get_auth_header
 
-__all__ = ["RepoModel"]
+__all__ = ["Model"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ OPTIMIZATION_FILE_TYPE = "optimization"
 DATA_FILE_TYPES = set(["inputs", "outputs", "labels"])
 
 
-class RepoModel(RepoDownloadable):
+class Model(RepoDownloadable):
     """
     A model repo model
 
@@ -51,10 +51,11 @@ class RepoModel(RepoDownloadable):
     :param optimizations: a list of model repo optimizations for this model
     :param results: a list of model repo results for this model
     :param release_version: a model repo release version this model was released with
+    :param tag_line: the tag line for the model
     """
 
     def __init__(self, **kwargs):
-        super(RepoModel, self).__init__(**kwargs)
+        super(Model, self).__init__(**kwargs)
 
         self._model_id = kwargs["model_id"]
         self._domain = kwargs["domain"]
@@ -71,37 +72,38 @@ class RepoModel(RepoDownloadable):
         self._user_id = kwargs["user_id"]
         self._release_version_id = kwargs["release_version_id"]
         self._base_model = kwargs["base_model"]
+        self._tag_line = kwargs["tag_line"]
 
         if "files" in kwargs:
-            self._files = [RepoFile(**file) for file in kwargs["files"]]
+            self._files = [File(**file) for file in kwargs["files"]]
         else:
             self._files = []
 
         if "tags" in kwargs:
-            self._tags = [RepoTag(**tag) for tag in kwargs["tags"]]
+            self._tags = [Tag(**tag) for tag in kwargs["tags"]]
         else:
             self._tags = []
 
         if "optimizations" in kwargs:
             self._optimizations = [
-                RepoOptimization(**optimization)
+                OptimizationRecipe(**optimization)
                 for optimization in kwargs["optimizations"]
             ]
         else:
             self._optimizations = []
 
         if "results" in kwargs:
-            self._results = [RepoResult(**result) for result in kwargs["results"]]
+            self._results = [Result(**result) for result in kwargs["results"]]
         else:
             self._results = []
 
         if "release_version" in kwargs:
-            self._release_version = RepoReleaseVersion(**kwargs["release_version"])
+            self._release_version = ReleaseVersion(**kwargs["release_version"])
         else:
             self._release_version = None
 
         if "user" in kwargs:
-            self._user = RepoUser(**kwargs["user"])
+            self._user = User(**kwargs["user"])
         else:
             self._user = None
 
@@ -118,7 +120,7 @@ class RepoModel(RepoDownloadable):
         force_token_refresh: bool = False,
     ):
         """
-        Obtains a RepoModel with signed files from the model repo
+        Obtains a Model with signed files from the model repo
 
         :param domain: The domain of the models e.g. cv
         :param sub_domain: The sub domain of the models e.g. classification
@@ -129,7 +131,7 @@ class RepoModel(RepoDownloadable):
         :param optimization_name: The level of optimization of the model e.g. base
         :param release_version: Optional param specifying the maximum supported release version for the models
         :param force_token_refresh: Forces a refresh of the authentication token
-        :return: the RepoModel
+        :return: the Model
         """
         header = get_auth_header(force_token_refresh=force_token_refresh)
 
@@ -152,104 +154,153 @@ class RepoModel(RepoDownloadable):
         response.raise_for_status()
         response_json = response.json()
 
-        return RepoModel(**response_json["model"])
+        return Model(**response_json["model"])
 
     @property
     def model_id(self) -> str:
+        """
+        :return: the model id
+        """
         return self._model_id
 
     @property
     def domain(self) -> str:
+        """
+        :return: The domain of the models e.g. cv
+        """
         return self._domain
 
     @property
     def sub_domain(self) -> str:
+        """
+        :return: The sub domain of the models e.g. classification
+        """
         return self._sub_domain
 
     @property
     def architecture(self) -> str:
+        """
+        :return: The architecture of the models e.g. mobilenet
+        """
         return self._architecture
 
     @property
     def sub_architecture(self) -> str:
+        """
+        :return: The sub architecture of the model e.g. 1.0
+        """
         return self._sub_architecture
 
     @property
     def dataset(self) -> str:
+        """
+        :return: The dataset the model was trained on e.g. imagenet
+        """
         return self._dataset
 
     @property
     def framework(self) -> str:
+        """
+        :return: The framework the model was trained on e.g. pytorch
+        """
         return self._framework
 
     @property
     def optimization_name(self) -> str:
+        """
+        :return: The level of optimization of the model e.g. base
+        """
         return self._optimization_name
 
     @property
     def display_name(self) -> str:
+        """
+        :return: the display name for the model
+        """
         return self._display_name
 
     @property
     def display_description(self) -> str:
+        """
+        :return: the description for the model
+        """
         return self._display_description
 
     @property
     def repo_source(self) -> str:
+        """
+        :return: the source repo for the model
+        """
         return self._repo_source
 
     @property
     def user_id(self) -> str:
+        """
+        :return: the user id for the user who uploaded model
+        """
         return self._user_id
 
     @property
     def release_version_id(self) -> str:
+        """
+        :return: the release version id for the release version of the model
+        """
         return self._release_version_id
 
     @property
     def base_model(self) -> str:
+        """
+        :return: the model id of a model this model inherited from
+        """
         return self._base_model
 
     @property
-    def files(self) -> List[RepoFile]:
+    def files(self) -> List[File]:
+        """
+        :return: a list of model repo files for this model
+        """
         return self._files
 
     @property
-    def tags(self) -> List[RepoTag]:
+    def tags(self) -> List[Tag]:
+        """
+        :return: a list of model repo tags for this model
+        """
         return self._tags
 
     @property
-    def optimizations(self) -> List[RepoOptimization]:
+    def optimizations(self) -> List[OptimizationRecipe]:
+        """
+        :return: a list of model repo optimizations for this model
+        """
         return self._optimizations
 
     @property
-    def results(self) -> List[RepoResult]:
+    def results(self) -> List[Result]:
+        """
+        :return: a list of model repo results for this model
+        """
         return self._results
 
     @property
-    def release_version(self) -> Union[RepoReleaseVersion, None]:
+    def release_version(self) -> Union[ReleaseVersion, None]:
+        """
+        :return: a model repo release version this model was released with
+        """
         return self._release_version
 
     @property
-    def user(self) -> Union[RepoUser, None]:
+    def user(self) -> Union[User, None]:
+        """
+        :return: the model repo user who uploaded this model
+        """
         return self._user
 
-    def _get_download_folder(
-        self,
-        overwrite: bool = False,
-        save_dir: str = None,
-        save_path: str = None,
-    ):
-        if save_dir:
-            save_dir = os.path.join(save_dir, self.model_id)
-        save_folder = self._get_download_save_path(overwrite, save_dir, save_path)
-
-        if not os.path.exists(save_folder):
-            create_dirs(save_folder)
-        return save_folder
-
     @property
-    def framework_files(self) -> List[RepoFile]:
+    def framework_files(self) -> List[File]:
+        """
+        :return: list of Files that are of type framework
+        """
         return [
             file_obj
             for file_obj in self.files
@@ -257,7 +308,10 @@ class RepoModel(RepoDownloadable):
         ]
 
     @property
-    def optimization_files(self) -> List[RepoFile]:
+    def optimization_files(self) -> List[File]:
+        """
+        :return: list of Files that are of type optimization
+        """
         return [
             file_obj
             for file_obj in self.files
@@ -265,54 +319,29 @@ class RepoModel(RepoDownloadable):
         ]
 
     @property
-    def onnx_files(self) -> List[RepoFile]:
+    def onnx_files(self) -> List[File]:
+        """
+        :return: list of Files that are of type onnx
+        """
         return [
             file_obj for file_obj in self.files if file_obj.file_type == ONNX_FILE_TYPE
         ]
 
     @property
-    def data_files(self) -> List[RepoFile]:
+    def tag_line(self) -> str:
+        """
+        :return: the tag line for model
+        """
+        return self._tag_line
+
+    @property
+    def data_files(self) -> List[File]:
+        """
+        :return: list of Files that are of type inputs, outputs, or labels
+        """
         return [
             file_obj for file_obj in self.files if file_obj.file_type in DATA_FILE_TYPES
         ]
-
-    def _download_files(
-        self,
-        overwrite: bool = False,
-        save_dir: str = None,
-        save_path: str = None,
-        files=List[RepoFile],
-        force_download_on_unsigned: bool = False,
-    ) -> str:
-        save_folder = self._get_download_folder(overwrite, save_dir, save_path)
-        for file_obj in files:
-            try:
-                file_obj.download(
-                    overwrite=overwrite,
-                    save_dir=save_folder,
-                )
-            except UnsignedFileError:
-                if force_download_on_unsigned:
-                    other_file = RepoFile.get_downloadable_file(
-                        self.domain,
-                        self.sub_domain,
-                        self.architecture,
-                        self.sub_architecture,
-                        self.dataset,
-                        self.framework,
-                        self.optimization_name,
-                        file_obj.display_name,
-                        str(self.release_version),
-                        force_token_refresh=True,
-                    )
-                    file_obj.url = other_file.url
-                    file_obj.download(
-                        overwrite=overwrite,
-                        save_dir=save_folder,
-                    )
-                else:
-                    raise
-        return save_folder
 
     def download(
         self,
@@ -459,24 +488,54 @@ class RepoModel(RepoDownloadable):
             force_download_on_unsigned=force_download_on_unsigned,
         )
 
-    def dict(self) -> Dict:
-        return {
-            "model_id": self.model_id,
-            "display_name": self.display_name,
-            "display_description": self.display_description,
-            "domain": self.domain,
-            "sub_domain": self.sub_domain,
-            "architecture": self.architecture,
-            "sub_architecture": self.sub_architecture,
-            "dataset": self.dataset,
-            "framework": self.framework,
-            "optimization_name": self.optimization_name,
-            "repo_source": self.repo_source,
-            "base_model": self.base_model,
-            "files": [file.dict() for file in self.files],
-            "tags": [tag.dict() for tag in self.tags],
-            "optimizations": [optim.dict() for optim in self.optimizations],
-            "release_version": self.release_version.dict(),
-            "results": [result.dict() for result in self.results],
-            "user": self.user.dict(),
-        }
+    def _get_download_folder(
+        self,
+        overwrite: bool = False,
+        save_dir: str = None,
+        save_path: str = None,
+    ):
+        if save_dir:
+            save_dir = os.path.join(save_dir, self.model_id)
+        save_folder = self._get_download_save_path(overwrite, save_dir, save_path)
+
+        if not os.path.exists(save_folder):
+            create_dirs(save_folder)
+        return save_folder
+
+    def _download_files(
+        self,
+        overwrite: bool = False,
+        save_dir: str = None,
+        save_path: str = None,
+        files=List[File],
+        force_download_on_unsigned: bool = False,
+    ) -> str:
+        save_folder = self._get_download_folder(overwrite, save_dir, save_path)
+        for file_obj in files:
+            try:
+                file_obj.download(
+                    overwrite=overwrite,
+                    save_dir=save_folder,
+                )
+            except UnsignedFileError:
+                if force_download_on_unsigned:
+                    other_file = File.get_downloadable_file(
+                        self.domain,
+                        self.sub_domain,
+                        self.architecture,
+                        self.sub_architecture,
+                        self.dataset,
+                        self.framework,
+                        self.optimization_name,
+                        file_obj.display_name,
+                        str(self.release_version),
+                        force_token_refresh=True,
+                    )
+                    file_obj.url = other_file.url
+                    file_obj.download(
+                        overwrite=overwrite,
+                        save_dir=save_folder,
+                    )
+                else:
+                    raise
+        return save_folder

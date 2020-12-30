@@ -1,18 +1,17 @@
 """
 Code related to a model repo optimization file
 """
-from typing import Dict
 import logging
 
-from sparsezoo.schemas.file_schema import RepoFile
+from sparsezoo.schemas.file_schema import File
 from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 
-__all__ = ["RepoOptimization"]
+__all__ = ["OptimizationRecipe"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class RepoOptimization(RepoDownloadable):
+class OptimizationRecipe(RepoDownloadable):
     """
     A model repo optimization.
 
@@ -21,17 +20,18 @@ class RepoOptimization(RepoDownloadable):
     :param display_name: the display name for the optimization
     :param display_description: the description for the optimization
     :param optimization_type: the type of optimizations
+    :param tag_line: the tag line for optimization
     :param file: the file object for the optimization
     """
 
     def __init__(self, **kwargs):
-        super(RepoOptimization, self).__init__(**kwargs)
+        super(OptimizationRecipe, self).__init__(**kwargs)
         self._optimization_id = kwargs["optimization_id"]
         self._model_id = kwargs["model_id"]
         self._display_name = kwargs["display_name"]
         self._display_description = kwargs["display_description"]
         self._optimization_type = kwargs["optimization_type"]
-
+        self._tag_line = kwargs["tag_line"]
         if "file" in kwargs:
             self._file = kwargs["file"]
         else:
@@ -39,26 +39,51 @@ class RepoOptimization(RepoDownloadable):
 
     @property
     def display_name(self):
+        """
+        :return: the display name for the optimization
+        """
         return self._display_name
 
     @property
     def display_description(self):
+        """
+        :return: the description for the optimization
+        """
         return self._display_description
 
     @property
     def model_id(self) -> str:
+        """
+        :return: the model id of the optimization
+        """
         return self._model_id
 
     @property
     def optimization_id(self) -> str:
+        """
+        :return: the optimization id
+        """
         return self._optimization_id
 
     @property
+    def tag_line(self) -> str:
+        """
+        :return: the tag line for optimization
+        """
+        return self._tag_line
+
+    @property
     def optimization_type(self) -> str:
+        """
+        :return: the type of optimizations
+        """
         return self._optimization_type
 
     @property
-    def file(self) -> RepoFile:
+    def file(self) -> File:
+        """
+        :return: the file object for the optimization
+        """
         return self._file
 
     def download(
@@ -86,13 +111,3 @@ class RepoOptimization(RepoDownloadable):
             self.file.download(
                 overwrite=overwrite, save_dir=save_dir, save_path=save_path
             )
-
-    def dict(self) -> Dict:
-        return {
-            "optimization_id": self.optimization_id,
-            "optimization_type": self.optimization_type,
-            "model_id": self.model_id,
-            "display_description": self.display_description,
-            "display_name": self.display_name,
-            "file": self.file,
-        }

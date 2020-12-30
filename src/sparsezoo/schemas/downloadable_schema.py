@@ -4,28 +4,16 @@ Code related to a downloadable interface
 
 import os
 import logging
-from typing import NamedTuple, Union
 
-from sparsezoo.schemas.object_schema import ObjectSchema
+from sparsezoo.schemas.object_schema import SparseZooObject
 from sparsezoo.utils import clean_path, create_dirs, CACHE_DIR
 
-__all__ = ["DownloadableSchema", "RepoDownloadable"]
+__all__ = ["Downloadable", "RepoDownloadable"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-DownloadProgress = NamedTuple(
-    "DownloadProgress",
-    [
-        ("chunk_size", int),
-        ("downloaded", int),
-        ("content_length", Union[None, int]),
-        ("path", str),
-    ],
-)
-
-
-class DownloadableSchema(ObjectSchema):
+class Downloadable(SparseZooObject):
     """
     Downloadable interface with a default folder and file name
 
@@ -36,17 +24,31 @@ class DownloadableSchema(ObjectSchema):
     def __init__(
         self, default_folder_name: str = "", default_file_name: str = "", **kwargs
     ):
-        super(DownloadableSchema, self).__init__(**kwargs)
+        super(Downloadable, self).__init__(**kwargs)
         self._default_folder_name = default_folder_name
         self._default_file_name = default_file_name
 
     @property
     def default_folder_name(self):
+        """
+        :return: Default folder to save file to save_dir or save_path are not provided
+        """
         return self._default_folder_name
 
     @property
     def default_file_name(self):
+        """
+        :return: Default file name to save file as if save_path is not provided
+        """
         return self._default_file_name
+
+    def download(
+        self,
+        overwrite: bool = False,
+        save_dir: str = None,
+        save_path: str = None,
+    ):
+        raise NotImplementedError()
 
     def _get_download_save_path(
         self, overwrite: bool = False, save_dir: str = None, save_path: str = None
@@ -78,16 +80,8 @@ class DownloadableSchema(ObjectSchema):
                 )
         return save_file
 
-    def download(
-        self,
-        overwrite: bool = False,
-        save_dir: str = None,
-        save_path: str = None,
-    ):
-        raise NotImplementedError()
 
-
-class RepoDownloadable(DownloadableSchema):
+class RepoDownloadable(Downloadable):
     """
     A downloadable model repo object. Uses model_id as the default folder to save the file
 
@@ -101,3 +95,10 @@ class RepoDownloadable(DownloadableSchema):
             **kwargs,
         )
         self._model_id = kwargs["model_id"]
+
+    def _get_properties(self) -> str:
+        return [
+            key
+            for key in vars(self).keys()
+            if key != "_default_folder_name" and key != "_default_file_name"
+        ]

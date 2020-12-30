@@ -8,17 +8,30 @@ from typing import List
 
 import requests
 
-from sparsezoo.schemas import RepoModel
+from sparsezoo.schemas import Model
 from sparsezoo.utils import get_auth_header, BASE_API_URL
 
 
-__all__ = ["search_models"]
+__all__ = ["search_models", "ModelRepoSearchArgs"]
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class ModelRepoSearchArgs:
+    """
+    The optional search arguments for a GET request for https://api.neuralmagic.com/models/search
+
+    :param architecture: The architecture of the models e.g. mobilenet
+    :param sub_architecture: The sub architecture of the models e.g. 1.0
+    :param dataset: The dataset the models were trained on e.g. imagenet
+    :param framework: The framework the models were trained with e.g. pytorch
+    :param optimization_name: The level of optimization of the models e.g. base
+    :param release_version: The model repo release version models were released with
+    :param page: The page to request results for
+    :param page_length: The number of results to show
+    """
+
     def __init__(self, **kwargs):
         self.architecture = kwargs["architecture"] if "architecture" in kwargs else None
         self.sub_architecture = (
@@ -59,7 +72,7 @@ def search_models(
     page: int = 1,
     page_length: int = 20,
     force_token_refresh: bool = False,
-) -> List[RepoModel]:
+) -> List[Model]:
     """
     Search model repo for any models matching the search criteria.
 
@@ -93,5 +106,5 @@ def search_models(
     _LOGGER.info(f"Searching models from {url}")
 
     response_json = requests.get(url=url, headers=header).json()
-    models = [RepoModel(**model) for model in response_json["models"]]
+    models = [Model(**model) for model in response_json["models"]]
     return models

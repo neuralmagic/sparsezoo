@@ -107,12 +107,14 @@ def get_auth_header(
     :param user_id: user id if auth type requires user_id
     :param app_id: app id if auth type requires app_id
     :param force_token_refresh: forces a new token to be generated
+    :return: An authentication header with key 'nm-token-header' containing the header token
     """
     credentials = SparseZooCredentials()
     token = credentials.token
     if token and not force_token_refresh:
         return {NM_TOKEN_HEADER: token}
     elif authentication_type.lower() == PUBLIC_AUTH_TYPE:
+        _LOGGER.warning("Obtaining new sparse zoo credentials token")
         created = time.time()
         response = requests.post(
             url=AUTH_API, data=json.dumps({"authentication_type": PUBLIC_AUTH_TYPE})

@@ -3,25 +3,24 @@ import logging
 
 import requests
 
-from typing import Dict
 from sparsezoo.schemas.downloadable_schema import RepoDownloadable
 from sparsezoo.utils import download_file, get_auth_header, BASE_API_URL
 
-__all__ = ["RepoFile", "UnsignedFileError"]
+__all__ = ["File", "UnsignedFileError"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class UnsignedFileError(Exception):
     """
-    Error raised when a RepoFile does not contain signed url
+    Error raised when a File does not contain signed url
     """
 
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
 
-class RepoFile(RepoDownloadable):
+class File(RepoDownloadable):
     """
     A model repo file.
 
@@ -40,7 +39,7 @@ class RepoFile(RepoDownloadable):
     """
 
     def __init__(self, **kwargs):
-        super(RepoFile, self).__init__(kwargs["display_name"], **kwargs)
+        super(File, self).__init__(kwargs["display_name"], **kwargs)
         self._file_id = kwargs["file_id"]
         self._model_id = kwargs["model_id"]
         self._display_name = kwargs["display_name"]
@@ -70,7 +69,7 @@ class RepoFile(RepoDownloadable):
         force_token_refresh: bool = False,
     ):
         """
-        Creates a RepoFile with a signed url from specified model attributes in the model repo.
+        Obtains a File with a signed url from specified model attributes from the model repo.
 
         :param domain: The domain of the models e.g. cv
         :param sub_domain: The sub domain of the models e.g. classification
@@ -82,7 +81,7 @@ class RepoFile(RepoDownloadable):
         :param file_name: The name of the file being downloaded e.g. model.onnx
         :param release_version: Optional param specifying the maximum supported release version for the models
         :param force_token_refresh: Forces a refresh of the authentication token
-        :return: a RepoFile for the downloaded model file
+        :return: a File for the downloaded model file
         """
         header = get_auth_header(force_token_refresh=force_token_refresh)
 
@@ -107,54 +106,92 @@ class RepoFile(RepoDownloadable):
         response.raise_for_status()
         response_json = response.json()
 
-        return RepoFile(**response_json["file"])
+        return File(**response_json["file"])
 
     @property
     def display_name(self) -> str:
+        """
+        :return: the display name for the optimization
+        """
         return self._display_name
 
     @property
     def model_id(self) -> str:
+        """
+        :return: the model id of the optimization
+        """
         return self._model_id
 
     @property
     def file_id(self) -> str:
+        """
+        :return: the file id
+        """
         return self._file_id
 
     @property
     def file_type(self) -> str:
+        """
+        :return: the file type e.g. onnx
+        """
         return self._file_type
 
     @property
     def operator_version(self) -> str:
+        """
+        :return: Any operator version associated for the file e.g. onnx opset.
+            None if no operator version exists
+        """
         return self._operator_version
 
     @property
     def optimization_id(self) -> str:
+        """
+        :return: An optimization id if this file is an optimization file, otherwise None
+        """
         return self._optimization_id
 
     @property
     def quantized(self) -> str:
+        """
+        :return: True if file is a quantized onnx model. False otherwise.
+        """
         return self._quantized
 
     @property
     def md5(self) -> str:
+        """
+        :return: The md5 hash of the file
+        """
         return self._md5
 
     @property
     def file_size(self) -> int:
+        """
+        :return: The file size in bytes
+        """
         return self._file_size
 
     @property
     def downloads(self) -> int:
+        """
+        :return: The amount of times a download has been requested for this file
+        """
         return self._downloads
 
     @property
     def url(self) -> str:
+        """
+        :return: The signed url to retrieve the file.
+        """
         return self._url
 
     @url.setter
     def url(self, url):
+        """
+        Setter for url
+        :param url: The signed url to retrieve the file.
+        """
         self._url = url
 
     def download(
@@ -184,18 +221,3 @@ class RepoFile(RepoDownloadable):
             download_file(self.url, save_file, overwrite=overwrite)
 
         return save_file
-
-    def dict(self) -> Dict:
-        return {
-            "display_name": self.display_name,
-            "model_id": self.model_id,
-            "file_id": self.file_id,
-            "file_type": self.file_type,
-            "operator_version": self.operator_version,
-            "optimization_id": self.optimization_id,
-            "quantized": self.quantized,
-            "md5": self.md5,
-            "file_size": self.file_size,
-            "downloads": self.downloads,
-            "url": self.url,
-        }

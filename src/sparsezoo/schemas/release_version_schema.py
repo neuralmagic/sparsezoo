@@ -1,14 +1,12 @@
 """
 Code related to a model repo release version
 """
+from sparsezoo.schemas.object_schema import SparseZooObject
 
-from typing import Dict
-from sparsezoo.schemas.object_schema import ObjectSchema
-
-__all__ = ["RepoReleaseVersion"]
+__all__ = ["ReleaseVersion"]
 
 
-class RepoReleaseVersion(ObjectSchema):
+class ReleaseVersion(SparseZooObject):
     """
     A model repo semantic release verison. Will represent a version in the format
 
@@ -22,7 +20,7 @@ class RepoReleaseVersion(ObjectSchema):
     """
 
     def __init__(self, **kwargs):
-        super(RepoReleaseVersion, self).__init__(**kwargs)
+        super(ReleaseVersion, self).__init__(**kwargs)
         self._release_version_id = kwargs["release_version_id"]
         self._major_version = kwargs["major_version"]
         self._minor_version = kwargs["minor_version"]
@@ -31,32 +29,41 @@ class RepoReleaseVersion(ObjectSchema):
 
     @property
     def published(self) -> bool:
+        """
+        :return: whether the release has been officially published
+        """
         return self._published
 
     @property
     def release_version_id(self) -> str:
+        """
+        :return: the release version id
+        """
         return self._release_version_id
 
     @property
     def major_version(self) -> str:
+        """
+        :return: the major version of the release
+        """
         return self._major_version
 
     @property
     def minor_version(self) -> str:
+        """
+        :return: the minor version of the release
+        """
         return self._minor_version
 
     @property
     def patch_version(self) -> str:
+        """
+        :return: the patchversion of the release
+        """
         return self._patch_version
 
-    def dict(self) -> Dict:
-        return {
-            "release_version_id": self.release_version_id,
-            "published": self.published,
-            "major_version": self.major_version,
-            "minor_version": self.minor_version,
-            "patch_version": self.patch_version,
-        }
-
     def __str__(self) -> str:
+        """
+        :return: The release version as semantic version string MAJOR.MINOR.PATCH
+        """
         return f"{self.major_version}.{self.minor_version}.{self.patch_version}"

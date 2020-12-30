@@ -1,14 +1,12 @@
 """
 Code related to a model repo user
 """
+from sparsezoo.schemas.object_schema import SparseZooObject
 
-from typing import Dict
-from sparsezoo.schemas.object_schema import ObjectSchema
-
-__all__ = ["RepoUser"]
+__all__ = ["User"]
 
 
-class RepoUser(ObjectSchema):
+class User(SparseZooObject):
     """
     A model repo user
 
@@ -19,7 +17,7 @@ class RepoUser(ObjectSchema):
     """
 
     def __init__(self, **kwargs):
-        super(RepoUser, self).__init__(**kwargs)
+        super(User, self).__init__(**kwargs)
         self._email = kwargs["email"]
         self._name = kwargs["name"]
         self._user_id = kwargs["user_id"]
@@ -40,11 +38,3 @@ class RepoUser(ObjectSchema):
     @property
     def trusted(self) -> bool:
         return self._trusted
-
-    def dict(self) -> Dict:
-        return {
-            "user_id": self.user_id,
-            "email": self.email,
-            "name": self.name,
-            "trusted": self.trusted,
-        }

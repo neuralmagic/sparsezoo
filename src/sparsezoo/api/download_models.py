@@ -5,7 +5,7 @@ Code related to wrapping around API calls under api.neuralmagic.com/models/downl
 import logging
 
 
-from sparsezoo.schemas import RepoFile, RepoModel
+from sparsezoo.schemas import File, Model
 
 
 __all__ = ["download_model_file", "download_model"]
@@ -27,7 +27,7 @@ def download_model(
     save_dir: str = None,
     save_path: str = None,
     force_token_refresh: bool = False,
-) -> RepoModel:
+) -> Model:
     """
     Downloads all files from specified model in the model repo.
 
@@ -47,7 +47,7 @@ def download_model(
         the default cache dir or save_dir
     :return: the downloaded model
     """
-    model = RepoModel.get_downloadable_model(
+    model = Model.get_downloadable_model(
         domain,
         sub_domain,
         architecture,
@@ -79,7 +79,7 @@ def download_model_file(
     save_dir: str = None,
     save_path: str = None,
     force_token_refresh: bool = False,
-) -> RepoFile:
+) -> File:
     """
     Downloads a file from specified model in the model repo.
 
@@ -98,9 +98,9 @@ def download_model_file(
         instead of the default cache dir
     :param save_path: The exact path to save the model file to instead of
         the default cache dir or save_dir
-    :return: a RepoFile for the downloaded model file
+    :return: a File for the downloaded model file
     """
-    file_obj = RepoFile.get_downloadable_file(
+    file_obj = File.get_downloadable_file(
         domain,
         sub_domain,
         architecture,
