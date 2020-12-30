@@ -5,7 +5,7 @@ Code related to a downloadable interface
 import os
 import logging
 
-from sparsezoo.schemas.object_schema import SparseZooObject
+from sparsezoo.models.sparse_zoo_object import SparseZooObject
 from sparsezoo.utils import clean_path, create_dirs, CACHE_DIR
 
 __all__ = ["Downloadable", "RepoDownloadable"]

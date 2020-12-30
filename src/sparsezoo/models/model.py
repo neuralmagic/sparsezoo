@@ -8,13 +8,13 @@ from typing import List, Union
 
 import requests
 
-from sparsezoo.schemas.file_schema import File, UnsignedFileError
-from sparsezoo.schemas.tag_schema import Tag
-from sparsezoo.schemas.optimization_schema import OptimizationRecipe
-from sparsezoo.schemas.release_version_schema import ReleaseVersion
-from sparsezoo.schemas.result_schema import Result
-from sparsezoo.schemas.user_schema import User
-from sparsezoo.schemas.downloadable_schema import RepoDownloadable
+from sparsezoo.models.file import File, UnsignedFileError
+from sparsezoo.models.tag import Tag
+from sparsezoo.models.optimization import OptimizationRecipe
+from sparsezoo.models.release_version import ReleaseVersion
+from sparsezoo.models.result import Result
+from sparsezoo.models.user import User
+from sparsezoo.models.downloadable import RepoDownloadable
 from sparsezoo.utils import create_dirs, BASE_API_URL, get_auth_header
 
 __all__ = ["Model"]

@@ -1,7 +1,7 @@
 """
 Code related to a model repo results
 """
-from sparsezoo.schemas.object_schema import SparseZooObject
+from sparsezoo.models.sparse_zoo_object import SparseZooObject
 
 __all__ = ["Result"]
 

@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from sparsezoo.schemas.downloadable_schema import RepoDownloadable
+from sparsezoo.models.downloadable import RepoDownloadable
 from sparsezoo.utils import download_file, get_auth_header, BASE_API_URL
 
 __all__ = ["File", "UnsignedFileError"]

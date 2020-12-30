@@ -5,7 +5,7 @@ Code related to wrapping around API calls under api.neuralmagic.com/models/downl
 import logging
 
 
-from sparsezoo.schemas import File, Model
+from sparsezoo.models import File, Model
 
 
 __all__ = ["download_model_file", "download_model"]

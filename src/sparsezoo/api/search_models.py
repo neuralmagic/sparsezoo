@@ -8,7 +8,7 @@ from typing import List
 
 import requests
 
-from sparsezoo.schemas import Model
+from sparsezoo.models import Model
 from sparsezoo.utils import get_auth_header, BASE_API_URL
 
 
