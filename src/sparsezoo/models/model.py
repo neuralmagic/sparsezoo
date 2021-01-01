@@ -2,20 +2,20 @@
 Code related to a model repo model
 """
 
-import os
 import logging
+import os
 from typing import List, Union
 
 import requests
-
+from sparsezoo.models.downloadable import RepoDownloadable
 from sparsezoo.models.file import File, UnsignedFileError
-from sparsezoo.models.tag import Tag
 from sparsezoo.models.optimization import OptimizationRecipe
 from sparsezoo.models.release_version import ReleaseVersion
 from sparsezoo.models.result import Result
+from sparsezoo.models.tag import Tag
 from sparsezoo.models.user import User
-from sparsezoo.models.downloadable import RepoDownloadable
-from sparsezoo.utils import create_dirs, BASE_API_URL, get_auth_header
+from sparsezoo.utils import BASE_API_URL, create_dirs, get_auth_header
+
 
 __all__ = ["Model"]
 

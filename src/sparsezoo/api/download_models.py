@@ -4,7 +4,6 @@ Code related to wrapping around API calls under api.neuralmagic.com/models/downl
 
 import logging
 
-
 from sparsezoo.models import File, Model
 
 

@@ -2,14 +2,13 @@
 Code related to wrapping around API calls under api.neuralmagic.com/models/search
 """
 
-import os
 import logging
+import os
 from typing import List
 
 import requests
-
 from sparsezoo.models import Model
-from sparsezoo.utils import get_auth_header, BASE_API_URL
+from sparsezoo.utils import BASE_API_URL, get_auth_header
 
 
 __all__ = ["search_models", "ModelRepoSearchArgs"]

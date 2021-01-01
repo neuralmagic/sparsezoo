@@ -47,5 +47,8 @@
     "bracketSpacing": true,
     "jsxBracketSameLine": false,
     "arrowParens": "always"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
   }
 }

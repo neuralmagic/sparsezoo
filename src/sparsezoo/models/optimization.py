@@ -3,8 +3,9 @@ Code related to a model repo optimization file
 """
 import logging
 
-from sparsezoo.models.file import File
 from sparsezoo.models.downloadable import RepoDownloadable
+from sparsezoo.models.file import File
+
 
 __all__ = ["OptimizationRecipe"]
 

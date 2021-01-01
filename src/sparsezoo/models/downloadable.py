@@ -2,11 +2,12 @@
 Code related to a downloadable interface
 """
 
-import os
 import logging
+import os
 
 from sparsezoo.models.sparse_zoo_object import SparseZooObject
-from sparsezoo.utils import clean_path, create_dirs, CACHE_DIR
+from sparsezoo.utils import CACHE_DIR, clean_path, create_dirs
+
 
 __all__ = ["Downloadable", "RepoDownloadable"]
 
