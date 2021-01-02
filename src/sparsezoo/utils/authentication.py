@@ -52,8 +52,8 @@ class SparseZooCredentials:
 
     def save_token(self, token: str, created: float):
         """
-        Save the jwt for accessing sparse zoo APIs. Will create the credentials file if it does
-        not exist already.
+        Save the jwt for accessing sparse zoo APIs. Will create the credentials file
+        if it does not exist already.
 
         :param token: the jwt for accessing sparse zoo APIs
         :param created: the approximate time the token was created
@@ -99,8 +99,8 @@ def get_auth_header(
 ) -> Dict:
     """
     Obtain an authentication header token from either credentials file or from APIs
-    if token is over 1 day old. Location of credentials file can be changed by setting the
-    environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
+    if token is over 1 day old. Location of credentials file can be changed by setting
+    the environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
 
     Currently only 'public' authentication type is supported.
 
@@ -108,7 +108,8 @@ def get_auth_header(
     :param user_id: user id if auth type requires user_id
     :param app_id: app id if auth type requires app_id
     :param force_token_refresh: forces a new token to be generated
-    :return: An authentication header with key 'nm-token-header' containing the header token
+    :return: An authentication header with key 'nm-token-header' containing the header
+        token
     """
     credentials = SparseZooCredentials()
     token = credentials.token

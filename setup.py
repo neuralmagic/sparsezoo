@@ -13,6 +13,7 @@ _dev_deps = [
     "isort>=5.7.0",
     "rinohtype>=0.4.2",
     "sphinxcontrib-apidoc>=0.3.0",
+    "wheel>=0.36.2"
 ]
 
 
@@ -53,6 +54,7 @@ setup(
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},
     packages=_setup_packages(),
+    include_package_data=True,
     install_requires=_setup_install_requires(),
     extras_require=_setup_extras(),
     entry_points=_setup_entry_points(),

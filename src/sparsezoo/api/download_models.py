@@ -37,7 +37,8 @@ def download_model(
     :param dataset: The dataset the model was trained on e.g. imagenet
     :param framework: The framework the model was trained on e.g. pytorch
     :param optimization_name: The level of optimization of the model e.g. base
-    :param release_version: Optional param specifying the maximum supported release version for the models
+    :param release_version: Optional param specifying the maximum supported
+        release version for the models
     :param force_token_refresh: Forces a refresh of the authentication token
     :param overwrite: True to overwrite the file if it exists, False otherwise
     :param save_dir: The directory to save the model files to
@@ -90,7 +91,8 @@ def download_model_file(
     :param framework: The framework the model was trained on e.g. pytorch
     :param optimization_name: The level of optimization of the model e.g. base
     :param file_name: The name of the file being downloaded e.g. model.onnx
-    :param release_version: Optional param specifying the maximum supported release version for the models
+    :param release_version: Optional param specifying the maximum supported
+        release version for the models
     :param force_token_refresh: Forces a refresh of the authentication token
     :param overwrite: True to overwrite the file if it exists, False otherwise
     :param save_dir: The directory to save the model files to

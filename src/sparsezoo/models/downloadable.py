@@ -18,8 +18,10 @@ class Downloadable(SparseZooObject):
     """
     Downloadable interface with a default folder and file name
 
-    :param default_folder_name: Default folder to save file to save_dir or save_path are not provided
-    :param default_file_name: Default file name to save file as if save_path is not provided
+    :param default_folder_name: Default folder to save file to save_dir or save_path are
+        not provided
+    :param default_file_name: Default file name to save file as if save_path is not
+        provided
     """
 
     def __init__(
@@ -84,9 +86,11 @@ class Downloadable(SparseZooObject):
 
 class RepoDownloadable(Downloadable):
     """
-    A downloadable model repo object. Uses model_id as the default folder to save the file
+    A downloadable model repo object. Uses model_id as the default folder to save the
+        file
 
-    :param default_folder_name: Default file name to save file as if save_path is not provided
+    :param default_folder_name: Default file name to save file as if save_path is not
+        provided
     """
 
     def __init__(self, default_file_name: str = "", **kwargs):

@@ -97,12 +97,15 @@ class OptimizationRecipe(RepoDownloadable):
         Downloads the optimization yaml file associated with this optimization
 
         :param overwrite: True to overwrite the file if it exists, False otherwise
-        :param save_dir: The directory to save the optimization file to instead of the default cache dir
-        :param save_path: The exact path to save the optimization file to instead of the default cache dir or save_dir
+        :param save_dir: The directory to save the optimization file to instead of the
+            default cache dir
+        :param save_path: The exact path to save the optimization file to instead of
+            the default cache dir or save_dir
         :return: the folder where the file was saved
         """
         _LOGGER.info(
-            f"Downloading recipe files for {self.display_name} from model {self.model_id}."
+            f"Downloading recipe files for {self.display_name} "
+            + "from model {self.model_id}."
         )
         if self.file is None:
             raise Exception(

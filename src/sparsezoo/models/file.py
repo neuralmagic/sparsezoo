@@ -28,13 +28,15 @@ class File(RepoDownloadable):
     :param model_id: the model id of the optimization
     :param display_name: the display name for the optimization
     :param file_type: the file type e.g. onnx
-    :param operator_version: Any operator version associated for the file e.g. onnx opset.
-        None if no operator version exists
-    :param optimization_id: An optimization id if this file is an optimization file, otherwise None
+    :param operator_version: Any operator version associated for the file
+        e.g. onnx opset. None if no operator version exists
+    :param optimization_id: An optimization id if this file is an optimization
+        file, otherwise None
     :param quantized: True if file is a quantized onnx model. False otherwise.
     :param md5: The md5 hash of the file
     :param file_size: The file size in bytes
-    :param downloads: The amount of times a download has been requested for this file
+    :param downloads: The amount of times a download has been requested for
+        this file
     :param url: The signed url to retrieve the file.
     """
 
@@ -69,7 +71,8 @@ class File(RepoDownloadable):
         force_token_refresh: bool = False,
     ):
         """
-        Obtains a File with a signed url from specified model attributes from the model repo.
+        Obtains a File with a signed url from specified model attributes from
+        the model repo.
 
         :param domain: The domain of the models e.g. cv
         :param sub_domain: The sub domain of the models e.g. classification
@@ -79,7 +82,8 @@ class File(RepoDownloadable):
         :param framework: The framework the model was trained on e.g. pytorch
         :param optimization_name: The level of optimization of the model e.g. base
         :param file_name: The name of the file being downloaded e.g. model.onnx
-        :param release_version: Optional param specifying the maximum supported release version for the models
+        :param release_version: Optional param specifying the maximum supported
+            release version for the models
         :param force_token_refresh: Forces a refresh of the authentication token
         :return: a File for the downloaded model file
         """
@@ -201,11 +205,14 @@ class File(RepoDownloadable):
         save_path: str = None,
     ) -> str:
         """
-        Downloads a model repo file. Will fail if the file does not contain a signed url
+        Downloads a model repo file. Will fail if the file does not contain a
+            signed url
 
         :param overwrite: True to overwrite the file if it exists, False otherwise
-        :param save_dir: The directory to save the file to instead of the default cache dir
-        :param save_path: The exact path to save the file to instead of the default cache dir or save_dir
+        :param save_dir: The directory to save the file to instead of the default
+            cache dir
+        :param save_path: The exact path to save the file to instead of the default
+            cache dir or save_dir
         :return: the folder where the file was saved
         """
         if self.url is None:
