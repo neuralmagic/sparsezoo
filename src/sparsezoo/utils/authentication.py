@@ -7,7 +7,7 @@ from typing import Dict
 
 import requests
 import yaml
-from sparsezoo.utils.helpers import BASE_API_URL, clean_path
+from sparsezoo.utils.helpers import BASE_API_URL, clean_path, create_parent_dirs
 
 
 __all__ = ["get_auth_header"]
@@ -59,6 +59,8 @@ class SparseZooCredentials:
         :param created: the approximate time the token was created
         """
         _LOGGER.info(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
+        if not os.path.exists(CREDENTIALS_YAML):
+            create_parent_dirs(CREDENTIALS_YAML)
         with open(CREDENTIALS_YAML, "w+") as credentials_file:
             credentials_yaml = yaml.safe_load(credentials_file)
             if credentials_yaml is None:
