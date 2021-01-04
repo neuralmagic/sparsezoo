@@ -2,20 +2,20 @@
 Code related to a model repo model
 """
 
-import os
 import logging
+import os
 from typing import List, Union
 
 import requests
-
+from sparsezoo.models.downloadable import RepoDownloadable
 from sparsezoo.models.file import File, UnsignedFileError
-from sparsezoo.models.tag import Tag
 from sparsezoo.models.optimization import OptimizationRecipe
 from sparsezoo.models.release_version import ReleaseVersion
 from sparsezoo.models.result import Result
+from sparsezoo.models.tag import Tag
 from sparsezoo.models.user import User
-from sparsezoo.models.downloadable import RepoDownloadable
-from sparsezoo.utils import create_dirs, BASE_API_URL, get_auth_header
+from sparsezoo.utils import BASE_API_URL, create_dirs, get_auth_header
+
 
 __all__ = ["Model"]
 
@@ -43,7 +43,8 @@ class Model(RepoDownloadable):
     :param display_description: the description for the model
     :param repo_source: the source repo for the model
     :param user_id: the user id for the user who uploaded model
-    :param release_version_id: the release version id for the release version of the model
+    :param release_version_id: the release version id for the release version of the
+        model
     :param base_model: the model id of a model this model inherited from
     :param files: a list of model repo files for this model
     :param tags: a list of model repo tags for this model
@@ -129,7 +130,8 @@ class Model(RepoDownloadable):
         :param dataset: The dataset the model was trained on e.g. imagenet
         :param framework: The framework the model was trained on e.g. pytorch
         :param optimization_name: The level of optimization of the model e.g. base
-        :param release_version: Optional param specifying the maximum supported release version for the models
+        :param release_version: Optional param specifying the maximum supported
+            release version for the models
         :param force_token_refresh: Forces a refresh of the authentication token
         :return: the Model
         """
@@ -358,8 +360,8 @@ class Model(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
-        :param force_download_on_unsigned: If files are unsigned, updates all the model to
-            contain signed version of files
+        :param force_download_on_unsigned: If files are unsigned, updates all
+            the model to contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id}.")
@@ -387,8 +389,8 @@ class Model(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
-        :param force_download_on_unsigned: If files are unsigned, updates all the model to
-            contain signed version of files
+        :param force_download_on_unsigned: If files are unsigned, updates all the model
+            to contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} onnx files.")
@@ -416,8 +418,8 @@ class Model(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
-        :param force_download_on_unsigned: If files are unsigned, updates all the model to
-            contain signed version of files
+        :param force_download_on_unsigned: If files are unsigned, updates all the model
+            to contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} framework files.")
@@ -445,8 +447,8 @@ class Model(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
-        :param force_download_on_unsigned: If files are unsigned, updates all the model to
-            contain signed version of files
+        :param force_download_on_unsigned: If files are unsigned, updates all the model
+            to contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} data files.")
@@ -474,8 +476,8 @@ class Model(RepoDownloadable):
             instead of the default cache dir
         :param save_path: The exact path to save the model files to instead of
             the default cache dir or save_dir
-        :param force_download_on_unsigned: If files are unsigned, updates all the model to
-            contain signed version of files
+        :param force_download_on_unsigned: If files are unsigned, updates all the model
+            to contain signed version of files
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} optimization files.")

@@ -2,8 +2,9 @@
 Code related to helper functions for model zoo
 """
 
-import os
 import errno
+import os
+
 
 __all__ = [
     "BASE_API_URL",

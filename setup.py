@@ -1,6 +1,21 @@
 from typing import Tuple, List, Dict
 from setuptools import find_packages, setup
 
+_deps = [
+    "requests>=2.25.1",
+    "PyYaml>=5.3.1",
+    "tqdm>=4.54.1",
+]
+
+_dev_deps = [
+    "black>=20.8b1",
+    "flake8>=3.8.3",
+    "isort>=5.7.0",
+    "rinohtype>=0.4.2",
+    "sphinxcontrib-apidoc>=0.3.0",
+    "wheel>=0.36.2"
+]
+
 
 def _setup_packages() -> List:
     return find_packages(
@@ -9,11 +24,13 @@ def _setup_packages() -> List:
 
 
 def _setup_install_requires() -> List:
-    return ["requests>=2.25.1", "PyYaml>=5.3.1", "tqdm>=4.54.1"]
+    return _deps
 
 
 def _setup_extras() -> Dict:
-    return {}
+    return {
+        "dev": _dev_deps
+    }
 
 
 def _setup_entry_points() -> Dict:
@@ -37,6 +54,7 @@ setup(
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},
     packages=_setup_packages(),
+    include_package_data=True,
     install_requires=_setup_install_requires(),
     extras_require=_setup_extras(),
     entry_points=_setup_entry_points(),
