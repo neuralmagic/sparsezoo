@@ -1,13 +1,14 @@
-import os
 import json
 import logging
+import os
 import time
 from datetime import datetime, timezone
-import yaml
 from typing import Dict
 
 import requests
-from sparsezoo.utils.helpers import BASE_API_URL, clean_path
+import yaml
+from sparsezoo.utils.helpers import BASE_API_URL, clean_path, create_parent_dirs
+
 
 __all__ = ["get_auth_header"]
 
@@ -51,13 +52,15 @@ class SparseZooCredentials:
 
     def save_token(self, token: str, created: float):
         """
-        Save the jwt for accessing sparse zoo APIs. Will create the credentials file if it does
-        not exist already.
+        Save the jwt for accessing sparse zoo APIs. Will create the credentials file
+        if it does not exist already.
 
         :param token: the jwt for accessing sparse zoo APIs
         :param created: the approximate time the token was created
         """
         _LOGGER.info(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
+        if not os.path.exists(CREDENTIALS_YAML):
+            create_parent_dirs(CREDENTIALS_YAML)
         with open(CREDENTIALS_YAML, "w+") as credentials_file:
             credentials_yaml = yaml.safe_load(credentials_file)
             if credentials_yaml is None:
@@ -98,8 +101,8 @@ def get_auth_header(
 ) -> Dict:
     """
     Obtain an authentication header token from either credentials file or from APIs
-    if token is over 1 day old. Location of credentials file can be changed by setting the
-    environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
+    if token is over 1 day old. Location of credentials file can be changed by setting
+    the environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
 
     Currently only 'public' authentication type is supported.
 
@@ -107,7 +110,8 @@ def get_auth_header(
     :param user_id: user id if auth type requires user_id
     :param app_id: app id if auth type requires app_id
     :param force_token_refresh: forces a new token to be generated
-    :return: An authentication header with key 'nm-token-header' containing the header token
+    :return: An authentication header with key 'nm-token-header' containing the header
+        token
     """
     credentials = SparseZooCredentials()
     token = credentials.token

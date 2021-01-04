@@ -1,5 +1,4 @@
 import pytest
-
 from sparsezoo.api import search_models
 
 

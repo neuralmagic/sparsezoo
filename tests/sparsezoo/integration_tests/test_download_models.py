@@ -2,7 +2,6 @@ import os
 import shutil
 
 import pytest
-
 from sparsezoo.api import download_model, download_model_file
 from sparsezoo.utils import CACHE_DIR
 

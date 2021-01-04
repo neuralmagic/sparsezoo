@@ -1,5 +1,6 @@
 from typing import Dict
 
+
 __all__ = ["SparseZooObject"]
 
 

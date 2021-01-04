@@ -2,14 +2,13 @@
 Code related to wrapping around API calls under api.neuralmagic.com/models/search
 """
 
-import os
 import logging
+import os
 from typing import List
 
 import requests
-
 from sparsezoo.models import Model
-from sparsezoo.utils import get_auth_header, BASE_API_URL
+from sparsezoo.utils import BASE_API_URL, get_auth_header
 
 
 __all__ = ["search_models", "ModelRepoSearchArgs"]
@@ -20,7 +19,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class ModelRepoSearchArgs:
     """
-    The optional search arguments for a GET request for https://api.neuralmagic.com/models/search
+    The optional search arguments for a GET request for
+    https://api.neuralmagic.com/models/search
 
     :param architecture: The architecture of the models e.g. mobilenet
     :param sub_architecture: The sub architecture of the models e.g. 1.0
@@ -78,12 +78,18 @@ def search_models(
 
     :param domain: The domain of the models e.g. cv
     :param sub_domain: The sub domain of the models e.g. classification
-    :param architecture: Optional param specifying the architecture of the models e.g. mobilenet
-    :param sub_architecture: Optional param specifying the sub architecture of the models e.g. 1.0
-    :param dataset: Optional param specifying the dataset the models were trained on e.g. imagenet
-    :param framework: Optional param specifying the framework the models were trained on e.g. pytorch
-    :param optimization_name: Optional param specifying the level of optimization of the models e.g. base
-    :param release_version: Optional param specifying the maximum supported release version for the models
+    :param architecture: Optional param specifying the architecture of
+        the models e.g. mobilenet
+    :param sub_architecture: Optional param specifying the sub architecture
+        of the models e.g. 1.0
+    :param dataset: Optional param specifying the dataset the models were
+        trained on e.g. imagenet
+    :param framework: Optional param specifying the framework the models
+        were trained on e.g. pytorch
+    :param optimization_name: Optional param specifying the level of
+        optimization of the models e.g. base
+    :param release_version: Optional param specifying the maximum supported
+        release version for the models
     :param force_token_refresh: Forces a refresh of the authentication token
     :return: list of models matching provided criterias
     """

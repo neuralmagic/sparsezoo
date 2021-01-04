@@ -15,7 +15,8 @@ class Tag(SparseZooObject):
     :param tag_id: the tag id
     :param display_name: the display name for tag
     :param model_id: the model id if the tag is associated with a Model
-    :param optimization_id: the optimization id if tag is associated with an OptimizationRecipe
+    :param optimization_id: the optimization id if tag is associated
+        with an OptimizationRecipe
     :param name: the name for the tag
     """
 

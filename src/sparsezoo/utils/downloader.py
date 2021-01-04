@@ -2,13 +2,14 @@
 Code related to efficiently downloading multiple files with parallel workers
 """
 
-from typing import Iterator, NamedTuple, Union
 import logging
 import os
+from typing import Iterator, NamedTuple, Union
+
 import requests
+from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 from tqdm import auto
 
-from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 
 __all__ = [
     "PreviouslyDownloadedError",
