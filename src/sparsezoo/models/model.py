@@ -41,7 +41,7 @@ class Model(RepoDownloadable):
     :param optimization_name: The level of optimization of the model e.g. base
     :param display_name: the display name for the model
     :param display_description: the description for the model
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param user_id: the user id for the user who uploaded model
     :param release_version_id: the release version id for the release version of the
         model
@@ -130,7 +130,7 @@ class Model(RepoDownloadable):
         :param sub_architecture: The sub architecture of the model e.g. 1.0
         :param dataset: The dataset the model was trained on e.g. imagenet
         :param framework: The framework the model was trained on e.g. pytorch
-        :param repo_source: the source repo for the model
+        :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
         :param optimization_name: The level of optimization of the model e.g. base
         :param release_version: Optional param specifying the maximum supported
             release version for the models

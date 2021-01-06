@@ -38,7 +38,7 @@ def download_model(
     :param sub_architecture: The sub architecture of the model e.g. 1.0
     :param dataset: The dataset the model was trained on e.g. imagenet
     :param framework: The framework the model was trained on e.g. pytorch
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param optimization_name: The level of optimization of the model e.g. base
     :param release_version: Optional param specifying the maximum supported
         release version for the models
@@ -94,7 +94,7 @@ def download_model_file(
     :param sub_architecture: The sub architecture of the model e.g. 1.0
     :param dataset: The dataset the model was trained on e.g. imagenet
     :param framework: The framework the model was trained on e.g. pytorch
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param optimization_name: The level of optimization of the model e.g. base
     :param file_name: The name of the file being downloaded e.g. model.onnx
     :param release_version: Optional param specifying the maximum supported
@@ -152,7 +152,7 @@ def download_model_recipes(
     :param sub_architecture: The sub architecture of the model e.g. 1.0
     :param dataset: The dataset the model was trained on e.g. imagenet
     :param framework: The framework the model was trained on e.g. pytorch
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param optimization_name: The level of optimization of the model e.g. base
     :param release_version: Optional param specifying the maximum supported
         release version for the models

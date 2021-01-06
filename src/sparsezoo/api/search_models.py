@@ -28,7 +28,7 @@ class ModelRepoSearchArgs:
     :param framework: The framework the models were trained with e.g. pytorch
     :param optimization_name: The level of optimization of the models e.g. base
     :param release_version: The model repo release version models were released with
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param page: The page to request results for
     :param page_length: The number of results to show
     """
@@ -89,7 +89,7 @@ def search_models(
         trained on e.g. imagenet
     :param framework: Optional param specifying the framework the models
         were trained on e.g. pytorch
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param optimization_name: Optional param specifying the level of
         optimization of the models e.g. base
     :param release_version: Optional param specifying the maximum supported
