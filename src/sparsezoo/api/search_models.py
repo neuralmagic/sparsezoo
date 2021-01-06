@@ -28,6 +28,7 @@ class ModelRepoSearchArgs:
     :param framework: The framework the models were trained with e.g. pytorch
     :param optimization_name: The level of optimization of the models e.g. base
     :param release_version: The model repo release version models were released with
+    :param repo_source: the source repo for the model
     :param page: The page to request results for
     :param page_length: The number of results to show
     """
@@ -45,6 +46,7 @@ class ModelRepoSearchArgs:
         self.release_version = (
             kwargs["release_version"] if "release_version" in kwargs else None
         )
+        self.repo_source = kwargs["repo_source"] if "repo_source" in kwargs else None
         self.page = kwargs["page"] if "page" in kwargs else 1
         self.page_length = kwargs["page_length"] if "page_length" in kwargs else 20
 
@@ -69,6 +71,7 @@ def search_models(
     framework: str = None,
     optimization_name: str = None,
     release_version: str = None,
+    repo_source: str = None,
     page: int = 1,
     page_length: int = 20,
     force_token_refresh: bool = False,
@@ -86,6 +89,7 @@ def search_models(
         trained on e.g. imagenet
     :param framework: Optional param specifying the framework the models
         were trained on e.g. pytorch
+    :param repo_source: the source repo for the model
     :param optimization_name: Optional param specifying the level of
         optimization of the models e.g. base
     :param release_version: Optional param specifying the maximum supported
@@ -93,6 +97,10 @@ def search_models(
     :param force_token_refresh: Forces a refresh of the authentication token
     :return: list of models matching provided criterias
     """
+    if not page > 0:
+        raise Exception("'page' value must be > 0")
+    if not page_length > 0:
+        raise Exception("'page_length' value must be > 0")
     header = get_auth_header(force_token_refresh=force_token_refresh)
 
     url = os.path.join(BASE_API_URL, "search", domain, sub_domain)
@@ -106,6 +114,7 @@ def search_models(
         release_version=release_version,
         page=page,
         page_length=page_length,
+        repo_source=repo_source,
     )
 
     url = os.path.join(url, "?" + str(search_args))

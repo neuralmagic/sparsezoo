@@ -1,5 +1,6 @@
 import logging
 import os
+import tarfile
 
 import requests
 from sparsezoo.models.downloadable import RepoDownloadable
@@ -9,6 +10,8 @@ from sparsezoo.utils import BASE_API_URL, download_file, get_auth_header
 __all__ = ["File", "UnsignedFileError"]
 
 _LOGGER = logging.getLogger(__name__)
+
+DATA_FILE_TYPES = set(["inputs", "outputs", "labels"])
 
 
 class UnsignedFileError(Exception):
@@ -65,6 +68,7 @@ class File(RepoDownloadable):
         sub_architecture: str,
         dataset: str,
         framework: str,
+        repo_source: str,
         optimization_name: str,
         file_name: str,
         release_version: str = None,
@@ -80,6 +84,7 @@ class File(RepoDownloadable):
         :param sub_architecture: The sub architecture of the model e.g. 1.0
         :param dataset: The dataset the model was trained on e.g. imagenet
         :param framework: The framework the model was trained on e.g. pytorch
+        :param repo_source: the source repo for the model
         :param optimization_name: The level of optimization of the model e.g. base
         :param file_name: The name of the file being downloaded e.g. model.onnx
         :param release_version: Optional param specifying the maximum supported
@@ -98,6 +103,7 @@ class File(RepoDownloadable):
             sub_architecture,
             dataset,
             framework,
+            repo_source,
             optimization_name,
             file_name,
         )
@@ -206,7 +212,8 @@ class File(RepoDownloadable):
     ) -> str:
         """
         Downloads a model repo file. Will fail if the file does not contain a
-            signed url
+            signed url. If file_type is either 'inputs', 'outputs', or 'labels',
+            downloaded tar file will be extracted
 
         :param overwrite: True to overwrite the file if it exists, False otherwise
         :param save_dir: The directory to save the file to instead of the default
@@ -227,4 +234,8 @@ class File(RepoDownloadable):
         if not os.path.exists(save_file) or overwrite:
             download_file(self.url, save_file, overwrite=overwrite)
 
+        if self.file_type in DATA_FILE_TYPES:
+            with tarfile.open(save_file) as tar:
+                save_dir = os.path.dirname(save_file)
+                tar.extractall(save_dir)
         return save_file

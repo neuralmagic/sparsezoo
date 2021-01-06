@@ -34,7 +34,7 @@ class OptimizationRecipe(RepoDownloadable):
         self._optimization_type = kwargs["optimization_type"]
         self._tag_line = kwargs["tag_line"]
         if "file" in kwargs:
-            self._file = kwargs["file"]
+            self._file = File(**kwargs["file"])
         else:
             self._file = None
 
