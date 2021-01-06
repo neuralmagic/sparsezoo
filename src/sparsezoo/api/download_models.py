@@ -3,7 +3,7 @@ Code related to wrapping around API calls under api.neuralmagic.com/models/downl
 """
 
 import logging
-from typing import List
+from typing import List, Tuple
 
 from sparsezoo.models import File, Model
 
@@ -28,7 +28,7 @@ def download_model(
     save_dir: str = None,
     save_path: str = None,
     force_token_refresh: bool = False,
-) -> str:
+) -> Tuple[Model, str]:
     """
     Downloads all files from specified model in the model repo.
 
@@ -48,7 +48,7 @@ def download_model(
         instead of the default cache dir
     :param save_path: The exact path to save the model files to instead of
         the default cache dir or save_dir
-    :return: the save location for the folder containing the model files
+    :return: a tuple containing the Model and the save folder containing the model files
     """
     model = Model.get_downloadable_model(
         domain,
@@ -66,7 +66,7 @@ def download_model(
         overwrite=overwrite, save_dir=save_dir, save_path=save_path
     )
     _LOGGER.info(f"Successfully saved model files at {save_location}")
-    return save_location
+    return [model, save_location]
 
 
 def download_model_file(
@@ -84,7 +84,7 @@ def download_model_file(
     save_dir: str = None,
     save_path: str = None,
     force_token_refresh: bool = False,
-) -> str:
+) -> Tuple[File, str]:
     """
     Downloads a file from specified model in the model repo.
 
@@ -105,7 +105,7 @@ def download_model_file(
         instead of the default cache dir
     :param save_path: The exact path to save the model file to instead of
         the default cache dir or save_dir
-    :return: a save location for the file
+    :return: a tuple containing the File and the save location for the file
     """
     file_obj = File.get_downloadable_file(
         domain,
@@ -124,7 +124,7 @@ def download_model_file(
         overwrite=overwrite, save_dir=save_dir, save_path=save_path
     )
     _LOGGER.info(f"Successfully saved file at {save_location}")
-    return save_location
+    return [file_obj, save_location]
 
 
 def download_model_recipes(
