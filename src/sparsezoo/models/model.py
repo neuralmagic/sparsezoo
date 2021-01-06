@@ -41,7 +41,7 @@ class Model(RepoDownloadable):
     :param optimization_name: The level of optimization of the model e.g. base
     :param display_name: the display name for the model
     :param display_description: the description for the model
-    :param repo_source: the source repo for the model
+    :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
     :param user_id: the user id for the user who uploaded model
     :param release_version_id: the release version id for the release version of the
         model
@@ -116,6 +116,7 @@ class Model(RepoDownloadable):
         sub_architecture: str,
         dataset: str,
         framework: str,
+        repo_source: str,
         optimization_name: str,
         release_version: str = None,
         force_token_refresh: bool = False,
@@ -129,6 +130,7 @@ class Model(RepoDownloadable):
         :param sub_architecture: The sub architecture of the model e.g. 1.0
         :param dataset: The dataset the model was trained on e.g. imagenet
         :param framework: The framework the model was trained on e.g. pytorch
+        :param repo_source: the source repo for the model e.g. neuralmagic, torchvision
         :param optimization_name: The level of optimization of the model e.g. base
         :param release_version: Optional param specifying the maximum supported
             release version for the models
@@ -146,6 +148,7 @@ class Model(RepoDownloadable):
             sub_architecture,
             dataset,
             framework,
+            repo_source,
             optimization_name,
         )
         if release_version:
@@ -365,14 +368,13 @@ class Model(RepoDownloadable):
         :return: the folder where the files were saved
         """
         _LOGGER.info(f"Downloading model {self.model_id}.")
-
-        return self._download_files(
-            overwrite=overwrite,
-            save_dir=save_dir,
-            save_path=save_path,
+        save_folder = self._get_download_folder(overwrite, save_dir, save_path)
+        self._download_files(
+            save_path=save_folder,
             files=self.files,
             force_download_on_unsigned=force_download_on_unsigned,
         )
+        return save_folder
 
     def download_onnx_files(
         self,
@@ -380,7 +382,7 @@ class Model(RepoDownloadable):
         save_dir: str = None,
         save_path: str = None,
         force_download_on_unsigned: bool = False,
-    ) -> str:
+    ) -> List[str]:
         """
         Downloads all onnx files associated with this model.
 
@@ -391,7 +393,7 @@ class Model(RepoDownloadable):
             the default cache dir or save_dir
         :param force_download_on_unsigned: If files are unsigned, updates all the model
             to contain signed version of files
-        :return: the folder where the files were saved
+        :return: the path of the files saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} onnx files.")
 
@@ -409,7 +411,7 @@ class Model(RepoDownloadable):
         save_dir: str = None,
         save_path: str = None,
         force_download_on_unsigned: bool = False,
-    ) -> str:
+    ) -> List[str]:
         """
         Downloads all framework files associated with this model.
 
@@ -420,7 +422,7 @@ class Model(RepoDownloadable):
             the default cache dir or save_dir
         :param force_download_on_unsigned: If files are unsigned, updates all the model
             to contain signed version of files
-        :return: the folder where the files were saved
+        :return: the path of the files saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} framework files.")
 
@@ -438,7 +440,7 @@ class Model(RepoDownloadable):
         save_dir: str = None,
         save_path: str = None,
         force_download_on_unsigned: bool = False,
-    ) -> str:
+    ) -> List[str]:
         """
         Downloads all data files associated with this model.
 
@@ -449,7 +451,7 @@ class Model(RepoDownloadable):
             the default cache dir or save_dir
         :param force_download_on_unsigned: If files are unsigned, updates all the model
             to contain signed version of files
-        :return: the folder where the files were saved
+        :return: the path of the files saved
         """
         _LOGGER.info(f"Downloading model {self.model_id} data files.")
 
@@ -461,15 +463,16 @@ class Model(RepoDownloadable):
             force_download_on_unsigned=force_download_on_unsigned,
         )
 
-    def download_optimization_files(
+    def download_recipe_files(
         self,
         overwrite: bool = False,
         save_dir: str = None,
         save_path: str = None,
         force_download_on_unsigned: bool = False,
-    ) -> str:
+        optimization_type: str = None,
+    ) -> List[str]:
         """
-        Downloads all optimization files associated with this model.
+        Downloads all optimization recipe files associated with this model.
 
         :param overwrite: True to overwrite the file if it exists, False otherwise
         :param save_dir: The directory to save the model files to
@@ -478,17 +481,37 @@ class Model(RepoDownloadable):
             the default cache dir or save_dir
         :param force_download_on_unsigned: If files are unsigned, updates all the model
             to contain signed version of files
-        :return: the folder where the files were saved
+        :param optimization_type: Specific optimization type of recipes to download
+        :return: the path of the files saved
         """
-        _LOGGER.info(f"Downloading model {self.model_id} optimization files.")
-
-        return self._download_files(
-            overwrite=overwrite,
-            save_dir=save_dir,
-            save_path=save_path,
-            files=self.optimization_files,
-            force_download_on_unsigned=force_download_on_unsigned,
-        )
+        _LOGGER.info(f"Downloading model {self.model_id} optimization recipe files.")
+        if optimization_type is None:
+            if len(self.optimizations) == 0:
+                raise Exception("No optimizations recipes found.")
+            return self._download_files(
+                overwrite=overwrite,
+                save_dir=save_dir,
+                save_path=save_path,
+                files=self.optimization_files,
+                force_download_on_unsigned=force_download_on_unsigned,
+            )
+        else:
+            optimizations = [
+                opt
+                for opt in self.optimizations
+                if opt.optimization_type == optimization_type
+            ]
+            if len(optimizations) == 0:
+                raise Exception(
+                    f"No optimization recipes of type {optimization_type} found"
+                )
+            return self._download_files(
+                overwrite=overwrite,
+                save_dir=save_dir,
+                save_path=save_path,
+                files=[opt.file for opt in optimizations],
+                force_download_on_unsigned=force_download_on_unsigned,
+            )
 
     def _get_download_folder(
         self,
@@ -511,14 +534,16 @@ class Model(RepoDownloadable):
         save_path: str = None,
         files=List[File],
         force_download_on_unsigned: bool = False,
-    ) -> str:
+    ) -> List[str]:
         save_folder = self._get_download_folder(overwrite, save_dir, save_path)
+        file_names = []
         for file_obj in files:
             try:
-                file_obj.download(
+                file_name = file_obj.download(
                     overwrite=overwrite,
                     save_dir=save_folder,
                 )
+                file_names.append(file_name)
             except UnsignedFileError:
                 if force_download_on_unsigned:
                     other_file = File.get_downloadable_file(
@@ -540,4 +565,4 @@ class Model(RepoDownloadable):
                     )
                 else:
                     raise
-        return save_folder
+        return file_names
