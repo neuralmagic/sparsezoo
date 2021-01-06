@@ -58,7 +58,7 @@ Follow the quick tour below to get started
 ### <a name=“install”></a> Installation and Requirements
 [TODO ENGINEERING: installation instructions]
 
-SparseZoo is OS-agnostic. Requires Python 3.6. 
+SparseZoo is OS-agnostic. Requires Python 3.6 or higher. 
 ```python
 $ pip install sparsezoo
 ```
@@ -76,7 +76,6 @@ from neuralmagicML.utils import available_models, RepoModel
 models = available_models()  # type: List[RepoModel]
 print(models)
 ```
-Peruse sample use cases to learn more for specific 
 
 ### <a name=“models”></a> Available Models and Recipes
 A number of pre-trained models are available in this API. Included are both baseline and recalibrated models for higher performance. These can optionally be used with [Neural Magic Inference Engine](https://github.com/neuralmagic/engine/). The types available for each model architecture are noted in the [SparseZoo model repository listing](docs/available-models.md).
@@ -106,7 +105,7 @@ Give SparseZoo a shout out on social! Are you able write a blog post, do a lunch
 
 ## <a name="community"></a> Join the Community
 
-For user help or questions about SparseZOO, please use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/issues). Everyone is welcome!
+For user help or questions about SparseZoo, please use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/issues). Everyone is welcome!
 
 You can get the latest news, webinar invites, and other ML Performance tidbits by [connecting with the Neural Magic community](https://www.neuralmagic.com/NEED_URL/).[TODO MARKETING: NEED METHOD]
 
