@@ -35,33 +35,34 @@ If it’s a bug, be sure to provide where applicable, the s.t.r. = steps to repr
 
 If proposing a feature request, share the problem you’re trying to solve, community benefits, and other relevant details to support your proposal.
 
-If contributing a model, here’s how to do that:
- - Need Engineering assistance	
- - On the steps an external user needs to 
- - Implement a model and contribute back; see further guidelines below that maybe relevant or if we should create separate guidance
+If you want to contribute a model, start with sharing a brief introduction at [GitHub Discussions under Ideas](https://github.com/neuralmagic/[TECH_REPO_NAME]/discussions/categories/ideas). Fellow Neural Magic engineers can work with your further to take next steps.
 
  ## <a name=“question”></a> Question or Problem
- - Post a topic to [GitHub Discussions](https://github.com/neuralmagic/[TECH_REPO_NAME]/]/discussions) for all other questions including support or how to contribute
+ - Post a topic to [GitHub Discussions](https://github.com/neuralmagic/[TECH_REPO_NAME]/discussions/) for all other questions including support or how to contribute
 
 Don’t forget to search through existing discussions to avoid duplicating posts! Thanks!
 
-## Developing [TECH_REPO_NAME]
+## Developing [TECH_FORMAL_NAME]
 
 _*Edit the following topics as it relates to the developing software of this repo and remove this comment; the following is placeholder content and may not be applicable or there may be missing sections.*_
 
-A full set of instructions on installing [TECH_FORMAL_NAME] from source is here: <insert path>
+### Building and running [TECH_FORMAL_NAME] locally
 
-### Building and running [TECH_REPO_NAME] locally
+[TECH_FORMAL_NAME] is OS-agnostic. Requires Python 3.6 or higher. 
+```python
+$ pip install [TECH_REPO_NAME]
 
-To build and run [TECH_REPO_NAME] locally, run the following commands:
-
+```
+This will do [list out concise summary of what these command will do and what the use can expect to happen once installed].
+  
+To build and run [TECH_FORMAL_NAME] locally, run the following commands:
 ```shell
 $ <command 1>
 $ <command 2>
 $ <command n>
 ```
 
-This will do <list out concise summary of what these command will do>.
+This will do [list out concise summary of what these command will do and what the use can expect to happen once installed].
 
 
 ### Testing changes locally
