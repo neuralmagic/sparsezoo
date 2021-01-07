@@ -100,7 +100,7 @@ The project also uses immutable types where ever possible. If adding new type(s)
 
 _Remove section if not needed._
 
-#### <a name=“commit”></a> Commit Message Format
+#### Commit Message Format
 
 The project uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/) for commit messages
 in order to aid in automatic generation of changelogs. As described in the Conventional Commmits specification,
@@ -172,7 +172,7 @@ Once enabled, commitlint will reject commits with improperly formatted commit me
 3. Add a remote to keep up with upstream changes.
 
    ```bash
-   git remote add upstream https://github.com/confluentinc/[TECH_REPO_NAME].git
+   git remote add upstream https://github.com/neuralmagic/[TECH_REPO_NAME].git
    ```
 
    If you already have a copy, fetch upstream changes.
