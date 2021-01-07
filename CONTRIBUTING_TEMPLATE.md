@@ -4,12 +4,10 @@ If you’re reading this, hopefully we have piqued your interest to take the nex
 
  - [Code of Conduct](#code-of-conduct)
  - [Ways to Contribute](#ways-to-contribute)
- - [Issues, Bugs, Feature Requests](#issue)
- - [Question or Problem?](#question)
- - [How to Contribute](#contribute)
- - [Coding Guidelines](#guidelines)
- - [Commit Message Formats](#commit)
- - [GitHub Workflow](#workflow)
+ - [Bugs and Feature Requests](#bugs-and-feature-requets)
+ - [Question or Problem?](#question-or-problem)
+ - [Developing [TECH_FORMAL_NAME](#developing-[TECH_FORMAL_NAME_LOWERCASE]
+ - [How to Contribute](#how-to-contribute)
 
  ## Code of Conduct
 Help us keep the software inclusive. Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) in order to promote an environment that is friendly, fair, respectful, and safe. We want to inspire collaboration, innovation, and fun!
@@ -26,7 +24,7 @@ Whether you’re a newbie, dabbler, or expert, we appreciate you jumping in.
  - Spread the word about [TECH_FORMAL_NAME] (and if you feel inclined, @mention Neural Magic as we love hearing about it);
  - Teach and empower others. This is the way!
 
- ## <a name=“issue”></a> Issues, Bugs, Feature Requests
+ ## Bugs and Feature Requests
  - Check out [GitHub Issues](https://github.com/neuralmagic/[TECH_REPO_NAME]/issues) for reporting bugs and feature requests
 
 Prior to creating an issue, please search through existing issues so that you are not creating duplicate ones. 
@@ -37,7 +35,7 @@ If proposing a feature request, share the problem you’re trying to solve, comm
 
 If you want to contribute a model, start with sharing a brief introduction at [GitHub Discussions under Ideas](https://github.com/neuralmagic/[TECH_REPO_NAME]/discussions/categories/ideas). Fellow Neural Magic engineers can work with your further to take next steps.
 
- ## <a name=“question”></a> Question or Problem
+ ## Question or Problem
  - Post a topic to [GitHub Discussions](https://github.com/neuralmagic/[TECH_REPO_NAME]/discussions/) for all other questions including support or how to contribute
 
 Don’t forget to search through existing discussions to avoid duplicating posts! Thanks!
@@ -78,9 +76,9 @@ $ <command n>
 See comments at the top of the [Docker compose file in the root of the project](docker-compose.yml) for instructions
 on how to build and run Docker images.
 
-## <a name=“contribute”></a> How to Contribute
+## How to Contribute
 
-### <a name=“guidelines”></a> Guidelines for Contributing Code, Examples, Documentation
+### Guidelines for Contributing Code, Examples, Documentation
 
 Code changes are submitted via a pull request (PR). Confirm first by searching the issues or PRs that someone is not already working on the same task. When submitting a PR use the following guidelines:
 
@@ -123,7 +121,6 @@ where the `type` is one of
  * "revert": for reverting other changes
  * "perf", "style", "build", "ci", or "chore": as described in the [Angular specification](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type) for Conventional Commits.
 
-
 ##### Breaking Changes
 
 A commit is a "breaking change" if users should expect different behavior from an existing workflow
@@ -154,7 +151,7 @@ To enable commitlint, simply run `npm install` from the root directory of the [T
 (after [installing `npm`](https://www.npmjs.com/get-npm).)
 Once enabled, commitlint will reject commits with improperly formatted commit messages.
 
-### <a name=“workflow”></a> GitHub Workflow
+### GitHub Workflow
 
 1. Fork the `neuralmagic/[TECH_REPO_NAME]` repository into your GitHub account: https://github.com/neuralmagic/[TECH_REPO_NAME]/fork.
 
