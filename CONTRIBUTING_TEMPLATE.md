@@ -6,7 +6,7 @@ If you’re reading this, hopefully we have piqued your interest to take the nex
  - [Ways to Contribute](#ways-to-contribute)
  - [Bugs and Feature Requests](#bugs-and-feature-requests)
  - [Question or Problem?](#question-or-problem)
- - [Developing [TECH_FORMAL_NAME]](#developing-[TECH_FORMAL_NAME_LOWERCASE]
+ - [Developing [TECH_FORMAL_NAME]](#developing-[TECH_FORMAL_NAME_LOWERCASE])
  - [How to Contribute](#how-to-contribute)
 
  ## Code of Conduct
