@@ -2,7 +2,7 @@
 
 If you’re reading this, hopefully we have piqued your interest to take the next step. Join us and help make [TECH_FORMAL_NAME] even better! As a contributor, here are some community guidelines we would like you to follow:
 
- - [Code of Conduct](#coc)
+ - [Code of Conduct](#markdown-header-code-of-conduct)
  - [Ways to Contribute](#ways)
  - [Issues, Bugs, Feature Requests](#issue)
  - [Question or Problem?](#question)
@@ -11,7 +11,7 @@ If you’re reading this, hopefully we have piqued your interest to take the nex
  - [Commit Message Formats](#commit)
  - [GitHub Workflow](#workflow)
 
- ## <a name="coc"></a> Code of Conduct
+ ## Code of Conduct
 Help us keep the software inclusive. Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) in order to promote an environment that is friendly, fair, respectful, and safe. We want to inspire collaboration, innovation, and fun!
 
  ## <a name=“ways”></a> Ways to Contribute
