@@ -1,6 +1,8 @@
 # Available Models
-A number of pre-trained models are available in this API. Included are both baseline and recalibrated models for higher performance. 
-The types available for each model architecture are noted in the table below.
+
+The SparseZoo features models sparsified with the latest pruning techniques to deliver exceptional performance on CPUs, and accelerates the process of deploying those models in production.
+
+A number of pre-trained models are available in this API. Included are both baseline and recalibrated models for higher performance. The types available for each model architecture are noted in the table below.
 
 Possible types are:
  - base - the baseline model (standard training process)
