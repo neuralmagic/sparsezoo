@@ -16,7 +16,7 @@ limitations under the License.
 
 # [Related Icon Here] SparseZoo
 
-### Neural network model repository for preoptimized models and optimization recipes
+### Neural network model repository for pre-optimized models and optimization recipes
 
 <p>
     <a href="https://github.com/neuralmagic/comingsoon/blob/master/LICENSE">
@@ -46,23 +46,23 @@ limitations under the License.
 
 Simplify time to value and reduce skill burden to build performant deep learning models by having a collection of pre-trained, performance-optimized deep learning models to prototype from. The growing repository consists of popular image classification and object detection models and is constantly growing. They have been sparsified with the latest pruning techniques to deliver exceptional performance on CPUs, and accelerates the process of deploying those models in production. Neural Magic already did the hard work of building, pruning, and re-training the models for immediate use in production. We invite others to contribute to the SparseZoo!
 
-Available via API and hosted in the cloud, there are a number of baseline and recalibrated models for higher performance. The SparseZoo repo contains the Python API code to handle the connection and authentication to the cloud.
+Available via API and hosted in the cloud, there are a number of baseline and recalibrated models for higher performance. The SparseZoo repository contains the Python API code to handle the connection and authentication to the cloud.
 
 Models in the SparseZoo can be transfer-learned with your data, and then recalibrated. This approach makes it easier for folks to use pre-optimized models with their own data, in their own environments. In addition to freely using these models, new models and recipes are very much welcomed!
 
-## <a name=“documentation”></a> Quick Tour and Documentation
+## Quick Tour and Documentation
 
-Follow the quick tour below to get started
-* For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
+Follow the quick tour below to get started.
+For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
 
-### <a name=“install”></a> Installation and Requirements
+### Installation and Requirements
 [TODO ENGINEERING: installation instructions]
 
 SparseZoo is OS-agnostic. Requires Python 3.6 or higher. 
 ```python
 $ pip install sparsezoo
 ```
-### <a name=“downloading”></a> Downloading and Usage
+### Downloading and Usage
 Tutorial notebooks and use cases are provided for easily integrating and using the models in the SparseZoo. 
 Check the ??? [Tutorials section](INSERT PATH HERE) for more details. [TODO ENGINEERING: CLARIFY HOW TUTORIALS WILL BE ADDED IF ANY]
 The APIs provided to interface with the SparseZoo are located in `neuralmagicML.utils`. 
@@ -77,13 +77,13 @@ models = available_models()  # type: List[RepoModel]
 print(models)
 ```
 
-### <a name=“models”></a> Available Models and Recipes
+### Available Models and Recipes
 A number of pre-trained models are available in this API. Included are both baseline and recalibrated models for higher performance. These can optionally be used with [Neural Magic Inference Engine](https://github.com/neuralmagic/engine/). The types available for each model architecture are noted in the [SparseZoo model repository listing](docs/available-models.md).
 
-### <a name=“dev”></a> Development Setup
+### Development Setup
 [TODO ENGINEERING: dev instructions or point to CONTRIBUTING.md]
 
-## <a name=“resources”></a> Resources and Learning More
+## Resources and Learning More
 * [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/).
 * [SparseZoo Use Cases](INSERT PATH HERE).
 * [SparseZoo Examples] Coming soon in February 2021
@@ -92,7 +92,7 @@ A number of pre-trained models are available in this API. Included are both base
 
 [TODO ENGINEERING: table with links for deeper topics or other links that should be included above]
 
-## <a name=“contribute”></a> Contributing
+## Contributing
 
 We appreciate contributions to the code, documentation and examples, documentation!
 
@@ -103,7 +103,7 @@ Give SparseZoo a shout out on social! Are you able write a blog post, do a lunch
 - item 1 [TODO MARKETING: NEED METHODS]
 - item n
 
-## <a name="community"></a> Join the Community
+## Join the Community
 
 For user help or questions about SparseZoo, please use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/issues). Everyone is welcome!
 
