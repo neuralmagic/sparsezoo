@@ -84,8 +84,8 @@ A number of pre-trained models are available in this API. Included are both base
 [TODO ENGINEERING: dev instructions or point to CONTRIBUTING.md]
 
 ## Resources and Learning More
-* [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/).
-* [SparseZoo Use Cases](INSERT PATH HERE).
+* [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/)
+* [SparseZoo Use Cases](INSERT PATH HERE)
 * [SparseZoo Examples] Coming soon in February 2021
 * [Neural Magic Blog](https://www.neuralmagic.com/blog/)
 * [Neural Magic](https://www.neuralmagic.com/)
