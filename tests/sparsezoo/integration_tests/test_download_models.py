@@ -16,6 +16,7 @@ from sparsezoo.utils import CACHE_DIR
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
                 "file_name": "model.onnx",
@@ -29,6 +30,7 @@ from sparsezoo.utils import CACHE_DIR
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
                 "file_name": "model.onnx",
@@ -42,6 +44,7 @@ from sparsezoo.utils import CACHE_DIR
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
                 "file_name": "model.onnx",
@@ -51,7 +54,7 @@ from sparsezoo.utils import CACHE_DIR
     ],
 )
 def test_download_model_file(model_args, other_args):
-    model_file = download_model_file(**model_args, **other_args)
+    model_file, save_path = download_model_file(**model_args, **other_args)
 
     if "save_dir" in other_args:
         path = os.path.join(other_args["save_dir"], model_file.display_name)
@@ -59,6 +62,7 @@ def test_download_model_file(model_args, other_args):
         path = other_args["save_path"]
     else:
         path = os.path.join(CACHE_DIR, model_file.model_id, model_file.display_name)
+    assert save_path == path
     assert os.path.exists(path)
     os.remove(path)
     assert not os.path.exists(path)
@@ -74,6 +78,7 @@ def test_download_model_file(model_args, other_args):
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
             },
@@ -86,6 +91,7 @@ def test_download_model_file(model_args, other_args):
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
             },
@@ -98,6 +104,7 @@ def test_download_model_file(model_args, other_args):
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "dataset": "imagenet",
+                "repo_source": "torchvision",
                 "framework": "pytorch",
                 "optimization_name": "base",
             },
@@ -106,7 +113,7 @@ def test_download_model_file(model_args, other_args):
     ],
 )
 def test_download_model(model_args, other_args):
-    model = download_model(**model_args, **other_args)
+    model, save_path = download_model(**model_args, **other_args)
 
     for key, value in model_args.items():
         assert getattr(model, key) == value
@@ -117,6 +124,7 @@ def test_download_model(model_args, other_args):
         root_path = other_args["save_path"]
     else:
         root_path = os.path.join(CACHE_DIR, model.model_id)
+    assert os.path.abspath(save_path) == os.path.abspath(root_path)
     assert os.path.exists(root_path)
     for model_file in model.files:
         assert os.path.exists(os.path.join(root_path, model_file.display_name))

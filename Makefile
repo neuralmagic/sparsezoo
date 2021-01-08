@@ -1,5 +1,5 @@
 BUILDDIR := $(PWD)
-PYCHECKDIRS := examples tests src utils
+PYCHECKDIRS := examples tests src utils scripts
 JSCHECKDIRS := src
 DOCDIR := docs
 
