@@ -11,7 +11,7 @@ from sparsezoo.api import search_models
             {
                 "domain": "cv",
                 "sub_domain": "classification",
-                "optimization_name": "base",
+                "optim_name": "base",
             },
             {},
         ),

@@ -1,4 +1,6 @@
 # flake8: noqa
-from .authentication import *
+
+from .data import *
 from .downloader import *
 from .helpers import *
+from .numpy import *

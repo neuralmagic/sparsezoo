@@ -6,7 +6,7 @@ Script to download a model from sparse zoo
 Command help:
 usage: model_download.py [-h] {search,download} ...
 
-Download deployed models
+Download deployed objects
 
 positional arguments:
   {search,download}
@@ -24,7 +24,7 @@ usage: model_download.py search [-h] --dom DOM --sub-dom SUB_DOM [--arch ARCH]
                                 [--release-version RELEASE_VERSION]
                                 [--page PAGE] [--page-length PAGE_LENGTH]
 
-Search for models from the repo.
+Search for objects from the repo.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -190,7 +190,7 @@ def add_model_arguments(parser, download_required=False):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Download models from the sparse zoo repo"
+        description="Download objects from the sparse zoo repo"
     )
 
     subparsers = parser.add_subparsers(dest="command")
@@ -200,7 +200,7 @@ def parse_args():
     )
     search_parser = subparsers.add_parser(
         SEARCH_COMMAND,
-        description="Search for models from the repo.",
+        description="Search for objects from the repo.",
     )
     add_model_arguments(download_parser, download_required=True)
     add_model_arguments(search_parser)
@@ -239,13 +239,13 @@ def main(args):
             args.sub_arch,
             args.dataset,
             args.framework,
-            args.repo_source,
-            args.optimization_name,
+            args.repo,
+            args.optim_name,
             release_version=args.release_version,
             save_dir=args.save_dir,
         )
     elif args.command == SEARCH_COMMAND:
-        LOGGER.info("loading available models...")
+        LOGGER.info("loading available objects...")
         models = search_models(
             args.dom,
             args.sub_dom,
@@ -253,8 +253,8 @@ def main(args):
             sub_architecture=args.sub_arch,
             dataset=args.dataset,
             framework=args.framework,
-            repo_source=args.repo_source,
-            optimization_name=args.optimization_name,
+            repo=args.repo,
+            optim_name=args.optim_name,
             release_version=args.release_version,
             page=args.page,
             page_length=args.page_length,

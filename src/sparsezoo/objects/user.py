@@ -1,13 +1,14 @@
 """
 Code related to a model repo user
 """
-from sparsezoo.models.sparse_zoo_object import SparseZooObject
+
+from sparsezoo.objects.base import BaseObject
 
 
 __all__ = ["User"]
 
 
-class User(SparseZooObject):
+class User(BaseObject):
     """
     A model repo user
 
@@ -17,12 +18,19 @@ class User(SparseZooObject):
     :param trusted: Whether the user is a trusted source
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        email: str,
+        name: str,
+        user_id: str,
+        trusted: bool,
+        **kwargs,
+    ):
         super(User, self).__init__(**kwargs)
-        self._email = kwargs["email"]
-        self._name = kwargs["name"]
-        self._user_id = kwargs["user_id"]
-        self._trusted = kwargs["trusted"]
+        self._email = email
+        self._name = name
+        self._user_id = user_id
+        self._trusted = trusted
 
     @property
     def email(self) -> str:

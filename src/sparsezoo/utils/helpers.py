@@ -7,14 +7,11 @@ import os
 
 
 __all__ = [
-    "BASE_API_URL",
     "CACHE_DIR",
     "clean_path",
     "create_dirs",
     "create_parent_dirs",
 ]
-
-BASE_API_URL = "https://api.neuralmagic.com/models/"
 
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "nm_models"))
 

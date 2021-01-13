@@ -1,15 +1,16 @@
 """
 Code related to a model repo release version
 """
-from sparsezoo.models.sparse_zoo_object import SparseZooObject
+
+from sparsezoo.objects.base import BaseObject
 
 
 __all__ = ["ReleaseVersion"]
 
 
-class ReleaseVersion(SparseZooObject):
+class ReleaseVersion(BaseObject):
     """
-    A model repo semantic release verison. Will represent a version in the format
+    A model repo semantic release version. Will represent a version in the format
 
     MAJOR.MINOR.PATCH
 
@@ -20,13 +21,27 @@ class ReleaseVersion(SparseZooObject):
     :param published: whether the release has been officially published
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        release_version_id: str,
+        major_version: str,
+        minor_version: str,
+        patch_version: str,
+        published: bool,
+        **kwargs,
+    ):
         super(ReleaseVersion, self).__init__(**kwargs)
-        self._release_version_id = kwargs["release_version_id"]
-        self._major_version = kwargs["major_version"]
-        self._minor_version = kwargs["minor_version"]
-        self._patch_version = kwargs["patch_version"]
-        self._published = kwargs["published"]
+        self._release_version_id = release_version_id
+        self._major_version = major_version
+        self._minor_version = minor_version
+        self._patch_version = patch_version
+        self._published = published
+
+    def __str__(self) -> str:
+        """
+        :return: The release version as semantic version string MAJOR.MINOR.PATCH
+        """
+        return f"{self.major_version}.{self.minor_version}.{self.patch_version}"
 
     @property
     def published(self) -> bool:
@@ -62,9 +77,3 @@ class ReleaseVersion(SparseZooObject):
         :return: the patchversion of the release
         """
         return self._patch_version
-
-    def __str__(self) -> str:
-        """
-        :return: The release version as semantic version string MAJOR.MINOR.PATCH
-        """
-        return f"{self.major_version}.{self.minor_version}.{self.patch_version}"
