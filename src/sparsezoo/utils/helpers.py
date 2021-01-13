@@ -60,7 +60,7 @@ def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
         if not will return tqdm so that notebooks will not break
     """
     try:
-        import ipywidgets as widgets
+        import ipywidgets as widgets  # noqa: F401
 
         return auto.tqdm
     except Exception:

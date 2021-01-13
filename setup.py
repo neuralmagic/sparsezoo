@@ -2,11 +2,12 @@ from typing import Tuple, List, Dict
 from setuptools import find_packages, setup
 
 _deps = [
-    "requests>=2.0.0",
-    "PyYaml>=5.1.0",
-    "tqdm>=4.0.0",
     "numpy>=1.0.0",
     "onnx>=1.0.0",
+    "pyyaml>=5.1.0",
+    "requests>=2.0.0",
+    "tabulate>=0.8.7",
+    "tqdm>=4.0.0",
 ]
 
 _dev_deps = [
@@ -35,7 +36,7 @@ def _setup_extras() -> Dict:
 
 
 def _setup_entry_points() -> Dict:
-    return {}
+    return {"console_scripts": ["sparsezoo=sparsezoo.main:main"]}
 
 
 def _setup_long_description() -> Tuple[str, str]:
