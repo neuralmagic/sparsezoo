@@ -44,7 +44,7 @@ def vgg_11(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -99,7 +99,7 @@ def vgg_11bn(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -154,7 +154,7 @@ def vgg_13(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -209,7 +209,7 @@ def vgg_13bn(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -264,7 +264,7 @@ def vgg_16(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -319,7 +319,7 @@ def vgg_16bn(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -374,7 +374,7 @@ def vgg_19(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -429,7 +429,7 @@ def vgg_19bn(
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
     :param optim_name: The name describing the optimization of the model
-        the object belongs to, e.g. base, sparse, sparse_quant
+        the object belongs to, e.g. base, pruned, pruned_quant
     :param optim_category: The degree of optimization of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)

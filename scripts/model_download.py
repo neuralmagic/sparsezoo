@@ -50,7 +50,7 @@ optional arguments:
                         belongs to if any; e.g. augmented
   --optim-name OPTIM_NAME
                         The name describing the optimization of the model the
-                        object belongs to, e.g. base, sparse, sparse_quant
+                        object belongs to, e.g. base, pruned, pruned_quant
   --optim-category OPTIM_CATEGORY
                         The degree of optimization of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
@@ -102,7 +102,7 @@ optional arguments:
                         belongs to if any; e.g. augmented
   --optim-name OPTIM_NAME
                         The name describing the optimization of the model the
-                        object belongs to, e.g. base, sparse, sparse_quant
+                        object belongs to, e.g. base, pruned, pruned_quant
   --optim-category OPTIM_CATEGORY
                         The degree of optimization of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
@@ -220,7 +220,7 @@ def add_model_arguments(parser, download_required=False):
         type=str,
         required=download_required,
         help="The name describing the optimization of the model "
-        "the object belongs to, e.g. base, sparse, sparse_quant",
+        "the object belongs to, e.g. base, pruned, pruned_quant",
     )
     parser.add_argument(
         "--optim-category",

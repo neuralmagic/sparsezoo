@@ -79,7 +79,7 @@ class Model(Downloadable, ModelMetadata):
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
         :param optim_name: The name describing the optimization of the model
-            the object belongs to, e.g. base, sparse, sparse_quant
+            the object belongs to, e.g. base, pruned, pruned_quant
         :param optim_category: The degree of optimization of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -157,7 +157,7 @@ class Model(Downloadable, ModelMetadata):
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
         :param optim_name: The name describing the optimization of the model
-            the object belongs to, e.g. base, sparse, sparse_quant
+            the object belongs to, e.g. base, pruned, pruned_quant
         :param optim_category: The degree of optimization of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
@@ -614,7 +614,7 @@ class Model(Downloadable, ModelMetadata):
             belongs to if any; e.g. augmented
         :param match_optim_name: True to match similar models to the current
             name describing the optimization of the model
-            the object belongs to, e.g. base, sparse, sparse_quant
+            the object belongs to, e.g. base, pruned, pruned_quant
         :param match_optim_category: True to match similar models to the current
             degree of optimization of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
