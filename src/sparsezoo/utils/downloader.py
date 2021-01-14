@@ -5,10 +5,9 @@ Code related to efficiently downloading multiple files with parallel workers
 import logging
 import os
 from typing import Iterator, NamedTuple, Union
-
 import requests
-from sparsezoo.utils.helpers import clean_path, create_parent_dirs
-from tqdm import auto
+
+from sparsezoo.utils.helpers import clean_path, create_parent_dirs, tqdm_auto
 
 
 __all__ = [
@@ -187,7 +186,7 @@ def download_file(
             and progress.content_length
             and progress.content_length > 0
         ):
-            bar = auto.tqdm(
+            bar = tqdm_auto(
                 total=progress.content_length,
                 desc=progress_title if progress_title else "downloading...",
             )
