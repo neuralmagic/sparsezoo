@@ -63,7 +63,9 @@ def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
 
         return auto.tqdm
     except Exception:
-        return tqdm
+        pass
+
+    return tqdm
 
 
 tqdm_auto = create_tqdm_auto_constructor()
