@@ -34,16 +34,28 @@ class User(BaseObject):
 
     @property
     def email(self) -> str:
+        """
+        :return: contact email
+        """
         return self._email
 
     @property
     def name(self) -> str:
+        """
+        :return: name of user
+        """
         return self._name
 
     @property
     def user_id(self) -> str:
+        """
+        :return: user id
+        """
         return self._user_id
 
     @property
     def trusted(self) -> bool:
+        """
+        :return: Whether the user is a trusted source
+        """
         return self._trusted

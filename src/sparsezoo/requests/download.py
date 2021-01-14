@@ -1,3 +1,7 @@
+"""
+Code related to wrapping around API calls under api.neuralmagic.com/objects/download
+"""
+
 from typing import Union, Dict
 import logging
 import requests
@@ -19,36 +23,21 @@ def download_get_request(
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    [TODO]
+    Get a downloadable model from the sparsezoo for any objects matching the args
+
+    :param args: the model args describing what should be downloaded for
+    :param file_name: the name of the file, if any, to get download info for
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: the json response as a dict
     """
     header = get_auth_header(force_token_refresh=force_token_refresh)
-    arch_id = f"{architecture}-{sub_architecture}" if sub_architecture else architecture
-    training_id = f"{dataset}-{training_scheme}" if training_scheme else dataset
-    optimization_id = (
-        f"{optim_name}-{optim_category}-{optim_target}"
-        if optim_target
-        else f"{optim_name}-{optim_category}"
-    )
-
-    url = "/".join(
-        [
-            BASE_API_URL,
-            DOWNLOAD_PATH,
-            domain,
-            sub_domain,
-            arch_id,
-            framework,
-            repo,
-            training_id,
-            optimization_id,
-        ]
-    )
+    url = f"{BASE_API_URL}/{DOWNLOAD_PATH}/{args.model_url_path}"
 
     if file_name:
-        url += f"/{file_name}"
+        url = f"{url}/{file_name}"
 
-    if release_version:
-        url += f"?release_version={release_version}"
+    if args.release_version:
+        url = f"{url}?release_version={args.release_version}"
 
     _LOGGER.debug(f"GET download from {url}")
 

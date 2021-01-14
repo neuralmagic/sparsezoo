@@ -15,7 +15,8 @@ _dev_deps = [
     "isort>=5.7.0",
     "rinohtype>=0.4.2",
     "sphinxcontrib-apidoc>=0.3.0",
-    "wheel>=0.36.2"
+    "wheel>=0.36.2",
+    "pytest>=6.0.0",
 ]
 
 
@@ -30,9 +31,7 @@ def _setup_install_requires() -> List:
 
 
 def _setup_extras() -> Dict:
-    return {
-        "dev": _dev_deps
-    }
+    return {"dev": _dev_deps}
 
 
 def _setup_entry_points() -> Dict:

@@ -24,9 +24,13 @@ def search_get_request(
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    Search model repo for any objects matching the search criteria.
+    Search the sparsezoo for any objects matching the args
 
-    [TODO]
+    :param args: the model args describing what should be searched for
+    :param page: the page of values to get
+    :param page_length: the page length of values to get
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: the json response as a dict
     """
     if not page > 0:
         raise Exception("'page' value must be > 0")
@@ -42,6 +46,7 @@ def search_get_request(
     if args.release_version:
         search_args.extend(f"release_version={args.release_version}")
 
+    search_args = "&".join(search_args)
     url = f"{BASE_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
 
     _LOGGER.debug(f"Searching objects from {url}")

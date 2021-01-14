@@ -2,7 +2,7 @@
 Code related to base functionality for making requests
 """
 
-from typing import Union, List
+from typing import Union, List, Any
 
 __all__ = ["BASE_API_URL", "ModelArgs"]
 
@@ -11,23 +11,48 @@ BASE_API_URL = "https://api.neuralmagic.com/models"
 
 class ModelArgs:
     """
-    [TODO]
+    Arguments for making requests into the sparsezoo
+
+    :param domain: The domain of the model the object belongs to;
+        e.g. cv, nlp
+    :param sub_domain: The sub domain of the model the object belongs to;
+        e.g. classification, segmentation
+    :param architecture: The architecture of the model the object belongs to;
+        e.g. resnet_v1, mobilenet_v1
+    :param sub_architecture: The sub architecture (scaling factor) of the model
+        the object belongs to; e.g. 50, 101, 152
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object belongs
+        to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant,
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param release_version: The sparsezoo release version for the model
     """
 
     def __init__(
         self,
-        domain: Union[str, None],
-        sub_domain: Union[str, None],
-        architecture: Union[str, None],
-        sub_architecture: Union[str, None],
-        framework: Union[str, None],
-        repo: Union[str, None],
-        dataset: Union[str, None],
-        training_scheme: Union[str, None],
-        optim_name: Union[str, None],
-        optim_category: Union[str, None],
-        optim_target: Union[str, None],
-        release_version: Union[str, None],
+        domain: Union[str, None] = None,
+        sub_domain: Union[str, None] = None,
+        architecture: Union[str, List[str], None] = None,
+        sub_architecture: Union[str, List[str], None] = None,
+        framework: Union[str, List[str], None] = None,
+        repo: Union[str, List[str], None] = None,
+        dataset: Union[str, List[str], None] = None,
+        training_scheme: Union[str, List[str], None] = None,
+        optim_name: Union[str, List[str], None] = None,
+        optim_category: Union[str, List[str], None] = None,
+        optim_target: Union[str, List[str], None] = None,
+        release_version: Union[str, Any, None] = None,
         **kwargs,
     ):
         self._domain = domain
@@ -111,7 +136,7 @@ class ModelArgs:
     def optim_name(self) -> Union[str, List[str], None]:
         """
         :return: The name describing the optimization of the model
-            the object belongs to, e.g. base, sparse, sparse_quant,
+            the object belongs to, e.g. base, sparse, sparse_quant
         """
         return self._optim_name
 
@@ -134,10 +159,17 @@ class ModelArgs:
 
     @property
     def release_version(self) -> Union[str, None]:
+        """
+        :return: The sparsezoo release version for the model
+        """
         return self._release_version
 
     @property
     def architecture_id(self) -> str:
+        """
+        :return: Unique id for the model architecture containing both the
+            architecture and sub_architecture
+        """
         if not self.architecture:
             return ""
 
@@ -148,6 +180,10 @@ class ModelArgs:
 
     @property
     def training_id(self) -> str:
+        """
+        :return: Unique id for how the model was trained containing both the
+            dataset and training_scheme
+        """
         if not self.dataset:
             return ""
 
@@ -158,6 +194,10 @@ class ModelArgs:
 
     @property
     def optimization_id(self) -> str:
+        """
+        :return: Unique id for how the model was optimized containing the
+            optim_name, optim_category, optim_target
+        """
         if not self.optim_name:
             return ""
 
@@ -171,6 +211,9 @@ class ModelArgs:
 
     @property
     def model_url_root(self) -> str:
+        """
+        :return: root path for where the model is located in the sparsezoo
+        """
         if not self.domain:
             return ""
 
@@ -181,6 +224,9 @@ class ModelArgs:
 
     @property
     def model_url_path(self) -> str:
+        """
+        :return: full path for where the model is located in the sparsezoo
+        """
         return "/".join(
             [
                 self.model_url_root,
@@ -194,6 +240,9 @@ class ModelArgs:
 
     @property
     def model_url_args(self) -> List[str]:
+        """
+        :return: arguments for searching in the sparsezoo
+        """
         args = []
 
         for key in [

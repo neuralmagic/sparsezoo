@@ -1,3 +1,7 @@
+"""
+Code related to numpy array files
+"""
+
 from typing import Dict, Iterable, List, Union
 from collections import OrderedDict
 import glob
@@ -13,7 +17,7 @@ __all__ = [
     "NDARRAY_KEY",
     "load_numpy",
     "save_numpy",
-    "load_grouped_data",
+    "load_numpy_list",
     "NumpyArrayBatcher",
     "tensor_export",
     "tensors_export",
@@ -80,58 +84,36 @@ def save_numpy(
     return export_path
 
 
-def load_grouped_data(
-    *args: Union[str, Iterable[Union[str, numpy.ndarray, Dict[str, numpy.ndarray]]]],
-    raise_on_error: bool = True,
-) -> List[List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]]:
+def load_numpy_list(
+    data: Union[str, Iterable[Union[str, numpy.ndarray, Dict[str, numpy.ndarray]]]],
+    raise_on_error: bool,
+) -> List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
     """
-    Load data from disk or from memory and group them together.
-    Assumes sorted ordering for on disk. Will match between when a file glob is passed
-    for all data.
+    Load numpy data into a list
 
-    :param args: any number of the file glob or list of arrays to use for data
-    :param raise_on_error: True to raise on any error that occurs;
-        False to log a warning, ignore, and continue
-    :return: a list containing tuples of the data, labels. If labels was passed in
-        as None, will now contain a None for the second index in each tuple
+    :param data: the data to load, one of:
+        [folder path, iterable of file paths, iterable of numpy arrays]
+    :param raise_on_error: True to raise any errors encountered, False to skip
+    :return: the list of loaded data items
     """
-    data_sets = []
-    items_length = -1
+    loaded = []
 
-    for data in args:
-        if isinstance(data, str):
-            data = sorted(glob.glob(data))
-        data_sets.append(data)
-        items_length = len(data)
+    if isinstance(data, str):
+        data = sorted(glob.glob(data))
 
-    for data in data_sets:
-        if len(data) != items_length:
-            # always raise this error, lengths must match
-            raise ValueError(
-                "len(data) given of {} does not match with others at {}".format(
-                    len(data), items_length
-                )
-            )
+    for dat in data:
+        try:
+            if isinstance(dat, str):
+                dat = load_numpy(dat)
+        except Exception as err:
+            if raise_on_error:
+                raise err
+            else:
+                _LOGGER.error("Error loading data in numpy list: {}".format(err))
 
-    grouped_data = []
+        loaded.append(dat)
 
-    for data_set_index, data in enumerate(data_sets):
-        for index, dat in enumerate(data):
-            try:
-                if isinstance(dat, str):
-                    dat = load_numpy(dat)
-            except Exception as err:
-                if raise_on_error:
-                    raise err
-                else:
-                    _LOGGER.error("Error grouping data: {}".format(err))
-
-            if data_set_index == 0:
-                grouped_data.append([])
-
-            grouped_data[index].append(dat)
-
-    return grouped_data
+    return data
 
 
 class NumpyArrayBatcher(object):
@@ -154,6 +136,7 @@ class NumpyArrayBatcher(object):
         """
         Append a new item into the current batch.
         All keys and shapes must match the current state.
+
         :param item: the item to add for batching
         """
         if len(self) < 1 and isinstance(item, numpy.ndarray):
@@ -202,9 +185,14 @@ class NumpyArrayBatcher(object):
 
                 self._items[key].append(val)
 
-    def stack(self) -> Dict[str, numpy.ndarray]:
+    def stack(
+        self, as_list: bool = False
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]:
         """
         Stack the current items into a batch along a new, zeroed dimension
+
+        :param as_list: True to return the items as a list,
+            False to return items in a named ordereddict
         :return: the stacked items
         """
         batch_dict = OrderedDict()
@@ -212,7 +200,7 @@ class NumpyArrayBatcher(object):
         for key, val in self._items.items():
             batch_dict[key] = numpy.stack(self._items[key])
 
-        return batch_dict
+        return batch_dict if not as_list else list(batch_dict.values())
 
 
 def tensor_export(

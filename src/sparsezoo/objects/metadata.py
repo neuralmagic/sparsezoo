@@ -1,5 +1,10 @@
+"""
+Code related to metadata for models as stored in the sparsezoo
+"""
+
 from typing import Union
 
+from sparsezoo.requests import ModelArgs
 from sparsezoo.objects.base import BaseObject
 from sparsezoo.objects.release_version import ReleaseVersion
 
@@ -7,30 +12,41 @@ from sparsezoo.objects.release_version import ReleaseVersion
 __all__ = ["ModelMetadata"]
 
 
-class ModelMetadata(BaseObject):
+class ModelMetadata(BaseObject, ModelArgs):
     """
-    :param domain:
-    :param sub_domain:
-    :param architecture:
-    :param sub_architecture:
-    :param framework:
-    :param repo:
-    :param dataset:
-    :param training_scheme:
-    :param optim_name:
-    :param optim_category:
-    :param optim_target:
-    :param user_id: the user id for the user who uploaded model
-    :param release_version_id: the release version id for the release version of the
-        model
-    :param base_model: the model id of a model this model inherited from
+    Metadata to describe a model as stored in the sparsezoo
+
+    :param domain: The domain of the model the object belongs to;
+        e.g. cv, nlp
+    :param sub_domain: The sub domain of the model the object belongs to;
+        e.g. classification, segmentation
+    :param architecture: The architecture of the model the object belongs to;
+        e.g. resnet_v1, mobilenet_v1
+    :param sub_architecture: The sub architecture (scaling factor) of the model
+        the object belongs to; e.g. 50, 101, 152
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: The source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param release_version: The sparsezoo release version for the model
+    :param model_id: The id for the model as stored in the cloud
+    :param base_model: The id of the base model as stored in the cloud
+    :param user_id: The id of the user who uploaded the model as stored in the cloud
     """
 
     def __init__(
         self,
-        model_id: str,
-        base_model: str,
-        user_id: str,
         domain: str,
         sub_domain: str,
         architecture: str,
@@ -43,157 +59,48 @@ class ModelMetadata(BaseObject):
         optim_category: str,
         optim_target: Union[str, None],
         release_version: ReleaseVersion,
+        model_id: str,
+        base_model: str,
+        user_id: str,
         **kwargs,
     ):
+        super(BaseObject, self).__init__(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+            **kwargs,
+        )
         super(ModelMetadata, self).__init__(**kwargs)
         self._model_id = model_id
         self._base_model = base_model
         self._user_id = user_id
-        self._domain = domain
-        self._sub_domain = sub_domain
-        self._architecture = architecture
-        self._sub_architecture = sub_architecture
-        self._framework = framework
-        self._repo = repo
-        self._dataset = dataset
-        self._training_scheme = training_scheme
-        self._optim_name = optim_name
-        self._optim_category = optim_category
-        self._optim_target = optim_target
-        self._release_version = release_version
 
     @property
     def model_id(self) -> str:
         """
-        :return: The id of the model the object belongs to
+        :return: The id for the model as stored in the cloud
         """
         return self._model_id
 
     @property
-    def domain(self) -> str:
+    def base_model(self) -> str:
         """
-        :return: The domain of the model the object belongs to;
-            e.g. cv, nlp
+        :return: The id of the base model as stored in the cloud
         """
-        return self._domain
+        return self._base_model
 
     @property
-    def sub_domain(self) -> str:
+    def user_id(self) -> str:
         """
-        :return: The sub domain of the model the object belongs to;
-            e.g. classification, segmentation
+        :return: The id of the user who uploaded the model as stored in the cloud
         """
-        return self._sub_domain
-
-    @property
-    def architecture(self) -> str:
-        """
-        :return: The architecture of the model the object belongs to;
-            e.g. resnet_v1, mobilenet_v1
-        """
-        return self._architecture
-
-    @property
-    def sub_architecture(self) -> Union[str, None]:
-        """
-        :return: The sub architecture (scaling factor) of the model
-            the object belongs to; e.g. 50, 101, 152
-        """
-        return self._sub_architecture
-
-    @property
-    def framework(self) -> str:
-        """
-        :return: The framework the model the object belongs to was trained on;
-            e.g. pytorch, tensorflow
-        """
-        return self._framework
-
-    @property
-    def repo(self) -> str:
-        """
-        :return: the source repo for the model the object belongs to;
-            e.g. sparseml, torchvision
-        """
-        return self._repo
-
-    @property
-    def dataset(self) -> str:
-        """
-        :return: The dataset the model the object belongs to was trained on;
-            e.g. imagenet, cifar10
-        """
-        return self._dataset
-
-    @property
-    def training_scheme(self) -> Union[str, None]:
-        """
-        :return: The training scheme used on the model the object belongs to if any;
-            e.g. augmented
-        """
-        return self._training_scheme
-
-    @property
-    def optim_name(self) -> str:
-        """
-        :return: The name describing the optimization of the model
-            the object belongs to, e.g. base, sparse, sparse_quant,
-        """
-        return self._optim_name
-
-    @property
-    def optim_category(self) -> str:
-        """
-        :return: The degree of optimization of the model the object belongs to;
-            e.g. none, conservative (~100% baseline metric),
-            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        """
-        return self._optim_category
-
-    @property
-    def optim_target(self) -> Union[str, None]:
-        """
-        :return: The deployment target of optimization of the model
-            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
-        """
-        return self._optim_target
-
-    @property
-    def release_version(self) -> ReleaseVersion:
-        return self._release_version
-
-    @property
-    def architecture_id(self) -> str:
-        return f"{self.architecture}-{self.sub_architecture}"
-
-    @property
-    def training_id(self) -> str:
-        training_id = f"{self.dataset}"
-
-        if self.training_scheme:
-            training_id = f"{self.training_id}-{self.training_scheme}"
-
-        return training_id
-
-    @property
-    def optimization_id(self) -> str:
-        optimization_id = f"{self.optim_name}-{self.optim_category}"
-
-        if self.optim_target:
-            optimization_id = f"{optimization_id}-{self.optim_target}"
-
-        return optimization_id
-
-    @property
-    def model_url_path(self) -> str:
-        return "/".join(
-            [
-                self.domain,
-                self.sub_domain,
-                self.architecture_id,
-                self.framework,
-                self.repo,
-                self.training_id,
-                self.optimization_id,
-            ]
-        )
+        return self._user_id

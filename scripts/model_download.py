@@ -4,23 +4,25 @@ Script to download a model from sparse zoo
 
 ##########
 Command help:
-usage: model_download.py [-h] {search,download} ...
+usage: model_download.py [-h] {download,search} ...
 
-Download deployed objects
+Download objects from the sparse zoo repo
 
 positional arguments:
-  {search,download}
+  {download,search}
 
 optional arguments:
-  -h, --help       show this help message and exit
+  -h, --help         show this help message and exit
 
 
 ##########
 usage: model_download.py search [-h] --dom DOM --sub-dom SUB_DOM [--arch ARCH]
-                                [--sub-arch SUB_ARCH] [--dataset DATASET]
-                                [--framework FRAMEWORK]
-                                [--repo-source REPO_SOURCE]
-                                [--optimization-name OPTIMIZATION_NAME]
+                                [--sub-arch SUB_ARCH] [--framework FRAMEWORK]
+                                [--repo REPO] [--dataset DATASET]
+                                [--training_scheme TRAINING_SCHEME]
+                                [--optim-name OPTIM_NAME]
+                                [--optim-category OPTIM_CATEGORY]
+                                [--optim-target OPTIM_TARGET]
                                 [--release-version RELEASE_VERSION]
                                 [--page PAGE] [--page-length PAGE_LENGTH]
 
@@ -28,23 +30,36 @@ Search for objects from the repo.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --dom DOM             the domain the model belongs to; ex: cv, nlp, etc
-  --sub-dom SUB_DOM     the sub domain the model belongs to; ex:
-                        classification, detection, etc
-  --arch ARCH           the architecture the model belongs to; ex: resnet-v1,
-                        mobilenet-v1, etc
-  --sub-arch SUB_ARCH   the sub architecture the model belongs to; ex: 50,
-                        101, etc
-  --dataset DATASET     the dataset used to train the model; ex: imagenet,
-                        cifar, etc
+  --dom DOM             The domain of the model the object belongs to; e.g.
+                        cv, nlp
+  --sub-dom SUB_DOM     The sub domain of the model the object belongs to;
+                        e.g. classification, segmentation
+  --arch ARCH           The architecture of the model the object belongs to;
+                        e.g. resnet_v1, mobilenet_v1
+  --sub-arch SUB_ARCH   The sub architecture (scaling factor) of the model the
+                        object belongs to; e.g. 50, 101, 152
   --framework FRAMEWORK
-                        the framework used to train the model; ex: tensorflow,
-                        pytorch, keras, onnx, etc
-  --repo-source REPO_SOURCE
-                        the source of the model; ex: torchvision
-  --optimization-name OPTIMIZATION_NAME
-                        the optimization name of the model; ex: base, recal,
-                        recal-perf
+                        The framework the model the object belongs to was
+                        trained on; e.g. pytorch, tensorflow
+  --repo REPO           The source repo for the model the object belongs to;
+                        e.g. sparseml, torchvision
+  --dataset DATASET     The dataset the model the object belongs to was
+                        trained on; e.g. imagenet, cifar10
+  --training-scheme TRAINING_SCHEME
+                        The training scheme used on the model the object
+                        belongs to if any; e.g. augmented
+  --optim-name OPTIM_NAME
+                        The name describing the optimization of the model the
+                        object belongs to, e.g. base, sparse, sparse_quant
+  --optim-category OPTIM_CATEGORY
+                        The degree of optimization of the model the object
+                        belongs to; e.g. none, conservative (~100 baseline
+                        metric), moderate (>=99 baseline metric), aggressive
+                        (<99 baseline metric)
+  --optim-target OPTIM_TARGET
+                        The deployment target of optimization of the model the
+                        object belongs to; e.g. edge, deepsparse,
+                        deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
                         the max release version of the model in semantic
                         version format
@@ -55,10 +70,11 @@ optional arguments:
 
 ##########
 usage: model_download.py download [-h] --dom DOM --sub-dom SUB_DOM --arch ARCH
-                                  [--sub-arch SUB_ARCH] --dataset DATASET
-                                  --framework FRAMEWORK --repo-source
-                                  REPO_SOURCE --optimization-name
-                                  OPTIMIZATION_NAME
+                                  [--sub-arch SUB_ARCH] --framework FRAMEWORK
+                                  --repo REPO --dataset DATASET
+                                  [--training_scheme TRAINING_SCHEME]
+                                  --optim-name OPTIM_NAME --optim-category
+                                  OPTIM_CATEGORY [--optim-target OPTIM_TARGET]
                                   [--release-version RELEASE_VERSION]
                                   [--save-dir SAVE_DIR]
 
@@ -66,23 +82,36 @@ Download a specific model from the repo.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --dom DOM             the domain the model belongs to; ex: cv, nlp, etc
-  --sub-dom SUB_DOM     the sub domain the model belongs to; ex:
-                        classification, detection, etc
-  --arch ARCH           the architecture the model belongs to; ex: resnet-v1,
-                        mobilenet-v1, etc
-  --sub-arch SUB_ARCH   the sub architecture the model belongs to; ex: 50,
-                        101, etc
-  --dataset DATASET     the dataset used to train the model; ex: imagenet,
-                        cifar, etc
+  --dom DOM             The domain of the model the object belongs to; e.g.
+                        cv, nlp
+  --sub-dom SUB_DOM     The sub domain of the model the object belongs to;
+                        e.g. classification, segmentation
+  --arch ARCH           The architecture of the model the object belongs to;
+                        e.g. resnet_v1, mobilenet_v1
+  --sub-arch SUB_ARCH   The sub architecture (scaling factor) of the model the
+                        object belongs to; e.g. 50, 101, 152
   --framework FRAMEWORK
-                        the framework used to train the model; ex: tensorflow,
-                        pytorch, keras, onnx, etc
-  --repo-source REPO_SOURCE
-                        the source of the model; ex: torchvision
-  --optimization-name OPTIMIZATION_NAME
-                        the optimization name of the model; ex: base, recal,
-                        recal-perf
+                        The framework the model the object belongs to was
+                        trained on; e.g. pytorch, tensorflow
+  --repo REPO           The source repo for the model the object belongs to;
+                        e.g. sparseml, torchvision
+  --dataset DATASET     The dataset the model the object belongs to was
+                        trained on; e.g. imagenet, cifar10
+  --training-scheme TRAINING_SCHEME
+                        The training scheme used on the model the object
+                        belongs to if any; e.g. augmented
+  --optim-name OPTIM_NAME
+                        The name describing the optimization of the model the
+                        object belongs to, e.g. base, sparse, sparse_quant
+  --optim-category OPTIM_CATEGORY
+                        The degree of optimization of the model the object
+                        belongs to; e.g. none, conservative (~100 baseline
+                        metric), moderate (>=99 baseline metric), aggressive
+                        (<99 baseline metric)
+  --optim-target OPTIM_TARGET
+                        The deployment target of optimization of the model the
+                        object belongs to; e.g. edge, deepsparse,
+                        deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
                         the max release version of the model in semantic
                         version format
@@ -120,7 +149,7 @@ import argparse
 import logging
 from pprint import pprint
 
-from sparsezoo.api import download_model, search_models
+from sparsezoo.objects import Model
 
 
 DOWNLOAD_COMMAND = "download"
@@ -135,51 +164,78 @@ def add_model_arguments(parser, download_required=False):
         "--dom",
         type=str,
         required=True,
-        help="the domain the model belongs to; ex: cv, nlp, etc",
+        help="The domain of the model the object belongs to; e.g. cv, nlp",
     )
     parser.add_argument(
         "--sub-dom",
         type=str,
         required=True,
-        help="the sub domain the model belongs to; "
-        "ex: classification, detection, etc",
+        help="The sub domain of the model the object belongs to; "
+        "e.g. classification, segmentation",
     )
     parser.add_argument(
         "--arch",
         type=str,
         required=download_required,
-        help="the architecture the model belongs to; ex: resnet-v1, mobilenet-v1, etc",
+        help="The architecture of the model the object belongs to; "
+        "e.g. resnet_v1, mobilenet_v1",
     )
     parser.add_argument(
         "--sub-arch",
         type=str,
-        default="none" if download_required else None,
-        help="the sub architecture the model belongs to; ex: 50, 101, etc",
-    )
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        required=download_required,
-        help="the dataset used to train the model; ex: imagenet, cifar, etc",
+        default=None,
+        help="The sub architecture (scaling factor) of the model "
+        "the object belongs to; e.g. 50, 101, 152",
     )
     parser.add_argument(
         "--framework",
         type=str,
         required=download_required,
-        help="the framework used to train the model; "
-        "ex: tensorflow, pytorch, keras, onnx, etc",
+        help="The framework the model the object belongs to was trained on; "
+        "e.g. pytorch, tensorflow",
     )
     parser.add_argument(
-        "--repo-source",
+        "--repo",
         type=str,
         required=download_required,
-        help="the source of the model; ex: torchvision",
+        help="The source repo for the model the object belongs to; "
+        "e.g. sparseml, torchvision",
     )
     parser.add_argument(
-        "--optimization-name",
+        "--dataset",
         type=str,
         required=download_required,
-        help="the optimization name of the model; ex: base, recal, recal-perf",
+        help="The dataset the model the object belongs to was trained on; "
+        "e.g. imagenet, cifar10",
+    )
+    parser.add_argument(
+        "--training-scheme",
+        type=str,
+        default=None,
+        help="The training scheme used on the model the object "
+        "belongs to if any; e.g. augmented",
+    )
+    parser.add_argument(
+        "--optim-name",
+        type=str,
+        required=download_required,
+        help="The name describing the optimization of the model "
+        "the object belongs to, e.g. base, sparse, sparse_quant",
+    )
+    parser.add_argument(
+        "--optim-category",
+        type=str,
+        required=download_required,
+        help="The degree of optimization of the model the object "
+        "belongs to; e.g. none, conservative (~100 baseline metric), "
+        "moderate (>=99 baseline metric), aggressive (<99 baseline metric)",
+    )
+    parser.add_argument(
+        "--optim-target",
+        type=str,
+        default=None,
+        help="The deployment target of optimization of the model "
+        "the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu",
     )
     parser.add_argument(
         "--release-version",
@@ -195,12 +251,10 @@ def parse_args():
 
     subparsers = parser.add_subparsers(dest="command")
     download_parser = subparsers.add_parser(
-        DOWNLOAD_COMMAND,
-        description="Download a specific model from the repo.",
+        DOWNLOAD_COMMAND, description="Download a specific model from the repo.",
     )
     search_parser = subparsers.add_parser(
-        SEARCH_COMMAND,
-        description="Search for objects from the repo.",
+        SEARCH_COMMAND, description="Search for objects from the repo.",
     )
     add_model_arguments(download_parser, download_required=True)
     add_model_arguments(search_parser)
@@ -232,34 +286,76 @@ def main(args):
 
     if args.command == DOWNLOAD_COMMAND:
         LOGGER.info("Downloading files from model...")
-        download_model(
-            args.dom,
-            args.sub_dom,
-            args.arch,
-            args.sub_arch,
-            args.dataset,
-            args.framework,
-            args.repo,
-            args.optim_name,
-            release_version=args.release_version,
-            save_dir=args.save_dir,
-        )
-    elif args.command == SEARCH_COMMAND:
-        LOGGER.info("loading available objects...")
-        models = search_models(
-            args.dom,
-            args.sub_dom,
+        model = Model.get_downloadable(
+            domain=args.dom,
+            sub_domain=args.sub_dom,
             architecture=args.arch,
             sub_architecture=args.sub_arch,
-            dataset=args.dataset,
             framework=args.framework,
             repo=args.repo,
+            dataset=args.dataset,
+            training_scheme=args.training_scheme,
             optim_name=args.optim_name,
+            optim_category=args.optim_category,
+            optim_target=args.optim_target,
+            release_version=args.release_version,
+            override_parent_path=args.save_dir,
+        )
+        model.download()
+
+        print("Download results")
+        print("====================")
+        print("")
+        print(model.model_url_path)
+        print(f"downloaded to {model.dir_path}")
+    elif args.command == SEARCH_COMMAND:
+        LOGGER.info("loading available objects...")
+        models = Model.search_downloadable(
+            domain=args.dom,
+            sub_domain=args.sub_dom,
+            architecture=args.arch,
+            sub_architecture=args.sub_arch,
+            framework=args.framework,
+            repo=args.repo,
+            dataset=args.dataset,
+            training_scheme=args.training_scheme,
+            optim_name=args.optim_name,
+            optim_category=args.optim_category,
+            optim_target=args.optim_target,
             release_version=args.release_version,
             page=args.page,
             page_length=args.page_length,
         )
-        pprint([model.dict() for model in models])
+
+        print("Search results")
+        print("====================")
+
+        for model in models:
+            print("")
+            print("Model:")
+            print(f"    tag: {model.model_url_path}")
+            sub_arch_command = (
+                f"--sub-arch {model.sub_architecture}" if model.sub_architecture else ""
+            )
+            training_scheme_command = (
+                f"--training-scheme {model.training_scheme}"
+                if model.training_scheme
+                else ""
+            )
+            optim_target_command = (
+                f"--optim-target {model.training_scheme}"
+                if model.training_scheme
+                else ""
+            )
+            print(
+                f"    command: python3 scripts/model_download.py download "
+                f"--dom {model.domain} --sub-dom {model.sub_domain} "
+                f"--arch {model.architecture} {sub_arch_command} "
+                f"--framework {model.framework} --repo {model.repo} "
+                f"--dataset {model.dataset} {training_scheme_command} "
+                f"--optim-name {model.optim_name} "
+                f"--optim-category {model.optim_category} {optim_target_command}"
+            )
 
 
 if __name__ == "__main__":

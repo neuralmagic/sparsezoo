@@ -13,7 +13,7 @@ __all__ = [
     "create_parent_dirs",
 ]
 
-CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "nm_models"))
+CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
 
 def clean_path(path: str) -> str:

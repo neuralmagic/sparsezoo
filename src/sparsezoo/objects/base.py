@@ -1,4 +1,8 @@
-from typing import Dict, List
+"""
+Base objects for working with the sparsezoo
+"""
+
+from typing import Dict, List, Union
 
 
 __all__ = ["BaseObject"]
@@ -12,19 +16,24 @@ class BaseObject:
     :param modified: the date modified
     """
 
-    def __init__(self, created: str, modified: str, **kwargs):
+    def __init__(
+        self,
+        created: Union[str, None] = None,
+        modified: Union[str, None] = None,
+        **kwargs,
+    ):
         self._created = created
         self._modified = modified
 
     @property
-    def created(self) -> str:
+    def created(self) -> Union[str, None]:
         """
         :return: the date created
         """
         return self._created
 
     @property
-    def modified(self) -> str:
+    def modified(self) -> Union[str, None]:
         """
         :return: the date modifed
         """
@@ -51,7 +60,8 @@ class BaseObject:
             elif isinstance(prop_value, list):
                 prop_dict[prop] = [
                     elem.dict()
-                    if isinstance(elem, BaseObject) or issubclass(type(elem), BaseObject)
+                    if isinstance(elem, BaseObject)
+                    or issubclass(type(elem), BaseObject)
                     else elem
                     for elem in prop_value
                 ]

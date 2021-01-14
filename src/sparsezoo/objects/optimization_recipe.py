@@ -15,6 +15,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class OptimizationRecipeTypes(Enum):
+    """
+    Types of recipes available in the sparsezoo
+    """
+
     ORIGINAL = "original"
     TRANSFER_LEARN = "transfer_learn"
 
@@ -40,7 +44,7 @@ class OptimizationRecipe(File):
         **kwargs,
     ):
         super(OptimizationRecipe, self).__init__(
-            model_metadata=model_metadata, **kwargs
+            model_metadata=model_metadata, child_folder_name="recipes", **kwargs
         )
         self._recipe_id = recipe_id
         self._recipe_type = recipe_type
@@ -63,10 +67,18 @@ class OptimizationRecipe(File):
 
     @property
     def recipe_type_original(self) -> bool:
+        """
+        :return: True if this is the original optimization recipe
+            that created the model, False otherwise
+        """
         return self.recipe_type == OptimizationRecipeTypes.ORIGINAL.value
 
     @property
     def recipe_type_transfer_learn(self) -> bool:
+        """
+        :return: True if this is an optimization recipe for
+            transfer learning from the created model, False otherwise
+        """
         return self.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value
 
     @property

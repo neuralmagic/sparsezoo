@@ -2,61 +2,212 @@
 Utilities for data loading into numpy for use in ONNX supported systems
 """
 
+from typing import Dict, List, Iterable, Iterator, Tuple, Union
+from collections import OrderedDict
 import logging
 import math
-from typing import Dict, List, Iterable, Tuple, Union
 
 import numpy
 
-from sparsezoo.utils.numpy import NumpyArrayBatcher, load_grouped_data
+from sparsezoo.utils.numpy import NumpyArrayBatcher, load_numpy_list
 
 
-__all__ = ["DataLoader", "RandomDataLoader"]
+__all__ = ["Dataset", "RandomDataset", "DataLoader"]
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class DataLoader(object):
+class Dataset(Iterable):
+    """
+    A numpy dataset implementation
+
+    :param name: The name for the dataset
+    :param data: The data for the dataset. Can be one of
+        [str - path to a folder containing numpy files,
+        Iterable[str] - list of paths to numpy files,
+        Iterable[ndarray], Iterable[Dict[str, ndarray]]
+        ]
+    """
+
+    def __init__(
+        self,
+        name: str,
+        data: Union[str, Iterable[Union[str, numpy.ndarray, Dict[str, numpy.ndarray]]]],
+    ):
+        self._name = name
+        self._data = load_numpy_list(data, raise_on_error=True)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, index) -> Union[numpy.ndarray, Dict[str, numpy.ndarray]]:
+        return self._data[index]
+
+    def __iter__(self) -> Iterator[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
+        for item in self._data:
+            yield item
+
+    @property
+    def name(self) -> str:
+        """
+        :return: The name for the dataset
+        """
+        return self._name
+
+    @property
+    def data(self) -> List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
+        """
+        :return: The list of data items for the dataset.
+        """
+        return self._data
+
+
+class RandomDataset(Dataset):
+    """
+    A numpy dataset created from random data
+
+    :param name: The name for the dataset
+    :param typed_shapes: A dictionary containing the info for the random data to create,
+        the names of the items in the data map to a tuple (shapes, numpy type).
+        If numpy type is none, it will default to float32.
+        Ex: {"inp": ([3, 224, 224], None)}
+    :param num_samples: The number of random samples to create
+    """
+
+    def __init__(
+        self,
+        name: str,
+        typed_shapes: Dict[str, Tuple[Iterable[int], Union[numpy.dtype, None]]],
+        num_samples: int = 20,
+    ):
+        """
+
+        :param name:
+        :param typed_shapes:
+        :param num_samples:
+        """
+        data = []
+        for _ in range(num_samples):
+            item = {}
+            for key, (shape, type_) in typed_shapes.items():
+                dtype = type_ if type_ else numpy.float32
+                dtype_name = dtype.name if hasattr(dtype, "name") else dtype.__name__
+
+                if "float" in dtype_name:
+                    array = numpy.random.random(shape).astype(dtype)
+                elif "int" in dtype_name:
+                    iinfo = numpy.iinfo(dtype)
+                    array = numpy.random.randint(iinfo.min, iinfo.max, shape, dtype)
+                elif dtype is numpy.bool:
+                    array = numpy.random.random(shape) < 0.5
+                else:
+                    raise RuntimeError(
+                        "Cannot create random input for"
+                        " {} with unsupported type {}".format(key, dtype)
+                    )
+
+                item[key] = array
+            data.append(item)
+
+        super().__init__(name, data)
+
+
+class DataLoader(Iterable):
     """
     Data loader instance that supports loading numpy arrays from file or memory
     and creating an iterator to go through batches of that data.
     Iterator returns a list containing all data originally loaded.
 
-    :param args: any number of: file glob pointing to numpy files or loaded numpy data
+    :param datasets: any number of datasets to load for the dataloader
     :param batch_size: the size of batches to create for the iterator
     :param iter_steps: the number of steps (batches) to create.
         Set to -1 for infinite, 0 for running through the loaded data once,
         or a positive integer for the desired number of steps
+    :param batch_as_list: True to create the items from each dataset
+        as a list, False for an ordereddict
     """
 
     def __init__(
         self,
-        *args: Union[str, List[Dict[str, numpy.ndarray]]],
+        *datasets: Dataset,
         batch_size: int,
         iter_steps: int = 0,
+        batch_as_list: bool = False,
     ):
+        self._datasets = OrderedDict([(dataset.name, dataset) for dataset in datasets])
         self._batch_size = batch_size
         self._iter_steps = iter_steps
-        self._grouped_data = load_grouped_data(*args, raise_on_error=False)
+        self._batch_as_list = batch_as_list
+        self._num_items = -1
 
-        if len(self._grouped_data) < 1:
-            raise ValueError(
-                "No data for DataLoader after loading. data: {}".format(args)
-            )
+        if len(datasets) < 1:
+            raise ValueError("len(datasets) must be > 0")
 
-        self._index = 0
-        self._step_count = 0
+        if self._batch_size < 1:
+            raise ValueError("batch_size must be > 0")
+
+        if self._iter_steps < -1:
+            raise ValueError("iter_steps must be >= -1")
+
+        for dataset in datasets:
+            num_dataset_items = len(dataset)
+
+            if num_dataset_items < 1:
+                raise ValueError("No data in dataset: {}".format(dataset.name))
+
+            if self._num_items != -1 and num_dataset_items != self._num_items:
+                raise ValueError(
+                    (
+                        "Dataset {} with length {} does not match "
+                        "the other datasets of length {}"
+                    ).format(dataset.name, num_dataset_items, self._num_items)
+                )
+
+            self._num_items = num_dataset_items
+
+        self._iter_index = 0
+        self._iter_step_count = 0
 
         if self.infinite:
-            # __len__ cannot return math.inf as a value and must be non-negative integer
             self._max_steps = 0
         elif self._iter_steps > 0:
             self._max_steps = self._iter_steps
         else:
-            self._max_steps = math.ceil(
-                len(self._grouped_data) / float(self._batch_size)
-            )
+            self._max_steps = math.ceil(self._num_items / float(self._batch_size))
+
+    def __len__(self):
+        return self._max_steps
+
+    def __iter__(self):
+        self._iter_index = 0
+        self._iter_step_count = 0
+
+        return self
+
+    def __next__(
+        self,
+    ) -> Union[
+        Dict[str, Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]],
+        List[numpy.ndarray],
+        Dict[str, numpy.ndarray],
+    ]:
+        if not self.infinite and self._iter_step_count >= self._max_steps:
+            _LOGGER.debug("reached end of dataset, raising StopIteration")
+            raise StopIteration()
+
+        self._iter_step_count += 1
+        end_index, batch = self._create_batch(self._iter_index)
+        self._iter_index = end_index
+
+        return batch
+
+    @property
+    def datasets(self) -> Dict[str, Dataset]:
+        """
+        :return: any number of datasets to load for the dataloader
+        """
+        return self._datasets
 
     @property
     def batch_size(self) -> int:
@@ -75,15 +226,6 @@ class DataLoader(object):
         return self._iter_steps
 
     @property
-    def grouped_data(
-        self,
-    ) -> List[List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]]:
-        """
-        :return: the loaded data and labels
-        """
-        return self._grouped_data
-
-    @property
     def infinite(self) -> bool:
         """
         :return: True if the loader instance is setup to continually create batches,
@@ -91,118 +233,108 @@ class DataLoader(object):
         """
         return self._iter_steps == -1
 
-    def __len__(self):
-        return self._max_steps
+    @property
+    def batch_as_list(self) -> bool:
+        """
+        :return: True to create the items from each dataset
+            as a list, False for an ordereddict
+        """
+        return self._batch_as_list
 
-    def __iter__(self):
-        self._index = 0
-        self._step_count = 0
+    @property
+    def num_items(self) -> int:
+        """
+        :return: the number of items in each dataset
+        """
+        return self._num_items
 
-        return self
+    def get_batch(
+        self, bath_index: int
+    ) -> Union[
+        Dict[str, Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]],
+        List[numpy.ndarray],
+        Dict[str, numpy.ndarray],
+    ]:
+        """
+        Get a batch from the data at the given index
 
-    def __next__(self) -> List[Dict[str, numpy.ndarray]]:
-        if not self.infinite and self._step_count >= self._max_steps:
-            _LOGGER.debug("reached in of dataset, raising StopIteration")
-            raise StopIteration()
+        :param bath_index: the index of the batch to get
+        :return: the created batch
+        """
+        max_batches = math.ceil(self._num_items / self._batch_size)
 
-        self._step_count += 1
-        batchers = [NumpyArrayBatcher() for _ in self._grouped_data[0]]
+        if bath_index >= max_batches and not self.infinite:
+            raise IndexError(
+                f"batch_index {bath_index} is greater than the max {max_batches}"
+            )
+
+        start_index = bath_index * self._num_items
+        _, batch = self._create_batch(start_index)
+
+        return batch
+
+    def _create_batch(
+        self, start_index
+    ) -> Tuple[
+        int,
+        Union[
+            Dict[str, Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]],
+            List[numpy.ndarray],
+            Dict[str, numpy.ndarray],
+        ],
+    ]:
+        _LOGGER.debug("creating batch at data start index {}".format(start_index))
+        dataset_batchers = [
+            (dataset, NumpyArrayBatcher()) for key, dataset in self._datasets.items()
+        ]
+        index = start_index
         num_resets = 0
+        num_items = len(dataset_batchers[0][0])
+        max_resets = self._batch_size // num_items + 2
 
-        while len(batchers[0]) < self._batch_size:
+        if index >= self._num_items:
+            index = 0
+
+        while len(dataset_batchers[0][1]) < self._batch_size:
             try:
-                _LOGGER.debug("including data in batch at index {}".format(self._index))
-                data = self._grouped_data[self._index]
+                _LOGGER.debug("including data in batch at index {}".format(index))
 
-                for dat, batcher in zip(data, batchers):
-                    batcher.append(dat)
+                for dataset, batcher in dataset_batchers:
+                    batcher.append(dataset[index])
             except Exception as err:
-                logging.error(
+                raise RuntimeError(
                     (
-                        "DataLoader: Error while adding file "
+                        "DataLoader: Error while adding data "
                         "to batch for index {}: {}"
-                    ).format(self._index, err)
+                    ).format(index, err)
                 )
 
-            if self._index >= len(self._grouped_data) - 1:
+            index += 1
+
+            if index >= num_items - 1:
                 _LOGGER.debug("resetting index to loop data again")
-                self._index = 0
+                index = 0
                 num_resets += 1
 
-                if num_resets > self._batch_size // len(self._grouped_data) + 2:
+                if num_resets > max_resets:
                     # make sure we're not in an infinite loop because none of the
                     # data was loadable
                     raise ValueError(
                         "could not create a batch from the files, "
                         "not enough were loadable to fill the batch size"
                     )
-            else:
-                self._index += 1
 
-        batched_data = [batcher.stack() for batcher in batchers]
-        _LOGGER.debug("created batch data of size {}".format(len(batched_data[0])))
+        if len(dataset_batchers) == 1:
+            # special case where only have a single dataset
+            # for simplicity return the created batch instead nesting in dict
+            return index, dataset_batchers[0][1].stack(as_list=self._batch_as_list)
 
-        return batched_data
-
-
-class RandomDataLoader(DataLoader):
-    """
-    Data loader instance that supports creating random numpy arrays
-    and creating an iterator to go through batches of that data.
-    Iterator returns a list containing data for all shapes originally loaded.
-
-    :param args: any number of dictionaries containing the key name mapped to
-        a list of shapes, dtype
-    :param batch_size: the size of batches to create for the iterator
-    :param iter_steps: the number of steps (batches) to create.
-        Set to -1 for infinite, 0 for running through the loaded data once,
-        or a positive integer for the desired number of steps
-    """
-
-    def __init__(
-        self,
-        *args: Dict[str, Tuple[Iterable[int], Union[numpy.dtype, None]]],
-        batch_size: int,
-        iter_steps: int = 0,
-        num_samples: int = 20,
-    ):
-        data_sets = []
-
-        for data_desc in args:
-            for (shape, type_) in data_desc.values():
-                if not all(isinstance(dim, int) and dim > 0 for dim in shape):
-                    raise RuntimeError(
-                        "Invalid input shape, cannot create a random input shape"
-                        " from: {}".format(shape)
-                    )
-
-            data = []
-            for _ in range(num_samples):
-                item = {}
-
-                for key, (shape, type_) in data_desc.items():
-                    dtype = type_ if type_ else numpy.float32
-                    dtype_name = (
-                        dtype.name if hasattr(dtype, "name") else dtype.__name__
-                    )
-
-                    if "float" in dtype_name:
-                        array = numpy.random.random(shape).astype(dtype)
-                    elif "int" in dtype_name:
-                        iinfo = numpy.iinfo(dtype)
-                        array = numpy.random.randint(iinfo.min, iinfo.max, shape, dtype)
-                    elif dtype is numpy.bool:
-                        array = numpy.random.random(shape) < 0.5
-                    else:
-                        raise RuntimeError(
-                            "Cannot create random input for"
-                            " {} with unsupported type {}".format(key, dtype)
-                        )
-
-                    item[key] = array
-                data.append(item)
-            data_sets.append(data)
-
-        super(RandomDataLoader, self).__init__(
-            *data_sets, batch_size=batch_size, iter_steps=iter_steps
+        return (
+            index,
+            OrderedDict(
+                [
+                    (dataset.name, batcher.stack(as_list=self._batch_as_list))
+                    for (dataset, batcher) in dataset_batchers
+                ]
+            ),
         )

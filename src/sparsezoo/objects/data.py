@@ -1,10 +1,10 @@
 """
-Code related to a model repo optimization file
+Code related to sample data in the sparsezoo
 """
 
 import logging
 
-from sparsezoo.utils import DataLoader
+from sparsezoo.utils import DataLoader, Dataset
 from sparsezoo.objects.file import File
 from sparsezoo.objects.metadata import ModelMetadata
 
@@ -16,26 +16,54 @@ _LOGGER = logging.getLogger(__name__)
 
 class Data(File):
     """
-    A model repo optimization recipe.
+    Sample data for a given model
 
-    :param model_metadata: the metadata for the model the file is for
-    :param recipe_id: the recipe id
-    :param recipe_type: the type of optimization recipe
-    :param display_name: the display name for the optimization
-    :param display_description: the display description for the optimization
+    :param name: The name/type of sample data
+    :param model_metadata: Metadata for the model the data belongs to
     """
 
     def __init__(
-        self, model_metadata: ModelMetadata, **kwargs,
+        self, name: str, model_metadata: ModelMetadata, **kwargs,
     ):
         super(Data, self).__init__(model_metadata=model_metadata, **kwargs)
+        self._name = name
 
-    def loader(self, batch_size: int, iter_steps: int = 0) -> DataLoader:
-        if not self.downloaded:
-            raise RuntimeError(
-                "data files must be downloaded first before creating a data loader"
-            )
+    @property
+    def name(self) -> str:
+        """
+        :return: The name/type of sample data
+        """
+        return self._name
 
-        files_dir = self.path.replace(".tar.gz", "")
+    def dataset(self) -> Dataset:
+        """
+        A dataset for interacting with the sample data.
+        If the data is not found on the local disk, will automatically download.
 
-        return DataLoader(files_dir, batch_size=batch_size, iter_steps=iter_steps)
+        :return: The created dataset from the sample data files
+        """
+        files_dir = self.downloaded_path()
+        files_dir = files_dir.replace(".tar.gz", "")
+
+        return Dataset(self._name, files_dir)
+
+    def loader(
+        self, batch_size: int, iter_steps: int = 0, batch_as_list: bool = True
+    ) -> DataLoader:
+        """
+        A dataloader for interfacing with the sample data in a batched format.
+
+        :param batch_size: the size of the batches to create the loader for
+        :param iter_steps: the number of steps (batches) to create.
+            Set to -1 for infinite, 0 for running through the loaded data once,
+            or a positive integer for the desired number of steps
+        :param batch_as_list: True to return multiple inputs/outputs/etc
+            within the dataset as lists, False for an ordereddict
+        :return: The created dataloader from the sample data files
+        """
+        return DataLoader(
+            self.dataset(),
+            batch_size=batch_size,
+            iter_steps=iter_steps,
+            batch_as_list=batch_as_list,
+        )

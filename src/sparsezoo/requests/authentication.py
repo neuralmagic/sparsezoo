@@ -1,3 +1,7 @@
+"""
+Requests for authenticating with the sparsezoo cloud
+"""
+
 import json
 import logging
 import os

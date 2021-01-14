@@ -1,0 +1,327 @@
+"""
+ResNet models:
+    https://arxiv.org/abs/1512.03385
+"""
+
+from typing import Union
+
+from sparsezoo.objects import Model
+
+
+__all__ = [
+    "resnet_18",
+    "resnet_34",
+    "resnet_50",
+    "resnet_50_2x",
+    "resnet_101",
+    "resnet_101_2x",
+    "resnet_152",
+]
+
+
+def resnet_18(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 18 model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="18",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_34(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 34 model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="34",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_50(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 50 model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="50",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_50_2x(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 50 2x width model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="50_2x",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_101(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 101 model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="101",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_101_2x(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 101 2x width model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="101_2x",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )
+
+
+def resnet_152(
+    framework: str = "pytorch",
+    repo: str = "sparseml",
+    dataset: str = "imagenet",
+    training_scheme: Union[str, None] = None,
+    optim_name: str = "base",
+    optim_category: str = "none",
+    optim_target: Union[str, None] = None,
+):
+    """
+    Convenience function for getting a resnet 152 model
+
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object
+        belongs to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, sparse, sparse_quant
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :return: The created model
+    """
+    return Model.get_downloadable(
+        domain="cv",
+        sub_domain="classification",
+        architecture="resnet_v1",
+        sub_architecture="152",
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        optim_name=optim_name,
+        optim_category=optim_category,
+        optim_target=optim_target,
+    )

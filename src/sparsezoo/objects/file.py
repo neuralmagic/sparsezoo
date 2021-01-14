@@ -1,3 +1,9 @@
+"""
+Code related to files as stored for the sparsezoo as well a interacting with them
+such as downloading
+"""
+
+from typing import Union
 from enum import Enum
 import logging
 import os
@@ -20,8 +26,13 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FileTypes(Enum):
+    """
+    Types of files available in the sparsezoo
+    """
+
     CARD = "card"
     ONNX = "onnx"
+    ONNX_GZ = "onnx_gz"
     RECIPE = "recipe"
     FRAMEWORK = "framework"
     DATA_ORIGINALS = "originals"
@@ -30,32 +41,27 @@ class FileTypes(Enum):
     DATA_LABELS = "labels"
 
 
-class UnsignedFileError(Exception):
-    """
-    Error raised when a File does not contain signed url
-    """
-
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-
-
 class File(BaseObject, Downloadable):
     """
     A model repo file.
 
-    :param model_metadata: the metadata for the model the file is for
-    :param file_id: the file id
-    :param display_name: the display name for the optimization
-    :param file_type: the file type e.g. onnx
-    :param operator_version: Any operator version associated for the file
-        e.g. onnx opset. None if no operator version exists
-    :param checkpoint: True if this is a checkpoint file for transfer learning,
-        False otherwise
-    :param md5: The md5 hash of the file
-    :param file_size: The file size in bytes
+    :param model_metadata: The metadata of the model the file belongs to
+    :param file_id: Id of the file as stored in the cloud
+    :param display_name: The file name and extension
+    :param file_type: The type of file the object represents
+    :param operator_version: Version of the file such as onnx OPSET for onnx files
+    :param checkpoint: True if the model is a checkpoint file
+        (for use with transfer learning flows), False otherwise
+    :param md5: The md5 hash for the file as stored in the cloud
+    :param file_size: The size of the file as stored in the cloud
     :param downloads: The amount of times a download has been requested for
         this file
-    :param url: The signed url to retrieve the file.
+    :param url: The signed url to retrieve the file
+    :param child_folder_name: A child folder, if any, to store this file under locally
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
     """
 
     def __init__(
@@ -64,16 +70,29 @@ class File(BaseObject, Downloadable):
         file_id: str,
         display_name: str,
         file_type: str,
-        operator_version: str,
+        operator_version: Union[str, None],
         checkpoint: bool,
         md5: str,
         file_size: int,
         downloads: int,
         url: str = None,
+        child_folder_name: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
         **kwargs,
     ):
+        folder_name = (
+            model_metadata.model_id
+            if not override_folder_name
+            else override_folder_name
+        )
+        if child_folder_name:
+            folder_name = os.path.join(folder_name, child_folder_name)
+
         super(File, self).__init__(
-            default_folder_name=model_metadata.model_id, **kwargs
+            folder_name=folder_name,
+            override_parent_path=override_parent_path,
+            **kwargs,
         )
         self._model_metadata = model_metadata
         self._file_id = file_id
@@ -88,47 +107,72 @@ class File(BaseObject, Downloadable):
 
     @property
     def model_metadata(self) -> ModelMetadata:
+        """
+        :return: The metadata of the model the file belongs to
+        """
         return self._model_metadata
 
     @property
     def file_id(self) -> str:
         """
-        :return: the file id
+        :return: Id of the file as stored in the cloud
         """
         return self._file_id
 
     @property
     def display_name(self) -> str:
         """
-        :return: the display name for the optimization
+        :return: The file name and extension
         """
         return self._display_name
 
     @property
     def file_type(self) -> str:
         """
-        :return: the file type e.g. onnx
+        :return: The type of file the object represents
         """
         return self._file_type
 
     @property
     def file_type_card(self) -> bool:
+        """
+        :return: True if the file type is a card, False otherwise
+        """
         return self.file_type == FileTypes.CARD.value
 
     @property
     def file_type_onnx(self) -> bool:
+        """
+        :return: True if the file type is onnx, False otherwise
+        """
         return self.file_type == FileTypes.ONNX.value
 
     @property
+    def file_type_onnx_gz(self) -> bool:
+        """
+        :return: True if the file type is a gzipped onnx, False otherwise
+        """
+        return self.file_type == FileTypes.ONNX_GZ.value
+
+    @property
     def file_type_recipe(self) -> bool:
+        """
+        :return: True if the file type is a recipe, False otherwise
+        """
         return self.file_type == FileTypes.RECIPE.value
 
     @property
     def file_type_framework(self) -> bool:
+        """
+        :return: True if the file type is a framework file, False otherwise
+        """
         return self.file_type == FileTypes.FRAMEWORK.value
 
     @property
     def file_type_data(self) -> bool:
+        """
+        :return: True if the file type is sample data, False otherwise
+        """
         return (
             self.file_type_data_originals
             or self.file_type_data_inputs
@@ -138,39 +182,58 @@ class File(BaseObject, Downloadable):
 
     @property
     def file_type_data_originals(self) -> bool:
+        """
+        :return: True if the file type is the original sample data, False otherwise
+        """
         return self.file_type == FileTypes.DATA_ORIGINALS.value
 
     @property
     def file_type_data_inputs(self) -> bool:
+        """
+        :return: True if the file type is the input sample data, False otherwise
+        """
         return self.file_type == FileTypes.DATA_INPUTS.value
 
     @property
     def file_type_data_outputs(self) -> bool:
+        """
+        :return: True if the file type is the output sample data, False otherwise
+        """
         return self.file_type == FileTypes.DATA_OUTPUTS.value
 
     @property
     def file_type_data_labels(self) -> bool:
+        """
+        :return: True if the file type is the labels sample data, False otherwise
+        """
         return self.file_type == FileTypes.DATA_LABELS.value
 
     @property
-    def operator_version(self) -> str:
+    def operator_version(self) -> Union[str, None]:
         """
-        :return: Any operator version associated for the file e.g. onnx opset.
-            None if no operator version exists
+        :return: Version of the file such as onnx OPSET for onnx files
         """
         return self._operator_version
 
     @property
+    def checkpoint(self) -> bool:
+        """
+        :return: True if the model is a checkpoint file
+            (for use with transfer learning flows), False otherwise
+        """
+        return self._checkpoint
+
+    @property
     def md5(self) -> str:
         """
-        :return: The md5 hash of the file
+        :return: The md5 hash for the file as stored in the cloud
         """
         return self._md5
 
     @property
     def file_size(self) -> int:
         """
-        :return: The file size in bytes
+        :return: The size of the file as stored in the cloud
         """
         return self._file_size
 
@@ -190,11 +253,43 @@ class File(BaseObject, Downloadable):
 
     @property
     def path(self) -> str:
+        """
+        :return: The path for where this file is (or can be) downloaded to
+        """
         return f"{self.dir_path}/{self.display_name}"
 
     @property
     def downloaded(self):
+        """
+        :return: True if the file has already been downloaded, False otherwise
+        """
         return os.path.exists(self.path)
+
+    def downloaded_path(self) -> str:
+        """
+        :return: The local path to the downloaded file.
+            Returns the same value as path, but if the file hasn't been downloaded
+            then it will automatically download
+        """
+        self.check_download()
+
+        return self.path
+
+    def check_download(
+        self,
+        overwrite: bool = False,
+        refresh_token: bool = False,
+        show_progress: bool = True,
+    ):
+        """
+        Check if the file has been downloaded, if not then call download()
+
+        :param overwrite: True to overwrite any previous file, False otherwise
+        :param refresh_token: True to refresh the auth token, False otherwise
+        :param show_progress: True to print tqdm progress, False otherwise
+        """
+        if not self.downloaded or overwrite:
+            self.download(overwrite, refresh_token, show_progress)
 
     def download(
         self,
@@ -203,13 +298,12 @@ class File(BaseObject, Downloadable):
         show_progress: bool = True,
     ):
         """
-        Downloads a model repo file. Will fail if the file does not contain a
-        signed url. If file_type is either 'inputs', 'outputs', or 'labels',
-        downloaded tar file will be extracted
+        Downloads a sparsezoo file.
+        If the file_type is a data type then the downloaded tar file will be extracted
 
-        :param overwrite: True to overwrite the file if it exists, False otherwise
-        :param refresh_token: refresh the auth token
-        :param show_progress: True to use tqdm for progress, False to not show
+        :param overwrite: True to overwrite any previous file, False otherwise
+        :param refresh_token: True to refresh the auth token, False otherwise
+        :param show_progress: True to print tqdm progress, False otherwise
         """
         if os.path.exists(self.path) and not overwrite:
             _LOGGER.debug(
@@ -253,23 +347,8 @@ class File(BaseObject, Downloadable):
 
     def _signed_url(self, refresh_token: bool = False,) -> str:
         response_json = download_get_request(
-            domain=self.model_metadata.domain,
-            sub_domain=self.model_metadata.sub_domain,
-            architecture=self.model_metadata.architecture,
-            sub_architecture=self.model_metadata.sub_architecture,
-            framework=self.model_metadata.framework,
-            repo=self.model_metadata.repo,
-            dataset=self.model_metadata.dataset,
-            training_scheme=self.model_metadata.training_scheme,
-            optim_name=self.model_metadata.optim_name,
-            optim_category=self.model_metadata.optim_category,
-            optim_target=self.model_metadata.optim_target,
+            args=self.model_metadata,
             file_name=self.display_name,
-            release_version=(
-                str(self.model_metadata.release_version)
-                if self.model_metadata.release_version
-                else None
-            ),
             force_token_refresh=refresh_token,
         )
 
