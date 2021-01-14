@@ -2,14 +2,24 @@
 Code related to metadata for models as stored in the sparsezoo
 """
 
-from typing import Union
+from typing import Union, NamedTuple
 
 from sparsezoo.requests import ModelArgs
 from sparsezoo.objects.base import BaseObject
 from sparsezoo.objects.release_version import ReleaseVersion
 
 
-__all__ = ["ModelMetadata"]
+__all__ = ["OptimizationId", "ModelMetadata"]
+
+
+OptimizationId = NamedTuple(
+    "OptimizationId",
+    [
+        ("name", str),
+        ("category", str),
+        ("target", Union[None, str]),
+    ],
+)
 
 
 class ModelMetadata(BaseObject, ModelArgs):

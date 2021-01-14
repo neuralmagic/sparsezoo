@@ -80,3 +80,68 @@ def test_model_get_downloadable(model_args, other_args):
     model.download(overwrite=True)
     validate_model_downloaded(model, model_args, other_args)
     shutil.rmtree(model.dir_path)
+
+
+@pytest.mark.parametrize(
+    "model_args,other_args",
+    [
+        (
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+                "sub_architecture": "1.0",
+                "framework": "pytorch",
+                "repo": "torchvision",
+                "dataset": "imagenet",
+                "training_scheme": None,
+                "optim_name": "base",
+                "optim_category": "none",
+                "optim_target": None,
+            },
+            {},
+        ),
+    ],
+)
+def test_model_search_similar(model_args, other_args):
+    model = Model.get_downloadable(**model_args, **other_args)
+    similar = model.search_similar()
+    assert len(similar) > 0
+
+    for sim in similar:
+        assert sim
+        assert sim.domain == model.domain
+        assert sim.sub_domain == model.sub_domain
+        assert sim.architecture == model.architecture
+        assert sim.sub_architecture == model.sub_architecture
+
+
+@pytest.mark.parametrize(
+    "model_args,other_args",
+    [
+        (
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+                "sub_architecture": "1.0",
+                "framework": "pytorch",
+                "repo": "torchvision",
+                "dataset": "imagenet",
+                "training_scheme": None,
+                "optim_name": "base",
+                "optim_category": "none",
+                "optim_target": None,
+            },
+            {},
+        ),
+    ],
+)
+def test_model_search_optimized_versions(model_args, other_args):
+    model = Model.get_downloadable(**model_args, **other_args)
+    optimized_ids = model.search_optimized_versions()
+    assert len(optimized_ids) > 0
+
+    for id_ in optimized_ids:
+        assert id_.name
+        assert id_.category

@@ -8,7 +8,7 @@ import logging
 from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
 from sparsezoo.utils import DataLoader
 from sparsezoo.objects.downloadable import Downloadable
-from sparsezoo.objects.metadata import ModelMetadata
+from sparsezoo.objects.metadata import ModelMetadata, OptimizationId
 from sparsezoo.objects.data import Data
 from sparsezoo.objects.file import File, FileTypes
 from sparsezoo.objects.optimization_recipe import OptimizationRecipe
@@ -571,3 +571,114 @@ class Model(Downloadable, ModelMetadata):
                 refresh_token=refresh_token,
                 show_progress=show_progress,
             )
+
+    def search_similar(
+        self,
+        match_domain: bool = True,
+        match_sub_domain: bool = True,
+        match_architecture: bool = True,
+        match_sub_architecture: bool = True,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = False,
+        match_optim_name: bool = False,
+        match_optim_category: bool = False,
+        match_optim_target: bool = False,
+    ) -> List:
+        """
+        Search for similar models to the current one
+
+        :param match_domain: True to match similar models to the current
+            domain of the model the object belongs to; e.g. cv, nlp
+        :param match_sub_domain: True to match similar models to the current
+            sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param match_architecture: True to match similar models to the current
+            architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param match_sub_architecture: True to match similar models to the current
+            sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param match_framework: True to match similar models to the current
+            framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param match_repo: True to match similar models to the current
+            source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param match_dataset: True to match similar models to the current
+            dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param match_training_scheme: True to match similar models to the current
+            training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param match_optim_name: True to match similar models to the current
+            name describing the optimization of the model
+            the object belongs to, e.g. base, sparse, sparse_quant
+        :param match_optim_category: True to match similar models to the current
+            degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param match_optim_target: True to match similar models to the current
+            deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :return: a list of models matching the current model, if any
+        """
+        return Model.search_downloadable(
+            domain=self.domain if match_domain else None,
+            sub_domain=self.sub_domain if match_sub_domain else None,
+            architecture=self.architecture if match_architecture else None,
+            sub_architecture=self.sub_architecture if match_sub_architecture else None,
+            framework=self.framework if match_framework else None,
+            repo=self.repo if match_repo else None,
+            dataset=self.dataset if match_dataset else None,
+            training_scheme=self.training_scheme if match_training_scheme else None,
+            optim_name=self.optim_name if match_optim_name else None,
+            optim_category=self.optim_category if match_optim_category else None,
+            optim_target=self.optim_target if match_optim_target else None,
+        )
+
+    def search_optimized_versions(
+        self,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = True,
+    ) -> List[OptimizationId]:
+        """
+        Search for different available optimized versions based off of the current model
+
+        :param match_framework: True to match similar models to the current
+            framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param match_repo: True to match similar models to the current
+            source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param match_dataset: True to match similar models to the current
+            dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param match_training_scheme: True to match similar models to the current
+            training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :return: the list of matching optimization ids, if any
+        """
+        matched = self.search_similar(
+            match_domain=True,
+            match_sub_domain=True,
+            match_architecture=True,
+            match_sub_architecture=True,
+            match_framework=match_framework,
+            match_repo=match_repo,
+            match_dataset=match_dataset,
+            match_training_scheme=match_training_scheme,
+        )
+        ids = []
+
+        for match in matched:
+            ids.append(
+                OptimizationId(
+                    match.optim_name, match.optim_category, match.optim_target
+                )
+            )
+
+        return ids
