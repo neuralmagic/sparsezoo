@@ -27,6 +27,9 @@ def resnet_18(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 18 model
@@ -46,6 +49,11 @@ def resnet_18(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -60,6 +68,9 @@ def resnet_18(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -71,6 +82,9 @@ def resnet_34(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 34 model
@@ -90,6 +104,11 @@ def resnet_34(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -104,6 +123,9 @@ def resnet_34(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -115,6 +137,9 @@ def resnet_50(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 50 model
@@ -134,6 +159,11 @@ def resnet_50(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -148,6 +178,9 @@ def resnet_50(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -159,6 +192,9 @@ def resnet_50_2x(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 50 2x width model
@@ -178,6 +214,11 @@ def resnet_50_2x(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -192,6 +233,9 @@ def resnet_50_2x(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -203,6 +247,9 @@ def resnet_101(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 101 model
@@ -222,6 +269,11 @@ def resnet_101(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -236,6 +288,9 @@ def resnet_101(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -247,6 +302,9 @@ def resnet_101_2x(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 101 2x width model
@@ -266,6 +324,11 @@ def resnet_101_2x(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -280,6 +343,9 @@ def resnet_101_2x(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -291,6 +357,9 @@ def resnet_152(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a resnet 152 model
@@ -310,6 +379,11 @@ def resnet_152(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -324,4 +398,7 @@ def resnet_152(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )

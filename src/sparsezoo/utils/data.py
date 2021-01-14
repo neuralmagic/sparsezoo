@@ -36,7 +36,7 @@ class Dataset(Iterable):
         data: Union[str, Iterable[Union[str, numpy.ndarray, Dict[str, numpy.ndarray]]]],
     ):
         self._name = name
-        self._data = load_numpy_list(data, raise_on_error=True)
+        self._data = load_numpy_list(data)
 
     def __len__(self) -> int:
         return len(self._data)

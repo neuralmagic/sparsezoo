@@ -7,6 +7,8 @@ from collections import OrderedDict
 import glob
 import os
 import logging
+import tarfile
+from io import BytesIO
 
 import numpy
 
@@ -27,6 +29,16 @@ NDARRAY_KEY = "ndarray"
 _LOGGER = logging.getLogger(__name__)
 
 
+def _fix_loaded_numpy(array) -> Union[numpy.ndarray, Dict[str, numpy.ndarray]]:
+    if not isinstance(array, numpy.ndarray):
+        tmp_arrray = array
+        array = OrderedDict()
+        for key, val in tmp_arrray.items():
+            array[key] = val
+
+    return array
+
+
 def load_numpy(file_path: str) -> Union[numpy.ndarray, Dict[str, numpy.ndarray]]:
     """
     Load a numpy file into either an ndarray or an OrderedDict representing what
@@ -37,13 +49,7 @@ def load_numpy(file_path: str) -> Union[numpy.ndarray, Dict[str, numpy.ndarray]]
     file_path = clean_path(file_path)
     array = numpy.load(file_path)
 
-    if not isinstance(array, numpy.ndarray):
-        tmp_arrray = array
-        array = OrderedDict()
-        for key, val in tmp_arrray.items():
-            array[key] = val
-
-    return array
+    return _fix_loaded_numpy(array)
 
 
 def save_numpy(
@@ -84,32 +90,54 @@ def save_numpy(
     return export_path
 
 
+def load_numpy_from_tar(
+    path: str,
+) -> List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
+    """
+    Load numpy data into a list from a tar file.
+    All files contained in the tar are expected to be the numpy files.
+
+    :param path: path to the tarfile to load the numpy data from
+    :return: the list of loaded numpy data, either arrays or ordereddicts of arrays
+    """
+    tar = tarfile.open(path, "r")
+    files = tar.getmembers()
+    files = sorted([file.name for file in files])
+    data = []
+
+    for file in files:
+        extracted = BytesIO()
+        extracted.write(tar.extractfile(file).read())
+        extracted.seek(0)
+        array = numpy.load(extracted)
+        data.append(_fix_loaded_numpy(array))
+
+    return data
+
+
 def load_numpy_list(
     data: Union[str, Iterable[Union[str, numpy.ndarray, Dict[str, numpy.ndarray]]]],
-    raise_on_error: bool,
 ) -> List[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
     """
     Load numpy data into a list
 
     :param data: the data to load, one of:
         [folder path, iterable of file paths, iterable of numpy arrays]
-    :param raise_on_error: True to raise any errors encountered, False to skip
     :return: the list of loaded data items
     """
     loaded = []
 
-    if isinstance(data, str):
+    if isinstance(data, str) and os.path.isdir(data):
         data = sorted(glob.glob(data))
+    elif isinstance(data, str) and tarfile.is_tarfile(data):
+        data = load_numpy_from_tar(data)
+    elif isinstance(data, str):
+        # treat as a numpy file to load from
+        data = [load_numpy(data)]
 
     for dat in data:
-        try:
-            if isinstance(dat, str):
-                dat = load_numpy(dat)
-        except Exception as err:
-            if raise_on_error:
-                raise err
-            else:
-                _LOGGER.error("Error loading data in numpy list: {}".format(err))
+        if isinstance(dat, str):
+            dat = load_numpy(dat)
 
         loaded.append(dat)
 

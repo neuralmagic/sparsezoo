@@ -35,7 +35,10 @@ class Model(Downloadable, ModelMetadata):
     :param tags: a list of model repo tags for this model
     :param user: the model repo user who uploaded this model
     :param release_version: a model repo release version this model was released with
-    :param tag_line: the tag line for the model
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
     """
 
     @staticmethod
@@ -59,7 +62,36 @@ class Model(Downloadable, ModelMetadata):
         """
         Obtains a Model with signed files from the model repo
 
-        [TODO]
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, sparse, sparse_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
         """
         args = ModelArgs(
             domain=domain,
@@ -105,6 +137,42 @@ class Model(Downloadable, ModelMetadata):
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
     ) -> List:
+        """
+        Obtains a list of Models matching the search parameters
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, sparse, sparse_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param page: the page of values to get
+        :param page_length: the page length of values to get
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
         args = ModelArgs(
             domain=domain,
             sub_domain=sub_domain,
@@ -155,7 +223,7 @@ class Model(Downloadable, ModelMetadata):
             **kwargs,
             folder_name=kwargs["model_id"]
             if not override_folder_name
-            else kwargs["model_id"],
+            else override_folder_name,
             override_parent_path=override_parent_path,
         )
         super(Downloadable, self).__init__(**kwargs, release_version=release_version)
@@ -357,7 +425,7 @@ class Model(Downloadable, ModelMetadata):
         onnx_file = None
 
         for file in self.onnx_files:
-            if file.file_type == FileTypes.ONNX and file.display_name == "model.onnx":
+            if file.file_type_onnx and file.display_name == "model.onnx":
                 onnx_file = file
 
         return onnx_file
@@ -370,10 +438,7 @@ class Model(Downloadable, ModelMetadata):
         onnx_file = None
 
         for file in self.onnx_files:
-            if (
-                file.file_type == FileTypes.ONNX_GZ
-                and file.display_name == "model.onnx"
-            ):
+            if file.file_type_onnx_gz and file.display_name == "model.onnx":
                 onnx_file = file
 
         return onnx_file

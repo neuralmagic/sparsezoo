@@ -5,6 +5,8 @@ import pytest
 from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
 
+from tests.sparsezoo.utils import validate_model_downloaded
+
 
 @pytest.mark.parametrize(
     "model_args,other_args",
@@ -75,26 +77,6 @@ def test_model_search_downloadable(model_args, other_args):
 )
 def test_model_get_downloadable(model_args, other_args):
     model = Model.get_downloadable(**model_args, **other_args)
-    model.download()
-
-    for key, value in model_args.items():
-        assert getattr(model, key) == value
-
-    if "override_parent_path" in other_args:
-        assert other_args["override_parent_path"] in model.dir_path
-    if "override_folder_name" in other_args:
-        assert other_args["override_folder_name"] in model.dir_path
-
-    assert os.path.exists(model.dir_path)
-    assert os.path.exists(model.card_file.path)
-    assert os.path.exists(model.onnx_file.path)
-    assert os.path.exists(model.data_inputs.path)
-    assert os.path.exists(model.data_outputs.path)
-
-    for file in model.framework_files:
-        assert os.path.exists(file.path)
-
-    for recipe in model.recipes:
-        assert os.path.exists(recipe.path)
-
+    model.download(overwrite=True)
+    validate_model_downloaded(model, model_args, other_args)
     shutil.rmtree(model.dir_path)

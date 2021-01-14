@@ -42,10 +42,7 @@ class Data(File):
 
         :return: The created dataset from the sample data files
         """
-        files_dir = self.downloaded_path()
-        files_dir = files_dir.replace(".tar.gz", "")
-
-        return Dataset(self._name, files_dir)
+        return Dataset(self._name, self.downloaded_path())
 
     def loader(
         self, batch_size: int, iter_steps: int = 0, batch_as_list: bool = True

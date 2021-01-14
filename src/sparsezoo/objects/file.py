@@ -89,11 +89,12 @@ class File(BaseObject, Downloadable):
         if child_folder_name:
             folder_name = os.path.join(folder_name, child_folder_name)
 
-        super(File, self).__init__(
+        super(BaseObject, self).__init__(
             folder_name=folder_name,
             override_parent_path=override_parent_path,
             **kwargs,
         )
+        super(File, self).__init__(**kwargs)
         self._model_metadata = model_metadata
         self._file_id = file_id
         self._display_name = display_name
@@ -327,23 +328,12 @@ class File(BaseObject, Downloadable):
             os.remove(self.path)
         except:
             pass
-        try:
-            shutil.rmtree(self.path.replace(".tar.gz", ""))
-        except:
-            pass
 
         # creating target and downloading
         create_parent_dirs(self.path)
         download_file(
             self.url, self.path, overwrite=overwrite, show_progress=show_progress
         )
-
-        if self.file_type_data:
-            _LOGGER.info(f"extracting data tarfile at {self.path}")
-
-            with tarfile.open(self.path) as tar:
-                save_dir = os.path.dirname(self.path)
-                tar.extractall(save_dir)
 
     def _signed_url(self, refresh_token: bool = False,) -> str:
         response_json = download_get_request(

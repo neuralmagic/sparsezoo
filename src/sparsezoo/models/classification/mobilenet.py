@@ -19,6 +19,9 @@ def mobilenet_v1(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a mobilenet_v1 model
@@ -38,6 +41,11 @@ def mobilenet_v1(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -52,6 +60,9 @@ def mobilenet_v1(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )
 
 
@@ -63,6 +74,9 @@ def mobilenet_v2(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
+    override_folder_name: Union[str, None] = None,
+    override_parent_path: Union[str, None] = None,
+    force_token_refresh: bool = False,
 ):
     """
     Convenience function for getting a mobilenet_v2 model
@@ -82,6 +96,11 @@ def mobilenet_v2(
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
     :param optim_target: The deployment target of optimization of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param override_folder_name: Override for the name of the folder to save
+        this file under
+    :param override_parent_path: Path to override the default save path
+        for where to save the parent folder for this file under
+    :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
     return Model.get_downloadable(
@@ -96,4 +115,7 @@ def mobilenet_v2(
         optim_name=optim_name,
         optim_category=optim_category,
         optim_target=optim_target,
+        override_folder_name=override_folder_name,
+        override_parent_path=override_parent_path,
+        force_token_refresh=force_token_refresh,
     )

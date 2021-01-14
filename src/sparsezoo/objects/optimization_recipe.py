@@ -30,7 +30,6 @@ class OptimizationRecipe(File):
     :param model_metadata: the metadata for the model the file is for
     :param recipe_id: the recipe id
     :param recipe_type: the type of optimization recipe
-    :param display_name: the display name for the optimization
     :param display_description: the display description for the optimization
     """
 
@@ -39,7 +38,6 @@ class OptimizationRecipe(File):
         model_metadata: ModelMetadata,
         recipe_id: str,
         recipe_type: str,
-        display_name: str,
         display_description: str,
         **kwargs,
     ):
@@ -48,7 +46,6 @@ class OptimizationRecipe(File):
         )
         self._recipe_id = recipe_id
         self._recipe_type = recipe_type
-        self._display_name = display_name
         self._display_description = display_description
 
     @property
