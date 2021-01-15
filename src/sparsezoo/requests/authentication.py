@@ -1,3 +1,7 @@
+"""
+Requests for authenticating with the sparsezoo cloud
+"""
+
 import json
 import logging
 import os
@@ -7,7 +11,9 @@ from typing import Dict
 
 import requests
 import yaml
-from sparsezoo.utils.helpers import BASE_API_URL, clean_path, create_parent_dirs
+
+from sparsezoo.requests.base import BASE_API_URL
+from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 
 
 __all__ = ["get_auth_header"]

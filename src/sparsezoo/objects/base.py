@@ -1,37 +1,43 @@
-from typing import Dict
+"""
+Base objects for working with the sparsezoo
+"""
+
+from typing import Dict, List, Union
 
 
-__all__ = ["SparseZooObject"]
+__all__ = ["BaseObject"]
 
 
-class SparseZooObject:
+class BaseObject:
     """
-    A sparse zoo object
+    A sparse zoo base object
 
     :param created: the date created
-    :param modified: the date modifed
+    :param modified: the date modified
     """
 
-    def __init__(self, **kwargs):
-        self._created = kwargs["created"]
-        self._modified = kwargs["modified"]
+    def __init__(
+        self,
+        created: Union[str, None] = None,
+        modified: Union[str, None] = None,
+        **kwargs,
+    ):
+        self._created = created
+        self._modified = modified
 
     @property
-    def created(self) -> str:
+    def created(self) -> Union[str, None]:
         """
         :return: the date created
         """
         return self._created
 
     @property
-    def modified(self) -> str:
+    def modified(self) -> Union[str, None]:
         """
         :return: the date modifed
         """
         return self._modified
-
-    def _get_properties(self) -> str:
-        return vars(self).keys()
 
     def dict(self) -> Dict:
         """
@@ -47,15 +53,15 @@ class SparseZooObject:
 
             prop_value = getattr(self, prop)
 
-            if isinstance(prop_value, SparseZooObject) or issubclass(
-                type(prop_value), SparseZooObject
+            if isinstance(prop_value, BaseObject) or issubclass(
+                type(prop_value), BaseObject
             ):
                 prop_dict[prop] = prop_value.dict()
             elif isinstance(prop_value, list):
                 prop_dict[prop] = [
                     elem.dict()
-                    if isinstance(elem, SparseZooObject)
-                    or issubclass(type(elem), SparseZooObject)
+                    if isinstance(elem, BaseObject)
+                    or issubclass(type(elem), BaseObject)
                     else elem
                     for elem in prop_value
                 ]
@@ -63,3 +69,6 @@ class SparseZooObject:
                 prop_dict[prop] = prop_value
 
         return prop_dict
+
+    def _get_properties(self) -> List[str]:
+        return list(vars(self).keys())

@@ -1,15 +1,16 @@
 """
 Code related to a model repo results
 """
-from sparsezoo.models.sparse_zoo_object import SparseZooObject
+
+from sparsezoo.objects.base import BaseObject
 
 
 __all__ = ["Result"]
 
 
-class Result(SparseZooObject):
+class Result(BaseObject):
     """
-    A model repo result
+    A model repo metric result such as for performance, accuracy, etc
 
     :param result_id: the result id
     :param display_name: the display name for the result
@@ -21,16 +22,27 @@ class Result(SparseZooObject):
     :param recorded_format: any information of recorded format
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        result_id: str,
+        display_name: str,
+        result_type: str,
+        result_category: str,
+        model_id: str,
+        recorded_value: float,
+        recorded_units: str,
+        recorded_format: str,
+        **kwargs,
+    ):
         super(Result, self).__init__(**kwargs)
-        self._result_id = kwargs["result_id"]
-        self._display_name = kwargs["display_name"]
-        self._result_type = kwargs["result_type"]
-        self._result_category = kwargs["result_category"]
-        self._model_id = kwargs["model_id"]
-        self._recorded_value = kwargs["recorded_value"]
-        self._recorded_units = kwargs["recorded_units"]
-        self._recorded_format = kwargs["recorded_format"]
+        self._result_id = result_id
+        self._display_name = display_name
+        self._result_type = result_type
+        self._result_category = result_category
+        self._model_id = model_id
+        self._recorded_value = recorded_value
+        self._recorded_units = recorded_units
+        self._recorded_format = recorded_format
 
     @property
     def result_id(self) -> str:
