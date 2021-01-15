@@ -1,10 +1,9 @@
 import os
 import shutil
-import pytest
 
+import pytest
 from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
-
 from tests.sparsezoo.utils import validate_downloaded_model
 
 

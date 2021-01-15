@@ -3,21 +3,18 @@ Code related to files as stored for the sparsezoo as well a interacting with the
 such as downloading
 """
 
-from typing import Union
-from enum import Enum
 import logging
 import os
 import shutil
 import tarfile
+from enum import Enum
+from typing import Union
 
-from sparsezoo.utils import (
-    download_file,
-    create_parent_dirs,
-)
-from sparsezoo.requests import download_get_request
 from sparsezoo.objects.base import BaseObject
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.metadata import ModelMetadata
+from sparsezoo.requests import download_get_request
+from sparsezoo.utils import create_parent_dirs, download_file
 
 
 __all__ = ["FileTypes", "File"]
@@ -335,7 +332,10 @@ class File(BaseObject, Downloadable):
             self.url, self.path, overwrite=overwrite, show_progress=show_progress
         )
 
-    def _signed_url(self, refresh_token: bool = False,) -> str:
+    def _signed_url(
+        self,
+        refresh_token: bool = False,
+    ) -> str:
         response_json = download_get_request(
             args=self.model_metadata,
             file_name=self.display_name,

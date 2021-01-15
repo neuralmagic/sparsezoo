@@ -2,9 +2,9 @@
 Code related to a downloadable interface
 """
 
-from typing import Union
 import logging
 import os
+from typing import Union
 
 from sparsezoo.utils import CACHE_DIR, create_dirs
 

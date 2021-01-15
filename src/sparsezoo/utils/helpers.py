@@ -2,9 +2,10 @@
 Code related to helper functions for model zoo
 """
 
-from typing import Union
 import errno
 import os
+from typing import Union
+
 from tqdm import auto, tqdm, tqdm_notebook
 
 

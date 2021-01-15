@@ -2,16 +2,15 @@
 Code related to numpy array files
 """
 
-from typing import Dict, Iterable, List, Union
-from collections import OrderedDict
 import glob
-import os
 import logging
+import os
 import tarfile
+from collections import OrderedDict
 from io import BytesIO
+from typing import Dict, Iterable, List, Union
 
 import numpy
-
 from sparsezoo.utils.helpers import clean_path, create_dirs
 
 
@@ -318,7 +317,11 @@ def _tensors_export_recursive(
     if isinstance(tensors, Iterable):
         for index, tens in enumerate(tensors):
             _tensors_export_recursive(
-                tens, export_dir, name_prefix, counter + index, exported_paths,
+                tens,
+                export_dir,
+                name_prefix,
+                counter + index,
+                exported_paths,
             )
 
         return

@@ -2,13 +2,13 @@
 Code related to sample data in the sparsezoo
 """
 
-from typing import Union, List, Dict
 import logging
-import numpy
+from typing import Dict, List, Union
 
-from sparsezoo.utils import DataLoader, Dataset
+import numpy
 from sparsezoo.objects.file import File
 from sparsezoo.objects.metadata import ModelMetadata
+from sparsezoo.utils import DataLoader, Dataset
 
 
 __all__ = ["Data"]
@@ -25,7 +25,10 @@ class Data(File):
     """
 
     def __init__(
-        self, name: str, model_metadata: ModelMetadata, **kwargs,
+        self,
+        name: str,
+        model_metadata: ModelMetadata,
+        **kwargs,
     ):
         super(Data, self).__init__(model_metadata=model_metadata, **kwargs)
         self._name = name
@@ -69,9 +72,7 @@ class Data(File):
 
     def sample_batch(
         self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
-    ) -> Union[
-        List[numpy.ndarray], Dict[str, numpy.ndarray],
-    ]:
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray],]:
         """
         Get a sample batch of data from the data loader
 

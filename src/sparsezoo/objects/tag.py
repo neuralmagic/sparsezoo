@@ -15,7 +15,7 @@ class Tag(BaseObject):
     :param tag_id: the tag id
     :param display_name: the display name for tag
     :param model_id: the model id if the tag is associated with a Model
-    :param optimization_id: the optimization id if tag is associated
+    :param recipe_id: the optimization id if tag is associated
         with an OptimizationRecipe
     :param name: the name for the tag
     """
@@ -25,7 +25,7 @@ class Tag(BaseObject):
         tag_id: str,
         display_name: str,
         model_id: str,
-        optimization_id: str,
+        recipe_id: str,
         name: str,
         **kwargs,
     ):
@@ -33,7 +33,7 @@ class Tag(BaseObject):
         self._tag_id = tag_id
         self._display_name = display_name
         self._model_id = model_id
-        self._optimization_id = optimization_id
+        self._recipe_id = recipe_id
         self._name = name
 
     @property
@@ -65,8 +65,8 @@ class Tag(BaseObject):
         return self._model_id
 
     @property
-    def optimization_id(self) -> str:
+    def recipe_id(self) -> str:
         """
         :return: the optimization id if tag is associated with an OptimizationRecipe
         """
-        return self._optimization_id
+        return self._recipe_id

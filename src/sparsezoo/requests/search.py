@@ -2,12 +2,12 @@
 Code related to wrapping around API calls under api.neuralmagic.com/objects/search
 """
 
-from typing import Dict
 import logging
-import requests
+from typing import Dict
 
-from sparsezoo.requests.base import BASE_API_URL, ModelArgs
+import requests
 from sparsezoo.requests.authentication import get_auth_header
+from sparsezoo.requests.base import BASE_API_URL, ModelArgs
 
 
 __all__ = ["search_get_request", "SEARCH_PATH"]

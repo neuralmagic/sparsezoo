@@ -2,7 +2,8 @@
 Code related to base functionality for making requests
 """
 
-from typing import Union, List, Any
+from typing import Any, List, Union
+
 
 __all__ = ["BASE_API_URL", "ModelArgs"]
 

@@ -8,11 +8,11 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Dict
+
 import requests
 import yaml
-
-from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 from sparsezoo.requests.base import BASE_API_URL
+from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 
 
 __all__ = ["get_auth_header"]

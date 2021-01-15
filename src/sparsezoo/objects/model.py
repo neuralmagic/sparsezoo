@@ -2,21 +2,21 @@
 Code related to a model from the sparsezoo
 """
 
-from typing import List, Dict, Union, Any
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+from typing import Any, Dict, List, Union
 
-from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
-from sparsezoo.utils import DataLoader
-from sparsezoo.objects.downloadable import Downloadable
-from sparsezoo.objects.metadata import ModelMetadata, OptimizationId
 from sparsezoo.objects.data import Data
+from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.file import File, FileTypes
+from sparsezoo.objects.metadata import ModelMetadata, OptimizationId
 from sparsezoo.objects.optimization_recipe import OptimizationRecipe
 from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.objects.result import Result
 from sparsezoo.objects.tag import Tag
 from sparsezoo.objects.user import User
+from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
+from sparsezoo.utils import DataLoader
 
 
 __all__ = ["Model"]
@@ -109,7 +109,9 @@ class Model(Downloadable, ModelMetadata):
             release_version=release_version,
         )
         response_json = download_get_request(
-            args=args, file_name=None, force_token_refresh=force_token_refresh,
+            args=args,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
         )
 
         return Model(
@@ -514,9 +516,7 @@ class Model(Downloadable, ModelMetadata):
         show_progress: bool = True,
     ):
         """
-        Downloads a model repo file. Will fail if the file does not contain a
-        signed url. If file_type is either 'inputs', 'outputs', or 'labels',
-        downloaded tar file will be extracted
+        Downloads a model repo file.
 
         :param overwrite: True to overwrite the file if it exists, False otherwise
         :param refresh_token: refresh the auth token

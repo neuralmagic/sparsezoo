@@ -2,13 +2,12 @@
 Utilities for data loading into numpy for use in ONNX supported systems
 """
 
-from typing import Dict, List, Iterable, Iterator, Tuple, Union
-from collections import OrderedDict
 import logging
 import math
+from collections import OrderedDict
+from typing import Dict, Iterable, Iterator, List, Tuple, Union
 
 import numpy
-
 from sparsezoo.utils.numpy import NumpyArrayBatcher, load_numpy_list
 
 

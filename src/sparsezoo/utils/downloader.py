@@ -5,8 +5,8 @@ Code related to efficiently downloading multiple files with parallel workers
 import logging
 import os
 from typing import Iterator, NamedTuple, Union
-import requests
 
+import requests
 from sparsezoo.utils.helpers import clean_path, create_parent_dirs, tqdm_auto
 
 
