@@ -94,7 +94,10 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
 
 
 def download_file_iter(
-    url_path: str, dest_path: str, overwrite: bool, num_retries: int = 3,
+    url_path: str,
+    dest_path: str,
+    overwrite: bool,
+    num_retries: int = 3,
 ) -> Iterator[DownloadProgress]:
     """
     Download a file from the given url to the desired local path

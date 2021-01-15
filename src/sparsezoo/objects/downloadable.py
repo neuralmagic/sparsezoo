@@ -24,7 +24,10 @@ class Downloadable:
     """
 
     def __init__(
-        self, folder_name: str, override_parent_path: Union[str, None] = None, **kwargs,
+        self,
+        folder_name: str,
+        override_parent_path: Union[str, None] = None,
+        **kwargs,
     ):
         self._folder_name = folder_name
         self._override_parent_path = override_parent_path

@@ -332,7 +332,10 @@ class File(BaseObject, Downloadable):
             self.url, self.path, overwrite=overwrite, show_progress=show_progress
         )
 
-    def _signed_url(self, refresh_token: bool = False,) -> str:
+    def _signed_url(
+        self,
+        refresh_token: bool = False,
+    ) -> str:
         response_json = download_get_request(
             args=self.model_metadata,
             file_name=self.display_name,

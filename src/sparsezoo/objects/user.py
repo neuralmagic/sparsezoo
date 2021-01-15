@@ -19,7 +19,12 @@ class User(BaseObject):
     """
 
     def __init__(
-        self, email: str, name: str, user_id: str, trusted: bool, **kwargs,
+        self,
+        email: str,
+        name: str,
+        user_id: str,
+        trusted: bool,
+        **kwargs,
     ):
         super(User, self).__init__(**kwargs)
         self._email = email

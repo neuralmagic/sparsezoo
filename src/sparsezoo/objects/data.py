@@ -26,7 +26,10 @@ class Data(File):
     """
 
     def __init__(
-        self, name: str, model_metadata: ModelMetadata, **kwargs,
+        self,
+        name: str,
+        model_metadata: ModelMetadata,
+        **kwargs,
     ):
         super(Data, self).__init__(model_metadata=model_metadata, **kwargs)
         self._name = name
@@ -70,9 +73,7 @@ class Data(File):
 
     def sample_batch(
         self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
-    ) -> Union[
-        List[numpy.ndarray], Dict[str, numpy.ndarray],
-    ]:
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray],]:
         """
         Get a sample batch of data from the data loader
 

@@ -2,6 +2,7 @@ import os
 import shutil
 
 import pytest
+
 from sparsezoo.models.classification import mobilenet_v1
 from sparsezoo.utils import CACHE_DIR
 from tests.sparsezoo.utils import validate_downloaded_model
@@ -10,7 +11,9 @@ from tests.sparsezoo.utils import validate_downloaded_model
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "optim_name,optim_category,optim_target",
-    [(True, "pytorch", "torchvision", "imagenet", None, "base", "none", None),],
+    [
+        (True, "pytorch", "torchvision", "imagenet", None, "base", "none", None),
+    ],
 )
 def test_constructor(
     download,
