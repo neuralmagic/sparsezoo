@@ -11,6 +11,7 @@ from io import BytesIO
 from typing import Dict, Iterable, List, Union
 
 import numpy
+
 from sparsezoo.utils.helpers import clean_path, create_dirs
 
 

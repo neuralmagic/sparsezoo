@@ -7,6 +7,7 @@ import os
 from typing import Iterator, NamedTuple, Union
 
 import requests
+
 from sparsezoo.utils.helpers import clean_path, create_parent_dirs, tqdm_auto
 
 

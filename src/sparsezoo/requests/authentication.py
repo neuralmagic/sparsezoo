@@ -11,6 +11,7 @@ from typing import Dict
 
 import requests
 import yaml
+
 from sparsezoo.requests.base import BASE_API_URL
 from sparsezoo.utils.helpers import clean_path, create_parent_dirs
 

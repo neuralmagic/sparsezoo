@@ -6,6 +6,7 @@ import logging
 from typing import Dict, List, Union
 
 import numpy
+
 from sparsezoo.objects.file import File
 from sparsezoo.objects.metadata import ModelMetadata
 from sparsezoo.utils import DataLoader, Dataset

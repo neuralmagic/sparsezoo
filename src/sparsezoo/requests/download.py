@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Union
 
 import requests
+
 from sparsezoo.requests.authentication import get_auth_header
 from sparsezoo.requests.base import BASE_API_URL, ModelArgs
 

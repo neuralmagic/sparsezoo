@@ -8,6 +8,7 @@ from collections import OrderedDict
 from typing import Dict, Iterable, Iterator, List, Tuple, Union
 
 import numpy
+
 from sparsezoo.utils.numpy import NumpyArrayBatcher, load_numpy_list
 
 
