@@ -2,6 +2,7 @@ import os
 import shutil
 
 import pytest
+
 from sparsezoo import Model
 from sparsezoo.utils import CACHE_DIR
 from tests.sparsezoo.utils import validate_downloaded_model
@@ -138,9 +139,16 @@ def test_model_search_similar(model_args, other_args):
 )
 def test_model_search_optimized_versions(model_args, other_args):
     model = Model.get_downloadable(**model_args, **other_args)
-    optimized_ids = model.search_optimized_versions()
-    assert len(optimized_ids) > 0
+    optimized = model.search_optimized()
+    assert len(optimized) > 0
 
-    for id_ in optimized_ids:
-        assert id_.name
-        assert id_.category
+    for sim in optimized:
+        assert sim
+        assert sim.domain == model.domain
+        assert sim.sub_domain == model.sub_domain
+        assert sim.architecture == model.architecture
+        assert sim.sub_architecture == model.sub_architecture
+        assert sim.framework == model.framework
+        assert sim.repo == model.repo
+        assert sim.dataset == model.dataset
+        assert sim.training_scheme == model.training_scheme

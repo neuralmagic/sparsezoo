@@ -241,9 +241,7 @@ def tensor_export(
     :return: the path of the numpy file the tensor was exported to
     """
     create_dirs(export_dir)
-    export_path = os.path.join(
-        export_dir, f"{name}.{'npz' if npz else 'npy'}"
-    )
+    export_path = os.path.join(export_dir, f"{name}.{'npz' if npz else 'npy'}")
 
     if isinstance(tensor, numpy.ndarray) and npz:
         numpy.savez_compressed(export_path, tensor)
@@ -314,7 +312,11 @@ def _tensors_export_recursive(
     if isinstance(tensors, Iterable):
         for index, tens in enumerate(tensors):
             _tensors_export_recursive(
-                tens, export_dir, name_prefix, counter + index, exported_paths,
+                tens,
+                export_dir,
+                name_prefix,
+                counter + index,
+                exported_paths,
             )
 
         return
@@ -334,9 +336,7 @@ def _tensors_export_batch(
     if isinstance(tensors, numpy.ndarray):
         for index, tens in enumerate(tensors):
             exported_paths.append(
-                tensor_export(
-                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
-                )
+                tensor_export(tens, export_dir, f"{name_prefix}-{counter + index:04d}")
             )
 
         return
@@ -348,9 +348,7 @@ def _tensors_export_batch(
         for index, tens in enumerate(zip(*tensors.values())):
             tens = OrderedDict([(key, val) for key, val in zip(keys, tens)])
             exported_paths.append(
-                tensor_export(
-                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
-                )
+                tensor_export(tens, export_dir, f"{name_prefix}-{counter + index:04d}")
             )
 
         return
@@ -358,9 +356,7 @@ def _tensors_export_batch(
     if isinstance(tensors, Iterable):
         for index, tens in enumerate(zip(*tensors)):
             exported_paths.append(
-                tensor_export(
-                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
-                )
+                tensor_export(tens, export_dir, f"{name_prefix}-{counter + index:04d}")
             )
 
         return
