@@ -7,6 +7,7 @@ from typing import Union
 
 from sparsezoo.objects import Model
 
+
 __all__ = ["efficientnet_b0", "efficientnet_b4"]
 
 
@@ -21,7 +22,7 @@ def efficientnet_b0(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting an efficientnet b0 model
 
@@ -76,7 +77,7 @@ def efficientnet_b4(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting an efficientnet b0 model
 

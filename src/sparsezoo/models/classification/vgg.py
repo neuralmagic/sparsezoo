@@ -31,7 +31,7 @@ def vgg_11(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a vgg 11 model
 
@@ -86,7 +86,7 @@ def vgg_11bn(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a batch normalized vgg 11 model
 
@@ -141,7 +141,7 @@ def vgg_13(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a vgg 13 model
 
@@ -196,7 +196,7 @@ def vgg_13bn(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a batch normalized vgg 13 model
 
@@ -251,7 +251,7 @@ def vgg_16(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a vgg 16 model
 
@@ -306,7 +306,7 @@ def vgg_16bn(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a batch normalized vgg 16 model
 
@@ -361,7 +361,7 @@ def vgg_19(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a vgg 19 model
 
@@ -416,7 +416,7 @@ def vgg_19bn(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a batch normalized vgg 19 model
 

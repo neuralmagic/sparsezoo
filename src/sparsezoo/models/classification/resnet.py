@@ -30,7 +30,7 @@ def resnet_18(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 18 model
 
@@ -85,7 +85,7 @@ def resnet_34(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 34 model
 
@@ -140,7 +140,7 @@ def resnet_50(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 50 model
 
@@ -195,7 +195,7 @@ def resnet_50_2x(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 50 2x width model
 
@@ -250,7 +250,7 @@ def resnet_101(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 101 model
 
@@ -305,7 +305,7 @@ def resnet_101_2x(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 101 2x width model
 
@@ -360,7 +360,7 @@ def resnet_152(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a resnet 152 model
 

@@ -8,6 +8,7 @@ from typing import Union
 
 from sparsezoo.objects import Model
 
+
 __all__ = ["mobilenet_v1", "mobilenet_v2"]
 
 
@@ -22,7 +23,7 @@ def mobilenet_v1(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a mobilenet_v1 model
 
@@ -77,7 +78,7 @@ def mobilenet_v2(
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Model:
     """
     Convenience function for getting a mobilenet_v2 model
 

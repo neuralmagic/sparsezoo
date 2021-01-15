@@ -7,6 +7,7 @@ from typing import Union
 
 from sparsezoo.objects import Model
 
+
 __all__ = ["ssd_resnet50_300"]
 
 
@@ -18,7 +19,7 @@ def ssd_resnet50_300(
     optim_name: str = "base",
     optim_category: str = "none",
     optim_target: Union[str, None] = None,
-):
+) -> Model:
     """
     Convenience function for getting an ssd resnet50 300 model
 
