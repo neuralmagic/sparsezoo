@@ -251,12 +251,10 @@ def parse_args():
 
     subparsers = parser.add_subparsers(dest="command")
     download_parser = subparsers.add_parser(
-        DOWNLOAD_COMMAND,
-        description="Download a specific model from the repo.",
+        DOWNLOAD_COMMAND, description="Download a specific model from the repo.",
     )
     search_parser = subparsers.add_parser(
-        SEARCH_COMMAND,
-        description="Search for objects from the repo.",
+        SEARCH_COMMAND, description="Search for objects from the repo.",
     )
     add_model_arguments(download_parser, download_required=True)
     add_model_arguments(search_parser)
