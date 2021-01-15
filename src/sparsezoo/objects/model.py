@@ -6,6 +6,8 @@ import logging
 from collections import OrderedDict
 from typing import Any, Dict, List, Union
 
+import numpy
+
 from sparsezoo.objects.data import Data
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.file import File, FileTypes
@@ -109,9 +111,7 @@ class Model(Downloadable, ModelMetadata):
             release_version=release_version,
         )
         response_json = download_get_request(
-            args=args,
-            file_name=None,
-            force_token_refresh=force_token_refresh,
+            args=args, file_name=None, force_token_refresh=force_token_refresh,
         )
 
         return Model(
@@ -478,7 +478,7 @@ class Model(Downloadable, ModelMetadata):
         return self._user
 
     def data_loader(
-        self, batch_size: int, iter_steps: int = 0, batch_as_list: bool = True
+        self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
     ) -> DataLoader:
         """
         Create a  data loader containing all of the available data for this model
@@ -508,6 +508,24 @@ class Model(Downloadable, ModelMetadata):
             iter_steps=iter_steps,
             batch_as_list=batch_as_list,
         )
+
+    def sample_batch(
+        self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
+    ) -> Union[
+        List[numpy.ndarray], Dict[str, numpy.ndarray],
+    ]:
+        """
+        Get a sample batch of data from the data loader
+
+        :param batch_index: the index of the batch to get
+        :param batch_size: the size of the batches to create the loader for
+        :param batch_as_list: True to return multiple inputs/outputs/etc
+            within the dataset as lists, False for an ordereddict
+        :return: The sample batch for use with the model
+        """
+        loader = self.data_loader(batch_size=batch_size, batch_as_list=batch_as_list)
+
+        return loader.get_batch(bath_index=batch_index)
 
     def download(
         self,
