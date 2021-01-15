@@ -1,9 +1,10 @@
+from typing import List
 import os
 
 from sparsezoo.objects import Model
 
 
-def validate_model_downloaded(
+def validate_downloaded_model(
     model: Model, check_model_args=None, check_other_args=None
 ):
     if check_model_args:
@@ -32,8 +33,13 @@ def validate_model_downloaded(
     assert os.path.exists(model.data_outputs.path)
 
     num_batches = 0
-    for batch in model.loader(batch_size=16, iter_steps=5):
+    for batch in model.data_loader(batch_size=16, iter_steps=5):
         assert "inputs" in batch
         assert "outputs" in batch
         num_batches += 1
     assert num_batches == 5
+
+    for data_name, data in model.data.items():
+        batch = data.sample_batch()
+        assert batch
+        assert isinstance(batch, List)
