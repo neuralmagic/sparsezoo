@@ -3,6 +3,7 @@ Code related to a model from the sparsezoo
 """
 
 from typing import List, Dict, Union, Any
+from collections import OrderedDict
 import logging
 
 from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
@@ -258,50 +259,39 @@ class Model(Downloadable, ModelMetadata):
             else []
         )
 
-        self._data_inputs = (
-            Data(
+        self._data = OrderedDict()
+        if sorted_files[FileTypes.DATA_INPUTS.value]:
+            self._data["inputs"] = Data(
                 name="inputs",
                 model_metadata=metadata,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
                 **sorted_files[FileTypes.DATA_INPUTS.value][0],
             )
-            if sorted_files[FileTypes.DATA_INPUTS.value]
-            else None
-        )
-        self._data_outputs = (
-            Data(
+        if sorted_files[FileTypes.DATA_OUTPUTS.value]:
+            self._data["outputs"] = Data(
                 name="outputs",
                 model_metadata=metadata,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
                 **sorted_files[FileTypes.DATA_OUTPUTS.value][0],
             )
-            if sorted_files[FileTypes.DATA_OUTPUTS.value]
-            else None
-        )
-        self._data_labels = (
-            Data(
+        if sorted_files[FileTypes.DATA_LABELS.value]:
+            self._data["labels"] = Data(
                 name="labels",
                 model_metadata=metadata,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
                 **sorted_files[FileTypes.DATA_LABELS.value][0],
             )
-            if sorted_files[FileTypes.DATA_LABELS.value]
-            else None
-        )
-        self._data_originals = (
-            Data(
+        if sorted_files[FileTypes.DATA_ORIGINALS.value]:
+            self._data["originals"] = Data(
                 name="originals",
                 model_metadata=metadata,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
                 **sorted_files[FileTypes.DATA_ORIGINALS.value][0],
             )
-            if sorted_files[FileTypes.DATA_ORIGINALS.value]
-            else None
-        )
 
         self._framework_files = [
             File(
@@ -379,21 +369,21 @@ class Model(Downloadable, ModelMetadata):
         """
         :return: sample numpy data for inputs into the model
         """
-        return self._data_inputs
+        return self._data["inputs"] if "inputs" in self._data else None
 
     @property
     def data_outputs(self) -> Union[None, Data]:
         """
         :return: sample numpy data recorded as outputs from the model for a given input
         """
-        return self._data_outputs
+        return self._data["outputs"] if "outputs" in self._data else None
 
     @property
     def data_labels(self) -> Union[None, Data]:
         """
         :return: sample numpy data for labels for a given input
         """
-        return self._data_labels
+        return self._data["labels"] if "labels" in self._data else None
 
     @property
     def data_originals(self) -> Union[None, Data]:
@@ -401,7 +391,14 @@ class Model(Downloadable, ModelMetadata):
         :return: sample numpy data as originals before any pre processing is applied
             to the data to create the inputs for the model
         """
-        return self._data_originals
+        return self._data["originals"] if "originals" in self._data else None
+
+    @property
+    def data(self) -> Dict[str, Data]:
+        """
+        :return: A dictionary containing all of the Data objects for this model
+        """
+        return self._data
 
     @property
     def framework_files(self) -> List[File]:
@@ -478,22 +475,25 @@ class Model(Downloadable, ModelMetadata):
         """
         return self._user
 
-    def loader(
+    def data_loader(
         self, batch_size: int, iter_steps: int = 0, batch_as_list: bool = True
     ) -> DataLoader:
+        """
+        Create a  data loader containing all of the available data for this model
+
+        :param batch_size: the size of batches to create for the iterator
+        :param iter_steps: the number of steps (batches) to create.
+            Set to -1 for infinite, 0 for running through the loaded data once,
+            or a positive integer for the desired number of steps
+        :param batch_as_list: True to create the items from each dataset
+            as a list, False for an ordereddict
+        :return: The created data loader
+        """
+        data = self.data
         datasets = []
 
-        if self.data_inputs:
-            datasets.append(self.data_inputs.dataset())
-
-        if self.data_outputs:
-            datasets.append(self.data_outputs.dataset())
-
-        if self.data_labels:
-            datasets.append(self.data_labels.dataset())
-
-        if self.data_originals:
-            datasets.append(self.data_originals.dataset())
+        for _, dat in data.items():
+            datasets.append(dat.dataset())
 
         if len(datasets) < 1:
             raise FileNotFoundError(
@@ -525,6 +525,7 @@ class Model(Downloadable, ModelMetadata):
         _LOGGER.info(f"Downloading model {self.model_url_path}")
 
         if self.card_file:
+            _LOGGER.info(f"Downloading model card {self.model_url_path}")
             self.card_file.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -532,6 +533,7 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file:
+            _LOGGER.info(f"Downloading model onnx {self.model_url_path}")
             self.onnx_file.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -539,6 +541,7 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file_gz:
+            _LOGGER.info(f"Downloading model onnx gz {self.model_url_path}")
             self.onnx_file_gz.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -546,26 +549,28 @@ class Model(Downloadable, ModelMetadata):
             )
 
         for file in self._framework_files:
+            _LOGGER.info(
+                f"Downloading model framework file "
+                f"{file.display_name} {self.model_url_path}"
+            )
             file.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
                 show_progress=show_progress,
             )
 
-        for data in [
-            self._data_inputs,
-            self._data_outputs,
-            self.data_labels,
-            self.data_originals,
-        ]:
-            if data:
-                data.download(
-                    overwrite=overwrite,
-                    refresh_token=refresh_token,
-                    show_progress=show_progress,
-                )
+        for data in self._data.values():
+            _LOGGER.info(f"Downloading model data {data.name} {self.model_url_path}")
+            data.download(
+                overwrite=overwrite,
+                refresh_token=refresh_token,
+                show_progress=show_progress,
+            )
 
         for recipe in self._recipes:
+            _LOGGER.info(
+                f"Downloading model recipe {recipe.display_name} {self.model_url_path}"
+            )
             recipe.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
