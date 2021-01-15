@@ -68,9 +68,7 @@ def save_numpy(
     :return: the saved path
     """
     create_dirs(export_dir)
-    export_path = os.path.join(
-        export_dir, "{}.{}".format(name, "npz" if npz else "npy")
-    )
+    export_path = os.path.join(export_dir, f"{name}.{'npz' if npz else 'npy'}")
 
     if isinstance(array, numpy.ndarray) and npz:
         numpy.savez_compressed(export_path, array)
@@ -85,7 +83,7 @@ def save_numpy(
     elif isinstance(array, Iterable):
         raise ValueError("Iterable can only be exported to an npz file")
     else:
-        raise ValueError("Unrecognized type given for array {}".format(array))
+        raise ValueError(f"Unrecognized type given for array {array}")
 
     return export_path
 
@@ -181,10 +179,9 @@ class NumpyArrayBatcher(object):
             if item.shape != self._items[NDARRAY_KEY][0].shape:
                 raise ValueError(
                     (
-                        "item of numpy ndarray of shape {} does not "
-                        "match the current batch shape of {}".format(
-                            item.shape, self._items[NDARRAY_KEY][0].shape
-                        )
+                        f"item of numpy ndarray of shape {item.shape} does not "
+                        f"match the current batch shape of "
+                        f"{self._items[NDARRAY_KEY][0].shape}"
                     )
                 )
 
@@ -195,19 +192,18 @@ class NumpyArrayBatcher(object):
             if len(diff_keys) > 0:
                 raise ValueError(
                     (
-                        "numpy dict passed for item, not all keys match "
-                        "with the prev_batch. difference: {}"
-                    ).format(diff_keys)
+                        f"numpy dict passed for item, not all keys match "
+                        f"with the prev_batch. difference: {diff_keys}"
+                    )
                 )
 
             for key, val in item.items():
                 if val.shape != self._items[key][0].shape:
                     raise ValueError(
                         (
-                            "item with key {} of shape {} does not "
-                            "match the current batch shape of {}".format(
-                                key, val.shape, self._items[key][0].shape
-                            )
+                            f"item with key {key} of shape {val.shape} does not "
+                            f"match the current batch shape of "
+                            f"{self._items[key][0].shape}"
                         )
                     )
 
@@ -246,7 +242,7 @@ def tensor_export(
     """
     create_dirs(export_dir)
     export_path = os.path.join(
-        export_dir, "{}.{}".format(name, "npz" if npz else "npy")
+        export_dir, f"{name}.{'npz' if npz else 'npy'}"
     )
 
     if isinstance(tensor, numpy.ndarray) and npz:
@@ -262,7 +258,7 @@ def tensor_export(
     elif isinstance(tensor, Iterable):
         raise ValueError("tensor iterables can only be saved as npz")
     else:
-        raise ValueError("unknown type give for tensor {}".format(tensor))
+        raise ValueError(f"unknown type give for tensor {tensor}")
 
     return export_path
 
@@ -307,7 +303,7 @@ def _tensors_export_recursive(
 ):
     if isinstance(tensors, numpy.ndarray):
         exported_paths.append(
-            tensor_export(tensors, export_dir, "{}-{:04d}".format(name_prefix, counter))
+            tensor_export(tensors, export_dir, f"{name_prefix}-{counter:04d}")
         )
 
         return
@@ -318,17 +314,13 @@ def _tensors_export_recursive(
     if isinstance(tensors, Iterable):
         for index, tens in enumerate(tensors):
             _tensors_export_recursive(
-                tens,
-                export_dir,
-                name_prefix,
-                counter + index,
-                exported_paths,
+                tens, export_dir, name_prefix, counter + index, exported_paths,
             )
 
         return
 
     raise ValueError(
-        "unrecognized type for tensors given of {}".format(tensors.__class__.__name__)
+        f"unrecognized type for tensors given of {tensors.__class__.__name__}"
     )
 
 
@@ -343,7 +335,7 @@ def _tensors_export_batch(
         for index, tens in enumerate(tensors):
             exported_paths.append(
                 tensor_export(
-                    tens, export_dir, "{}-{:04d}".format(name_prefix, counter + index)
+                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
                 )
             )
 
@@ -357,7 +349,7 @@ def _tensors_export_batch(
             tens = OrderedDict([(key, val) for key, val in zip(keys, tens)])
             exported_paths.append(
                 tensor_export(
-                    tens, export_dir, "{}-{:04d}".format(name_prefix, counter + index)
+                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
                 )
             )
 
@@ -367,12 +359,12 @@ def _tensors_export_batch(
         for index, tens in enumerate(zip(*tensors)):
             exported_paths.append(
                 tensor_export(
-                    tens, export_dir, "{}-{:04d}".format(name_prefix, counter + index)
+                    tens, export_dir, f"{name_prefix}-{counter + index:04d}"
                 )
             )
 
         return
 
     raise ValueError(
-        "unrecognized type for tensors given of {}".format(tensors.__class__.__name__)
+        f"unrecognized type for tensors given of {tensors.__class__.__name__}"
     )

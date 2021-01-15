@@ -104,7 +104,7 @@ class RandomDataset(Dataset):
                 else:
                     raise RuntimeError(
                         "Cannot create random input for"
-                        " {} with unsupported type {}".format(key, dtype)
+                        f" {key} with unsupported type {dtype}"
                     )
 
                 item[key] = array
@@ -154,14 +154,13 @@ class DataLoader(Iterable):
             num_dataset_items = len(dataset)
 
             if num_dataset_items < 1:
-                raise ValueError("No data in dataset: {}".format(dataset.name))
+                raise ValueError(f"No data in dataset: {dataset.name}")
 
             if self._num_items != -1 and num_dataset_items != self._num_items:
                 raise ValueError(
-                    (
-                        "Dataset {} with length {} does not match "
-                        "the other datasets of length {}"
-                    ).format(dataset.name, num_dataset_items, self._num_items)
+                    f"Dataset {dataset.name} with length "
+                    f"{num_dataset_items} does not match "
+                    f"the other datasets of length {self._num_items}"
                 )
 
             self._num_items = num_dataset_items
@@ -283,7 +282,7 @@ class DataLoader(Iterable):
             Dict[str, numpy.ndarray],
         ],
     ]:
-        _LOGGER.debug("creating batch at data start index {}".format(start_index))
+        _LOGGER.debug(f"creating batch at data start index {start_index}")
         dataset_batchers = [
             (dataset, NumpyArrayBatcher()) for key, dataset in self._datasets.items()
         ]
@@ -297,16 +296,14 @@ class DataLoader(Iterable):
 
         while len(dataset_batchers[0][1]) < self._batch_size:
             try:
-                _LOGGER.debug("including data in batch at index {}".format(index))
+                _LOGGER.debug(f"including data in batch at index {index}")
 
                 for dataset, batcher in dataset_batchers:
                     batcher.append(dataset[index])
             except Exception as err:
                 raise RuntimeError(
-                    (
-                        "DataLoader: Error while adding data "
-                        "to batch for index {}: {}"
-                    ).format(index, err)
+                    f"DataLoader: Error while adding data "
+                    f"to batch for index {index}: {err}"
                 )
 
             index += 1

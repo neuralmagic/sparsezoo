@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Union
 from sparsezoo.objects.data import Data
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.file import File, FileTypes
-from sparsezoo.objects.metadata import ModelMetadata, OptimizationId
+from sparsezoo.objects.metadata import ModelMetadata
 from sparsezoo.objects.optimization_recipe import OptimizationRecipe
 from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.objects.result import Result
@@ -643,13 +643,13 @@ class Model(Downloadable, ModelMetadata):
             optim_target=self.optim_target if match_optim_target else None,
         )
 
-    def search_optimized_versions(
+    def search_optimized(
         self,
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
-    ) -> List[OptimizationId]:
+    ) -> List:
         """
         Search for different available optimized versions based off of the current model
 
@@ -665,9 +665,9 @@ class Model(Downloadable, ModelMetadata):
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :return: the list of matching optimization ids, if any
+        :return: the list of matching optimized models, if any
         """
-        matched = self.search_similar(
+        return self.search_similar(
             match_domain=True,
             match_sub_domain=True,
             match_architecture=True,
@@ -677,13 +677,3 @@ class Model(Downloadable, ModelMetadata):
             match_dataset=match_dataset,
             match_training_scheme=match_training_scheme,
         )
-        ids = []
-
-        for match in matched:
-            ids.append(
-                OptimizationId(
-                    match.optim_name, match.optim_category, match.optim_target
-                )
-            )
-
-        return ids

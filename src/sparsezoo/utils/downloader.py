@@ -43,17 +43,17 @@ DownloadProgress = NamedTuple(
 
 
 def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
-    _LOGGER.debug("downloading file from {} to {}".format(url_path, dest_path))
+    _LOGGER.debug(f"downloading file from {url_path} to {dest_path}")
 
     if os.path.exists(dest_path):
-        _LOGGER.debug("removing file for download at {}".format(dest_path))
+        _LOGGER.debug(f"removing file for download at {dest_path}")
 
         try:
             os.remove(dest_path)
         except OSError as err:
             _LOGGER.warning(
                 "error encountered when removing older "
-                "cache_file at {}: {}".format(dest_path, err)
+                f"cache_file at {dest_path}: {err}"
             )
 
     request = requests.get(url_path, stream=True)
@@ -63,7 +63,7 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
     try:
         content_length = int(content_length)
     except Exception:
-        _LOGGER.debug("could not get content length for file at {}".format(url_path))
+        _LOGGER.debug(f"could not get content length for file at {url_path}")
         content_length = None
 
     try:
@@ -85,7 +85,7 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
                 )
     except Exception as err:
         _LOGGER.error(
-            "error downloading file from {} to {}: {}".format(url_path, dest_path, err)
+            f"error downloading file from {url_path} to {dest_path}: {err}"
         )
 
         try:
@@ -96,10 +96,7 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
 
 
 def download_file_iter(
-    url_path: str,
-    dest_path: str,
-    overwrite: bool,
-    num_retries: int = 3,
+    url_path: str, dest_path: str, overwrite: bool, num_retries: int = 3,
 ) -> Iterator[DownloadProgress]:
     """
     Download a file from the given url to the desired local path
@@ -121,23 +118,21 @@ def download_file_iter(
         raise PreviouslyDownloadedError()
 
     if os.path.exists(dest_path):
-        _LOGGER.debug("removing previously downloaded file at {}".format(dest_path))
+        _LOGGER.debug(f"removing previously downloaded file at {dest_path}")
 
         try:
             os.remove(dest_path)
         except OSError as err:
             _LOGGER.warning(
                 "error encountered when removing older "
-                "cache_file at {}: {}".format(dest_path, err)
+                f"cache_file at {dest_path}: {err}"
             )
 
     retry_err = None
 
     for retry in range(num_retries + 1):
         _LOGGER.debug(
-            "downloading attempt {} for file from {} to {}".format(
-                retry, url_path, dest_path
-            )
+            f"downloading attempt {retry} for file from {url_path} to {dest_path}"
         )
 
         try:
@@ -148,7 +143,7 @@ def download_file_iter(
             raise err
         except Exception as err:
             _LOGGER.error(
-                "error while downloading file from {} to {}".format(url_path, dest_path)
+                f"error while downloading file from {url_path} to {dest_path}"
             )
             retry_err = err
 
