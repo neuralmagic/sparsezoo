@@ -2,6 +2,7 @@ import os
 import shutil
 
 import pytest
+
 from sparsezoo.models.classification import mobilenet_v1
 from sparsezoo.utils import CACHE_DIR
 from tests.sparsezoo.utils import validate_downloaded_model

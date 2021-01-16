@@ -51,7 +51,7 @@ class Data(File):
         return Dataset(self._name, self.downloaded_path())
 
     def loader(
-        self, batch_size: int, iter_steps: int = 0, batch_as_list: bool = True
+        self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
     ) -> DataLoader:
         """
         A dataloader for interfacing with the sample data in a batched format.
