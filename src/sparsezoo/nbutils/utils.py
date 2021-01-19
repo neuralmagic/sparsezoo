@@ -2,19 +2,13 @@
 Code related to model repo selection display in a jupyter notebook using ipywidgets
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import ipywidgets as widgets
 from sparsezoo.objects import Model
 
 
 __all__ = ["ModelSelectWidgetContainer", "SelectDomainWidgetContainer"]
-
-_domains = ["cv"]
-_sub_domains = {
-    "cv": ["classification"],
-}
-
 
 def format_html(
     message: str, header: str = None, color: str = None, italic: bool = False
@@ -41,18 +35,29 @@ def format_html(
 
 
 class SelectDomainWidgetContainer(object):
-    def __init__(self):
-        self._domains_dropdown = widgets.Dropdown(options=_domains, value=_domains[0])
+    """
+    Widget used in model repo notebooks for selecting domain and subdomain to search within
+
+    :param domains: list of domains to look through
+    :param sub_domain: a map of sub domains for each domain
+    """
+    def __init__(self, domains: List[str]=["cv"], sub_domains: Dict[str, List[str]]={
+    "cv": ["classification"],
+}):
+        self._domains_dropdown = widgets.Dropdown(options=domains, value=domains[0])
         self._sub_domains_dropdown = widgets.Dropdown(
-            options=_sub_domains[_domains[0]], value=_sub_domains[_domains[0]][0]
+            options=sub_domains[domains[0]], value=sub_domains[domains[0]][0]
         )
+        self._domains = domains
+        self._sub_domains = sub_domains
 
     def create(self):
         def _domain_selector(change):
             domain = change["new"]
-            self._sub_domains_dropdown.options = _sub_domains[domain]
-            if self._sub_domains_dropdown.value not in _sub_domains[domain]:
-                self._sub_domains_dropdown.value = _sub_domains[domain][0]
+            sub_domains = self._sub_domains[domain] if domain in self._sub_domains else []
+            self._sub_domains_dropdown.options = sub_domains
+            if self._sub_domains_dropdown.value not in sub_domains:
+                self._sub_domains_dropdown.value = sub_domains[0] if len(sub_domains) > 0 else None
 
         self._domains_dropdown.observe(_domain_selector, names="value")
         self.container = widgets.VBox(
@@ -301,7 +306,7 @@ class _FilterWidget(object):
 
 class ModelSelectWidgetContainer(object):
     """
-    Widget used in model repo notebooks for selecting a model for download
+    Widget used in model download notebooks for selecting a model for download
 
     :param filter_frameworks: if provided, will force all models
         to be one of these frameworks
