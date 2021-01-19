@@ -96,8 +96,8 @@ class Zoo:
         force_token_refresh: bool = False,
     ) -> Model:
         """
-        :param stub: the SparseZoo stub path to the model, can be a string path or ModelArgs
-            object
+        :param stub: the SparseZoo stub path to the model, can be a string path or
+            ModelArgs object
         :param override_folder_name: Override for the name of the folder to save
             this file under
         :param override_parent_path: Path to override the default save path

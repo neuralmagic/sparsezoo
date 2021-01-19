@@ -17,7 +17,6 @@ from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.objects.result import Result
 from sparsezoo.objects.tag import Tag
 from sparsezoo.objects.user import User
-from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
 from sparsezoo.utils import DataLoader
 
 

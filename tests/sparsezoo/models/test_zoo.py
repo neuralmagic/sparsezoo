@@ -59,7 +59,10 @@ def test_load_model(model_args, other_args):
     "stub, model_args, other_args",
     [
         [
-            "cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/sparse-conservative",
+            (
+                "cv/classification/mobilenet_v1-1.0/pytorch/"
+                "sparseml/imagenet/sparse-conservative"
+            ),
             {
                 "domain": "cv",
                 "sub_domain": "classification",

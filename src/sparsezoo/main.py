@@ -156,7 +156,7 @@ sparsezoo download --domain cv --sub-domain classification --architecture mobile
 import argparse
 import logging
 
-from sparsezoo import Zoo
+from sparsezoo.models import Zoo
 from sparsezoo.objects import Model
 
 
@@ -341,11 +341,15 @@ def search(args):
         optim_category=args.optim_category,
         optim_target=args.optim_target,
         release_version=args.release_version,
+        page=args.page,
+        page_length=args.page_length,
     )
 
     print("Search results")
     print("====================")
-    print(f"Showing page {args.page} with {args.page_length} results per page")
+    result_start = (args.page - 1) * args.page_length + 1
+    result_end = (args.page) * args.page_length
+    print(f"Showing results {result_start} - {result_end}")
     print("")
 
     for index, model in enumerate(models):
