@@ -45,7 +45,7 @@ def _setup_long_description() -> Tuple[str, str]:
 setup(
     name="sparsezoo",
     version="0.1.0",
-    author="Mark Kurtz, Kevin Rodriguez",
+    author="Mark Kurtz, Kevin Rodriguez, Benjamin Fineran, Michael Goin",
     author_email="support@neuralmagic.com",
     description="SparseZoo is a constantly-growing repository of optimized models. "
     "It simplifies and accelerates your time-to-value in building "
