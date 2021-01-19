@@ -6,7 +6,6 @@ _deps = [
     "onnx>=1.0.0,<1.8",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
-    "tabulate>=0.8.7",
     "tqdm>=4.0.0",
 ]
 

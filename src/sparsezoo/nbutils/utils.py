@@ -5,7 +5,6 @@ Code related to model repo selection display in a jupyter notebook using ipywidg
 from typing import List, Tuple
 
 import ipywidgets as widgets
-
 from sparsezoo.objects import Model
 
 

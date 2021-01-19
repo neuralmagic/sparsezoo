@@ -157,7 +157,6 @@ import argparse
 import logging
 
 from sparsezoo.objects import Model
-from tabulate import tabulate
 
 
 __all__ = ["main"]
@@ -294,7 +293,7 @@ def parse_args():
 
 
 def _get_command_from_model(model: Model):
-    download_command = "sparsezoo download \\ \n"
+    download_command = "sparsezoo download "
 
     fields = [
         "domain",
@@ -315,12 +314,15 @@ def _get_command_from_model(model: Model):
         for field in fields
         if hasattr(model, field) and getattr(model, field) is not None
     ]
-    return download_command + " \\ \n".join(
-        [
-            " ".join(command_strings[i : i + 2])
-            for i in range(0, len(command_strings), 2)
-        ]
+
+    command_string = download_command + " ".join(
+        # [
+        #     " \\ \n ".join(command_strings[i : i + 2])
+        #     for i in range(0, len(command_strings), 2)
+        # ]
+        command_strings
     )
+    return command_string
 
 
 def search(args):
@@ -340,21 +342,28 @@ def search(args):
         release_version=args.release_version,
     )
 
-    data = [
-        [
-            model.display_name,
-            ", ".join([tag.display_name for tag in model.tags]),
-            _get_command_from_model(model),
-        ]
-        for model in models
-    ]
     print("Search results")
     print("====================")
     print(f"Showing page {args.page} with {args.page_length} results per page")
     print("")
 
-    tabulated_data = tabulate(data, headers=["Model Name", "Tags", "Download Command"])
-    print(tabulated_data)
+    for index, model in enumerate(models):
+        result_index = (index + 1) + (args.page_length * (args.page - 1))
+        header = f"{result_index}) {model.display_name}"
+        print(header)
+        print("-------------------------")
+        print(f"Model Description: {model.display_description}")
+        print("")
+        print(f"Framework: {model.framework}")
+        print("")
+        print(f"Repository: {model.repo}")
+        print("")
+        tag_string = ", ".join([tag.display_name for tag in model.tags])
+        print(f"Tags: {tag_string}")
+        print("")
+        print(f"Download Command: {_get_command_from_model(model)}")
+        print("")
+        print("")
 
 
 def main():
