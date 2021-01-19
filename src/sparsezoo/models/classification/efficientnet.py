@@ -5,8 +5,8 @@ EfficientNet models:
 
 from typing import Union
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects import Model
-from sparsezoo.zoo import load_model
 
 
 __all__ = ["efficientnet_b0", "efficientnet_b4"]
@@ -49,7 +49,7 @@ def efficientnet_b0(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="efficientnet",
@@ -104,7 +104,7 @@ def efficientnet_b4(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="efficientnet",

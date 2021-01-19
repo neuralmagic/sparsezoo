@@ -3,14 +3,8 @@ import shutil
 
 import pytest
 
+from sparsezoo import Zoo
 from sparsezoo.utils import CACHE_DIR
-from sparsezoo.zoo import (
-    load_model,
-    load_model_from_path,
-    search_models,
-    search_optimized_models,
-    search_similar_models,
-)
 from tests.sparsezoo.utils import validate_downloaded_model
 
 
@@ -55,14 +49,14 @@ from tests.sparsezoo.utils import validate_downloaded_model
     ],
 )
 def test_load_model(model_args, other_args):
-    model = load_model(**model_args, **other_args)
+    model = Zoo.load_model(**model_args, **other_args)
     model.download(overwrite=True)
     validate_downloaded_model(model, model_args, other_args)
     shutil.rmtree(model.dir_path)
 
 
 @pytest.mark.parametrize(
-    "path, model_args, other_args",
+    "stub, model_args, other_args",
     [
         [
             "cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/sparse-conservative",
@@ -83,8 +77,8 @@ def test_load_model(model_args, other_args):
         ]
     ],
 )
-def test_load_model_from_path(path, model_args, other_args):
-    model = load_model_from_path(path, **other_args)
+def test_load_model_from_stub(stub, model_args, other_args):
+    model = Zoo.load_model_from_stub(stub, **other_args)
     model.download(overwrite=True)
     for key in model_args:
         if key and hasattr(model, key):
@@ -109,7 +103,7 @@ def test_load_model_from_path(path, model_args, other_args):
     ],
 )
 def test_search_models(model_args, other_args):
-    models = search_models(**model_args, **other_args)
+    models = Zoo.search_models(**model_args, **other_args)
 
     for model in models:
         for key, value in model_args.items():
@@ -141,8 +135,8 @@ def test_search_models(model_args, other_args):
     ],
 )
 def test_search_similar_models(model_args, other_args):
-    model = load_model(**model_args, **other_args)
-    similar = search_optimized_models(model)
+    model = Zoo.load_model(**model_args, **other_args)
+    similar = Zoo.search_optimized_models(model)
     assert len(similar) > 0
 
     for sim in similar:
@@ -175,8 +169,8 @@ def test_search_similar_models(model_args, other_args):
     ],
 )
 def test_search_optimized_models(model_args, other_args):
-    model = load_model(**model_args, **other_args)
-    optimized = search_optimized_models(model)
+    model = Zoo.load_model(**model_args, **other_args)
+    optimized = Zoo.search_optimized_models(model)
     assert len(optimized) > 0
 
     for sim in optimized:

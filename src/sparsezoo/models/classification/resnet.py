@@ -5,8 +5,8 @@ ResNet models:
 
 from typing import Union
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects import Model
-from sparsezoo.zoo import load_model
 
 
 __all__ = [
@@ -57,7 +57,7 @@ def resnet_18(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -112,7 +112,7 @@ def resnet_34(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -167,7 +167,7 @@ def resnet_50(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -222,7 +222,7 @@ def resnet_50_2x(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -277,7 +277,7 @@ def resnet_101(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -332,7 +332,7 @@ def resnet_101_2x(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
@@ -387,7 +387,7 @@ def resnet_152(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return load_model(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="resnet_v1",
