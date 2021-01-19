@@ -204,6 +204,34 @@ class Model(Downloadable, ModelMetadata):
         return self._recipes
 
     @property
+    def original_recipe(self) -> Union[None, OptimizationRecipe]:
+        """
+        :return: the original optimization recipe used to create the model
+        """
+        original = None
+
+        for recipe in self.recipes:
+            if recipe.recipe_type_original:
+                original = recipe
+                break
+
+        return original
+
+    @property
+    def transfer_learning_recipe(self) -> Union[None, OptimizationRecipe]:
+        """
+        :return: the optimization recipe to use for transfer learning from the model
+        """
+        transfer_learning = None
+
+        for recipe in self.recipes:
+            if recipe.recipe_type_transfer_learn:
+                transfer_learning = recipe
+                break
+
+        return transfer_learning
+
+    @property
     def data_inputs(self) -> Union[None, Data]:
         """
         :return: sample numpy data for inputs into the model

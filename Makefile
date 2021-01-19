@@ -2,7 +2,6 @@
 
 BUILDDIR := $(PWD)
 PYCHECKDIRS := examples tests src utils scripts notebooks
-JSCHECKDIRS := src
 DOCDIR := docs
 
 # run checks on all files for the repo
@@ -11,16 +10,12 @@ quality:
 	black --check $(PYCHECKDIRS);
 	isort --check-only $(PYCHECKDIRS);
 	flake8 $(PYCHECKDIRS);
-	@echo "Running js/jsx quality checks";
-	yarn prettier --check $(JSCHECKDIRS);
 
 # style the code according to accepted standards for the repo
 style:
 	@echo "Running python styling";
 	black $(PYCHECKDIRS);
 	isort $(PYCHECKDIRS);
-	@echo "Running js/jsx styling";
-	yarn prettier --write $(JSCHECKDIRS);
 
 # run tests for the repo
 test:
