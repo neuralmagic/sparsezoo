@@ -6,6 +6,7 @@ VGG models:
 from typing import Union
 
 from sparsezoo.objects import Model
+from sparsezoo.zoo import load_model
 
 
 __all__ = [
@@ -57,7 +58,7 @@ def vgg_11(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -112,7 +113,7 @@ def vgg_11bn(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -167,7 +168,7 @@ def vgg_13(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -222,7 +223,7 @@ def vgg_13bn(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -277,7 +278,7 @@ def vgg_16(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -332,7 +333,7 @@ def vgg_16bn(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -387,7 +388,7 @@ def vgg_19(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",
@@ -442,7 +443,7 @@ def vgg_19bn(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="classification",
         architecture="vgg",

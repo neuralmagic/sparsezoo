@@ -19,7 +19,7 @@ DOWNLOAD_PATH = "download"
 
 
 def download_get_request(
-    args: ModelArgs,
+    args: Union[ModelArgs, str],
     file_name: Union[str, None] = None,
     force_token_refresh: bool = False,
 ) -> Dict:
@@ -32,12 +32,13 @@ def download_get_request(
     :return: the json response as a dict
     """
     header = get_auth_header(force_token_refresh=force_token_refresh)
-    url = f"{BASE_API_URL}/{DOWNLOAD_PATH}/{args.model_url_path}"
+    path = args if isinstance(args, str) else args.model_url_path
+    url = f"{BASE_API_URL}/{DOWNLOAD_PATH}/{path}"
 
     if file_name:
         url = f"{url}/{file_name}"
 
-    if args.release_version:
+    if hasattr(args, "release_version") and args.release_version:
         url = f"{url}?release_version={args.release_version}"
 
     _LOGGER.debug(f"GET download from {url}")

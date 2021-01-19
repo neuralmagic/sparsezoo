@@ -6,6 +6,7 @@ YOLO models:
 from typing import Union
 
 from sparsezoo.objects import Model
+from sparsezoo.zoo import load_model
 
 
 __all__ = ["yolo_v3"]
@@ -40,7 +41,7 @@ def yolo_v3(
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :return: The created model
     """
-    return Model.get_downloadable(
+    return load_model(
         domain="cv",
         sub_domain="detection",
         architecture="yolo_v3",

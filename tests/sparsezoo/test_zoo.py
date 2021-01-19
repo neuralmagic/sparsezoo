@@ -3,36 +3,15 @@ import shutil
 
 import pytest
 
-from sparsezoo import Model
 from sparsezoo.utils import CACHE_DIR
-from tests.sparsezoo.utils import validate_downloaded_model
-
-
-@pytest.mark.parametrize(
-    "model_args,other_args",
-    [
-        ({"domain": "cv", "sub_domain": "classification"}, {}),
-        ({"domain": "cv", "sub_domain": "classification"}, {"page_length": 1}),
-        (
-            {
-                "domain": "cv",
-                "sub_domain": "classification",
-                "architecture": "mobilenet_v1",
-            },
-            {},
-        ),
-        ({"domain": "cv", "sub_domain": "classification", "optim_name": "base"}, {}),
-    ],
+from sparsezoo.zoo import (
+    load_model,
+    load_model_from_path,
+    search_models,
+    search_optimized_models,
+    search_similar_models,
 )
-def test_model_search_downloadable(model_args, other_args):
-    models = Model.search_downloadable(**model_args, **other_args)
-
-    for model in models:
-        for key, value in model_args.items():
-            assert getattr(model, key) == value
-
-    if "page_length" in other_args:
-        assert len(models) <= other_args["page_length"]
+from tests.sparsezoo.utils import validate_downloaded_model
 
 
 @pytest.mark.parametrize(
@@ -75,11 +54,69 @@ def test_model_search_downloadable(model_args, other_args):
         ),
     ],
 )
-def test_model_get_downloadable(model_args, other_args):
-    model = Model.get_downloadable(**model_args, **other_args)
+def test_load_model(model_args, other_args):
+    model = load_model(**model_args, **other_args)
     model.download(overwrite=True)
     validate_downloaded_model(model, model_args, other_args)
     shutil.rmtree(model.dir_path)
+
+
+@pytest.mark.parametrize(
+    "path, model_args, other_args",
+    [
+        [
+            "cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/sparse-conservative",
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+                "sub_architecture": "1.0",
+                "framework": "pytorch",
+                "repo": "sparseml",
+                "dataset": "imagenet",
+                "training_scheme": None,
+                "optim_name": "sparse",
+                "optim_category": "conservative",
+                "optim_target": None,
+            },
+            {},
+        ]
+    ],
+)
+def test_load_model_from_path(path, model_args, other_args):
+    model = load_model_from_path(path, **other_args)
+    model.download(overwrite=True)
+    for key in model_args:
+        if key and hasattr(model, key):
+            assert getattr(model, key) == model_args[key]
+    shutil.rmtree(model.dir_path)
+
+
+@pytest.mark.parametrize(
+    "model_args,other_args",
+    [
+        ({"domain": "cv", "sub_domain": "classification"}, {}),
+        ({"domain": "cv", "sub_domain": "classification"}, {"page_length": 1}),
+        (
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+            },
+            {},
+        ),
+        ({"domain": "cv", "sub_domain": "classification", "optim_name": "base"}, {}),
+    ],
+)
+def test_search_models(model_args, other_args):
+    models = search_models(**model_args, **other_args)
+
+    for model in models:
+        for key, value in model_args.items():
+            assert getattr(model, key) == value
+
+    if "page_length" in other_args:
+        assert len(models) <= other_args["page_length"]
 
 
 @pytest.mark.parametrize(
@@ -103,9 +140,9 @@ def test_model_get_downloadable(model_args, other_args):
         ),
     ],
 )
-def test_model_search_similar(model_args, other_args):
-    model = Model.get_downloadable(**model_args, **other_args)
-    similar = model.search_similar()
+def test_search_similar_models(model_args, other_args):
+    model = load_model(**model_args, **other_args)
+    similar = search_optimized_models(model)
     assert len(similar) > 0
 
     for sim in similar:
@@ -137,9 +174,9 @@ def test_model_search_similar(model_args, other_args):
         ),
     ],
 )
-def test_model_search_optimized_versions(model_args, other_args):
-    model = Model.get_downloadable(**model_args, **other_args)
-    optimized = model.search_optimized()
+def test_search_optimized_models(model_args, other_args):
+    model = load_model(**model_args, **other_args)
+    optimized = search_optimized_models(model)
     assert len(optimized) > 0
 
     for sim in optimized:
