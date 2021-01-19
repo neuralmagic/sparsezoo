@@ -12,7 +12,7 @@ from tests.sparsezoo.utils import validate_downloaded_model
     "download,framework,repo,dataset,training_scheme,"
     "optim_name,optim_category,optim_target",
     [
-        (True, "pytorch", "torchvision", "imagenet", None, "base", "none", None),
+        (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
     ],
 )
 def test_constructor(

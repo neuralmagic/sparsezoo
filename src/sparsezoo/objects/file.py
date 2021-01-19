@@ -5,8 +5,6 @@ such as downloading
 
 import logging
 import os
-import shutil
-import tarfile
 from enum import Enum
 from typing import Union
 
@@ -323,7 +321,7 @@ class File(BaseObject, Downloadable):
         # cleaning up target
         try:
             os.remove(self.path)
-        except:
+        except Exception:
             pass
 
         # creating target and downloading

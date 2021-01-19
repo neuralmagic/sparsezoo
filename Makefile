@@ -1,5 +1,7 @@
+.PHONY: build docs test
+
 BUILDDIR := $(PWD)
-PYCHECKDIRS := examples tests src utils scripts
+PYCHECKDIRS := examples tests src utils scripts notebooks
 JSCHECKDIRS := src
 DOCDIR := docs
 

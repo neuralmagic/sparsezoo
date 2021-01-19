@@ -18,7 +18,7 @@ from tests.sparsezoo.utils import validate_downloaded_model
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "framework": "pytorch",
-                "repo": "torchvision",
+                "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
                 "optim_name": "base",
@@ -37,7 +37,7 @@ from tests.sparsezoo.utils import validate_downloaded_model
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "framework": "pytorch",
-                "repo": "torchvision",
+                "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
                 "optim_name": "base",
@@ -59,7 +59,10 @@ def test_load_model(model_args, other_args):
     "stub, model_args, other_args",
     [
         [
-            "cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/sparse-conservative",
+            (
+                "cv/classification/mobilenet_v1-1.0/pytorch/"
+                "sparseml/imagenet/sparse-conservative"
+            ),
             {
                 "domain": "cv",
                 "sub_domain": "classification",
@@ -123,7 +126,7 @@ def test_search_models(model_args, other_args):
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "framework": "pytorch",
-                "repo": "torchvision",
+                "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
                 "optim_name": "base",
@@ -157,7 +160,7 @@ def test_search_similar_models(model_args, other_args):
                 "architecture": "mobilenet_v1",
                 "sub_architecture": "1.0",
                 "framework": "pytorch",
-                "repo": "torchvision",
+                "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
                 "optim_name": "base",
