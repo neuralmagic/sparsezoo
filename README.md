@@ -103,7 +103,7 @@ We appreciate contributions to the code, examples, and documentation as well as 
 
 ## Join the Community
 
-For user help or questions about SparseML, use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/issues). Everyone is welcome!
+For user help or questions about SparseML, use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/discussions/). Everyone is welcome!
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
