@@ -2,13 +2,14 @@
 Code related to model repo selection display in a jupyter notebook using ipywidgets
 """
 
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import ipywidgets as widgets
 from sparsezoo.objects import Model
 
 
 __all__ = ["ModelSelectWidgetContainer", "SelectDomainWidgetContainer"]
+
 
 def format_html(
     message: str, header: str = None, color: str = None, italic: bool = False
@@ -36,14 +37,20 @@ def format_html(
 
 class SelectDomainWidgetContainer(object):
     """
-    Widget used in model repo notebooks for selecting domain and subdomain to search within
+    Widget used in model repo notebooks for selecting domain and subdomain to
+        search within
 
     :param domains: list of domains to look through
     :param sub_domain: a map of sub domains for each domain
     """
-    def __init__(self, domains: List[str]=["cv"], sub_domains: Dict[str, List[str]]={
-    "cv": ["classification"],
-}):
+
+    def __init__(
+        self,
+        domains: List[str] = ["cv"],
+        sub_domains: Dict[str, List[str]] = {
+            "cv": ["classification"],
+        },
+    ):
         self._domains_dropdown = widgets.Dropdown(options=domains, value=domains[0])
         self._sub_domains_dropdown = widgets.Dropdown(
             options=sub_domains[domains[0]], value=sub_domains[domains[0]][0]
@@ -54,10 +61,14 @@ class SelectDomainWidgetContainer(object):
     def create(self):
         def _domain_selector(change):
             domain = change["new"]
-            sub_domains = self._sub_domains[domain] if domain in self._sub_domains else []
+            sub_domains = (
+                self._sub_domains[domain] if domain in self._sub_domains else []
+            )
             self._sub_domains_dropdown.options = sub_domains
             if self._sub_domains_dropdown.value not in sub_domains:
-                self._sub_domains_dropdown.value = sub_domains[0] if len(sub_domains) > 0 else None
+                self._sub_domains_dropdown.value = (
+                    sub_domains[0] if len(sub_domains) > 0 else None
+                )
 
         self._domains_dropdown.observe(_domain_selector, names="value")
         self.container = widgets.VBox(
