@@ -5,6 +5,7 @@ Inception models:
 
 from typing import Union
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects import Model
 
 
@@ -48,7 +49,7 @@ def inception_v3(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="inception_v3",

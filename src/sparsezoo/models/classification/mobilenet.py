@@ -6,6 +6,7 @@ MobileNet models:
 
 from typing import Union
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects import Model
 
 
@@ -49,7 +50,7 @@ def mobilenet_v1(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="mobilenet_v1",
@@ -104,7 +105,7 @@ def mobilenet_v2(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The created model
     """
-    return Model.get_downloadable(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="classification",
         architecture="mobilenet_v2",

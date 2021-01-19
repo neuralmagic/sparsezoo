@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from sparsezoo import Model
+from sparsezoo.objects import Model
 
 
 def validate_downloaded_model(

@@ -5,6 +5,7 @@ SSD models:
 
 from typing import Union
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects import Model
 
 
@@ -40,7 +41,7 @@ def ssd_resnet50_300(
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :return: The created model
     """
-    return Model.get_downloadable(
+    return Zoo.load_model(
         domain="cv",
         sub_domain="detection",
         architecture="ssd",
