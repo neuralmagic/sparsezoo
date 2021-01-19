@@ -156,6 +156,7 @@ sparsezoo download --domain cv --sub-domain classification --architecture mobile
 import argparse
 import logging
 
+from sparsezoo import Zoo
 from sparsezoo.objects import Model
 
 
@@ -327,7 +328,7 @@ def _get_command_from_model(model: Model):
 
 def search(args):
     LOGGER.info("loading available models...")
-    models = Model.search_downloadable(
+    models = Zoo.search_models(
         domain=args.domain,
         sub_domain=args.sub_domain,
         architecture=args.architecture,
@@ -372,7 +373,7 @@ def main():
 
     if args.command == DOWNLOAD_COMMAND:
         LOGGER.info("Downloading files from model...")
-        model = Model.get_downloadable(
+        model = Zoo.load_model(
             domain=args.domain,
             sub_domain=args.sub_domain,
             architecture=args.architecture,

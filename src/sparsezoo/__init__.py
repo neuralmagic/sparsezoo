@@ -1,5 +1,5 @@
 # flake8: noqa
 
-from .models.zoo import *
 from .main import *
+from .models.zoo import *
 from .objects import *

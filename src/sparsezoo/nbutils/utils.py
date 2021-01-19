@@ -8,7 +8,7 @@ import ipywidgets as widgets
 from sparsezoo.objects import Model
 
 
-__all__ = ["ModelSelectWidgetContainer"]
+__all__ = ["ModelSelectWidgetContainer", "SelectDomainWidgetContainer"]
 
 _domains = ["cv"]
 _sub_domains = {
