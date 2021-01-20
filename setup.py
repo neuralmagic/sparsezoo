@@ -45,12 +45,16 @@ def _setup_long_description() -> Tuple[str, str]:
 setup(
     name="sparsezoo",
     version="0.1.0",
-    author="Mark Kurtz, Kevin Rodriguez",
+    author="Mark Kurtz, Kevin Rodriguez, Benjamin Fineran, Michael Goin",
     author_email="support@neuralmagic.com",
-    description="[TODO]",
+    description="SparseZoo is a constantly-growing repository of optimized models. "
+    "It simplifies and accelerates your time-to-value in building "
+    "performant deep learning models with a collection of pre-trained, "
+    "performance-optimized models to prototype from.",
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
-    keywords="[TODO]",
+    keywords="inference machine learning neural network deep learning model models "
+    "computer vision nlp pretrained transfer learning",
     license="[TODO]",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},
@@ -60,5 +64,21 @@ setup(
     extras_require=_setup_extras(),
     entry_points=_setup_entry_points(),
     python_requires=">=3.6.0",
-    classifiers=["[TODO]"],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Programming Language :: Python :: 3",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: Science/Research",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
 )
