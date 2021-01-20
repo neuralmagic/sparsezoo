@@ -33,8 +33,10 @@ build:
 
 # clean package
 clean:
-	rm -fr .pytest_cache;
-	rm -fr docs/_build docs/build;
-	rm -fr node_modules;
-	find . -not -path "./.venv/*" | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -fr;
-	find . -not -path "./.venv/*" | grep .rst | xargs rm -fr;
+	rm -rf .pytest_cache;
+	rm -rf docs/_build docs/build;
+	rm -rf build;
+	rm -rf dist;
+	rm -rf src/sparsezoo.egg-info;
+	find $(PYCHECKDIRS) | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf;
+	find $(DOCDIR) | grep .rst | xargs rm -rf;
