@@ -422,23 +422,17 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file_gz:
-            _LOGGER.info(f"Downloading model onnx gz {self.model_url_path}")
-            self.onnx_file_gz.download(
+            self.download_onnx_files(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
                 show_progress=show_progress,
             )
 
-        for file in self._framework_files:
-            _LOGGER.info(
-                f"Downloading model framework file "
-                f"{file.display_name} {self.model_url_path}"
-            )
-            file.download(
-                overwrite=overwrite,
-                refresh_token=refresh_token,
-                show_progress=show_progress,
-            )
+        self.download_framework_files(
+            overwrite=overwrite,
+            refresh_token=refresh_token,
+            show_progress=show_progress,
+        )
 
         for data in self._data.values():
             _LOGGER.info(f"Downloading model data {data.name} {self.model_url_path}")
@@ -457,3 +451,66 @@ class Model(Downloadable, ModelMetadata):
                 refresh_token=refresh_token,
                 show_progress=show_progress,
             )
+
+    def download_onnx_files(
+        self,
+        overwrite: bool = False,
+        refresh_token: bool = False,
+        show_progress: bool = True,
+    ) -> Union[str, None]:
+        """
+        Downloads the ONNX file for this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param refresh_token: refresh the auth token
+        :param show_progress: True to use tqdm for progress, False to not show
+        :return: the path to the downloaded file. None if no file is found
+        """
+        if self.onnx_file:
+            _LOGGER.info(f"Downloading model onnx {self.model_url_path}")
+            self.onnx_file.download(
+                overwrite=overwrite,
+                refresh_token=refresh_token,
+                show_progress=show_progress,
+            )
+            return self.onnx_file.path
+        else:
+            _LOGGER.info(f"No model onnx found")
+            return None
+
+    def download_framework_files(
+        self,
+        overwrite: bool = False,
+        refresh_token: bool = False,
+        show_progress: bool = True,
+        extensions: Union[List[str], None] = None,
+    ) -> List[str]:
+        """
+        Downloads the framework file(s) for this model.
+
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :param refresh_token: refresh the auth token
+        :param show_progress: True to use tqdm for progress, False to not show
+        :param extensions: List of file extensions to filter for. ex ['.pth', '.ptc'].
+            If None or empty list, all framework files are downloaded. Default is None
+        :return: List of paths to the downlaoded files. Empty list if no files are
+            found or matched
+        """
+        downloaded_paths = []
+        for file in self._framework_files:
+            if extensions and not any(
+                file.display_name.endswith(ext) for ext in extensions
+            ):  # skip files that do not end in valid extension
+                continue
+
+            _LOGGER.info(
+                f"Downloading model framework file "
+                f"{file.display_name} {self.model_url_path}"
+            )
+            file.download(
+                overwrite=overwrite,
+                refresh_token=refresh_token,
+                show_progress=show_progress,
+            )
+            downloaded_paths.append(file.path)
+        return downloaded_paths
