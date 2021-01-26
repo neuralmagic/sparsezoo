@@ -422,7 +422,8 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file_gz:
-            self.download_onnx_files(
+            _LOGGER.info(f"Downloading model onnx gz {self.model_url_path}")
+            self.onnx_file_gz.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
                 show_progress=show_progress,
@@ -451,32 +452,6 @@ class Model(Downloadable, ModelMetadata):
                 refresh_token=refresh_token,
                 show_progress=show_progress,
             )
-
-    def download_onnx_files(
-        self,
-        overwrite: bool = False,
-        refresh_token: bool = False,
-        show_progress: bool = True,
-    ) -> Union[str, None]:
-        """
-        Downloads the ONNX file for this model.
-
-        :param overwrite: True to overwrite the file if it exists, False otherwise
-        :param refresh_token: refresh the auth token
-        :param show_progress: True to use tqdm for progress, False to not show
-        :return: the path to the downloaded file. None if no file is found
-        """
-        if self.onnx_file:
-            _LOGGER.info(f"Downloading model onnx {self.model_url_path}")
-            self.onnx_file.download(
-                overwrite=overwrite,
-                refresh_token=refresh_token,
-                show_progress=show_progress,
-            )
-            return self.onnx_file.path
-        else:
-            _LOGGER.info(f"No model onnx found")
-            return None
 
     def download_framework_files(
         self,
