@@ -61,7 +61,7 @@ def test_load_model(model_args, other_args):
         [
             (
                 "cv/classification/mobilenet_v1-1.0/pytorch/"
-                "sparseml/imagenet/sparse-conservative"
+                "sparseml/imagenet/pruned-conservative"
             ),
             {
                 "domain": "cv",
@@ -72,7 +72,7 @@ def test_load_model(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "sparse",
+                "optim_name": "pruned",
                 "optim_category": "conservative",
                 "optim_target": None,
             },
