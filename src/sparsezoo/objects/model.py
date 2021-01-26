@@ -493,7 +493,7 @@ class Model(Downloadable, ModelMetadata):
         :param show_progress: True to use tqdm for progress, False to not show
         :param extensions: List of file extensions to filter for. ex ['.pth', '.ptc'].
             If None or empty list, all framework files are downloaded. Default is None
-        :return: List of paths to the downlaoded files. Empty list if no files are
+        :return: List of paths to the downloaded files. Empty list if no files are
             found or matched
         """
         downloaded_paths = []
