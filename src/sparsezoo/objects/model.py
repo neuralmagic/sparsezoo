@@ -182,6 +182,12 @@ class Model(Downloadable, ModelMetadata):
             else None
         )
 
+    def __repr__(self):
+        return self.stub
+
+    def __str__(self):
+        return self.stub
+
     @property
     def display_name(self) -> str:
         """
