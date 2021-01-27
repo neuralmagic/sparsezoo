@@ -32,7 +32,7 @@ def download_get_request(
     :return: the json response as a dict
     """
     header = get_auth_header(force_token_refresh=force_token_refresh)
-    path = args if isinstance(args, str) else args.model_url_path
+    path = args if isinstance(args, str) else args.stub
     url = f"{BASE_API_URL}/{DOWNLOAD_PATH}/{path}"
 
     if file_name:

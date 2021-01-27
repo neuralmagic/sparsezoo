@@ -182,6 +182,12 @@ class Model(Downloadable, ModelMetadata):
             else None
         )
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(stub={self.stub})"
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(stub={self.stub})"
+
     @property
     def display_name(self) -> str:
         """
@@ -403,10 +409,10 @@ class Model(Downloadable, ModelMetadata):
         :param refresh_token: refresh the auth token
         :param show_progress: True to use tqdm for progress, False to not show
         """
-        _LOGGER.info(f"Downloading model {self.model_url_path}")
+        _LOGGER.info(f"Downloading model {self.stub}")
 
         if self.card_file:
-            _LOGGER.info(f"Downloading model card {self.model_url_path}")
+            _LOGGER.info(f"Downloading model card {self.stub}")
             self.card_file.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -414,7 +420,7 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file:
-            _LOGGER.info(f"Downloading model onnx {self.model_url_path}")
+            _LOGGER.info(f"Downloading model onnx {self.stub}")
             self.onnx_file.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -422,7 +428,7 @@ class Model(Downloadable, ModelMetadata):
             )
 
         if self.onnx_file_gz:
-            _LOGGER.info(f"Downloading model onnx gz {self.model_url_path}")
+            _LOGGER.info(f"Downloading model onnx gz {self.stub}")
             self.onnx_file_gz.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -436,7 +442,7 @@ class Model(Downloadable, ModelMetadata):
         )
 
         for data in self._data.values():
-            _LOGGER.info(f"Downloading model data {data.name} {self.model_url_path}")
+            _LOGGER.info(f"Downloading model data {data.name} {self.stub}")
             data.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
@@ -444,9 +450,7 @@ class Model(Downloadable, ModelMetadata):
             )
 
         for recipe in self._recipes:
-            _LOGGER.info(
-                f"Downloading model recipe {recipe.display_name} {self.model_url_path}"
-            )
+            _LOGGER.info(f"Downloading model recipe {recipe.display_name} {self.stub}")
             recipe.download(
                 overwrite=overwrite,
                 refresh_token=refresh_token,
