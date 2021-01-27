@@ -224,7 +224,7 @@ class ModelArgs:
         return f"{self.domain}/{self.sub_domain}"
 
     @property
-    def model_url_path(self) -> str:
+    def stub(self) -> str:
         """
         :return: full path for where the model is located in the sparsezoo
         """

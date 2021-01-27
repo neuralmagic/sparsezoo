@@ -397,7 +397,7 @@ def main():
         print("Download results")
         print("====================")
         print("")
-        print(model.model_url_path)
+        print(model.stub)
         print(f"downloaded to {model.dir_path}")
     elif args.command == SEARCH_COMMAND:
         search(args)
