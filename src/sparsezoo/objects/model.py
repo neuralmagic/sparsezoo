@@ -183,10 +183,10 @@ class Model(Downloadable, ModelMetadata):
         )
 
     def __repr__(self):
-        return self.stub
+        return f"{self.__class__.__name__}(stub={self.stub})"
 
     def __str__(self):
-        return self.stub
+        return f"{self.__class__.__name__}(stub={self.stub})"
 
     @property
     def display_name(self) -> str:
