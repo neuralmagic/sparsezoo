@@ -63,11 +63,11 @@ This repository contains the Python API code to handle the connection and authen
 - [DeepSparse](https://github.com/neuralmagic/deepsparse): 
   CPU inference engine that delivers unprecedented performance for sparse models
 - [SparseML](https://github.com/neuralmagic/sparseml): 
-  Libraries for state-of-the-art sparsification and optimization algorithms enabling integration 
-  in most neural network pipelines with a few lines of code
+  Libraries for state-of-the-art deep neural network optimization algorithms, 
+  enabling simple pipelines integration with a few lines of code
 - [Sparsify](https://github.com/neuralmagic/sparsify): 
-  Easy-to-use autoML interface to sparsify and optimize neural networks 
-  for better inference performance and a smaller footprint
+  Easy-to-use autoML interface to optimize deep neural networks for 
+  better inference performance and a smaller footprint
 
 ## Quick Tour
 
@@ -78,18 +78,18 @@ Each model in the SparseZoo has a specific stub that identifies it. The stubs ar
 The properties within each model stub are defined as the following:
 
 | Model Property   | Definition                                                                                    | Examples                                                                           |
-|:----------------:|:---------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
-| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                            |
-| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                       |
-| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet, mobilenet                                                                  |
-| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width, depth, etc                   | 50, 101, 152                                                                       |
-| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                             |
-| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                              |
-| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                  |
-| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                |
-| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
+|:----------------:|:---------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
+| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                             |
+| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                         |
+| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet_v1, mobilenet_v1                                                             |
+| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width, depth, etc                   | 50, 101, 152                                                                         |
+| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                               |
+| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                               |
+| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                   |
+| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                 |
+| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)          |
 | OPTIM_CATEGORY   | Descriptor on the degree to which the model is optimized as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
-| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                        |
+| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                         |
 
 ### Python APIS
 
