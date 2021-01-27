@@ -4,7 +4,7 @@ Script to download a model from sparse zoo
 
 ##########
 Command help:
-usage: model_download.py [-h] {download,search} ...
+usage: sparsezoo.py [-h] {download,search} ...
 
 Download objects from the sparse zoo repo
 
@@ -16,7 +16,7 @@ optional arguments:
 
 
 ##########
-usage: model_download.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
+usage: sparsezoo.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                 [--architecture ARCHITECTURE]
                                 [--sub-architecture SUB_ARCHITECTURE]
                                 [--framework FRAMEWORK] [--repo REPO]
@@ -74,7 +74,7 @@ optional arguments:
 
 
 ##########
-usage: model_download.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
+usage: sparsezoo.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                   --architecture ARCHITECTURE
                                   [--sub-architecture SUB_ARCHITECTURE]
                                   --framework FRAMEWORK --repo REPO --dataset
@@ -130,12 +130,12 @@ optional arguments:
 
 ##########
 Example search:
-python3 scripts/model_download.py search --domain cv --sub-domain classification
+python3 scripts/sparsezoo.py search --domain cv --sub-domain classification
 
 
 ##########
 Example search for mobilenet v1:
-python3 scripts/model_download.py search --domain cv --sub-domain classification \
+python3 scripts/sparsezoo.py search --domain cv --sub-domain classification \
     --architecture mobilenet_v1
 
 

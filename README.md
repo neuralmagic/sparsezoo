@@ -16,7 +16,7 @@ limitations under the License.
 
 # ![icon for SparseZoo](docs/icon-sparsezoo.png) SparseZoo
 
-### Neural network model repository for highly sparse models and sparsification recipes
+### Neural network model repository for highly sparse models and optimization recipes
 
 <p>
     <a href="https://github.com/neuralmagic/comingsoon/blob/master/LICENSE">
@@ -44,70 +44,187 @@ limitations under the License.
 
 ## Overview
 
-SparseZoo is a constantly-growing repository of optimized models. It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of pre-trained, performance-optimized models to prototype from.
+SparseZoo is a constantly-growing repository of optimized models and optimization recipes for neural networks.
+It simplifies and accelerates your time-to-value in building performant deep learning models with a 
+collection of inference-optimized models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of performance and recovery. With recipe-driven approaches, you can benchmark from the SparseZoo and transfer learn from your private data sets or other open source data sets.
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized 
+to different degrees of inference performance vs baseline loss recovery. 
+Optimizations on neural networks include approaches such as 
+[pruning](https://neuralmagic.com/blog/pruning-overview/) and [quantization](https://arxiv.org/abs/1609.07061)
+allowing for significantly faster models with limited to no effect on their baseline metrics such as accuracy.
+Recipe-driven approaches built around these optimizations allow you to take the models as given, 
+transfer learn from the models onto private datasets, or transfer the recipes to your architectures. 
 
 This repository contains the Python API code to handle the connection and authentication to the cloud.
 
-## Quick Tour and Documentation
+## Quick Links
 
-[TODO ENGINEERING: EDIT THE CONTENT PLACEHOLDERS AS NEEDED]
+- [DeepSparse](https://github.com/neuralmagic/deepsparse): 
+  CPU inference engine that delivers unprecedented performance for sparse models
+- [SparseML](https://github.com/neuralmagic/sparseml): 
+  Libraries for state-of-the-art sparsification and optimization algorithms enabling integration 
+  in most neural network pipelines with a few lines of code
+- [Sparsify](https://github.com/neuralmagic/sparsify): 
+  Easy-to-use autoML interface to sparsify and optimize neural networks 
+  for better inference performance and a smaller footprint
 
-Follow the quick tour below to get started.
+## Quick Tour
+
+Each model in the SparseZoo has a specific stub that identifies it. The stubs are made up of the following structure:
+
+`DOMAIN/SUB_DOMAIN/ARCHITECTURE{-SUB_ARCHITECTURE}/FRAMEWORK/REPO/DATASET{-TRAINING_SCHEME}/OPTIM_NAME-OPTIM_CATEGORY-{OPTIM_TARGET}`
+
+The properties within each model stub are defined as the following:
+
+| Model Property   | Definition                                                                                    | Examples                                                                           |
+|:----------------:|:---------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
+| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                            |
+| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                       |
+| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet, mobilenet                                                                  |
+| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width, depth, etc                   | 50, 101, 152                                                                       |
+| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                             |
+| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                              |
+| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                  |
+| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                |
+| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
+| OPTIM_CATEGORY   | Descriptor on the degree to which the model is optimized as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
+| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                        |
+
+### Python APIS
+
+The Python APIs respect this format enabling you to search and download models.
+Some code examples are given below.
+
+#### Searching the Zoo
+```python
+from sparsezoo import Zoo
+
+models = Zoo.search_models(domain="cv", sub_domain="classification")
+print(models)
+```
+
+#### Common Models
+```python
+from sparsezoo.models.classification import resnet_50
+
+model = resnet_50()
+model.download()
+
+print(model.onnx_file.downloaded_path())
+```
+
+#### Searching Optimized Versions
+```python
+from sparsezoo import Zoo
+from sparsezoo.models.classification import resnet_50
+
+search_model = resnet_50()
+optimized_models = Zoo.search_optimized_models(search_model)
+
+print(optimized_models)
+```
+
+### Console Scripts
+
+In addition to the Python APIs, a console script entry point is installed with the package `sparsezoo`.
+This enables easy interaction straight from your console/terminal.
+Note, for some environments the console scripts cannot install properly.
+If this happens for your system and the sparsezoo command is not available, 
+`scripts/sparsezoo.py` may be used in its place. 
+
+```shell script
+sparsezoo -h
+```
+
+#### Searching
+
+Search command help
+```shell script
+sparsezoo search -h
+```
+
+<br>Searching for all classification models in the computer vision domain
+```shell script
+sparsezoo search --domain cv --sub-domain classification \
+    --architecture resnet_v1 --sub-architecture 50
+```
+
+<br>Searching for all ResNet 50 models
+```shell script
+sparsezoo search --domain cv --sub-domain classification
+```
+
+#### Downloading
+
+Download command help
+```shell script
+sparsezoo download -h
+```
+
+<br>Download ResNet 50 Model
+```shell script
+sparsezoo download --domain cv --sub-domain classification \
+    --architecture resnet_v1 --sub-architecture 50 \
+    --framework pytorch --repo sparseml --dataset imagenet \
+    --optim-name base --optim-category none
+```
+
+<br>Download pruned and quantized ResNet 50 Model
+```shell script
+sparsezoo download --domain cv --sub-domain classification \
+    --architecture resnet_v1 --sub-architecture 50 \
+    --framework pytorch --repo sparseml \
+    --dataset imagenet --training-scheme augmented \
+    --optim-name pruned_quant --optim-category aggressive
+```
+
 For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
-
-### Requirements
-
-- This repository is tested on Python 3.6+, PyTorch base-ver+ and TensorFlow 1.x+
-- Use Case: Computer Vision - Image Classification, Object Detection
-- Model Architectures: Deep Learning Neural Network Architectures (e.g., CNNs, DNNs - refer to [SparseZoo](https://docs.neuralmagic.com/sparsezoo/) for examples)
-- Instruction Set: CPUs with AVX2 or AVX-512 (best); (e.g., Intel Xeon Cascade Lake, Icelake, Skylake; AMD) and 2 FMAs. VNNI support required for sparse quantization.
-- OS / Environment: Linux
 
 ### Installation
 
-To install, run:
+This repository is tested on Python 3.6+, and ONNX 1.5.0+. It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
+
+Install with pip using:
 
 ```bash
 pip install sparsezoo
 ```
 
-## Tutorials
-
-[SparseZoo Tutorials](notebooks/) and [Use Cases](examples/) are provided for easily integrating and using the models in the SparseZoo. The APIs provided to interface with the SparseZoo are located in `neuralmagicML.utils`.
-
-To retrieve all available models in the repo, you can use the `available_models` function. It returns a list of `RepoModel` objects.
-Example code:
-
-```python
-from neuralmagicML.utils import available_models, RepoModel
-
-models = available_models()  # type: List[RepoModel]
-print(models)
-```
+Then if you want to explore any of the [scripts](scripts/), [notebooks](notebooks/), or [examples](examples/)
+clone the repository and install any additional dependencies as required.
 
 ## Available Models and Recipes
 
-A number of pre-trained models are available in this API. Included are both baseline and recalibrated models for higher performance. These can optionally be used with the [DeepSparse Engine](https://github.com/neuralmagic/engine/). The types available for each model architecture are noted in the [SparseZoo model repository listing](docs/available-models.md).
+A number of pre-trained baseline and optimized models across domains and sub domains are available and constantly being added.
+For an up to date list, please consult the [available models listing](https://docs.neuralmagic.com/sparsezoo/available-models).
 
 ## Resources and Learning More
 
-- [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/), [Tutorials](notebooks/), [Use Cases](examples/)
+- [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/)
 - [DeepSparse Documentation](https://docs.neuralmagic.com/deepsparse/)
-- [Neural Magic Blog](https://www.neuralmagic.com/blog/), [Resources](https://www.neuralmagic.com/resources/), [Website](https://www.neuralmagic.com/)
+- [SparseML Documentation](https://docs.neuralmagic.com/sparseml/)
+- [Sparsify Documentation](https://docs.neuralmagic.com/sparsify/)
+- Neural Magic [Blog](https://www.neuralmagic.com/blog/), 
+  [Resources](https://www.neuralmagic.com/resources/), 
+  [Website](https://www.neuralmagic.com/)
 
 ## Contributing
 
-We appreciate contributions to the code, examples, and documentation as well as bug reports and feature requests! [Learn how here](CONTRIBUTING.md).
+We appreciate contributions to the code, examples, and documentation as well as bug reports and feature requests! 
+[Learn how here](CONTRIBUTING.md).
 
 ## Join the Community
 
-For user help or questions about SparseML, use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/discussions/). Everyone is welcome!
+For user help or questions about SparseZoo, 
+use our [GitHub Discussions](https://www.github.com/neuralmagic/sparsezoo/discussions/). Everyone is welcome!
 
-You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
+You can get the latest news, webinar and event invites, research papers, 
+and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
-For more general questions about Neural Magic, please email us at [learnmore@neuralmagic.com](mailto:learnmore@neuralmagic.com) or fill out this [form](http://neuralmagic.com/contact/).
+For more general questions about Neural Magic, 
+please email us at [learnmore@neuralmagic.com](mailto:learnmore@neuralmagic.com) 
+or fill out this [form](http://neuralmagic.com/contact/).
 
 ## License
 
@@ -115,4 +232,8 @@ The project is licensed under the [Apache License Version 2.0](LICENSE).
 
 ## Release History
 
-[Track this project via GitHub Releases.](https://github.com/neuralmagic/sparsezoo/releases)
+Official builds are hosted on PyPi
+- stable: [sparsezoo](https://pypi.org/project/sparsezoo/)
+- nightly (dev): [sparsezoo-nightly](https://pypi.org/project/sparsezoo-nightly/)
+
+Additionally, more information can be found via [GitHub Releases.](https://github.com/neuralmagic/sparsezoo/releases)

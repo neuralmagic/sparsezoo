@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 _deps = [
     "numpy>=1.0.0",
-    "onnx>=1.0.0,<1.8",
+    "onnx>=1.0.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
@@ -47,10 +47,11 @@ setup(
     version="0.1.0",
     author="Mark Kurtz, Kevin Rodriguez, Benjamin Fineran, Michael Goin",
     author_email="support@neuralmagic.com",
-    description="SparseZoo is a constantly-growing repository of optimized models. "
-    "It simplifies and accelerates your time-to-value in building "
-    "performant deep learning models with a collection of pre-trained, "
-    "performance-optimized models to prototype from.",
+    description="SparseZoo is a constantly-growing repository of optimized models "
+    "and optimization recipes for neural networks. "
+    "It simplifies and accelerates your time-to-value in building performant "
+    "deep learning models with a collection of inference-optimized models "
+    "and recipes to prototype from.",
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
     keywords="inference machine learning neural network deep learning model models "
