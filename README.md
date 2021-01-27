@@ -183,7 +183,9 @@ For a more in-depth read, check out [SparseZoo documentation](https://docs.neura
 
 ### Installation
 
-This repository is tested on Python 3.6+, and ONNX 1.5.0+. It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
+This repository is tested on Python 3.6+, and Linux/Debian systems.
+It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) 
+to keep your system in order.
 
 Install with pip using:
 
@@ -202,9 +204,9 @@ For an up to date list, please consult the [available models listing](https://do
 ## Resources and Learning More
 
 - [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/)
-- [DeepSparse Documentation](https://docs.neuralmagic.com/deepsparse/)
 - [SparseML Documentation](https://docs.neuralmagic.com/sparseml/)
 - [Sparsify Documentation](https://docs.neuralmagic.com/sparsify/)
+- [DeepSparse Documentation](https://docs.neuralmagic.com/deepsparse/)
 - Neural Magic [Blog](https://www.neuralmagic.com/blog/), 
   [Resources](https://www.neuralmagic.com/resources/), 
   [Website](https://www.neuralmagic.com/)
