@@ -78,18 +78,32 @@ Each model in the SparseZoo has a specific stub that identifies it. The stubs ar
 The properties within each model stub are defined as the following:
 
 | Model Property   | Definition                                                                                    | Examples                                                                           |
-|:----------------:|:---------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
-| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                             |
-| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                         |
-| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet_v1, mobilenet_v1                                                             |
-| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                   | 50, 101, 152                                                                         |
-| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                               |
-| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                               |
-| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                   |
-| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                 |
-| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)          |
+|:----------------:|:---------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
+| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                            |
+| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                       |
+| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet_v1, mobilenet_v1                                                            |
+| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                      | 50, 101, 152                                                                       |
+| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                             |
+| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                              |
+| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                  |
+| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                |
+| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
 | OPTIM_CATEGORY   | Descriptor on the degree to which the model is optimized as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
-| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                         |
+| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                        |
+
+The contents of each model are made up of the following:
+- model.md: The model card containing metadata, descriptions, and information for the model.
+- model.onnx: The [ONNX](https://onnx.ai/) representation of the model's graph.
+- model.onnx.tar.gz: A compressed format for the ONNX file. 
+    Currently ONNX does not support sparse tensors and quantized sparse tensors well for compression.
+- [FRAMEWORK]/model.[EXTENSION]: The native ML framework file(s) for the model in which it was originally trained.
+    Such as PyTorch, Keras, TensorFlow V1
+- recipes/optimization.[md|yaml]: The original optimization recipe used to create the model.
+- recipes/[NAME].[md|yaml]: Additional optimization recipes that can be used with the model such as transfer learning.
+- sample-originals: The original sample data without any preprocessing for use with the model.
+- sample-inputs: The sample data after pre processing for use with the model.
+- sample-outputs: The outputs after running the sample inputs through the model.
+- sample-labels: The labels that classify the sample inputs.
 
 ### Python APIS
 
@@ -199,7 +213,7 @@ clone the repository and install any additional dependencies as required.
 ## Available Models and Recipes
 
 A number of pre-trained baseline and optimized models across domains and sub domains are available and constantly being added.
-For an up to date list, please consult the [available models listing](https://docs.neuralmagic.com/sparsezoo/available-models).
+For an up to date list, please consult the [available models listing](docs/available-models.md).
 
 ## Resources and Learning More
 
