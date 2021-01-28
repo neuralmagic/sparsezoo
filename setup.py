@@ -17,6 +17,7 @@ _dev_deps = [
     "sphinxcontrib-apidoc>=0.3.0",
     "wheel>=0.36.2",
     "pytest>=6.0.0",
+    "sphinx-rtd-theme",
 ]
 
 
