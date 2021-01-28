@@ -45,17 +45,15 @@ def _setup_long_description() -> Tuple[str, str]:
 setup(
     name="sparsezoo",
     version="0.1.0",
-    author="Mark Kurtz, Kevin Rodriguez, Benjamin Fineran, Michael Goin",
+    author="Neuralmagic, Inc.",
     author_email="support@neuralmagic.com",
-    description="SparseZoo is a constantly-growing repository of optimized models "
-    "and optimization recipes for neural networks. "
-    "It simplifies and accelerates your time-to-value in building performant "
-    "deep learning models with a collection of inference-optimized models "
-    "and recipes to prototype from.",
+    description="Neural network model repository for highly sparse models "
+    "and optimization recipes.",
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
-    keywords="inference machine learning neural network deep learning model models "
-    "computer vision nlp pretrained transfer learning",
+    keywords="inference, machine learning, neural network, deep learning model, "
+    "models, computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
+    "quantization, sparse models, resnet, mobilenet, yolov3",
     license="[TODO]",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},

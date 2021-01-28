@@ -6,7 +6,7 @@ Script to download a model from sparse zoo
 Command help:
 usage: main.py [-h] {download,search} ...
 
-Download objects from the sparse zoo repo
+Download objects from the SparseZoo
 
 positional arguments:
   {download,search}
@@ -134,19 +134,19 @@ python3 scripts/main.py search --domain cv --sub-domain classification
 
 
 ##########
-Example search for mobilenet v1:
+Example search for MobileNetV1:
 python3 scripts/main.py search --domain cv --sub-domain classification \
     --architecture mobilenet_v1
 
 
 #########
-Example download mobilenet v1:
+Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --optim-name base --optim-category none
 
 #########
-Example download mobilenet v1 with maximum release version:
+Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --optim-name base --optim-category none --release-version 0.1.0

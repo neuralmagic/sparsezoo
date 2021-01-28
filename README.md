@@ -82,7 +82,7 @@ The properties within each model stub are defined as the following:
 | DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                             |
 | SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                         |
 | ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet_v1, mobilenet_v1                                                             |
-| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width, depth, etc                   | 50, 101, 152                                                                         |
+| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                   | 50, 101, 152                                                                         |
 | FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                               |
 | REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                               |
 | DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                   |
@@ -150,7 +150,7 @@ sparsezoo search --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50
 ```
 
-<br>Searching for all ResNet 50 models
+<br>Searching for all ResNet-50 models
 ```shell script
 sparsezoo search --domain cv --sub-domain classification
 ```
@@ -162,7 +162,7 @@ Download command help
 sparsezoo download -h
 ```
 
-<br>Download ResNet 50 Model
+<br>Download ResNet-50 Model
 ```shell script
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
@@ -170,7 +170,7 @@ sparsezoo download --domain cv --sub-domain classification \
     --optim-name base --optim-category none
 ```
 
-<br>Download pruned and quantized ResNet 50 Model
+<br>Download pruned and quantized ResNet-50 Model
 ```shell script
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
