@@ -58,7 +58,7 @@ transfer learn from the models onto private datasets, or transfer the recipes to
 
 This repository contains the Python API code to handle the connection and authentication to the cloud.
 
-## Quick Links
+### Related Products
 
 - [DeepSparse](https://github.com/neuralmagic/deepsparse): 
   CPU inference engine that delivers unprecedented performance for sparse models
