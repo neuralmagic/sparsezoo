@@ -54,7 +54,7 @@ setup(
     keywords="inference, machine learning, neural network, deep learning model, "
     "models, computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
     "quantization, sparse models, resnet, mobilenet, yolov3",
-    license="[TODO]",
+    license="Apache",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},
     packages=_setup_packages(),
@@ -71,6 +71,7 @@ setup(
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
