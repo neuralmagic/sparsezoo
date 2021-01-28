@@ -193,7 +193,7 @@ Install with pip using:
 pip install sparsezoo
 ```
 
-Then if you want to explore any of the [scripts](scripts/), [notebooks](notebooks/), or [examples](examples/)
+Then if you would like to explore any of the [scripts](scripts/), [notebooks](notebooks/), or [examples](examples/)
 clone the repository and install any additional dependencies as required.
 
 ## Available Models and Recipes
