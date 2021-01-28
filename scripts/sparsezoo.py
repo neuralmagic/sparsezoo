@@ -4,9 +4,9 @@ Script to download a model from sparse zoo
 
 ##########
 Command help:
-usage: model_download.py [-h] {download,search} ...
+usage: sparsezoo.py [-h] {download,search} ...
 
-Download objects from the sparse zoo repo
+Download objects from the SparseZoo
 
 positional arguments:
   {download,search}
@@ -16,7 +16,7 @@ optional arguments:
 
 
 ##########
-usage: model_download.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
+usage: sparsezoo.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                 [--architecture ARCHITECTURE]
                                 [--sub-architecture SUB_ARCHITECTURE]
                                 [--framework FRAMEWORK] [--repo REPO]
@@ -74,7 +74,7 @@ optional arguments:
 
 
 ##########
-usage: model_download.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
+usage: sparsezoo.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                   --architecture ARCHITECTURE
                                   [--sub-architecture SUB_ARCHITECTURE]
                                   --framework FRAMEWORK --repo REPO --dataset
@@ -130,23 +130,23 @@ optional arguments:
 
 ##########
 Example search:
-python3 scripts/model_download.py search --domain cv --sub-domain classification
+python3 scripts/sparsezoo.py search --domain cv --sub-domain classification
 
 
 ##########
-Example search for mobilenet v1:
-python3 scripts/model_download.py search --domain cv --sub-domain classification \
+Example search for MobileNetV1:
+python3 scripts/sparsezoo.py search --domain cv --sub-domain classification \
     --architecture mobilenet_v1
 
 
 #########
-Example download mobilenet v1:
+Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --optim-name base --optim-category none
 
 #########
-Example download mobilenet v1 with maximum release version:
+Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --optim-name base --optim-category none --release-version 0.1.0

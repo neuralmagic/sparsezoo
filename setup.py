@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 _deps = [
     "numpy>=1.0.0",
-    "onnx>=1.0.0,<1.8",
+    "onnx>=1.0.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
@@ -45,17 +45,16 @@ def _setup_long_description() -> Tuple[str, str]:
 setup(
     name="sparsezoo",
     version="0.1.0",
-    author="Mark Kurtz, Kevin Rodriguez, Benjamin Fineran, Michael Goin",
+    author="Neuralmagic, Inc.",
     author_email="support@neuralmagic.com",
-    description="SparseZoo is a constantly-growing repository of optimized models. "
-    "It simplifies and accelerates your time-to-value in building "
-    "performant deep learning models with a collection of pre-trained, "
-    "performance-optimized models to prototype from.",
+    description="Neural network model repository for highly sparse models "
+    "and optimization recipes.",
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
-    keywords="inference machine learning neural network deep learning model models "
-    "computer vision nlp pretrained transfer learning",
-    license="[TODO]",
+    keywords="inference, machine learning, neural network, deep learning model, "
+    "models, computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
+    "quantization, sparse models, resnet, mobilenet, yolov3",
+    license="Apache",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},
     packages=_setup_packages(),
@@ -72,6 +71,7 @@ setup(
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
