@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 _deps = [
     "numpy>=1.0.0",
-    "onnx>=1.0.0",
+    "onnx>=1.0.0,<1.8.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
