@@ -483,8 +483,7 @@ class Model(Downloadable, ModelMetadata):
                 continue
 
             _LOGGER.info(
-                f"Downloading model framework file "
-                f"{file.display_name} {self.model_url_path}"
+                f"Downloading model framework file {file.display_name} {self.stub}"
             )
             file.download(
                 overwrite=overwrite,
