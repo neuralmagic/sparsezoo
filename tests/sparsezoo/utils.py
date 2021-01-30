@@ -13,9 +13,109 @@
 # limitations under the License.
 
 import os
+import shutil
+from collections import OrderedDict
 from typing import List
 
+import onnxruntime
 from sparsezoo.objects import Model
+from sparsezoo.utils import CACHE_DIR
+
+
+SPARSEZOO_TEST_ALL_MODELS = os.getenv("SPARSEZOO_TEST_ALL_MODELS", False)
+SPARSEZOO_TEST_ALL_CLASSIFICATION = (
+    os.getenv("SPARSEZOO_TEST_ALL_CLASSIFICATION", False) or SPARSEZOO_TEST_ALL_MODELS
+)
+SPARSEZOO_TEST_ALL_DETECTION = (
+    os.getenv("SPARSEZOO_TEST_ALL_DETECTION", False) or SPARSEZOO_TEST_ALL_MODELS
+)
+
+SPARSEZOO_TEST_ALL_EFFICIENTNET = (
+    os.getenv("SPARSEZOO_TEST_ALL_EFFICIENTNET", False)
+    or SPARSEZOO_TEST_ALL_CLASSIFICATION
+)
+SPARSEZOO_TEST_ALL_INCEPTION = (
+    os.getenv("SPARSEZOO_TEST_ALL_INCEPTION", False)
+    or SPARSEZOO_TEST_ALL_CLASSIFICATION
+)
+SPARSEZOO_TEST_ALL_MOBILENET = (
+    os.getenv("SPARSEZOO_TEST_ALL_MOBILENET", False)
+    or SPARSEZOO_TEST_ALL_CLASSIFICATION
+)
+SPARSEZOO_TEST_ALL_RESNET = (
+    os.getenv("SPARSEZOO_TEST_ALL_RESNET", False) or SPARSEZOO_TEST_ALL_CLASSIFICATION
+)
+SPARSEZOO_TEST_ALL_VGG = (
+    os.getenv("SPARSEZOO_TEST_ALL_VGG", False) or SPARSEZOO_TEST_ALL_CLASSIFICATION
+)
+
+SPARSEZOO_TEST_ALL_SSD = (
+    os.getenv("SPARSEZOO_TEST_ALL_SSD", False) or SPARSEZOO_TEST_ALL_DETECTION
+)
+SPARSEZOO_TEST_ALL_YOLO = (
+    os.getenv("SPARSEZOO_TEST_ALL_YOLO", False) or SPARSEZOO_TEST_ALL_DETECTION
+)
+ALL_MODELS_SKIP_MESSAGE = "Set 'SPARSEZOO_TEST_ALL_MODELS' flag to run all tests"
+
+
+def model_constructor(
+    constructor_function,
+    download,
+    framework,
+    repo,
+    dataset,
+    training_scheme,
+    optim_name,
+    optim_category,
+    optim_target,
+):
+    other_args = {
+        "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+    }
+
+    if framework is None:
+        model = constructor_function(**other_args)
+    else:
+        model = constructor_function(
+            framework,
+            repo,
+            dataset,
+            training_scheme,
+            optim_name,
+            optim_category,
+            optim_target,
+            **other_args,
+        )
+    assert model
+
+    if download:
+        model.download(overwrite=True)
+        validate_downloaded_model(model, check_other_args=other_args)
+        shutil.rmtree(model.dir_path)
+
+
+def validate_with_ort(path: str, input_data, output_data):
+    sess_options = onnxruntime.SessionOptions()
+
+    sess_options.log_severity_level = 3
+
+    inf_session = onnxruntime.InferenceSession(
+        path,
+        sess_options,
+    )
+
+    sess_batch = {}
+
+    for inp_index, inp in enumerate(inf_session.get_inputs()):
+        sess_batch[inp.name] = input_data[inp_index]
+
+    sess_outputs = [out.name for out in inf_session.get_outputs()]
+    pred = inf_session.run(sess_outputs, sess_batch)
+    pred_dict = OrderedDict((key, val) for key, val in zip(sess_outputs, pred))
+
+    assert len(pred_dict.keys()) == len(output_data)
+    for out_index, pred_key in enumerate(pred_dict.keys()):
+        assert pred_dict[pred_key].shape == output_data[out_index].shape
 
 
 def validate_downloaded_model(
@@ -39,7 +139,9 @@ def validate_downloaded_model(
     for file in model.framework_files:
         assert os.path.exists(file.path)
 
-    assert len(model.recipes) > (0 if model.optim_name != "base" else -1)
+    assert len(model.recipes) > (
+        0 if (model.optim_name != "base" and model.optim_name != "arch") else -1
+    )
     for recipe in model.recipes:
         assert os.path.exists(recipe.path)
 
@@ -51,7 +153,11 @@ def validate_downloaded_model(
         assert "inputs" in batch
         assert "outputs" in batch
         num_batches += 1
+
     assert num_batches == 5
+
+    for batch in model.data_loader(batch_size=1, iter_steps=5):
+        validate_with_ort(model.onnx_file.path, batch["inputs"], batch["outputs"])
 
     for data_name, data in model.data.items():
         batch = data.sample_batch()
