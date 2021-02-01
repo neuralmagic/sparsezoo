@@ -190,7 +190,10 @@ class NumpyArrayBatcher(object):
                     "numpy ndarray passed for item, but prev_batch does not contain one"
                 )
 
-            if item.shape != self._items[NDARRAY_KEY][0].shape:
+            if item.shape != self._items[NDARRAY_KEY][0].shape and (
+                item.shape[0] != self._items[NDARRAY_KEY][0].shape[0]
+                and item.shape[2:] != self._items[NDARRAY_KEY][0].shape[2:]
+            ):
                 raise ValueError(
                     (
                         f"item of numpy ndarray of shape {item.shape} does not "
