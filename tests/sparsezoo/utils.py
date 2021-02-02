@@ -18,15 +18,17 @@ from collections import OrderedDict
 from typing import Callable, Dict, List, Optional
 
 import onnxruntime
+from sparsezoo.models import Zoo
 from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
 
 
-def download_and_verify(model: Model, other_args: Optional[Dict] = None):
+def download_and_verify(model: str, other_args: Optional[Dict] = None):
     if other_args is None:
         other_args = {
             "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
         }
+    model = Zoo.load_model_from_stub(model, **other_args)
     model.download(overwrite=True)
     validate_downloaded_model(model, check_other_args=other_args)
     shutil.rmtree(model.dir_path)

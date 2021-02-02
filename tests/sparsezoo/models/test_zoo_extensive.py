@@ -17,11 +17,10 @@ from typing import List
 import pytest
 
 from sparsezoo.models import Zoo
-from sparsezoo.objects import Model
 from tests.sparsezoo.utils import download_and_verify
 
 
-def _get_models(domain, sub_domain) -> List[Model]:
+def _get_models(domain, sub_domain) -> List[str]:
     page = 1
     models = []
     while True:
@@ -30,7 +29,7 @@ def _get_models(domain, sub_domain) -> List[Model]:
             break
         models.extend(results)
         page += 1
-    return models
+    return [model.stub for model in models]
 
 
 @pytest.mark.parametrize(("model"), _get_models("cv", "classification"))
