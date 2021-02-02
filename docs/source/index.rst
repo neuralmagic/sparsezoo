@@ -8,7 +8,7 @@ Neural network model repository for highly sparse models and optimization recipe
 
     <div style="margin-bottom:16px;">
         <a href="https://github.com/neuralmagic/comingsoon/blob/master/LICENSE">
-            <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/comingsoon.svg?color=purple&style=for-the-badge" height=25 style="margin-bottom:4px;">
+            <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
         <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
             <img alt="Documentation" src="https://img.shields.io/website/http/neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25 style="margin-bottom:4px;">
@@ -16,7 +16,7 @@ Neural network model repository for highly sparse models and optimization recipe
         <a href="https://github.com/neuralmagic/sparsezoo/releases">
             <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
-        <a href="https://github.com/neuralmagic.com/comingsoon/blob/master/CODE_OF_CONDUCT.md">
+        <a href="https://github.com/neuralmagic.com/sparsezoo/blob/master/CODE_OF_CONDUCT.md">
             <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
          <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
