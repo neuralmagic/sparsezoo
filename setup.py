@@ -31,7 +31,9 @@ _dev_deps = [
     "rinohtype>=0.4.2",
     "recommonmark>=0.7.0",
     "sphinxcontrib-api>=0.3.0",
-    "sphinx-copybutton>=0.3.0" "sphinx-markdown-tables>=0.0.15" "wheel>=0.36.2",
+    "sphinx-copybutton>=0.3.0",
+    "sphinx-markdown-tables>=0.0.15",
+    "wheel>=0.36.2",
     "pytest>=6.0.0",
     "sphinx-rtd-theme",
 ]
