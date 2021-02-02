@@ -27,8 +27,9 @@ __all__ = ["yolo_v3"]
 
 
 def yolo_v3(
+    sub_architecture: str = "spp",
     framework: str = "pytorch",
-    repo: str = "sparseml",
+    repo: str = "ultralytics",
     dataset: str = "coco",
     training_scheme: Union[str, None] = None,
     optim_name: str = "base",
@@ -38,6 +39,8 @@ def yolo_v3(
     """
     Convenience function for getting an ssd resnet50 300 model
 
+    :param sub_architecture: The sub architecture of the model the object belongs
+        to; e.g. spp
     :param framework: The framework the model the object belongs to was trained on;
         e.g. pytorch, tensorflow
     :param repo: the source repo for the model the object belongs to;
@@ -59,7 +62,7 @@ def yolo_v3(
         domain="cv",
         sub_domain="detection",
         architecture="yolo_v3",
-        sub_architecture=None,
+        sub_architecture=sub_architecture,
         framework=framework,
         repo=repo,
         dataset=dataset,
