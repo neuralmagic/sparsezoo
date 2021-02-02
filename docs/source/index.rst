@@ -7,7 +7,7 @@ Neural network model repository for highly sparse models and optimization recipe
 .. raw:: html
 
     <div style="margin-bottom:16px;">
-        <a href="https://github.com/neuralmagic/comingsoon/blob/master/LICENSE">
+        <a href="https://github.com/neuralmagic/sparsezoo/blob/master/LICENSE">
             <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
         <a href="https://docs.neuralmagic.com/sparsezoo/index.html">

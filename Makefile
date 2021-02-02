@@ -31,7 +31,7 @@ test:
 
 # create docs
 docs:
-	sphinx-apidoc -o "$(DOCDIR)/source/" src/sparsezoo;
+	sphinx-apidoc -o "$(DOCDIR)/source/api" src/sparsezoo;
 	cd $(DOCDIR) && $(MAKE) html;
 
 # creates wheel file
