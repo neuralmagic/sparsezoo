@@ -15,59 +15,33 @@
 import os
 import shutil
 from collections import OrderedDict
-from typing import List
+from typing import Callable, Dict, List, Optional
 
 import onnxruntime
 from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
 
 
-SPARSEZOO_TEST_ALL_MODELS = os.getenv("SPARSEZOO_TEST_ALL_MODELS", False)
-SPARSEZOO_TEST_ALL_CLASSIFICATION = (
-    os.getenv("SPARSEZOO_TEST_ALL_CLASSIFICATION", False) or SPARSEZOO_TEST_ALL_MODELS
-)
-SPARSEZOO_TEST_ALL_DETECTION = (
-    os.getenv("SPARSEZOO_TEST_ALL_DETECTION", False) or SPARSEZOO_TEST_ALL_MODELS
-)
-
-SPARSEZOO_TEST_ALL_EFFICIENTNET = (
-    os.getenv("SPARSEZOO_TEST_ALL_EFFICIENTNET", False)
-    or SPARSEZOO_TEST_ALL_CLASSIFICATION
-)
-SPARSEZOO_TEST_ALL_INCEPTION = (
-    os.getenv("SPARSEZOO_TEST_ALL_INCEPTION", False)
-    or SPARSEZOO_TEST_ALL_CLASSIFICATION
-)
-SPARSEZOO_TEST_ALL_MOBILENET = (
-    os.getenv("SPARSEZOO_TEST_ALL_MOBILENET", False)
-    or SPARSEZOO_TEST_ALL_CLASSIFICATION
-)
-SPARSEZOO_TEST_ALL_RESNET = (
-    os.getenv("SPARSEZOO_TEST_ALL_RESNET", False) or SPARSEZOO_TEST_ALL_CLASSIFICATION
-)
-SPARSEZOO_TEST_ALL_VGG = (
-    os.getenv("SPARSEZOO_TEST_ALL_VGG", False) or SPARSEZOO_TEST_ALL_CLASSIFICATION
-)
-
-SPARSEZOO_TEST_ALL_SSD = (
-    os.getenv("SPARSEZOO_TEST_ALL_SSD", False) or SPARSEZOO_TEST_ALL_DETECTION
-)
-SPARSEZOO_TEST_ALL_YOLO = (
-    os.getenv("SPARSEZOO_TEST_ALL_YOLO", False) or SPARSEZOO_TEST_ALL_DETECTION
-)
-ALL_MODELS_SKIP_MESSAGE = "Set 'SPARSEZOO_TEST_ALL_MODELS' flag to run all tests"
+def download_and_verify(model: Model, other_args: Optional[Dict] = None):
+    if other_args is None:
+        other_args = {
+            "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+        }
+    model.download(overwrite=True)
+    validate_downloaded_model(model, check_other_args=other_args)
+    shutil.rmtree(model.dir_path)
 
 
 def model_constructor(
-    constructor_function,
-    download,
-    framework,
-    repo,
-    dataset,
-    training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    constructor_function: Callable,
+    download: bool,
+    framework: str,
+    repo: str,
+    dataset: str,
+    training_scheme: Optional[str],
+    optim_name: str,
+    optim_category: str,
+    optim_target: Optional[str],
 ):
     other_args = {
         "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -94,7 +68,7 @@ def model_constructor(
         shutil.rmtree(model.dir_path)
 
 
-def validate_with_ort(path: str, input_data, output_data):
+def validate_with_ort(path: str, input_data: List, output_data: List):
     sess_options = onnxruntime.SessionOptions()
 
     sess_options.log_severity_level = 3

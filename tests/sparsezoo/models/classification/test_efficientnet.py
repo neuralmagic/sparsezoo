@@ -22,7 +22,6 @@ from tests.sparsezoo.utils import (
 )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_EFFICIENTNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

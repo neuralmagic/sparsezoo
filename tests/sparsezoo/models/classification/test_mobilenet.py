@@ -14,11 +14,7 @@
 import pytest
 
 from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
-from tests.sparsezoo.utils import (
-    ALL_MODELS_SKIP_MESSAGE,
-    SPARSEZOO_TEST_ALL_MOBILENET,
-    model_constructor,
-)
+from tests.sparsezoo.utils import model_constructor
 
 
 @pytest.mark.parametrize(
@@ -53,7 +49,6 @@ def test_mobilenet_v1(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_MOBILENET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "optim_name,optim_category,optim_target",

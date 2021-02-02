@@ -15,14 +15,9 @@
 import pytest
 
 from sparsezoo.models.detection import yolo_v3
-from tests.sparsezoo.utils import (
-    ALL_MODELS_SKIP_MESSAGE,
-    SPARSEZOO_TEST_ALL_YOLO,
-    model_constructor,
-)
+from tests.sparsezoo.utils import model_constructor
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_YOLO, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

@@ -15,11 +15,7 @@
 import pytest
 
 from sparsezoo.models.detection import ssd_resnet50_300
-from tests.sparsezoo.utils import (
-    ALL_MODELS_SKIP_MESSAGE,
-    SPARSEZOO_TEST_ALL_SSD,
-    model_constructor,
-)
+from tests.sparsezoo.utils import model_constructor
 
 
 @pytest.mark.parametrize(
@@ -55,7 +51,6 @@ def test_ssd_resnet50_300(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_SSD, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

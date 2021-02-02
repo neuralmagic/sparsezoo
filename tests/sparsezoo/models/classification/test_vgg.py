@@ -24,14 +24,9 @@ from sparsezoo.models.classification import (
     vgg_19,
     vgg_19bn,
 )
-from tests.sparsezoo.utils import (
-    ALL_MODELS_SKIP_MESSAGE,
-    SPARSEZOO_TEST_ALL_VGG,
-    model_constructor,
-)
+from tests.sparsezoo.utils import model_constructor
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -66,7 +61,6 @@ def test_vgg_11(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -100,7 +94,6 @@ def test_vgg_11_bn(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -134,7 +127,6 @@ def test_vgg_13(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -168,7 +160,6 @@ def test_vgg_13_bn(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -204,7 +195,6 @@ def test_vgg_16(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -238,7 +228,6 @@ def test_vgg_16_bn(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -273,7 +262,6 @@ def test_vgg_19(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_VGG, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

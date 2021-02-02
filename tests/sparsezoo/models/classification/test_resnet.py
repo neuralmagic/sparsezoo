@@ -23,14 +23,9 @@ from sparsezoo.models.classification import (
     resnet_101_2x,
     resnet_152,
 )
-from tests.sparsezoo.utils import (
-    ALL_MODELS_SKIP_MESSAGE,
-    SPARSEZOO_TEST_ALL_RESNET,
-    model_constructor,
-)
+from tests.sparsezoo.utils import model_constructor
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -65,7 +60,6 @@ def test_resnet_18(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -133,7 +127,6 @@ def test_resnet_50(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -200,7 +193,6 @@ def test_resnet_50_extended(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -234,7 +226,6 @@ def test_resnet_50_2x(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -269,7 +260,6 @@ def test_resnet_101(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -303,7 +293,6 @@ def test_resnet_101_2x(
     )
 
 
-@pytest.mark.skipif(not SPARSEZOO_TEST_ALL_RESNET, reason=ALL_MODELS_SKIP_MESSAGE)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
