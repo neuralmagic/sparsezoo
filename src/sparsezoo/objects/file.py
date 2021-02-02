@@ -309,7 +309,6 @@ class File(BaseObject, Downloadable):
     ):
         """
         Downloads a sparsezoo file.
-        If the file_type is a data type then the downloaded tar file will be extracted
 
         :param overwrite: True to overwrite any previous file, False otherwise
         :param refresh_token: True to refresh the auth token, False otherwise
