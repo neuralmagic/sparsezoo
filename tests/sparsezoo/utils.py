@@ -53,13 +53,13 @@ def model_constructor(
         model = constructor_function(**other_args)
     else:
         model = constructor_function(
-            framework,
-            repo,
-            dataset,
-            training_scheme,
-            optim_name,
-            optim_category,
-            optim_target,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
             **other_args,
         )
     assert model
@@ -129,7 +129,6 @@ def validate_downloaded_model(
         assert "inputs" in batch
         assert "outputs" in batch
         num_batches += 1
-
     assert num_batches == 5
 
     for batch in model.data_loader(batch_size=1, iter_steps=5):

@@ -25,7 +25,7 @@ from tests.sparsezoo.utils import model_constructor
     ),
     [
         (True, "pytorch", "ultralytics", "coco", None, "base", "none", None),
-        (True, "pytorch", "ultralytics", "coco", None, "pruned", "moderate", None),
+        (True, "pytorch", "ultralytics", "coco", None, "pruned", "aggressive", None),
     ],
 )
 def test_yolo_v3(
