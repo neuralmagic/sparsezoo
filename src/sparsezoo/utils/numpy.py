@@ -74,6 +74,7 @@ def save_numpy(
 ):
     """
     Save a numpy array or collection of numpy arrays to disk
+
     :param array: the array or collection of arrays to save
     :param export_dir: the directory to export the numpy file into
     :param name: the name of the file to export to (without extension)
@@ -139,13 +140,16 @@ def load_numpy_list(
     """
     loaded = []
 
-    if isinstance(data, str) and os.path.isdir(data):
-        data = sorted(glob.glob(data))
-    elif isinstance(data, str) and tarfile.is_tarfile(data):
-        data = load_numpy_from_tar(data)
-    elif isinstance(data, str):
-        # treat as a numpy file to load from
-        data = [load_numpy(data)]
+    if isinstance(data, str):
+        if os.path.isfile(data) and tarfile.is_tarfile(data):
+            data = load_numpy_from_tar(data)
+        elif os.path.isfile(data) and ".np" in data:
+            # treat as a numpy file to load from
+            data = [load_numpy(data)]
+        else:
+            # load from directory or glob
+            glob_path = os.path.join(data, "*") if os.path.isdir(data) else data
+            data = sorted(glob.glob(glob_path))
 
     for dat in data:
         if isinstance(dat, str):

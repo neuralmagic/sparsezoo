@@ -1,11 +1,11 @@
 # Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ _deps = [
     "requests>=2.0.0",
     "tqdm>=4.0.0",
 ]
+_notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
 _dev_deps = [
     "black>=20.8b1",
@@ -30,7 +31,12 @@ _dev_deps = [
     "onnxruntime>=1.0.0",
     "pytest>=6.0.0",
     "rinohtype>=0.4.2",
-    "sphinxcontrib-apidoc>=0.3.0",
+    "recommonmark>=0.7.0",
+    "sphinx>=3.4.0",
+    "sphinx-copybutton>=0.3.0",
+    "sphinx-markdown-tables>=0.0.15",
+    "wheel>=0.36.2",
+    "pytest>=6.0.0",
     "sphinx-rtd-theme",
     "wheel>=0.36.2",
 ]
@@ -47,7 +53,7 @@ def _setup_install_requires() -> List:
 
 
 def _setup_extras() -> Dict:
-    return {"dev": _dev_deps}
+    return {"dev": _dev_deps, "nb": _notebook_deps}
 
 
 def _setup_entry_points() -> Dict:
