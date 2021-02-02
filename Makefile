@@ -7,7 +7,7 @@ DOCDIR := docs
 MDCHECKGLOBS := 'docs/**/*.md' 'examples/**/*.md' 'notebooks/**/*.md' 'scripts/**/*.md'
 MDCHECKFILES := CODE_OF_CONDUCT.md CONTRIBUTING.md DEVELOPING.md README.md
 
-TARGETS := ""  # targets for running pytests: full,efficientnet,inception,mobilenet,resnet,vgg,ssd,yolo
+TARGETS := ""  # targets for running pytests: full,efficientnet,inception,resnet,vgg,ssd,yolo
 PYTEST_ARGS := ""
 ifneq ($(findstring full,$(TARGETS)),full)
     PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/test_zoo_extensive.py
@@ -23,6 +23,9 @@ ifneq ($(findstring resnet,$(TARGETS)),resnet)
 endif
 ifneq ($(findstring vgg,$(TARGETS)),vgg)
     PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/classification/test_vgg.py
+endif
+ifneq ($(findstring ssd,$(TARGETS)),ssd)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/detection/test_ssd.py
 endif
 ifneq ($(findstring yolo,$(TARGETS)),yolo)
     PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/detection/test_yolo.py
