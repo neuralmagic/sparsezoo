@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Sparse Zoo"
+project = "SparseZoo"
 copyright = (
-    "Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved. "
+    "2021 - present / Neuralmagic, Inc. All Rights Reserved. "
     'Licensed under the Apache License, Version 2.0 (the "License")'
 )
 author = "Neural Magic"
@@ -122,14 +122,14 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "sparsezoo.tex", "Sparse Zoo Documentation", [author], "manual",),
+    (master_doc, "sparsezoo.tex", "SparseZoo Documentation", [author], "manual",),
 ]
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "sparsezoo", "Sparse Zoo Documentation", [author], 1)]
+man_pages = [(master_doc, "sparsezoo", "SparseZoo Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -141,7 +141,7 @@ texinfo_documents = [
     (
         master_doc,
         "sparsezoo",
-        "Sparse Zoo Documentation",
+        "SparseZoo Documentation",
         author,
         "sparsezoo",
         (

@@ -17,8 +17,7 @@ limitations under the License.
 ### Installation
 
 This repository is tested on Python 3.6+, and Linux/Debian systems.
-It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) 
-to keep your system in order.
+It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
 Install with pip using:
 
@@ -26,7 +25,4 @@ Install with pip using:
 pip install sparsezoo
 ```
 
-Then if you would like to explore any of the [scripts](https://github.com/neuralmagic/sparsezoo/tree/main/scripts), 
-[notebooks](https://github.com/neuralmagic/sparsezoo/tree/main/notebooks), 
-or [examples](https://github.com/neuralmagic/sparsezoo/tree/main/examples)
-clone the repository and install any additional dependencies as required.
+Then if you would like to explore any of the [scripts](https://github.com/neuralmagic/sparsezoo/tree/main/scripts) or [notebooks](https://github.com/neuralmagic/sparsezoo/tree/main/notebooks) clone the repository and install any additional dependencies as required.
