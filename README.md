@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# ![icon for SparseZoo]((https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
+# ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
 ### Neural network model repository for highly sparse models and optimization recipes
 
