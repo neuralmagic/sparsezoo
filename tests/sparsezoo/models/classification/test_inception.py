@@ -11,22 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import pytest
 
-from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
+from sparsezoo.models.classification import inception_v3
 from tests.sparsezoo.utils import model_constructor
 
 
 @pytest.mark.parametrize(
-    "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
+    (
+        "download,framework,repo,dataset,training_scheme,"
+        "optim_name,optim_category,optim_target"
+    ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
         (True, "pytorch", "sparseml", "imagenet", None, "pruned", "conservative", None),
         (True, "pytorch", "sparseml", "imagenet", None, "pruned", "moderate", None),
     ],
 )
-def test_mobilenet_v1(
+def test_inception_v3(
     download,
     framework,
     repo,
@@ -37,37 +40,7 @@ def test_mobilenet_v1(
     optim_target,
 ):
     model_constructor(
-        mobilenet_v1,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
-    )
-
-
-@pytest.mark.parametrize(
-    "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
-    [
-        (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
-    ],
-)
-def test_mobilenet_v2(
-    download,
-    framework,
-    repo,
-    dataset,
-    training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
-):
-    model_constructor(
-        mobilenet_v2,
+        inception_v3,
         download,
         framework,
         repo,

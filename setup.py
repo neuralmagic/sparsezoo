@@ -28,6 +28,8 @@ _dev_deps = [
     "black>=20.8b1",
     "flake8>=3.8.3",
     "isort>=5.7.0",
+    "onnxruntime>=1.0.0",
+    "pytest>=6.0.0",
     "rinohtype>=0.4.2",
     "recommonmark>=0.7.0",
     "sphinx>=3.4.0",
@@ -36,6 +38,7 @@ _dev_deps = [
     "wheel>=0.36.2",
     "pytest>=6.0.0",
     "sphinx-rtd-theme",
+    "wheel>=0.36.2",
 ]
 
 

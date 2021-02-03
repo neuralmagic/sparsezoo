@@ -7,6 +7,31 @@ DOCDIR := docs
 MDCHECKGLOBS := 'docs/**/*.md' 'docs/**/*.rst' 'examples/**/*.md' 'notebooks/**/*.md' 'scripts/**/*.md'
 MDCHECKFILES := CODE_OF_CONDUCT.md CONTRIBUTING.md DEVELOPING.md README.md
 
+TARGETS := ""  # targets for running pytests: full,efficientnet,inception,resnet,vgg,ssd,yolo
+PYTEST_ARGS := ""
+ifneq ($(findstring full,$(TARGETS)),full)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/test_zoo_extensive.py
+endif
+ifneq ($(findstring efficientnet,$(TARGETS)),efficientnet)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/classification/test_efficientnet.py
+endif
+ifneq ($(findstring inception,$(TARGETS)),inception)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/classification/test_inception.py
+endif
+ifneq ($(findstring resnet,$(TARGETS)),resnet)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/classification/test_resnet.py
+endif
+ifneq ($(findstring vgg,$(TARGETS)),vgg)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/classification/test_vgg.py
+endif
+ifneq ($(findstring ssd,$(TARGETS)),ssd)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/detection/test_ssd.py
+endif
+ifneq ($(findstring yolo,$(TARGETS)),yolo)
+    PYTEST_ARGS := $(PYTEST_ARGS) --ignore tests/sparsezoo/models/detection/test_yolo.py
+endif
+
+
 # run checks on all files for the repo
 quality:
 	@echo "Running copyright checks";
@@ -27,7 +52,7 @@ style:
 # run tests for the repo
 test:
 	@echo "Running python tests";
-	@pytest;
+	pytest tests $(PYTEST_ARGS);
 
 # create docs
 docs:

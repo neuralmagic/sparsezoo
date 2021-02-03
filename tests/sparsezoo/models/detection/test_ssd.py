@@ -11,22 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import pytest
 
-from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
+from sparsezoo.models.detection import ssd_resnet50_300
 from tests.sparsezoo.utils import model_constructor
 
 
 @pytest.mark.parametrize(
-    "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
+    (
+        "download,framework,repo,dataset,training_scheme,"
+        "optim_name,optim_category,optim_target"
+    ),
     [
-        (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
-        (True, "pytorch", "sparseml", "imagenet", None, "pruned", "conservative", None),
-        (True, "pytorch", "sparseml", "imagenet", None, "pruned", "moderate", None),
+        (True, "pytorch", "sparseml", "coco", None, "base", "none", None),
+        (True, "pytorch", "sparseml", "coco", None, "pruned", "moderate", None),
     ],
 )
-def test_mobilenet_v1(
+def test_ssd_resnet50_300(
     download,
     framework,
     repo,
@@ -37,7 +39,7 @@ def test_mobilenet_v1(
     optim_target,
 ):
     model_constructor(
-        mobilenet_v1,
+        ssd_resnet50_300,
         download,
         framework,
         repo,
@@ -50,13 +52,16 @@ def test_mobilenet_v1(
 
 
 @pytest.mark.parametrize(
-    "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
+    (
+        "download,framework,repo,dataset,training_scheme,"
+        "optim_name,optim_category,optim_target"
+    ),
     [
-        (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
+        (True, "pytorch", "sparseml", "voc", None, "base", "none", None),
+        (True, "pytorch", "sparseml", "voc", None, "pruned", "moderate", None),
     ],
 )
-def test_mobilenet_v2(
+def test_ssd_resnet50_300_extended(
     download,
     framework,
     repo,
@@ -67,7 +72,7 @@ def test_mobilenet_v2(
     optim_target,
 ):
     model_constructor(
-        mobilenet_v2,
+        ssd_resnet50_300,
         download,
         framework,
         repo,

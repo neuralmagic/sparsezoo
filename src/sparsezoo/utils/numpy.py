@@ -169,6 +169,7 @@ class NumpyArrayBatcher(object):
 
     def __init__(self):
         self._items = OrderedDict()  # type: Dict[str, List[numpy.ndarray]]
+        self._batch_index = None
 
     def __len__(self):
         if len(self._items) == 0:
@@ -189,12 +190,20 @@ class NumpyArrayBatcher(object):
             for key, val in item.items():
                 self._items[key] = [val]
         elif isinstance(item, numpy.ndarray):
+            if self._batch_index is None:
+                self._batch_index = {NDARRAY_KEY: 0}
             if NDARRAY_KEY not in self._items:
                 raise ValueError(
                     "numpy ndarray passed for item, but prev_batch does not contain one"
                 )
 
             if item.shape != self._items[NDARRAY_KEY][0].shape:
+                self._batch_index[NDARRAY_KEY] = 1
+
+            if item.shape != self._items[NDARRAY_KEY][0].shape and (
+                item.shape[0] != self._items[NDARRAY_KEY][0].shape[0]
+                or item.shape[2:] != self._items[NDARRAY_KEY][0].shape[2:]
+            ):
                 raise ValueError(
                     (
                         f"item of numpy ndarray of shape {item.shape} does not "
@@ -215,8 +224,17 @@ class NumpyArrayBatcher(object):
                     )
                 )
 
+            if self._batch_index is None:
+                self._batch_index = {key: 0 for key in item}
+
             for key, val in item.items():
                 if val.shape != self._items[key][0].shape:
+                    self._batch_index[key] = 1
+
+                if val.shape != self._items[key][0].shape and (
+                    val.shape[0] != self._items[key][0].shape[0]
+                    or val.shape[2:] != self._items[key][0].shape[2:]
+                ):
                     raise ValueError(
                         (
                             f"item with key {key} of shape {val.shape} does not "
@@ -240,8 +258,10 @@ class NumpyArrayBatcher(object):
         batch_dict = OrderedDict()
 
         for key, val in self._items.items():
-            batch_dict[key] = numpy.stack(self._items[key])
-
+            if self._batch_index is None or self._batch_index[key] == 0:
+                batch_dict[key] = numpy.stack(val)
+            else:
+                batch_dict[key] = numpy.concatenate(val, axis=self._batch_index[key])
         return batch_dict if not as_list else list(batch_dict.values())
 
 
