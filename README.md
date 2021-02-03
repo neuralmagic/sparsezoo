@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# ![icon for SparseZoo](https://github.com/neuralmagic/sparsezoo/blob/main/docs/icon-sparsezoo.png) SparseZoo
+# ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
 ### Neural network model repository for highly sparse models and optimization recipes
 
@@ -23,7 +23,7 @@ limitations under the License.
         <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/comingsoon.svg?color=purple&style=for-the-badge" height=25>
     </a>
     <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
-        <img alt="Documentation" src="https://img.shields.io/website/http/neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
+        <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/releases">
         <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25>
@@ -205,13 +205,13 @@ Install with pip using:
 pip install sparsezoo
 ```
 
-Then if you would like to explore any of the [scripts](https://github.com/neuralmagic/sparsezoo/blob/main/scripts/), [notebooks](https://github.com/neuralmagic/sparsezoo/blob/main/notebooks/), or [examples](https://github.com/neuralmagic/sparsezoo/blob/main/examples/)
+Then if you would like to explore any of the [scripts](https://github.com/neuralmagic/sparsezoo/blob/main/scripts/) or [notebooks](https://github.com/neuralmagic/sparsezoo/blob/main/notebooks/)
 clone the repository and install any additional dependencies as required.
 
 ## Available Models and Recipes
 
 A number of pre-trained baseline and optimized models across domains and sub domains are available and constantly being added.
-For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/available-models.md).
+For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md).
 
 ## Resources and Learning More
 
@@ -223,7 +223,7 @@ For an up to date list, please consult the [available models listing](https://gi
 
 ## Contributing
 
-We appreciate contributions to the code, examples, and documentation as well as bug reports and feature requests![Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
+We appreciate contributions to the code, examples, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
 
 ## Join the Community
 

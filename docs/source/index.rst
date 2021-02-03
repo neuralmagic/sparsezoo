@@ -17,21 +17,21 @@
 SparseZoo |version|
 ===================
 
-Neural network model repository for highly sparse models and optimization recipes.
+Neural network model repository for highly sparse models and optimization recipes
 
 .. raw:: html
 
     <div style="margin-bottom:16px;">
-        <a href="https://github.com/neuralmagic/sparsezoo/blob/master/LICENSE">
+        <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
             <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
         <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
-            <img alt="Documentation" src="https://img.shields.io/website/http/neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25 style="margin-bottom:4px;">
+            <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
         <a href="https://github.com/neuralmagic/sparsezoo/releases">
             <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
-        <a href="https://github.com/neuralmagic.com/sparsezoo/blob/master/CODE_OF_CONDUCT.md">
+        <a href="https://github.com/neuralmagic.com/sparsezoo/blob/main/CODE_OF_CONDUCT.md">
             <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25 style="margin-bottom:4px;">
         </a>
          <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
@@ -77,7 +77,6 @@ Related Products
 Resources and Learning More
 ===========================
 
-- `SparseZoo Documentation <https://docs.neuralmagic.com/sparsezoo/ />`_
 - `SparseML Documentation <https://docs.neuralmagic.com/sparseml/ />`_
 - `Sparsify Documentation <https://docs.neuralmagic.com/sparsify/ />`_
 - `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse/ />`_
@@ -109,3 +108,11 @@ Additionally, more information can be found via
     :caption: API
 
     api/sparsezoo
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Help and Support
+
+    `Bugs, Feature Requests <https://github.com/neuralmagic/sparsezoo/discussions>`_ 
+    `Support, General Q&A <https://github.com/neuralmagic/sparsezoo/issues>`_ 
+   

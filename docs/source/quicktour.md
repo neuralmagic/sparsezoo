@@ -56,6 +56,7 @@ The Python APIs respect this format enabling you to search and download models.
 Some code examples are given below.
 
 #### Searching the Zoo
+
 ```python
 from sparsezoo import Zoo
 
@@ -64,6 +65,7 @@ print(models)
 ```
 
 #### Common Models
+
 ```python
 from sparsezoo.models.classification import resnet_50
 
@@ -74,6 +76,7 @@ print(model.onnx_file.downloaded_path())
 ```
 
 #### Searching Optimized Versions
+
 ```python
 from sparsezoo import Zoo
 from sparsezoo.models.classification import resnet_50
@@ -89,8 +92,7 @@ print(optimized_models)
 In addition to the Python APIs, a console script entry point is installed with the package `sparsezoo`.
 This enables easy interaction straight from your console/terminal.
 Note, for some environments the console scripts cannot install properly.
-If this happens for your system and the sparsezoo command is not available, 
-`scripts/sparsezoo.py` may be used in its place. 
+If this happens for your system and the sparsezoo command is not available, `scripts/sparsezoo.py` may be used in its place.
 
 ```shell script
 sparsezoo -h
@@ -99,17 +101,20 @@ sparsezoo -h
 #### Searching
 
 Search command help
+
 ```shell script
 sparsezoo search -h
 ```
 
 <br>Searching for all classification models in the computer vision domain
+
 ```shell script
 sparsezoo search --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50
 ```
 
 <br>Searching for all ResNet-50 models
+
 ```shell script
 sparsezoo search --domain cv --sub-domain classification
 ```
@@ -117,11 +122,13 @@ sparsezoo search --domain cv --sub-domain classification
 #### Downloading
 
 Download command help
+
 ```shell script
 sparsezoo download -h
 ```
 
 <br>Download ResNet-50 Model
+
 ```shell script
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
@@ -130,6 +137,7 @@ sparsezoo download --domain cv --sub-domain classification \
 ```
 
 <br>Download pruned and quantized ResNet-50 Model
+
 ```shell script
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
