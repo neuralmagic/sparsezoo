@@ -7,6 +7,7 @@ DOCDIR := docs
 MDCHECKGLOBS := 'docs/**/*.md' 'docs/**/*.rst' 'examples/**/*.md' 'notebooks/**/*.md' 'scripts/**/*.md'
 MDCHECKFILES := CODE_OF_CONDUCT.md CONTRIBUTING.md DEVELOPING.md README.md
 
+BUILD_ARGS :=  # set nightly to build nightly release
 TARGETS := ""  # targets for running pytests: full,efficientnet,inception,resnet,vgg,ssd,yolo
 PYTEST_ARGS := ""
 ifneq ($(findstring full,$(TARGETS)),full)
@@ -61,7 +62,7 @@ docs:
 
 # creates wheel file
 build:
-	python3 setup.py sdist bdist_wheel
+	python3 setup.py sdist bdist_wheel $(BUILD_ARGS)
 
 # clean package
 clean:
