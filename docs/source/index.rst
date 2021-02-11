@@ -60,7 +60,7 @@ allowing for significantly faster models with limited to no effect on their base
 Recipe-driven approaches built around these optimizations allow you to take the models as given,
 transfer learn from the models onto private datasets, or transfer the recipes to your architectures.
 
-This repository contains the Python API code to handle the connection and authentication to the cloud.
+`This repository <https://github.com/neuralmagic/sparsezoo />`_ contains the Python API code to handle the connection and authentication to the cloud.
 
 Related Products
 ================
@@ -77,19 +77,19 @@ Related Products
 Resources and Learning More
 ===========================
 
-- `SparseML Documentation <https://docs.neuralmagic.com/sparseml/ />`_
-- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify/ />`_
-- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse/ />`_
-- `Neural Magic Blog <https://www.neuralmagic.com/blog/ />`_,
-  `Resources <https://www.neuralmagic.com/resources/ />`_,
-  `Website <https://www.neuralmagic.com/ />`_
+- `SparseML Documentation <https://docs.neuralmagic.com/sparseml />`_
+- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify />`_
+- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse />`_
+- `Neural Magic Blog <https://www.neuralmagic.com/blog />`_,
+  `Resources <https://www.neuralmagic.com/resources />`_,
+  `Website <https://www.neuralmagic.com />`_
 
 Release History
 ===============
 
 Official builds are hosted on PyPi
-- stable: `sparsezoo <https://pypi.org/project/sparsezoo/ />`_
-- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly/ />`_
+- stable: `sparsezoo <https://pypi.org/project/sparsezoo />`_
+- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly />`_
 
 Additionally, more information can be found via
 `GitHub Releases <https://github.com/neuralmagic/sparsezoo/releases />`_.
@@ -110,8 +110,9 @@ Additionally, more information can be found via
     api/sparsezoo
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Help and Support
+    :maxdepth: 3
+    :caption: Help
 
     Bugs, Feature Requests <https://github.com/neuralmagic/sparsezoo/issues>
     Support, General Q&A <https://github.com/neuralmagic/sparsezoo/discussions>
+    Neural Magic Docs <https://docs.neuralmagic.com>
