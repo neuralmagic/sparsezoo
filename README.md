@@ -16,7 +16,7 @@ limitations under the License.
 
 # ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
-### Neural network model repository for highly sparse models and optimization recipes
+### Open-source neural network model repository for highly sparse and sparse-quantized models with matching pruning recipes for CPUs and GPUs
 
 <p>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">

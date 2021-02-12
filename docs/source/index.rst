@@ -17,8 +17,7 @@
 SparseZoo |version|
 ===================
 
-Neural network model repository for highly sparse models and optimization recipes
-
+Open-source neural network model repository for highly sparse and sparse-quantized models with matching pruning recipes for CPUs and GPUs
 .. raw:: html
 
     <div style="margin-bottom:16px;">
