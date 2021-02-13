@@ -20,11 +20,18 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 from typing import List, Union
 
 from sparsezoo.objects.model import Model
-from sparsezoo.objects.optimization_recipe import OptimizationRecipe
+from sparsezoo.objects.optimization_recipe import (
+    OptimizationRecipe,
+    OptimizationRecipeTypes,
+)
 from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
 
 
 __all__ = ["Zoo"]
+
+
+# optional prefix for stubs
+_ZOO_STUB_PREFIX = "zoo:"
 
 
 class Zoo:
@@ -119,6 +126,10 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Model instance
         """
+        # strip optional zoo stub prefix
+        if isinstance(stub, str) and stub.startswith(_ZOO_STUB_PREFIX):
+            stub = stub[len(_ZOO_STUB_PREFIX) :]
+
         response_json = download_get_request(
             args=stub,
             file_name=None,
@@ -443,3 +454,56 @@ class Zoo:
             match_training_scheme=match_training_scheme,
         )
         return [recipe for model in optimized_models for recipe in model.recipes]
+
+    @staticmethod
+    def download_recipe_from_stub(
+        stub: Union[str, ModelArgs, Model],
+        recipe_type: str = OptimizationRecipeTypes.ORIGINAL.value,
+    ) -> str:
+        """
+        :param stub: a string model stub, ModelArgs object, or Model object of
+            the model to download the recipe of
+        :param recipe_type: recipe type from OptimizationRecipeTypes enum object.
+            i.e. 'original', 'transfer'
+        :return: file path of the downloaded recipe
+        """
+        if not isinstance(stub, Model):
+            model = Zoo.load_model_from_stub(stub)
+        for recipe in model.recipes:
+            if recipe.recipe_type == recipe_type:
+                return recipe.downloaded_path()
+        raise RuntimeError(
+            f"No recipe with recipe_type {recipe_type} found for model {model}"
+        )
+
+    @staticmethod
+    def download_recipe_base_framework_files(
+        stub: Union[str, ModelArgs, Model],
+        recipe_type: str = OptimizationRecipeTypes.ORIGINAL.value,
+        extensions: Union[List[str], None] = None,
+    ) -> List[str]:
+        """
+        :param stub: a string model stub, ModelArgs object, or Model object of
+            the model to download the base framework files for
+        :param recipe_type: recipe type from OptimizationRecipeTypes enum object.
+            i.e. 'original', 'transfer'
+        :param extensions: List of file extensions to filter for. ex ['.pth', '.ptc'].
+            If None or empty list, all framework files are downloaded. Default is None
+        :return: file path to the downloaded framework checkpoint files for the
+            base weights of this recipe
+        """
+        if not isinstance(stub, Model):
+            model = Zoo.load_model_from_stub(stub)
+        if recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
+            # return final model's optimized weights for sparse transfer learning
+            return model.download_framework_files(extensions=extensions)
+        else:
+            # search for base model, and return those weights as a starting checkpoint
+            base_model = [
+                result
+                for result in Zoo.search_optimized_models(model)
+                if result.optim_name == "base"
+            ]
+            if not base_model:
+                raise ValueError(f"Could not find base model for model {model}")
+            return base_model[0].download_framework_files(extensions=extensions)
