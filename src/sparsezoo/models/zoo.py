@@ -17,7 +17,8 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 """
 
 
-from typing import List, Union
+import warnings
+from typing import Dict, List, Tuple, Union
 
 from sparsezoo.objects.model import Model
 from sparsezoo.objects.optimization_recipe import (
@@ -27,11 +28,51 @@ from sparsezoo.objects.optimization_recipe import (
 from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
 
 
-__all__ = ["Zoo"]
+__all__ = [
+    "ZOO_STUB_PREFIX",
+    "parse_zoo_stub",
+    "Zoo",
+]
 
 
 # optional prefix for stubs
-_ZOO_STUB_PREFIX = "zoo:"
+ZOO_STUB_PREFIX = "zoo:"
+
+
+def parse_zoo_stub(
+    stub: str, valid_params: Union[List[str], None] = None
+) -> Tuple[str, Dict[str, str]]:
+    """
+    :param stub: A SparseZoo model stub. i.e. 'model/stub/path',
+        'zoo:model/stub/path', 'zoo:model/stub/path?param1=value1&param2=value2'
+    :param valid_params: list of expected parameter names to be encoded in the
+        stub. Will raise a warning if any unexpected param names are given. Leave
+        as None to not raise any warnings. Default is None
+    :return: the parsed base stub and a dictionary of parameter names and their values
+    """
+    # strip optional zoo stub prefix
+    if stub.startswith(ZOO_STUB_PREFIX):
+        stub = stub[len(ZOO_STUB_PREFIX) :]
+
+    if "?" not in stub:
+        return stub, {}
+
+    stub_parts = stub.split("?")
+    if len(stub_parts) > 2:
+        raise ValueError(
+            "Invalid SparseZoo stub, query string must be preceded by only one '?'"
+            f"given {stub}"
+        )
+    stub, params = stub_parts
+    params = dict(param.split("=") for param in params.split("&"))
+
+    if valid_params is not None and any(param not in valid_params for param in params):
+        warnings.warn(
+            f"Invalid query string for stub {stub} valid params include {valid_params}, "
+            f" given {list(params.keys())}"
+        )
+
+    return stub, params
 
 
 class Zoo:
@@ -126,9 +167,8 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Model instance
         """
-        # strip optional zoo stub prefix
-        if isinstance(stub, str) and stub.startswith(_ZOO_STUB_PREFIX):
-            stub = stub[len(_ZOO_STUB_PREFIX) :]
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
 
         response_json = download_get_request(
             args=stub,
@@ -457,44 +497,54 @@ class Zoo:
 
     @staticmethod
     def download_recipe_from_stub(
-        stub: Union[str, ModelArgs, Model],
-        recipe_type: str = OptimizationRecipeTypes.ORIGINAL.value,
+        stub: str,
     ) -> str:
         """
-        :param stub: a string model stub, ModelArgs object, or Model object of
-            the model to download the recipe of
-        :param recipe_type: recipe type from OptimizationRecipeTypes enum object.
-            i.e. 'original', 'transfer'
-        :return: file path of the downloaded recipe
+        :param stub: a string model stub that points to a SparseZoo model.
+            recipe_type may be added as a stub parameter. i.e.
+            "model/stub/path", "zoo:model/stub/path",
+            "zoo:model/stub/path?recipe_type=original"
+        :return: file path of the downloaded recipe for that model
         """
-        if not isinstance(stub, Model):
-            model = Zoo.load_model_from_stub(stub)
+        stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
+        model = Zoo.load_model_from_stub(stub)
+
+        # parse recipe type and find matching recipe
+        recipe_type = (
+            args["recipe_type"]
+            if "recipe_type" in args
+            else OptimizationRecipeTypes.ORIGINAL.value
+        )
         for recipe in model.recipes:
             if recipe.recipe_type == recipe_type:
                 return recipe.downloaded_path()
+
         raise RuntimeError(
             f"No recipe with recipe_type {recipe_type} found for model {model}"
         )
 
     @staticmethod
     def download_recipe_base_framework_files(
-        stub: Union[str, ModelArgs, Model],
-        recipe_type: str = OptimizationRecipeTypes.ORIGINAL.value,
+        stub: str,
         extensions: Union[List[str], None] = None,
     ) -> List[str]:
         """
-        :param stub: a string model stub, ModelArgs object, or Model object of
-            the model to download the base framework files for
-        :param recipe_type: recipe type from OptimizationRecipeTypes enum object.
-            i.e. 'original', 'transfer'
+        :param stub: a string model stub that points to a SparseZoo model.
+            recipe_type may be added as a stub parameter. i.e.
+            "model/stub/path", "zoo:model/stub/path",
+            "zoo:model/stub/path?recipe_type=transfer"
         :param extensions: List of file extensions to filter for. ex ['.pth', '.ptc'].
             If None or empty list, all framework files are downloaded. Default is None
         :return: file path to the downloaded framework checkpoint files for the
             base weights of this recipe
         """
-        if not isinstance(stub, Model):
-            model = Zoo.load_model_from_stub(stub)
-        if recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
+        stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
+        model = Zoo.load_model_from_stub(stub)
+
+        if (
+            recipe_type in args
+            and args["recipe_type"] == OptimizationRecipeTypes.TRANSFER_LEARN.value
+        ):
             # return final model's optimized weights for sparse transfer learning
             return model.download_framework_files(extensions=extensions)
         else:
