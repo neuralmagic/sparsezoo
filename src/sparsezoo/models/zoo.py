@@ -546,7 +546,7 @@ class Zoo:
         valid_recipe_types = list(map(lambda typ: typ.value, OptimizationRecipeTypes))
         if recipe_type not in valid_recipe_types:
             raise ValueError(
-                f"Invalid reicpe_type {recipe_type}. "
+                f"Invalid recipe_type {recipe_type}. "
                 f"Valid recipe types: {valid_recipe_types}"
             )
 
