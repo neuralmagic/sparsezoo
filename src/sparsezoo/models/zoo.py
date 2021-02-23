@@ -542,11 +542,22 @@ class Zoo:
         model = Zoo.load_model_from_stub(stub)
 
         if (
-            recipe_type in args
+            "recipe_type" in args
             and args["recipe_type"] == OptimizationRecipeTypes.TRANSFER_LEARN.value
         ):
             # return final model's optimized weights for sparse transfer learning
-            return model.download_framework_files(extensions=extensions)
+            framework_files = model.download_framework_files(extensions=extensions)
+            if any(
+                framework_file.endswith(".ckpt.pth")
+                for framework_file in framework_files
+            ):
+                # download only pre-quantized weights
+                framework_files = [
+                    framework_file
+                    for framework_file in framework_files
+                    if framework_file.endswith(".cpkt.pth")
+                ]
+            return framework_files
         else:
             # search for base model, and return those weights as a starting checkpoint
             base_model = [
