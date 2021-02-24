@@ -179,7 +179,6 @@ __all__ = ["main"]
 DOWNLOAD_COMMAND = "download"
 SEARCH_COMMAND = "search"
 
-logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger()
 
 
@@ -330,13 +329,7 @@ def _get_command_from_model(model: Model):
         if hasattr(model, field) and getattr(model, field) is not None
     ]
 
-    command_string = download_command + " ".join(
-        # [
-        #     " \\ \n ".join(command_strings[i : i + 2])
-        #     for i in range(0, len(command_strings), 2)
-        # ]
-        command_strings
-    )
+    command_string = download_command + " ".join(command_strings)
     return command_string
 
 

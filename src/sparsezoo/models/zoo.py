@@ -68,7 +68,7 @@ def parse_zoo_stub(
 
     if valid_params is not None and any(param not in valid_params for param in params):
         warnings.warn(
-            f"Invalid query string for stub {stub} valid params include {valid_params}, "
+            f"Invalid query string for stub {stub} valid params include {valid_params},"
             f" given {list(params.keys())}"
         )
 
