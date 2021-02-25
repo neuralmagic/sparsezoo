@@ -79,22 +79,22 @@ Recipes encode the directions for how to sparsify a model into a simple, easily 
 Resources and Learning More
 ===========================
 
-- `SparseML Documentation <https://docs.neuralmagic.com/sparseml />`_
-- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify />`_
-- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse />`_
-- `Neural Magic Blog <https://www.neuralmagic.com/blog />`_,
-  `Resources <https://www.neuralmagic.com/resources />`_,
-  `Website <https://www.neuralmagic.com />`_
+- `SparseML Documentation <https://docs.neuralmagic.com/sparseml>`_
+- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify>`_
+- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse>`_
+- `Neural Magic Blog <https://www.neuralmagic.com/blog>`_,
+  `Resources <https://www.neuralmagic.com/resources>`_,
+  `Website <https://www.neuralmagic.com>`_
 
 Release History
 ===============
 
 Official builds are hosted on PyPi
-- stable: `sparsezoo <https://pypi.org/project/sparsezoo />`_
-- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly />`_
+- stable: `sparsezoo <https://pypi.org/project/sparsezoo>`_
+- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly>`_
 
 Additionally, more information can be found via
-`GitHub Releases <https://github.com/neuralmagic/sparsezoo/releases />`_.
+`GitHub Releases <https://github.com/neuralmagic/sparsezoo/releases>`_.
 
 .. toctree::
     :maxdepth: 3
