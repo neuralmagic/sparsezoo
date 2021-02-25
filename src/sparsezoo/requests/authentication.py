@@ -54,7 +54,7 @@ class SparseZooCredentials:
 
     def __init__(self):
         if os.path.exists(CREDENTIALS_YAML):
-            _LOGGER.info(f"Loading sparse zoo credentials from {CREDENTIALS_YAML}")
+            _LOGGER.debug(f"Loading sparse zoo credentials from {CREDENTIALS_YAML}")
             with open(CREDENTIALS_YAML) as credentials_file:
                 credentials_yaml = yaml.safe_load(credentials_file)
                 if credentials_yaml and CREDENTIALS_YAML_TOKEN_KEY in credentials_yaml:
@@ -66,7 +66,9 @@ class SparseZooCredentials:
                     self._token = None
                     self._created = None
         else:
-            _LOGGER.info(f"No sparse zoo credentials files found at {CREDENTIALS_YAML}")
+            _LOGGER.debug(
+                f"No sparse zoo credentials files found at {CREDENTIALS_YAML}"
+            )
             self._token = None
             self._created = None
 
@@ -78,7 +80,7 @@ class SparseZooCredentials:
         :param token: the jwt for accessing sparse zoo APIs
         :param created: the approximate time the token was created
         """
-        _LOGGER.info(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
+        _LOGGER.debug(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
         if not os.path.exists(CREDENTIALS_YAML):
             create_parent_dirs(CREDENTIALS_YAML)
         with open(CREDENTIALS_YAML, "w+") as credentials_file:
@@ -99,17 +101,17 @@ class SparseZooCredentials:
         """
         :return: obtain the token if under 1 day old, else return None
         """
-        _LOGGER.info(f"Obtaining sparse zoo credentials from {CREDENTIALS_YAML}")
+        _LOGGER.debug(f"Obtaining sparse zoo credentials from {CREDENTIALS_YAML}")
         if self._token and self._created is not None:
             creation_date = datetime.fromtimestamp(self._created, tz=timezone.utc)
             creation_difference = datetime.now(tz=timezone.utc) - creation_date
-            if creation_difference.days == 0:
+            if creation_difference.days < 30:
                 return self._token
             else:
-                _LOGGER.warning(f"Expired sparse zoo credentials at {CREDENTIALS_YAML}")
+                _LOGGER.debug(f"Expired sparse zoo credentials at {CREDENTIALS_YAML}")
                 return None
         else:
-            _LOGGER.warning(f"No sparse zoo credentials found at {CREDENTIALS_YAML}")
+            _LOGGER.debug(f"No sparse zoo credentials found at {CREDENTIALS_YAML}")
             return None
 
 
@@ -138,7 +140,7 @@ def get_auth_header(
     if token and not force_token_refresh:
         return {NM_TOKEN_HEADER: token}
     elif authentication_type.lower() == PUBLIC_AUTH_TYPE:
-        _LOGGER.warning("Obtaining new sparse zoo credentials token")
+        _LOGGER.info("Obtaining new sparse zoo credentials token")
         created = time.time()
         response = requests.post(
             url=AUTH_API, data=json.dumps({"authentication_type": PUBLIC_AUTH_TYPE})

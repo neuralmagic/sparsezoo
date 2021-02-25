@@ -64,7 +64,7 @@ def search_get_request(
     search_args = "&".join(search_args)
     url = f"{BASE_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
 
-    _LOGGER.debug(f"Searching objects from {url}")
+    _LOGGER.info(f"Searching objects from {url}")
     response_json = requests.get(url=url, headers=header).json()
 
     return response_json

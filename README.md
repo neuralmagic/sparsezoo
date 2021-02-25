@@ -16,11 +16,11 @@ limitations under the License.
 
 # ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
-### Neural network model repository for highly sparse models and optimization recipes
+### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
 <p>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/comingsoon.svg?color=purple&style=for-the-badge" height=25>
+        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25>
     </a>
     <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
         <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
@@ -44,42 +44,55 @@ limitations under the License.
 
 ## Overview
 
-SparseZoo is a constantly-growing repository of optimized models and optimization recipes for neural networks.
+SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks. 
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs baseline loss recovery. Optimizations on neural networks include approaches such as [pruning](https://neuralmagic.com/blog/pruning-overview/) and [quantization](https://arxiv.org/abs/1609.07061)
-allowing for significantly faster models with limited to no effect on their baseline metrics such as accuracy.
-Recipe-driven approaches built around these optimizations allow you to take the models as given, transfer learn from the models onto private datasets, or transfer the recipes to your architectures.
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs. baseline loss recovery. 
+Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 This repository contains the Python API code to handle the connection and authentication to the cloud.
 
-### Related Products
 
-- [DeepSparse](https://github.com/neuralmagic/deepsparse): CPU inference engine that delivers unprecedented performance for sparse models
-- [SparseML](https://github.com/neuralmagic/sparseml): Libraries for state-of-the-art deep neural network optimization algorithms, enabling simple pipelines integration with a few lines of code
-- [Sparsify](https://github.com/neuralmagic/sparsify): Easy-to-use autoML interface to optimize deep neural networks for better inference performance and a smaller footprint
+## Sparsification
+
+Sparsification is the process of taking a trained deep learning model and removing redundant information from the overprecise and over-parameterized network resulting in a faster and smaller model.
+Techniques for sparsification are all encompassing including everything from inducing sparsity using [pruning](https://neuralmagic.com/blog/pruning-overview/) and [quantization](https://arxiv.org/abs/1609.07061) to enabling naturally occurring sparsity using [activation sparsity](http://proceedings.mlr.press/v119/kurtz20a.html) or [winograd/FFT](https://arxiv.org/abs/1509.09308). 
+When implemented correctly, these techniques result in significantly more performant and smaller models with limited to no effect on the baseline metrics.
+For example, pruning plus quantization can give over [7x improvements in performance](https://neuralmagic.com/blog/benchmark-resnet50-with-deepsparse) while recovering to nearly the same baseline accuracy.
+
+The Deep Sparse product suite builds on top of sparsification enabling you to easily apply the techniques to your datasets and models using recipe-driven approaches.
+Recipes encode the directions for how to sparsify a model into a simple, easily editable format.
+- Download a sparsification recipe and sparsified model from the [SparseZoo](https://github.com/neuralmagic/sparsezoo).
+- Alternatively, create a recipe for your model using [Sparsify](https://github.com/neuralmagic/sparsify).
+- Apply your recipe with only a few lines of code using [SparseML](https://github.com/neuralmagic/sparseml).
+- Finally, for GPU-level performance on CPUs, deploy your sparse-quantized model with the [DeepSparse Engine](https://github.com/neuralmagic/deepsparse).
+
+
+**Full Deep Sparse product flow:**  
+
+<img src="https://docs.neuralmagic.com/docs/source/sparsification/flow-overview.svg" width="960px">
 
 ## Quick Tour
 
 Each model in the SparseZoo has a specific stub that identifies it. The stubs are made up of the following structure:
 
-`DOMAIN/SUB_DOMAIN/ARCHITECTURE{-SUB_ARCHITECTURE}/FRAMEWORK/REPO/DATASET{-TRAINING_SCHEME}/OPTIM_NAME-OPTIM_CATEGORY-{OPTIM_TARGET}`
+`DOMAIN/SUB_DOMAIN/ARCHITECTURE{-SUB_ARCHITECTURE}/FRAMEWORK/REPO/DATASET{-TRAINING_SCHEME}/SPARSE_NAME-SPARSE_CATEGORY-{SPARSE_TARGET}`
 
 The properties within each model stub are defined as the following:
 
-| Model Property   | Definition                                                                                    | Examples                                                                           |
-|:----------------:|:---------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
-| DOMAIN           | The type of solution the model is architected and trained for                                 | cv, nlp                                                                            |
-| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                             | classification, segmentation                                                       |
-| ARCHITECTURE     | The name of the guiding setup for the network's graph                                         | resnet_v1, mobilenet_v1                                                            |
-| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                      | 50, 101, 152                                                                       |
-| FRAMEWORK        | The machine learning framework the model was defined and trained in                           | pytorch, tensorflow_v1                                                             |
-| REPO             | The model repository the model and baseline weights originated from                           | sparseml, torchvision                                                              |
-| DATASET          | The dataset the model was trained on                                                          | imagenet, cifar10                                                                  |
-| TRAINING_SCHEME  | (optional) A description on how the model was trained                                         | augmented, lower_lr                                                                |
-| OPTIM_NAME       | An overview of what was done to optimize the model                                            | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
-| OPTIM_CATEGORY   | Descriptor on the degree to which the model is optimized as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
-| OPTIM_TARGET     | (optional) Descriptor for the target environment the model was optimized for                  | disk, edge, deepsparse, gpu                                                        |
+| Model Property   | Definition                                                                                     | Examples                                                                           |
+|:----------------:|:----------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
+| DOMAIN           | The type of solution the model is architected and trained for                                  | cv, nlp                                                                            |
+| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                              | classification, segmentation                                                       |
+| ARCHITECTURE     | The name of the guiding setup for the network's graph                                          | resnet_v1, mobilenet_v1                                                            |
+| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                       | 50, 101, 152                                                                       |
+| FRAMEWORK        | The machine learning framework the model was defined and trained in                            | pytorch, tensorflow_v1                                                             |
+| REPO             | The model repository the model and baseline weights originated from                            | sparseml, torchvision                                                              |
+| DATASET          | The dataset the model was trained on                                                           | imagenet, cifar10                                                                  |
+| TRAINING_SCHEME  | (optional) A description on how the model was trained                                          | augmented, lower_lr                                                                |
+| SPARSE_NAME      | An overview of what was done to sparsify the model                                             | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
+| SPARSE_CATEGORY  | Descriptor on the degree to which the model is sparsified as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
+| SPARSE_TARGET    | (optional) Descriptor for the target environment the model was sparsified for                  | disk, edge, deepsparse, gpu                                                        |
 
 The contents of each model are made up of the following:
 
@@ -89,8 +102,8 @@ The contents of each model are made up of the following:
     Currently ONNX does not support sparse tensors and quantized sparse tensors well for compression.
 - [FRAMEWORK]/model.[EXTENSION]: The native ML framework file(s) for the model in which it was originally trained.
     Such as PyTorch, Keras, TensorFlow V1
-- recipes/optimization.[md|yaml]: The original optimization recipe used to create the model.
-- recipes/[NAME].[md|yaml]: Additional optimization recipes that can be used with the model such as transfer learning.
+- recipes/original.[md|yaml]: The original sparsification recipe used to create the model.
+- recipes/[NAME].[md|yaml]: Additional sparsification recipes that can be used with the model such as transfer learning.
 - sample-originals: The original sample data without any preprocessing for use with the model.
 - sample-inputs: The sample data after pre processing for use with the model.
 - sample-outputs: The outputs after running the sample inputs through the model.
@@ -210,7 +223,7 @@ clone the repository and install any additional dependencies as required.
 
 ## Available Models and Recipes
 
-A number of pre-trained baseline and optimized models across domains and sub domains are available and constantly being added.
+A number of pre-trained baseline and sparsified models across domains and sub domains are available and constantly being added.
 For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md).
 
 ## Resources and Learning More

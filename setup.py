@@ -12,8 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+from datetime import date
 from typing import Tuple, List, Dict
 from setuptools import find_packages, setup
+
+_PACKAGE_NAME = "sparsezoo"
+_VERSION = "0.1.1"
+_VERSION_MAJOR, _VERSION_MINOR, _VERSION_BUG = _VERSION.split(".")
+_VERSION_MAJOR_MINOR = f"{_VERSION_MAJOR}.{_VERSION_MINOR}"
+_NIGHTLY = "nightly" in sys.argv
+
+if _NIGHTLY:
+    _PACKAGE_NAME += "-nightly"
+    _VERSION += "." + date.today().strftime("%Y%m%d")
+    # remove nightly param so it does not break bdist_wheel
+    sys.argv.remove("nightly")
 
 _deps = [
     "numpy>=1.0.0",
@@ -65,17 +79,21 @@ def _setup_long_description() -> Tuple[str, str]:
 
 
 setup(
-    name="sparsezoo",
-    version="0.1.0",
+    name=_PACKAGE_NAME,
+    version=_VERSION,
     author="Neuralmagic, Inc.",
     author_email="support@neuralmagic.com",
-    description="Neural network model repository for highly sparse models "
-    "and optimization recipes.",
+    description=(
+        "Neural network model repository for highly sparse and sparse-quantized "
+        "models with matching sparsification recipes"
+    ),
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
-    keywords="inference, machine learning, neural network, deep learning model, "
-    "models, computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
-    "quantization, sparse models, resnet, mobilenet, yolov3",
+    keywords=(
+        "inference, machine learning, neural network, deep learning model, models, "
+        "computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
+        "quantization, sparse models, resnet, mobilenet, yolov3"
+    ),
     license="Apache",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},

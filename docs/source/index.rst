@@ -17,7 +17,7 @@
 SparseZoo |version|
 ===================
 
-Neural network model repository for highly sparse models and optimization recipes
+Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
 .. raw:: html
 
@@ -48,51 +48,53 @@ Neural network model repository for highly sparse models and optimization recipe
 Overview
 ========
 
-SparseZoo is a constantly-growing repository of optimized models and optimization recipes for neural networks.
-It simplifies and accelerates your time-to-value in building performant deep learning models with a
-collection of inference-optimized models and recipes to prototype from.
+SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks.
+It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized
-to different degrees of inference performance vs baseline loss recovery.
-Optimizations on neural networks include approaches such as
-`pruning <https://neuralmagic.com/blog/pruning-overview />`_ and `quantization <https://arxiv.org/abs/1609.07061 />`_
-allowing for significantly faster models with limited to no effect on their baseline metrics such as accuracy.
-Recipe-driven approaches built around these optimizations allow you to take the models as given,
-transfer learn from the models onto private datasets, or transfer the recipes to your architectures.
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs. baseline loss recovery.
+Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
-This repository contains the Python API code to handle the connection and authentication to the cloud.
+`This repository <https://github.com/neuralmagic/sparsezoo>`_ contains the Python API code to handle the connection and authentication to the cloud.
 
-Related Products
-================
+Sparsification
+==============
 
-- `DeepSparse <https://github.com/neuralmagic/deepsparse />`_:
-  CPU inference engine that delivers unprecedented performance for sparse models
-- `SparseML <https://github.com/neuralmagic/sparseml />`_:
-  Libraries for state-of-the-art deep neural network optimization algorithms,
-  enabling simple pipelines integration with a few lines of code
-- `Sparsify <https://github.com/neuralmagic/sparsify />`_:
-  Easy-to-use autoML interface to optimize deep neural networks for
-  better inference performance and a smaller footprint
+Sparsification is the process of taking a trained deep learning model and removing redundant information from the overprecise and over-parameterized network resulting in a faster and smaller model.
+Techniques for sparsification are all encompassing including everything from inducing sparsity using `pruning <https://neuralmagic.com/blog/pruning-overview/>`_ and `quantization <https://arxiv.org/abs/1609.07061>`_ to enabling naturally occurring sparsity using `activation sparsity <http://proceedings.mlr.press/v119/kurtz20a.html>`_ or `winograd/FFT <https://arxiv.org/abs/1509.09308>`_.
+When implemented correctly, these techniques result in significantly more performant and smaller models with limited to no effect on the baseline metrics.
+For example, pruning plus quantization can give over `7x improvements in performance <https://neuralmagic.com/blog/benchmark-resnet50-with-deepsparse>`_ while recovering to nearly the same baseline accuracy.
+
+The Deep Sparse product suite builds on top of sparsification enabling you to easily apply the techniques to your datasets and models using recipe-driven approaches.
+Recipes encode the directions for how to sparsify a model into a simple, easily editable format.
+- Download a sparsification recipe and sparsified model from the `SparseZoo <https://github.com/neuralmagic/sparsezoo>`_.
+- Alternatively, create a recipe for your model using `Sparsify <https://github.com/neuralmagic/sparsify>`_.
+- Apply your recipe with only a few lines of code using `SparseML <https://github.com/neuralmagic/sparseml>`_.
+- Finally, for GPU-level performance on CPUs, deploy your sparse-quantized model with the `DeepSparse Engine <https://github.com/neuralmagic/deepsparse>`_.
+
+
+**Full Deep Sparse product flow:**  
+
+<img src="https://docs.neuralmagic.com/docs/source/sparsification/flow-overview.svg" width="960px">
 
 Resources and Learning More
 ===========================
 
-- `SparseML Documentation <https://docs.neuralmagic.com/sparseml/ />`_
-- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify/ />`_
-- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse/ />`_
-- `Neural Magic Blog <https://www.neuralmagic.com/blog/ />`_,
-  `Resources <https://www.neuralmagic.com/resources/ />`_,
-  `Website <https://www.neuralmagic.com/ />`_
+- `SparseML Documentation <https://docs.neuralmagic.com/sparseml>`_
+- `Sparsify Documentation <https://docs.neuralmagic.com/sparsify>`_
+- `DeepSparse Documentation <https://docs.neuralmagic.com/deepsparse>`_
+- `Neural Magic Blog <https://www.neuralmagic.com/blog>`_,
+  `Resources <https://www.neuralmagic.com/resources>`_,
+  `Website <https://www.neuralmagic.com>`_
 
 Release History
 ===============
 
 Official builds are hosted on PyPi
-- stable: `sparsezoo <https://pypi.org/project/sparsezoo/ />`_
-- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly/ />`_
+- stable: `sparsezoo <https://pypi.org/project/sparsezoo>`_
+- nightly (dev): `sparsezoo-nightly <https://pypi.org/project/sparsezoo-nightly>`_
 
 Additionally, more information can be found via
-`GitHub Releases <https://github.com/neuralmagic/sparsezoo/releases />`_.
+`GitHub Releases <https://github.com/neuralmagic/sparsezoo/releases>`_.
 
 .. toctree::
     :maxdepth: 3
@@ -110,9 +112,9 @@ Additionally, more information can be found via
     api/sparsezoo
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Help and Support
+    :maxdepth: 3
+    :caption: Help
 
-    `Bugs, Feature Requests <https://github.com/neuralmagic/sparsezoo/discussions>`_ 
-    `Support, General Q&A <https://github.com/neuralmagic/sparsezoo/issues>`_ 
-   
+    Bugs, Feature Requests <https://github.com/neuralmagic/sparsezoo/issues>
+    Support, General Q&A <https://github.com/neuralmagic/sparsezoo/discussions>
+    Neural Magic Docs <https://docs.neuralmagic.com>
