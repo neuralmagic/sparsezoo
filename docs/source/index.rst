@@ -54,7 +54,7 @@ It simplifies and accelerates your time-to-value in building performant deep lea
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs. baseline loss recovery.
 Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
-This repository contains the Python API code to handle the connection and authentication to the cloud.
+`This repository <https://github.com/neuralmagic/sparsezoo>`_ contains the Python API code to handle the connection and authentication to the cloud.
 
 Sparsification
 ==============
