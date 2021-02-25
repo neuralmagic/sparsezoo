@@ -83,13 +83,17 @@ setup(
     version=_VERSION,
     author="Neuralmagic, Inc.",
     author_email="support@neuralmagic.com",
-    description="Neural network model repository for highly sparse models "
-    "and optimization recipes.",
+    description=(
+        "Neural network model repository for highly sparse and sparse-quantized "
+        "models with matching sparsification recipes"
+    ),
     long_description=_setup_long_description()[0],
     long_description_content_type=_setup_long_description()[1],
-    keywords="inference, machine learning, neural network, deep learning model, "
-    "models, computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
-    "quantization, sparse models, resnet, mobilenet, yolov3",
+    keywords=(
+        "inference, machine learning, neural network, deep learning model, models, "
+        "computer vision, nlp, pretrained transfer learning, sparsity, pruning, "
+        "quantization, sparse models, resnet, mobilenet, yolov3"
+    ),
     license="Apache",
     url="https://github.com/neuralmagic/sparsezoo",
     package_dir={"": "src"},

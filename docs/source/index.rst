@@ -17,7 +17,8 @@
 SparseZoo |version|
 ===================
 
-Open-source neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
+Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
+
 .. raw:: html
 
     <div style="margin-bottom:16px;">
@@ -47,13 +48,13 @@ Open-source neural network model repository for highly sparse and sparse-quantiz
 Overview
 ========
 
-SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models and sparsification recipes for neural networks.
+SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks.
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery.
-Recipe-driven approaches allow you to take the models as given, transfer learn from the models onto private datasets, or transfer the recipes to your architectures.
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs. baseline loss recovery.
+Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
-`This repository <https://github.com/neuralmagic/sparsezoo />`_ contains the Python API code to handle the connection and authentication to the cloud.
+This repository contains the Python API code to handle the connection and authentication to the cloud.
 
 Sparsification
 ==============
@@ -61,7 +62,7 @@ Sparsification
 Sparsification is the process of taking a trained deep learning model and removing redundant information from the overprecise and over-parameterized network resulting in a faster and smaller model.
 Techniques for sparsification are all encompassing including everything from inducing sparsity using `pruning <https://neuralmagic.com/blog/pruning-overview/>`_ and `quantization <https://arxiv.org/abs/1609.07061>`_ to enabling naturally occurring sparsity using `activation sparsity <http://proceedings.mlr.press/v119/kurtz20a.html>`_ or `winograd/FFT <https://arxiv.org/abs/1509.09308>`_.
 When implemented correctly, these techniques result in significantly more performant and smaller models with limited to no effect on the baseline metrics.
-For example, pruning plus quantization can give over [7x improvements in performance](resnet50link) while recovering to nearly the same baseline accuracy.
+For example, pruning plus quantization can give over `7x improvements in performance <https://neuralmagic.com/blog/benchmark-resnet50-with-deepsparse>`_ while recovering to nearly the same baseline accuracy.
 
 The Deep Sparse product suite builds on top of sparsification enabling you to easily apply the techniques to your datasets and models using recipe-driven approaches.
 Recipes encode the directions for how to sparsify a model into a simple, easily editable format.
