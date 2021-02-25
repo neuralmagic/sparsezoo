@@ -47,7 +47,7 @@ limitations under the License.
 SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models and sparsification recipes for neural networks.
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs baseline loss recovery.
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery.
 Recipe-driven approaches allow you to take the models as given, transfer learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 This repository contains the Python API code to handle the connection and authentication to the cloud.
