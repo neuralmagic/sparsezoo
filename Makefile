@@ -72,4 +72,4 @@ clean:
 	rm -rf dist;
 	rm -rf src/sparsezoo.egg-info;
 	find $(PYCHECKDIRS) | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf;
-	find $(DOCDIR) | grep .rst | xargs rm -rf;
+	find $(DOCDIR)/source/api | grep .rst | xargs rm -rf;
