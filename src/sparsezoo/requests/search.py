@@ -22,7 +22,7 @@ from typing import Dict
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import BASE_API_URL, ModelArgs
+from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
 
 
 __all__ = ["search_get_request", "SEARCH_PATH"]
@@ -62,7 +62,7 @@ def search_get_request(
         search_args.extend(f"release_version={args.release_version}")
 
     search_args = "&".join(search_args)
-    url = f"{BASE_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
+    url = f"{MODELS_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
 
     _LOGGER.info(f"Searching objects from {url}")
     response_json = requests.get(url=url, headers=header).json()
