@@ -16,12 +16,18 @@
 Code related to base functionality for making requests
 """
 
+import os
 from typing import Any, List, Union
 
 
-__all__ = ["BASE_API_URL", "ModelArgs"]
+__all__ = ["BASE_API_URL", "ModelArgs", "MODELS_API_URL"]
 
-BASE_API_URL = "https://api.neuralmagic.com/models"
+BASE_API_URL = (
+    os.getenv("SPARSEZOO_API_URL")
+    if os.getenv("SPARSEZOO_API_URL")
+    else "https://api.neuralmagic.com"
+)
+MODELS_API_URL = f"{BASE_API_URL}/models"
 
 
 class ModelArgs:

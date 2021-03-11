@@ -22,7 +22,7 @@ from typing import Dict, Union
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import BASE_API_URL, ModelArgs
+from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
 
 
 __all__ = ["download_get_request", "DOWNLOAD_PATH"]
@@ -47,7 +47,7 @@ def download_get_request(
     """
     header = get_auth_header(force_token_refresh=force_token_refresh)
     path = args if isinstance(args, str) else args.stub
-    url = f"{BASE_API_URL}/{DOWNLOAD_PATH}/{path}"
+    url = f"{MODELS_API_URL}/{DOWNLOAD_PATH}/{path}"
 
     if file_name:
         url = f"{url}/{file_name}"
