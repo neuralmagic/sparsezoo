@@ -39,8 +39,8 @@ AUTH_API = os.path.join(BASE_API_URL, "auth")
 PUBLIC_AUTH_TYPE = "public"
 
 CREDENTIALS_YAML = os.path.abspath(
-    os.getenv("NM_SPARSE_ZOO_CREDENTIALS")
-    if os.getenv("NM_SPARSE_ZOO_CREDENTIALS")
+    os.getenv("SPARSEZOO_CREDENTIALS")
+    if os.getenv("SPARSEZOO_CREDENTIALS")
     else clean_path(os.path.join("~", ".cache", "nm_models", "credentials.yaml"))
 )
 
