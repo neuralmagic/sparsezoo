@@ -1,0 +1,37 @@
+pipeline {
+    agent {
+        label 'ModelSlave'
+    }
+    environment {
+        VIRTUAL_ENV = "${env.WORKSPACE}/venv"
+        AWS_DEFAULT_REGION = "us-east-1"
+    }
+    parameters {
+        string(name: 'TEST_API', defaultValue:"https://api.neuralmagic.com", description: 'Test API URL override')
+    }
+    stages {
+        stage("setup") {
+            steps {
+                sh """
+                    python3 -m venv ${VIRTUAL_ENV}
+                    source ${VIRTUAL_ENV}/bin/activate
+                    pip3 install --upgrade pip
+                    pip3 install .[dev]
+                
+                """
+            }
+        }
+        stage('test') {
+            steps {
+                sh """
+                    source ${VIRTUAL_ENV}/bin/activate
+                    export SPARSEZOO_CREDENTIALS="credentials.yaml"
+                    export SPARSEZOO_API_URL=${params.TEST_API}
+                    cd ${env.WORKSPACE}/sparsezoo
+                    make test
+                    rm credentials.yaml
+                """
+            }
+        }
+    }
+}
