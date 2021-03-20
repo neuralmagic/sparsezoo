@@ -41,7 +41,7 @@ PUBLIC_AUTH_TYPE = "public"
 CREDENTIALS_YAML = os.path.abspath(
     os.getenv("SPARSEZOO_CREDENTIALS")
     if os.getenv("SPARSEZOO_CREDENTIALS")
-    else clean_path(os.path.join("~", ".cache", "nm_models", "credentials.yaml"))
+    else clean_path(os.path.join("~", ".cache", "sparsezoo", "credentials.yaml"))
 )
 
 CREDENTIALS_YAML_TOKEN_KEY = "nm_api_token"
