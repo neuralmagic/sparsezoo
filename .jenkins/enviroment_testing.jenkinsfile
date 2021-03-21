@@ -27,7 +27,6 @@ pipeline {
                     source ${VIRTUAL_ENV}/bin/activate
                     export SPARSEZOO_CREDENTIALS="credentials.yaml"
                     export SPARSEZOO_API_URL=${params.TEST_API}
-                    cd ${env.WORKSPACE}/sparsezoo
                     make test
                     rm credentials.yaml
                 """
