@@ -6,6 +6,7 @@ PYCHECKGLOBS := 'examples/**/*.py' 'scripts/**/*.py' 'src/**/*.py' 'tests/**/*.p
 DOCDIR := docs
 MDCHECKGLOBS := 'docs/**/*.md' 'docs/**/*.rst' 'examples/**/*.md' 'notebooks/**/*.md' 'scripts/**/*.md'
 MDCHECKFILES := CODE_OF_CONDUCT.md CONTRIBUTING.md DEVELOPING.md README.md
+SPARSEZOO_TEST_MODE := "true"
 
 BUILD_ARGS :=  # set nightly to build nightly release
 TARGETS := ""  # targets for running pytests: full,efficientnet,inception,resnet,vgg,ssd,yolo
@@ -53,6 +54,7 @@ style:
 # run tests for the repo
 test:
 	@echo "Running python tests";
+	export SPARSEZOO_TEST_MODE=$(SPARSEZOO_TEST_MODE);
 	pytest tests $(PYTEST_ARGS);
 
 # create docs

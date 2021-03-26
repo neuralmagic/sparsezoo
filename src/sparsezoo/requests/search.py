@@ -59,7 +59,7 @@ def search_get_request(
     search_args.extend([f"page={page}", f"page_length={page_length}"])
 
     if args.release_version:
-        search_args.extend(f"release_version={args.release_version}")
+        search_args.append(f"release_version={args.release_version}")
 
     search_args = "&".join(search_args)
     url = f"{MODELS_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
