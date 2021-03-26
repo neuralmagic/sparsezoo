@@ -54,7 +54,6 @@ style:
 # run tests for the repo
 test:
 	@echo "Running python tests";
-	export SPARSEZOO_TEST_MODE=$(SPARSEZOO_TEST_MODE);
 	pytest tests $(PYTEST_ARGS);
 
 # create docs
