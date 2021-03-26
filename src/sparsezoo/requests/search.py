@@ -22,12 +22,18 @@ from typing import Dict
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
+from sparsezoo.requests.base import (
+    MODELS_API_URL,
+    RECIPES_API_URL,
+    ModelArgs,
+    RecipeArgs,
+)
 
 
 __all__ = [
     "search_get_request",
     "search_model_get_request",
+    "search_recipe_get_request",
     "SEARCH_PATH",
 ]
 
@@ -93,6 +99,30 @@ def search_model_get_request(
     """
     return search_get_request(
         base_url=MODELS_API_URL,
+        args=args,
+        page=page,
+        page_length=page_length,
+        force_token_refresh=force_token_refresh,
+    )
+
+
+def search_recipe_get_request(
+    args: RecipeArgs,
+    page: int = 1,
+    page_length: int = 20,
+    force_token_refresh: bool = False,
+) -> Dict:
+    """
+    Search the sparsezoo for any models matching the args
+
+    :param args: the model args describing what should be searched for
+    :param page: the page of values to get
+    :param page_length: the page length of values to get
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: the json response as a dict
+    """
+    return search_get_request(
+        base_url=RECIPES_API_URL,
         args=args,
         page=page,
         page_length=page_length,

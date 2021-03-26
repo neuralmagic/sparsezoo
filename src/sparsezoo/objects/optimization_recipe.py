@@ -18,6 +18,7 @@ Code related to a model repo optimization file
 
 import logging
 from enum import Enum
+from typing import Optional
 
 from sparsezoo.objects.file import File
 from sparsezoo.objects.metadata import ModelMetadata
@@ -53,6 +54,7 @@ class OptimizationRecipe(File):
         recipe_id: str,
         recipe_type: str,
         display_description: str,
+        base_stub: Optional[str],
         **kwargs,
     ):
         super(OptimizationRecipe, self).__init__(
@@ -61,6 +63,8 @@ class OptimizationRecipe(File):
         self._recipe_id = recipe_id
         self._recipe_type = recipe_type
         self._display_description = display_description
+        self._base_stub = base_stub
+        self._model = None
 
     @property
     def recipe_id(self) -> str:
@@ -105,3 +109,10 @@ class OptimizationRecipe(File):
         :return: the display description for the optimization
         """
         return self._display_description
+
+    @property
+    def base_stub(self) -> Optional[str]:
+        """
+        :return: the stub for the base model of this recipe, if any
+        """
+        return self._base_stub

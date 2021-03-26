@@ -27,9 +27,13 @@ from sparsezoo.objects.optimization_recipe import (
 )
 from sparsezoo.requests import (
     ModelArgs,
+    RecipeArgs,
     download_model_get_request,
+    download_recipe_get_request,
     get_model_get_request,
+    get_recipe_get_request,
     search_model_get_request,
+    search_recipe_get_request,
 )
 
 
@@ -184,6 +188,68 @@ class Zoo:
             **response_json["model"],
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
+        )
+
+    @staticmethod
+    def load_model_from_recipe(
+        recipe: OptimizationRecipe,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ):
+        """
+        Loads the model associated with a recipe
+
+        :param recipe: the Recipe associated with the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        metadata = recipe.model_metadata
+        return Zoo.load_model(
+            domain=metadata.domain,
+            sub_domain=metadata.sub_domain,
+            architecture=metadata.architecture,
+            sub_architecture=metadata.sub_architecture,
+            framework=metadata.framework,
+            repo=metadata.repo,
+            dataset=metadata.dataset,
+            training_scheme=metadata.training_scheme,
+            optim_name=metadata.optim_name,
+            optim_category=metadata.optim_category,
+            optim_target=metadata.optim_target,
+            release_version=metadata.release_version,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+        )
+
+    @staticmethod
+    def load_base_model_from_recipe(
+        recipe: OptimizationRecipe,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ):
+        """
+        Loads the base model associated with a recipe
+
+        :param recipe: the Recipe associated with the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        return Zoo.load_model_from_stub(
+            recipe.base_stub,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
         )
 
     @staticmethod
@@ -507,6 +573,7 @@ class Zoo:
         optim_category: Union[str, None] = None,
         optim_target: Union[str, None] = None,
         release_version: Union[str, None] = None,
+        recipe_type: Union[str, None] = None,
         page: int = 1,
         page_length: int = 20,
         override_folder_name: Union[str, None] = None,
@@ -540,6 +607,7 @@ class Zoo:
         :param optim_target: The deployment target of optimization of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
+        :param recipe_type: The recipe type; e.g. original, transfer_learn
         :param page: the page of values to get
         :param page_length: the page length of values to get
         :param override_folder_name: Override for the name of the folder to save
@@ -547,12 +615,12 @@ class Zoo:
         :param override_parent_path: Path to override the default save path
             for where to save the parent folder for this file under
         :param force_token_refresh: True to refresh the auth token, False otherwise
-        :return: A list of OptimizationRecipe objects for models that match the given
+        :return: A list of Recipe objects for models that match the given
             search parameters
         """
-        matched_models = Zoo.search_models(
-            domain,
-            sub_domain,
+        args = RecipeArgs(
+            domain=domain,
+            sub_domain=sub_domain,
             architecture=architecture,
             sub_architecture=sub_architecture,
             framework=framework,
@@ -563,27 +631,39 @@ class Zoo:
             optim_category=optim_category,
             optim_target=optim_target,
             release_version=release_version,
+            recipe_type=recipe_type,
+        )
+        response_json = search_recipe_get_request(
+            args=args,
             page=page,
             page_length=page_length,
-            override_folder_name=override_folder_name,
-            override_parent_path=override_parent_path,
             force_token_refresh=force_token_refresh,
         )
-        return [recipe for model in matched_models for recipe in model.recipes]
+
+        return [
+            OptimizationRecipe(
+                **recipe,
+                model_metadata=recipe["model"],
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
+            )
+            for recipe in response_json["recipes"]
+        ]
 
     @staticmethod
     def search_optimized_recipes(
         model: Union[Model, str, ModelArgs],
+        recipe_type: Union[str, None] = None,
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
     ) -> List[OptimizationRecipe]:
         """
-        Search for optimized recipes of the given model
+        Search for recipes of the given model
 
         :param model: The model object, a SparseZoo stub model path, or a ModelArgs
-            object representing the base model to search different optimizations of
+            object representing the base model to search for recipes
         :param match_framework: True to match similar models to the current
             framework the model the object belongs to was trained on;
             e.g. pytorch, tensorflow
@@ -598,6 +678,9 @@ class Zoo:
             belongs to if any; e.g. augmented
         :return: the list of matching optimization recipes, if any
         """
+        if isinstance(recipe_type, str):
+            recipe_type = OptimizationRecipeTypes(recipe_type).value
+
         optimized_models = Zoo.search_similar_models(
             model=model,
             match_domain=True,
@@ -609,53 +692,296 @@ class Zoo:
             match_dataset=match_dataset,
             match_training_scheme=match_training_scheme,
         )
-        return [recipe for model in optimized_models for recipe in model.recipes]
+        return [
+            recipe
+            for model in optimized_models
+            for recipe in model.recipes
+            if recipe_type is None or recipe_type == recipe.recipe_type
+        ]
 
     @staticmethod
-    def download_recipe_from_stub(
-        stub: str,
-    ) -> str:
+    def load_recipe(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: Union[str, None],
+        framework: str,
+        repo: str,
+        dataset: str,
+        training_scheme: Union[str, None],
+        optim_name: str,
+        optim_category: str,
+        optim_target: Union[str, None],
+        recipe_type: Union[str, None] = None,
+        release_version: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> Model:
         """
-        :param stub: a string model stub that points to a SparseZoo model.
-            recipe_type may be added as a stub parameter. i.e.
-            "model/stub/path", "zoo:model/stub/path",
-            "zoo:model/stub/path?recipe_type=original"
-        :return: file path of the downloaded recipe for that model
+        Obtains a Recipe from the model repo
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param recipe_type: The recipe type; e.g. original, transfer_learn
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Recipe instance
         """
-        stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
-        recipe_type = _get_stub_args_recipe_type(args)
-        model = Zoo.load_model_from_stub(stub)
-
-        for recipe in model.recipes:
-            if recipe.recipe_type == recipe_type:
-                return recipe.downloaded_path()
-
-        found_recipe_types = [recipe.recipe_type for recipe in model.recipes]
-        raise RuntimeError(
-            f"No recipe with recipe_type {recipe_type} found for model {model}. "
-            f"Found {len(model.recipes)} recipes with recipe types {found_recipe_types}"
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        return Zoo.load_recipe_from_stub(
+            args,
+            recipe_type=recipe_type,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
         )
 
     @staticmethod
+    def load_recipe_from_stub(
+        stub: Union[str, ModelArgs],
+        recipe_type: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> OptimizationRecipe:
+        """
+        Loads a recipe from stub. If the stub is a string, it may contain the
+        recipe type as a stub parameter. i.e.
+            - "model/stub/path"
+            - "zoo:model/stub/path",
+            - "zoo:model/stub/path?recipe_type=original",
+            - "zoo:model/stub/path/transfer_learn"
+
+        :param stub: the SparseZoo stub path to the recipe, can be a string path or
+            ModelArgs object
+        :param recipe_type: the recipe type to obtain if not original
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Recipe instance
+        """
+        if isinstance(stub, str):
+            stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
+            if recipe_type is None:
+                recipe_type = _get_stub_args_recipe_type(args)
+
+        response_json = get_recipe_get_request(
+            args=stub,
+            recipe_type=recipe_type,
+            force_token_refresh=force_token_refresh,
+        )
+
+        recipe = response_json["recipe"]
+        return OptimizationRecipe(
+            **recipe,
+            model_metadata=recipe["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+
+    @staticmethod
+    def download_recipe(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: Union[str, None],
+        framework: str,
+        repo: str,
+        dataset: str,
+        training_scheme: Union[str, None],
+        optim_name: str,
+        optim_category: str,
+        optim_target: Union[str, None],
+        recipe_type: Union[str, None] = None,
+        release_version: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> Model:
+        """
+        Downloads a Recipe from the model repo
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param recipe_type: The recipe type; e.g. original, transfer_learn
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Recipe instance
+        """
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        return Zoo.download_recipe_from_stub(
+            args,
+            recipe_type=recipe_type,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+        )
+
+    @staticmethod
+    def download_recipe_from_stub(
+        stub: Union[str, ModelArgs],
+        recipe_type: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ) -> OptimizationRecipe:
+        """
+        Downloads a recipe from stub. If the stub is a string, it may contain the
+        recipe type as a stub parameter or part of the stub. i.e.
+            - "model/stub/path"
+            - "zoo:model/stub/path",
+            - "zoo:model/stub/path?recipe_type=original",
+            - "zoo:model/stub/path/transfer_learn"
+
+        :param stub: the SparseZoo stub path to the recipe, can be a string path or
+            ModelArgs object
+        :param recipe_type: the recipe_type to download if not original
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :return: The requested Recipe instance
+        """
+        if isinstance(stub, str):
+            stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
+            if recipe_type is None:
+                recipe_type = _get_stub_args_recipe_type(args)
+
+        response_json = download_recipe_get_request(stub, recipe_type=recipe_type)
+
+        recipe = response_json["recipe"]
+
+        recipe = OptimizationRecipe(
+            **recipe,
+            model_metadata=recipe["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+        recipe.download(overwrite=overwrite)
+        return recipe
+
+    @staticmethod
     def download_recipe_base_framework_files(
-        stub: str,
+        stub: Union[str, ModelArgs],
+        recipe_type: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
         extensions: Union[List[str], None] = None,
     ) -> List[str]:
         """
         :param stub: a string model stub that points to a SparseZoo model.
-            recipe_type may be added as a stub parameter. i.e.
+            recipe_type may be added as a stub parameter or path of path. i.e.
             "model/stub/path", "zoo:model/stub/path",
-            "zoo:model/stub/path?recipe_type=transfer"
+            "zoo:model/stub/path?recipe_type=transfer",
+            "zoo:model/stub/path/transfer"
+        :param recipe_type: the recipe_type to download if not original
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
         :param extensions: List of file extensions to filter for. ex ['.pth', '.ptc'].
             If None or empty list, all framework files are downloaded. Default is None
         :return: file path to the downloaded framework checkpoint files for the
             base weights of this recipe
         """
-        stub, args = parse_zoo_stub(stub, valid_params=["recipe_type"])
-        recipe_type = _get_stub_args_recipe_type(args)
-        model = Zoo.load_model_from_stub(stub)
+        recipe = Zoo.load_recipe_from_stub(
+            stub,
+            recipe_type=recipe_type,
+            force_token_refresh=force_token_refresh,
+        )
 
-        if recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
+        if recipe.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
+            model = Zoo.load_model_from_recipe(
+                recipe,
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
+            )
             # return final model's optimized weights for sparse transfer learning
             framework_files = model.download_framework_files(extensions=extensions)
 
@@ -670,16 +996,17 @@ class Zoo:
             return checkpoint_framework_files or framework_files
         else:
             # search for base model, and return those weights as a starting checkpoint
-            base_model = [
-                result
-                for result in Zoo.search_optimized_models(model)
-                if result.optim_name == "base"
-            ]
-            if not base_model:
-                raise ValueError(f"Could not find base model for model {model}")
-            framework_files = base_model[0].download_framework_files(
-                extensions=extensions
+            base_model = Zoo.load_base_model_from_recipe(
+                recipe,
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
             )
+
+            if not recipe.base_stub:
+                raise ValueError(
+                    f"Could not find base model for model {model.model_metadata}"
+                )
+            framework_files = base_model.download_framework_files(extensions=extensions)
 
             # filter out checkpoint weights if any exist
             base_framework_files = [
@@ -694,11 +1021,11 @@ class Zoo:
 
 def _get_stub_args_recipe_type(stub_args: Dict[str, str]) -> str:
     # check recipe type, default to original, and validate
-    recipe_type = stub_args.get("recipe_type", OptimizationRecipeTypes.ORIGINAL.value)
+    recipe_type = stub_args.get("recipe_type")
 
     # validate
     valid_recipe_types = list(map(lambda typ: typ.value, OptimizationRecipeTypes))
-    if recipe_type not in valid_recipe_types:
+    if recipe_type not in valid_recipe_types and recipe_type is not None:
         raise ValueError(
             f"Invalid recipe_type: '{recipe_type}'. "
             f"Valid recipe types: {valid_recipe_types}"

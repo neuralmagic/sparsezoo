@@ -22,10 +22,10 @@ from typing import Dict, Union
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
+from sparsezoo.requests.base import MODELS_API_URL, RECIPES_API_URL, ModelArgs
 
 
-__all__ = ["get_request", "get_model_get_request", "GET_PATH"]
+__all__ = ["get_request", "get_model_get_request", "get_recipe_get_request", "GET_PATH"]
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -87,5 +87,26 @@ def get_model_get_request(
         MODELS_API_URL,
         args=args,
         sub_path=file_name,
+        force_token_refresh=force_token_refresh,
+    )
+
+
+def get_recipe_get_request(
+    args: Union[ModelArgs, str],
+    recipe_type: Union[str, None] = None,
+    force_token_refresh: bool = False,
+):
+    """
+    Get a recipe from the sparsezoo for any objects matching the args
+
+    :param args: the model args describing what should be retrieved for
+    :param recipe_type: the recipe_type to get recipe info for if not original
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: the json response as a dict
+    """
+    return get_request(
+        base_url=RECIPES_API_URL,
+        args=args,
+        sub_path=recipe_type,
         force_token_refresh=force_token_refresh,
     )

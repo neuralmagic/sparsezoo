@@ -20,11 +20,12 @@ such as downloading
 import logging
 import os
 from enum import Enum
-from typing import Union
+from typing import Dict, Union
 
 from sparsezoo.objects.base import BaseObject
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.metadata import ModelMetadata
+from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.requests import download_model_get_request
 from sparsezoo.utils import create_parent_dirs, download_file
 
@@ -75,11 +76,12 @@ class File(BaseObject, Downloadable):
 
     def __init__(
         self,
-        model_metadata: ModelMetadata,
+        model_metadata: Union[Dict, ModelMetadata],
         file_id: str,
         display_name: str,
         file_type: str,
         operator_version: Union[str, None],
+        release_version: Union[Dict, ReleaseVersion],
         checkpoint: bool,
         md5: str,
         file_size: int,
@@ -90,6 +92,12 @@ class File(BaseObject, Downloadable):
         override_parent_path: Union[str, None] = None,
         **kwargs,
     ):
+        if isinstance(model_metadata, dict):
+            if isinstance(release_version, dict):
+                release_version = ReleaseVersion(**release_version)
+            model_metadata = ModelMetadata(
+                release_version=release_version, **model_metadata
+            )
         folder_name = (
             model_metadata.model_id
             if not override_folder_name
