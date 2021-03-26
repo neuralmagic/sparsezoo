@@ -291,6 +291,11 @@ def parse_args():
         help="The directory to save the model files in, "
         "defaults to the cwd with the model description as a sub folder",
     )
+    download_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrites existing model files if previously downloaded",
+    )
 
     search_parser.add_argument(
         "--page", type=int, default=1, help="The page of search results to view"
@@ -384,7 +389,7 @@ def main():
 
     if args.command == DOWNLOAD_COMMAND:
         LOGGER.info("Downloading files from model...")
-        model = Zoo.load_model(
+        dir_path = Zoo.download_model(
             domain=args.domain,
             sub_domain=args.sub_domain,
             architecture=args.architecture,
@@ -398,14 +403,13 @@ def main():
             optim_target=args.optim_target,
             release_version=args.release_version,
             override_parent_path=args.save_dir,
+            overwrite=args.overwrite,
         )
-        model.download()
 
         print("Download results")
         print("====================")
         print("")
-        print(model.stub)
-        print(f"downloaded to {model.dir_path}")
+        print(f"downloaded to {dir_path}")
     elif args.command == SEARCH_COMMAND:
         search(args)
 

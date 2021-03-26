@@ -21,4 +21,5 @@ Classes for making requests with the sparsezoo
 from .authentication import *
 from .base import *
 from .download import *
+from .get import *
 from .search import *

@@ -25,7 +25,7 @@ from typing import Union
 from sparsezoo.objects.base import BaseObject
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.metadata import ModelMetadata
-from sparsezoo.requests import download_get_request
+from sparsezoo.requests import download_model_get_request
 from sparsezoo.utils import create_parent_dirs, download_file
 
 
@@ -347,7 +347,7 @@ class File(BaseObject, Downloadable):
         self,
         refresh_token: bool = False,
     ) -> str:
-        response_json = download_get_request(
+        response_json = download_model_get_request(
             args=self.model_metadata,
             file_name=self.display_name,
             force_token_refresh=refresh_token,

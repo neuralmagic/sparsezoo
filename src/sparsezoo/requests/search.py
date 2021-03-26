@@ -25,7 +25,11 @@ from sparsezoo.requests.authentication import get_auth_header
 from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
 
 
-__all__ = ["search_get_request", "SEARCH_PATH"]
+__all__ = [
+    "search_get_request",
+    "search_model_get_request",
+    "SEARCH_PATH",
+]
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,6 +37,7 @@ SEARCH_PATH = "search"
 
 
 def search_get_request(
+    base_url: str,
     args: ModelArgs,
     page: int = 1,
     page_length: int = 20,
@@ -41,6 +46,7 @@ def search_get_request(
     """
     Search the sparsezoo for any objects matching the args
 
+    :param base_url: the base url
     :param args: the model args describing what should be searched for
     :param page: the page of values to get
     :param page_length: the page length of values to get
@@ -62,9 +68,33 @@ def search_get_request(
         search_args.extend(f"release_version={args.release_version}")
 
     search_args = "&".join(search_args)
-    url = f"{MODELS_API_URL}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
+    url = f"{base_url}/{SEARCH_PATH}/{args.model_url_root}?{search_args}"
 
     _LOGGER.info(f"Searching objects from {url}")
     response_json = requests.get(url=url, headers=header).json()
 
     return response_json
+
+
+def search_model_get_request(
+    args: ModelArgs,
+    page: int = 1,
+    page_length: int = 20,
+    force_token_refresh: bool = False,
+) -> Dict:
+    """
+    Search the sparsezoo for any models matching the args
+
+    :param args: the model args describing what should be searched for
+    :param page: the page of values to get
+    :param page_length: the page length of values to get
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: the json response as a dict
+    """
+    return search_get_request(
+        base_url=MODELS_API_URL,
+        args=args,
+        page=page,
+        page_length=page_length,
+        force_token_refresh=force_token_refresh,
+    )

@@ -25,7 +25,12 @@ from sparsezoo.objects.optimization_recipe import (
     OptimizationRecipe,
     OptimizationRecipeTypes,
 )
-from sparsezoo.requests import ModelArgs, download_get_request, search_get_request
+from sparsezoo.requests import (
+    ModelArgs,
+    download_model_get_request,
+    get_model_get_request,
+    search_model_get_request,
+)
 
 
 __all__ = [
@@ -170,7 +175,7 @@ class Zoo:
         if isinstance(stub, str):
             stub, _ = parse_zoo_stub(stub, valid_params=[])
 
-        response_json = download_get_request(
+        response_json = get_model_get_request(
             args=stub,
             file_name=None,
             force_token_refresh=force_token_refresh,
@@ -180,6 +185,117 @@ class Zoo:
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
         )
+
+    @staticmethod
+    def download_model(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: Union[str, None],
+        framework: str,
+        repo: str,
+        dataset: str,
+        training_scheme: Union[str, None],
+        optim_name: str,
+        optim_category: str,
+        optim_target: Union[str, None],
+        release_version: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ) -> str:
+        """
+        Downloads a model from model repo
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :return: The path where the models were downloaded
+        """
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        return Zoo.download_model_from_stub(
+            args,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+            overwrite=overwrite,
+        )
+
+    @staticmethod
+    def download_model_from_stub(
+        stub: Union[str, ModelArgs],
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ) -> str:
+        """
+        :param stub: the SparseZoo stub path to the model, can be a string path or
+            ModelArgs object
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :return: The path where the model files were downloaded
+        """
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
+
+        response_json = download_model_get_request(
+            args=stub,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
+        )
+        model = Model(
+            **response_json["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+        model.download(overwrite=overwrite, refresh_token=force_token_refresh)
+        return model.dir_path
 
     @staticmethod
     def search_models(
@@ -251,7 +367,7 @@ class Zoo:
             optim_target=optim_target,
             release_version=release_version,
         )
-        response_json = search_get_request(
+        response_json = search_model_get_request(
             args=args,
             page=page,
             page_length=page_length,
