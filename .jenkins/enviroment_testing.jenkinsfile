@@ -8,6 +8,7 @@ pipeline {
     }
     parameters {
         string(name: 'TEST_API', defaultValue:"https://api.neuralmagic.com", description: 'Test API URL override')
+        string(name: 'BRANCH', defaultValue:"main", description: 'Branch to switch to test features')
     }
     stages {
         stage("setup") {
@@ -27,6 +28,7 @@ pipeline {
                     source ${VIRTUAL_ENV}/bin/activate
                     export SPARSEZOO_CREDENTIALS="credentials.yaml"
                     export SPARSEZOO_API_URL=${params.TEST_API}
+                    git checkout ${params.BRANCH}
                     make test
                     rm credentials.yaml
                 """
