@@ -104,7 +104,7 @@ class Zoo:
         force_token_refresh: bool = False,
     ) -> Model:
         """
-        Obtains a Model with signed files from the model repo
+        Obtains a Model from the model repo
 
         :param domain: The domain of the model the object belongs to;
             e.g. cv, nlp
