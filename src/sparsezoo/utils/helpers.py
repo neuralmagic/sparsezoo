@@ -18,7 +18,7 @@ Code related to helper functions for model zoo
 
 import errno
 import os
-from typing import Union
+from typing import Any, Union
 
 from tqdm import auto, tqdm, tqdm_notebook
 
@@ -26,6 +26,7 @@ from tqdm import auto, tqdm, tqdm_notebook
 __all__ = [
     "CACHE_DIR",
     "clean_path",
+    "convert_to_bool",
     "create_dirs",
     "create_parent_dirs",
     "create_tqdm_auto_constructor",
@@ -41,6 +42,18 @@ def clean_path(path: str) -> str:
     :return: a cleaned version that expands the user path and creates an absolute path
     """
     return os.path.abspath(os.path.expanduser(path))
+
+
+def convert_to_bool(val: Any):
+    """
+    :param val: a value
+    :return: False if value is a Falsy value e.g. 0, f, false, None, otherwise True.
+    """
+    return (
+        bool(val)
+        if not isinstance(val, str)
+        else bool(val) and "f" not in val.lower() and "0" not in val.lower()
+    )
 
 
 def create_dirs(path: str):

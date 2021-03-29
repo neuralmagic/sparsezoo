@@ -22,7 +22,7 @@ from typing import Dict, Union
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
+from sparsezoo.requests.base import MODELS_API_URL, SPARSEZOO_TEST_MODE, ModelArgs
 
 
 __all__ = ["download_get_request", "DOWNLOAD_PATH"]
@@ -52,11 +52,18 @@ def download_get_request(
     if file_name:
         url = f"{url}/{file_name}"
 
+    download_args = []
+
     if hasattr(args, "release_version") and args.release_version:
-        url = f"{url}?release_version={args.release_version}"
+        download_args.append(f"release_version={args.release_version}")
+
+    if SPARSEZOO_TEST_MODE:
+        download_args.append("increment_download=False")
+
+    if download_args:
+        url = f"{url}?{'&'.join(download_args)}"
 
     _LOGGER.debug(f"GET download from {url}")
-
     response = requests.get(url=url, headers=header)
     response.raise_for_status()
     response_json = response.json()
