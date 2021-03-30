@@ -19,8 +19,12 @@ Code related to base functionality for making requests
 import os
 from typing import Any, List, Union
 
+from sparsezoo.utils import convert_to_bool
 
-__all__ = ["BASE_API_URL", "ModelArgs", "MODELS_API_URL"]
+
+__all__ = ["BASE_API_URL", "ModelArgs", "MODELS_API_URL", "SPARSEZOO_TEST_MODE"]
+
+SPARSEZOO_TEST_MODE = convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE"))
 
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
