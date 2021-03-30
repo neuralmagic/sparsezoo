@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Code related to wrapping around API calls under api.neuralmagic.com/objects/download
+Code related to wrapping around API calls under api.neuralmagic.com/[object]/download
 """
 
 import logging
@@ -45,9 +45,13 @@ def download_get_request(
     """
     Get a downloadable object from the sparsezoo for any objects matching the args
 
+    The path called has structure:
+        [base_url]/download/[args.stub]/{sub_path}
+
     :param base_url: the base url
     :param args: the model args describing what should be downloaded for
-    :param sub_path: the sub path from the model path if any
+    :param sub_path: the sub path from the model path if any e.g.
+        file_name for models api or recipe_type for the recipes api
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
@@ -74,7 +78,7 @@ def download_model_get_request(
     args: Union[ModelArgs, str],
     file_name: Union[str, None] = None,
     force_token_refresh: bool = False,
-):
+) -> Dict:
     """
     Get a downloadable model from the sparsezoo for any objects matching the args
 

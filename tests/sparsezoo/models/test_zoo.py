@@ -110,9 +110,7 @@ def test_load_model(model_args, other_args):
     ],
 )
 def test_download_model(model_args, other_args):
-    path = Zoo.download_model(**model_args, **other_args)
-    model = Zoo.load_model(**model_args, **other_args)
-    assert path == model.dir_path
+    model = Zoo.download_model(**model_args, **other_args)
     validate_downloaded_model(model, model_args, other_args)
     shutil.rmtree(model.dir_path)
 

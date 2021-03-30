@@ -204,7 +204,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> str:
+    ) -> Model:
         """
         Downloads a model from model repo
 
@@ -238,7 +238,7 @@ class Zoo:
             for where to save the parent folder for this file under
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :param overwrite: True to overwrite the file if it exists, False otherwise
-        :return: The path where the models were downloaded
+        :return: The requested Model instance
         """
         args = ModelArgs(
             domain=domain,
@@ -269,7 +269,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> str:
+    ) -> Model:
         """
         :param stub: the SparseZoo stub path to the model, can be a string path or
             ModelArgs object
@@ -279,7 +279,7 @@ class Zoo:
             for where to save the parent folder for this file under
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :param overwrite: True to overwrite the file if it exists, False otherwise
-        :return: The path where the model files were downloaded
+        :return: The requested Model instance
         """
         if isinstance(stub, str):
             stub, _ = parse_zoo_stub(stub, valid_params=[])
@@ -295,7 +295,7 @@ class Zoo:
             override_parent_path=override_parent_path,
         )
         model.download(overwrite=overwrite, refresh_token=force_token_refresh)
-        return model.dir_path
+        return model
 
     @staticmethod
     def search_models(

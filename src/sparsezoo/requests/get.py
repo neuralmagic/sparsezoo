@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Code related to wrapping around API calls under api.neuralmagic.com/objects/download
+Code related to wrapping around API calls under api.neuralmagic.com/[object]/get
 """
 
 import logging
@@ -35,15 +35,19 @@ GET_PATH = "get"
 def get_request(
     base_url: str,
     args: Union[ModelArgs, str],
-    file_name: Union[str, None] = None,
+    sub_path: Union[str, None] = None,
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    Get a downloadable object from the sparsezoo for any objects matching the args
+    Get an object from the sparsezoo for any objects matching the args.
+
+    The path called has structure:
+        [base_url]/get/[args.stub]/{sub_path}
 
     :param base_url: the base url of the request
-    :param args: the args describing what should be downloaded for
-    :param file_name: the name of the file, if any, to get download info for
+    :param args: the args describing what should be retrieved
+    :param file_name: the sub path from the model path if any e.g.
+        file_name for models api or recipe_type for the recipes api
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
@@ -51,8 +55,8 @@ def get_request(
     path = args if isinstance(args, str) else args.stub
     url = f"{base_url}/{GET_PATH}/{path}"
 
-    if file_name:
-        url = f"{url}/{file_name}"
+    if sub_path:
+        url = f"{url}/{sub_path}"
 
     if hasattr(args, "release_version") and args.release_version:
         url = f"{url}?release_version={args.release_version}"
@@ -72,16 +76,16 @@ def get_model_get_request(
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    Get a downloadable model from the sparsezoo for any objects matching the args
+    Get a model from the sparsezoo for any objects matching the args
 
-    :param args: the model args describing what should be downloaded for
-    :param file_name: the name of the file, if any, to get download info for
+    :param args: the model args describing what should be retrieved for
+    :param file_name: the name of the file, if any, to get model info for
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
     return get_request(
         MODELS_API_URL,
         args=args,
-        file_name=file_name,
+        sub_path=file_name,
         force_token_refresh=force_token_refresh,
     )
