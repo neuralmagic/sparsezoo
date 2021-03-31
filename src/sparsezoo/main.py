@@ -389,7 +389,7 @@ def main():
 
     if args.command == DOWNLOAD_COMMAND:
         LOGGER.info("Downloading files from model...")
-        dir_path = Zoo.download_model(
+        model = Zoo.download_model(
             domain=args.domain,
             sub_domain=args.sub_domain,
             architecture=args.architecture,
@@ -409,7 +409,7 @@ def main():
         print("Download results")
         print("====================")
         print("")
-        print(f"downloaded to {dir_path}")
+        print(f"downloaded to {model.dir_path}")
     elif args.command == SEARCH_COMMAND:
         search(args)
 
