@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Code related to wrapping around API calls under api.neuralmagic.com/[object]/download
+Code related to wrapping around API calls under api.neuralmagic.com/[object]/get
 """
 
 import logging
@@ -22,58 +22,47 @@ from typing import Dict, Union
 import requests
 
 from sparsezoo.requests.authentication import get_auth_header
-from sparsezoo.requests.base import MODELS_API_URL, SPARSEZOO_TEST_MODE, ModelArgs
+from sparsezoo.requests.base import MODELS_API_URL, ModelArgs
 
 
-__all__ = [
-    "download_get_request",
-    "download_model_get_request",
-    "DOWNLOAD_PATH",
-]
+__all__ = ["get_request", "get_model_get_request", "GET_PATH"]
 
 
 _LOGGER = logging.getLogger(__name__)
-DOWNLOAD_PATH = "download"
+GET_PATH = "get"
 
 
-def download_get_request(
+def get_request(
     base_url: str,
     args: Union[ModelArgs, str],
     sub_path: Union[str, None] = None,
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    Get a downloadable object from the sparsezoo for any objects matching the args
+    Get an object from the sparsezoo for any objects matching the args.
 
     The path called has structure:
-        [base_url]/download/[args.stub]/{sub_path}
+        [base_url]/get/[args.stub]/{sub_path}
 
-    :param base_url: the base url
-    :param args: the model args describing what should be downloaded for
-    :param sub_path: the sub path from the model path if any e.g.
+    :param base_url: the base url of the request
+    :param args: the args describing what should be retrieved
+    :param file_name: the sub path from the model path if any e.g.
         file_name for models api or recipe_type for the recipes api
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
     header = get_auth_header(force_token_refresh=force_token_refresh)
     path = args if isinstance(args, str) else args.stub
-    url = f"{base_url}/{DOWNLOAD_PATH}/{path}"
+    url = f"{base_url}/{GET_PATH}/{path}"
 
     if sub_path:
         url = f"{url}/{sub_path}"
 
-    download_args = []
-
     if hasattr(args, "release_version") and args.release_version:
-        download_args.append(f"release_version={args.release_version}")
-
-    if SPARSEZOO_TEST_MODE:
-        download_args.append("increment_download=False")
-
-    if download_args:
-        url = f"{url}?{'&'.join(download_args)}"
+        url = f"{url}?release_version={args.release_version}"
 
     _LOGGER.debug(f"GET download from {url}")
+
     response = requests.get(url=url, headers=header)
     response.raise_for_status()
     response_json = response.json()
@@ -81,21 +70,21 @@ def download_get_request(
     return response_json
 
 
-def download_model_get_request(
+def get_model_get_request(
     args: Union[ModelArgs, str],
     file_name: Union[str, None] = None,
     force_token_refresh: bool = False,
 ) -> Dict:
     """
-    Get a downloadable model from the sparsezoo for any objects matching the args
+    Get a model from the sparsezoo for any objects matching the args
 
-    :param args: the model args describing what should be downloaded for
-    :param file_name: the name of the file, if any, to get download info for
+    :param args: the model args describing what should be retrieved for
+    :param file_name: the name of the file, if any, to get model info for
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
-    return download_get_request(
-        base_url=MODELS_API_URL,
+    return get_request(
+        MODELS_API_URL,
         args=args,
         sub_path=file_name,
         force_token_refresh=force_token_refresh,

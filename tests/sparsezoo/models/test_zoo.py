@@ -70,6 +70,52 @@ def test_load_model(model_args, other_args):
 
 
 @pytest.mark.parametrize(
+    "model_args,other_args",
+    [
+        (
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+                "sub_architecture": "1.0",
+                "framework": "pytorch",
+                "repo": "sparseml",
+                "dataset": "imagenet",
+                "training_scheme": None,
+                "optim_name": "base",
+                "optim_category": "none",
+                "optim_target": None,
+            },
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+                "override_folder_name": "test_folder",
+            },
+        ),
+        (
+            {
+                "domain": "cv",
+                "sub_domain": "classification",
+                "architecture": "mobilenet_v1",
+                "sub_architecture": "1.0",
+                "framework": "pytorch",
+                "repo": "sparseml",
+                "dataset": "imagenet",
+                "training_scheme": None,
+                "optim_name": "base",
+                "optim_category": "none",
+                "optim_target": None,
+            },
+            {},
+        ),
+    ],
+)
+def test_download_model(model_args, other_args):
+    model = Zoo.download_model(**model_args, **other_args)
+    validate_downloaded_model(model, model_args, other_args)
+    shutil.rmtree(model.dir_path)
+
+
+@pytest.mark.parametrize(
     "stub, model_args, other_args",
     [
         [
