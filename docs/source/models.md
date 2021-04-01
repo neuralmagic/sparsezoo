@@ -62,26 +62,36 @@ The contents of each model are made up of the following:
 | cv/classification/inception_v3/pytorch/sparseml/imagenet/base-none                         | 77.4% top1 accuracy        |  
 | cv/classification/inception_v3/pytorch/sparseml/imagenet/pruned-conservative               | 77.4% top1 accuracy        |  
 | cv/classification/inception_v3/pytorch/sparseml/imagenet/pruned-moderate                   | 76.6% top1 accuracy        |  
+| cv/classification/mnist/keras/sparseml/mnist/pruned-conservative                           | ??.?% top1 accuracy        |  
 | cv/classification/mnistnet/pytorch/sparseml/mnist/base-none                                | 99.4% top1 accuracy        |  
 | cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/base-none                     | 70.9% top1 accuracy        |  
 | cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-conservative           | 70.9% top1 accuracy        |  
 | cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate               | 70.1% top1 accuracy        |  
 | cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned_quant-moderate         | 70.1% top1 accuracy        |  
 | cv/classification/mobilenet_v2-1.0/pytorch/sparseml/imagenet/base-none                     | 71.9% top1 accuracy        |  
+| cv/classification/resnet_v1-101/keras/sparseml/imagenet/base-none                          | 77.4% top1 accuracy        |  
+| cv/classification/resnet_v1-101/keras/sparseml/imagenet/pruned-moderate                    | 76.6% top1 accuracy        |  
 | cv/classification/resnet_v1-101/pytorch/sparseml/imagenet/base-none                        | 77.4% top1 accuracy        |  
 | cv/classification/resnet_v1-101/pytorch/sparseml/imagenet/pruned-moderate                  | 76.6% top1 accuracy        |  
 | cv/classification/resnet_v1-101/pytorch/torchvision/imagenet/base-none                     | 76.6% top1 accuracy        |  
 | cv/classification/resnet_v1-101_2x/pytorch/sparseml/imagenet/base-none                     | 78.8% top1 accuracy        |  
 | cv/classification/resnet_v1-101_2x/pytorch/torchvision/imagenet/base-none                  | 78.8% top1 accuracy        |  
+| cv/classification/resnet_v1-152/keras/sparseml/imagenet/base-none                          | 78.3% top1 accuracy        |  
+| cv/classification/resnet_v1-152/keras/sparseml/imagenet/pruned-moderate                    | 77.5% top1 accuracy        |  
 | cv/classification/resnet_v1-152/pytorch/sparseml/imagenet/base-none                        | 78.3% top1 accuracy        |  
 | cv/classification/resnet_v1-152/pytorch/sparseml/imagenet/pruned-moderate                  | 77.5% top1 accuracy        |  
 | cv/classification/resnet_v1-152/pytorch/torchvision/imagenet/base-none                     | 77.5% top1 accuracy        |  
 | cv/classification/resnet_v1-18/pytorch/sparseml/imagenet/base-none                         | 69.8% top1 accuracy        |  
 | cv/classification/resnet_v1-18/pytorch/sparseml/imagenet/pruned-conservative               | 69.8% top1 accuracy        |  
-| cv/classification/resnet_v1-18/pytorch/torchvision/imagenet/base-none                      | 69.8% top1 accuracy        |  
+| cv/classification/resnet_v1-18/pytorch/torchvision/imagenet/base-none                      | 69.8% top1 accuracy        |
+| cv/classification/resnet_v1-20/keras/sparseml/cifar_10/base-none                           | 91.3% top1 accuracy        |
+| cv/classification/resnet_v1-20/keras/sparseml/cifar_10/pruned-conservative                 | ??.?% top1 accuracy        |
 | cv/classification/resnet_v1-34/pytorch/sparseml/imagenet/base-none                         | 73.3% top1 accuracy        |  
 | cv/classification/resnet_v1-34/pytorch/sparseml/imagenet/pruned-conservative               | 73.3% top1 accuracy        |  
 | cv/classification/resnet_v1-34/pytorch/torchvision/imagenet/base-none                      | 73.3% top1 accuracy        |  
+| cv/classification/resnet_v1-50/keras/sparseml/imagenet/base-none                           | 76.1% top1 accuracy        |  
+| cv/classification/resnet_v1-50/keras/sparseml/imagenet/pruned-conservative                 | 76.1% top1 accuracy        |  
+| cv/classification/resnet_v1-50/keras/sparseml/imagenet/pruned-moderate                     | 75.3% top1 accuracy        |  
 | cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/base-none                         | 76.1% top1 accuracy        |  
 | cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned-conservative               | 76.1% top1 accuracy        |  
 | cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned-moderate                   | 75.3% top1 accuracy        |  
@@ -118,9 +128,12 @@ The contents of each model are made up of the following:
 
 |  Model Tag                                                                                 | Validation Baseline Metric |
 | ------------------------------------------------------------------------------------------ | -------------------------- |
+| cv/detection/ssd-resnet18_300/pytorch/sparseml/voc/base-none                               | ??.? mAP@0.5               |
+| cv/detection/ssd-resnet18_300/pytorch/sparseml/voc/pruned-moderate                         | ??.? mAP@0.5               |
 | cv/detection/ssd-resnet50_300/pytorch/sparseml/coco/base-none                              | 42.7 mAP@0.5               |
 | cv/detection/ssd-resnet50_300/pytorch/sparseml/coco/pruned-moderate                        | 41.8 mAP@0.5               |
 | cv/detection/ssd-resnet50_300/pytorch/sparseml/voc/base-none                               | 52.2 mAP@0.5               |
 | cv/detection/ssd-resnet50_300/pytorch/sparseml/voc/pruned-moderate                         | 51.5 mAP@0.5               |
-| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/base-none                                | 63.5 mAP@0.5               |
-| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/pruned-aggressive                        | 62.1 mAP@0.5               |
+| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/base-none                                | 64.2 mAP@0.5               |
+| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/pruned-aggressive_97                     | 62.4 mAP@0.5               |
+| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/pruned_quant-aggressive_94               | 60.5 mAP@0.5               |
