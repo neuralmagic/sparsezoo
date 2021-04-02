@@ -13,11 +13,9 @@
 # limitations under the License.
 
 import argparse
-import glob
 import os
 import subprocess
-import sys
-from typing import List, NamedTuple
+from distutils.dir_util import copy_tree
 
 
 def parse_args():
@@ -44,6 +42,14 @@ def parse_args():
 
 
 def create_docs(src: str, dest: str):
+    """
+    Run the sphinx command to create the docs from src into dest.
+
+    :param src: the source directory for docs
+    :type src: str
+    :param dest: the destination directory for docs
+    :type dest: str
+    """
     print("running sphinx-multiversion")
     res = subprocess.run(["sphinx-multiversion", src, dest])
 
@@ -54,9 +60,21 @@ def create_docs(src: str, dest: str):
 
 
 def package_docs(dest: str):
-    print("packaging docs")
+    """
+    Run any extra packaging commands to prep the docs for release.
+    Ex: copies the latest version to the root so if a version isn't specified will load.
+
+    :param dest: the destination directory the docs were built in
+    :type dest: str
+    """
+    print(f"packaging docs at {dest}")
     version_folders = os.listdir(dest)
-    print(version_folders)
+    version_folders.sort()
+    latest = version_folders[-1]
+    latest_path = os.path.join(dest, latest)
+    print(f"found latest version `{latest}`, copying from {latest_path} over to {dest}")
+    copy_tree(latest_path, dest)
+    print(f"copied version {latest} to root as default")
 
 
 def main():

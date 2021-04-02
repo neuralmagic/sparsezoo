@@ -50,8 +50,6 @@ style:
 	@echo "Running python styling";
 	black $(PYCHECKDIRS);
 	isort $(PYCHECKDIRS);
-	@echo "Runnning update to api docs"
-	sphinx-apidoc -o "$(DOCDIR)/api" src/sparsezoo;
 
 # run tests for the repo
 test:
@@ -62,6 +60,11 @@ test:
 docs:
 	@echo "Running docs creation";
 	python utils/docs_builder.py --src docs --dest docs/build/html;
+
+docsupdate:
+	@echo "Runnning update to api docs";
+	find $(DOCDIR)/api | grep .rst | xargs rm -rf;
+	sphinx-apidoc -o "$(DOCDIR)/api" src/sparsezoo;
 
 # creates wheel file
 build:
