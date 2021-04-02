@@ -50,6 +50,8 @@ style:
 	@echo "Running python styling";
 	black $(PYCHECKDIRS);
 	isort $(PYCHECKDIRS);
+	@echo "Runnning update to api docs"
+	sphinx-apidoc -o "$(DOCDIR)/api" src/sparsezoo;
 
 # run tests for the repo
 test:
@@ -58,8 +60,8 @@ test:
 
 # create docs
 docs:
-	sphinx-apidoc -o "$(DOCDIR)/source/api" src/sparsezoo;
-	cd $(DOCDIR) && $(MAKE) html;
+	@echo "Running docs creation";
+	python utils/docs_builder.py --src docs --dest docs/build/html;
 
 # creates wheel file
 build:
@@ -73,4 +75,3 @@ clean:
 	rm -rf dist;
 	rm -rf src/sparsezoo.egg-info;
 	find $(PYCHECKDIRS) | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf;
-	find $(DOCDIR)/source/api | grep .rst | xargs rm -rf;

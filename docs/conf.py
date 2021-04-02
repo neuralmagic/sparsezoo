@@ -59,23 +59,17 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
-html_sidebars = {
-    '**': [
-        'versioning.html',
-    ],
-}
-
 # Whitelist pattern for tags (set to None to ignore all tags)
-smv_tag_whitelist = r'^.*$'
+smv_tag_whitelist = None
 
 # Whitelist pattern for branches (set to None to ignore all branches)
-smv_branch_whitelist = r'^.*$'
+smv_branch_whitelist = r'^(main)|(docs-upgrades)$'
 
 # Whitelist pattern for remotes (set to None to use local branches only)
 smv_remote_whitelist = None
 
 # Pattern for released versions
-smv_released_pattern = r'^tags/.*$'
+smv_released_pattern = r'^tags/v.*$'
 
 # Format for versioned output directories inside the build directory
 smv_outputdir_format = '{ref.name}'
