@@ -51,12 +51,19 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
     "sphinx_markdown_tables",
+    "sphinx_multiversion",
     "sphinx_rtd_theme",
     "recommonmark",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+html_sidebars = {
+    '**': [
+        'versioning.html',
+    ],
+}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -100,6 +107,8 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_css_files = ["css/nm-theme-adjustment.css"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

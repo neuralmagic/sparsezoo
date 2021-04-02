@@ -1,0 +1,39 @@
+body, .wy-side-nav-search, .wy-nav-side, .wy-nav-content-wrap, .wy-nav-content, .wy-nav-shift {
+    background: #ffffff;
+    color: rgb(40, 68, 41);
+    font-family: "Helvetica Neue";
+}
+
+.wy-nav-content {
+    border-right: solid 1px;
+    border-left:  solid 1px;
+}
+
+.highlight {
+    background: #f5f5f5;
+}
+
+a {
+    color: #062EF5;
+}
+
+.wy-side-nav-search>div.version, .wy-side-nav-search .wy-dropdown>a, .wy-side-nav-search>a {
+    color:  rgb(40, 68, 41);
+}
+
+.wy-side-nav-search .icon-home {
+    display: flex;
+    justify-content: center;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+.wy-side-nav-search>a.icon img.logo {
+    padding: 0;
+    margin: 0 8px 0 0;
+    width: 28px;
+}
+
+.wy-side-nav-search .icon-home::before {
+    content: "";
+}
