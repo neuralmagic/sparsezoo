@@ -1,5 +1,3 @@
-# flake8: noqa
-
 # Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +13,12 @@
 # limitations under the License.
 
 """
-Functionality for accessing models, recipes, and supporting files in the SparseZoo
+Functionality for storing and setting the version info for SparseML
 """
 
-# flake8: noqa
-# isort: skip_file
+__all__ = ["__version__"]
+__version__ = "0.2.0"
 
-from .version import *
-from .main import *
-from .models.zoo import *
-from .objects import *
+version = __version__
+version_major, version_minor, version_bug = version.split(".")
+version_major_minor = f"{version_major}.{version_minor}"
