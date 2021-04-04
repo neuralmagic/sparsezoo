@@ -17,6 +17,9 @@ import os
 import re
 import subprocess
 from distutils.dir_util import copy_tree
+from typing import List
+import glob
+from bs4 import BeautifulSoup
 
 from packaging import version
 
@@ -71,15 +74,24 @@ def package_docs(dest: str):
     :type dest: str
     """
     print(f"packaging docs at {dest}")
-    latest = _get_latest_folder(dest)
-    latest_path = os.path.join(dest, latest)
-    print(f"found latest version `{latest}`, copying from {latest_path} over to {dest}")
-    copy_tree(latest_path, dest)
+    folders = _get_docs_folders(dest)
+    print(f"found {len(folders)} docs folders from build")
+    latest = _get_latest_folder(folders)
+    print(f"found latest version `{latest}`, copying to {dest}")
+    _copy_to_root(dest, latest)
     print(f"copied version {latest} to root as default")
+    print("fixing root links")
+    _fix_html_files_version_links(dest, folders)
+    print("root links fixed")
 
 
-def _get_latest_folder(dest: str) -> str:
+def _get_docs_folders(dest: str) -> List[str]:
     folders = os.listdir(dest)
+
+    return folders
+
+
+def _get_latest_folder(folders: List[str]) -> str:
     versioned_folders = [
         (folder, version.parse(folder[1:]))
         for folder in folders
@@ -98,6 +110,34 @@ def _get_latest_folder(dest: str) -> str:
     # fall back on any other folder sorted
     folders.sort()
     return folders[-1]
+
+
+def _copy_to_root(dest: str, latest: str):
+    latest_path = os.path.join(dest, latest)
+    copy_tree(latest_path, dest)
+
+
+def _fix_html_files_version_links(dest: str, folders: List[str]):
+    for file in glob.glob(os.path.join(dest, "**", "*.html"), recursive=True):
+        relative = os.path.relpath(file, dest)
+        parent = relative.split(os.sep)[0]
+
+        if parent in folders:
+            continue
+
+        _fix_html_version_links(file)
+
+
+def _fix_html_version_links(file_path: str):
+    html = open(file_path).read()
+    soup = BeautifulSoup(html, 'html.parser')
+
+    for anchor in soup.find("div", {"class": "rst-other-versions"}).find_all("a"):
+        if anchor["href"].startswith("../"):
+            anchor["href"] = anchor["href"][3:]
+
+    with open(file_path, "wb") as file:
+        file.write(soup.prettify("utf-8"))
 
 
 def main():
