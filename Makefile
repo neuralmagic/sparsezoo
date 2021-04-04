@@ -59,7 +59,7 @@ test:
 # create docs
 docs:
 	@echo "Running docs creation";
-	python utils/docs_builder.py --src docs --dest docs/build/html;
+	python utils/docs_builder.py --src $(DOCDIR) --dest $(DOCDIR)/build/html;
 
 docsupdate:
 	@echo "Runnning update to api docs";

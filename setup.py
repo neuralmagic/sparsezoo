@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+usage: docs_builder.py [-h] --src SRC --dest DEST
+
+Create and package documentation for the repository
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --src SRC    the source directory to read the source for the docs from
+  --dest DEST  the destination directory to put the built docs
+"""
+
 import os
 import sys
 from datetime import date
@@ -54,6 +65,7 @@ _dev_deps = [
     "sphinx>=3.4.0",
     "sphinx-copybutton>=0.3.0",
     "sphinx-markdown-tables>=0.0.15",
+    "sphinx-multiversion==0.2.4",
     "wheel>=0.36.2",
     "pytest>=6.0.0",
     "sphinx-rtd-theme",

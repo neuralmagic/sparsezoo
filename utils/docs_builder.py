@@ -13,14 +13,14 @@
 # limitations under the License.
 
 import argparse
+import glob
 import os
 import re
 import subprocess
 from distutils.dir_util import copy_tree
 from typing import List
-import glob
-from bs4 import BeautifulSoup
 
+from bs4 import BeautifulSoup
 from packaging import version
 
 
@@ -130,7 +130,7 @@ def _fix_html_files_version_links(dest: str, folders: List[str]):
 
 def _fix_html_version_links(file_path: str):
     html = open(file_path).read()
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
 
     for anchor in soup.find("div", {"class": "rst-other-versions"}).find_all("a"):
         if anchor["href"].startswith("../"):

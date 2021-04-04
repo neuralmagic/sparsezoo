@@ -39,6 +39,14 @@ sparsezoo.main module
    :undoc-members:
    :show-inheritance:
 
+sparsezoo.version module
+------------------------
+
+.. automodule:: sparsezoo.version
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
