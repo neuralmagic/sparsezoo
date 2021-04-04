@@ -14,8 +14,11 @@
 
 import argparse
 import os
+import re
 import subprocess
 from distutils.dir_util import copy_tree
+
+from packaging import version
 
 
 def parse_args():
@@ -68,13 +71,33 @@ def package_docs(dest: str):
     :type dest: str
     """
     print(f"packaging docs at {dest}")
-    version_folders = os.listdir(dest)
-    version_folders.sort()
-    latest = version_folders[-1]
+    latest = _get_latest_folder(dest)
     latest_path = os.path.join(dest, latest)
     print(f"found latest version `{latest}`, copying from {latest_path} over to {dest}")
     copy_tree(latest_path, dest)
     print(f"copied version {latest} to root as default")
+
+
+def _get_latest_folder(dest: str) -> str:
+    folders = os.listdir(dest)
+    versioned_folders = [
+        (folder, version.parse(folder[1:]))
+        for folder in folders
+        if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+$", folder)
+    ]
+    versioned_folders.sort(key=lambda ver: ver[1])
+
+    # get the latest version
+    if versioned_folders:
+        return versioned_folders[-1][0]
+
+    # fall back on main if available as default
+    if "main" in folders:
+        return "main"
+
+    # fall back on any other folder sorted
+    folders.sort()
+    return folders[-1]
 
 
 def main():
