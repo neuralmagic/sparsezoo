@@ -66,7 +66,6 @@ _dev_deps = [
     "sphinx-copybutton>=0.3.0",
     "sphinx-markdown-tables>=0.0.15",
     "sphinx-multiversion==0.2.4",
-    "wheel>=0.36.2",
     "pytest>=6.0.0",
     "sphinx-rtd-theme",
     "wheel>=0.36.2",
