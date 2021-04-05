@@ -84,7 +84,6 @@ The contents of each model are made up of the following:
 | cv/classification/resnet_v1-18/pytorch/sparseml/imagenet/pruned-conservative               | 69.8% top1 accuracy        |  
 | cv/classification/resnet_v1-18/pytorch/torchvision/imagenet/base-none                      | 69.8% top1 accuracy        |
 | cv/classification/resnet_v1-20/keras/sparseml/cifar_10/base-none                           | 91.3% top1 accuracy        |
-| cv/classification/resnet_v1-20/keras/sparseml/cifar_10/pruned-conservative                 | ??.?% top1 accuracy        |
 | cv/classification/resnet_v1-34/pytorch/sparseml/imagenet/base-none                         | 73.3% top1 accuracy        |  
 | cv/classification/resnet_v1-34/pytorch/sparseml/imagenet/pruned-conservative               | 73.3% top1 accuracy        |  
 | cv/classification/resnet_v1-34/pytorch/torchvision/imagenet/base-none                      | 73.3% top1 accuracy        |  
