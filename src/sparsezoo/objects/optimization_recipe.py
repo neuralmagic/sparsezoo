@@ -17,18 +17,27 @@ Code related to a model repo optimization file
 """
 
 import logging
-from enum import Enum
-from typing import Optional
+import os
+from typing import TYPE_CHECKING, Optional
 
+
+if TYPE_CHECKING:
+    from sparsezoo.objects.model import Model
+
+from enum import Enum
+
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects.file import File
 from sparsezoo.objects.metadata import ModelMetadata
 
 
 __all__ = ["OptimizationRecipeTypes", "OptimizationRecipe"]
 
+
 _LOGGER = logging.getLogger(__name__)
 
 
+@Zoo.register("OptimizationRecipeTypes")
 class OptimizationRecipeTypes(Enum):
     """
     Types of recipes available in the sparsezoo
@@ -40,7 +49,7 @@ class OptimizationRecipeTypes(Enum):
 
 class OptimizationRecipe(File):
     """
-    A model repo optimization recipe.
+    A model repo recipe.
 
     :param model_metadata: the metadata for the model the file is for
     :param recipe_id: the recipe id
@@ -65,49 +74,67 @@ class OptimizationRecipe(File):
         self._recipe_type = recipe_type
         self._display_description = display_description
         self._base_stub = base_stub
-        self._model = None
+
+    @staticmethod
+    @Zoo.register("OptimizationRecipe")
+    def construct(
+        model_metadata: ModelMetadata,
+        recipe_id: str,
+        recipe_type: str,
+        display_description: str,
+        base_stub: Optional[str],
+        **kwargs,
+    ):
+        return OptimizationRecipe(
+            model_metadata=model_metadata,
+            recipe_id=recipe_id,
+            recipe_type=recipe_type,
+            display_description=display_description,
+            base_stub=base_stub,
+            **kwargs,
+        )
 
     @property
     def recipe_id(self) -> str:
         """
-        :return: the optimization id
+        :return: the recipe id
         """
         return self._recipe_id
 
     @property
     def recipe_type(self) -> str:
         """
-        :return: the type of optimizations
+        :return: the type of recipe
         """
         return self._recipe_type
 
     @property
     def recipe_type_original(self) -> bool:
         """
-        :return: True if this is the original optimization recipe
-            that created the model, False otherwise
+        :return: True if this is the original recipe that created the
+            model, False otherwise
         """
         return self.recipe_type == OptimizationRecipeTypes.ORIGINAL.value
 
     @property
     def recipe_type_transfer_learn(self) -> bool:
         """
-        :return: True if this is an optimization recipe for
-            transfer learning from the created model, False otherwise
+        :return: True if this is a recipe for transfer learning from the
+            created model, False otherwise
         """
         return self.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value
 
     @property
     def display_name(self):
         """
-        :return: the display name for the optimization
+        :return: the display name for the recipe
         """
         return self._display_name
 
     @property
     def display_description(self) -> str:
         """
-        :return: the display description for the optimization
+        :return: the display description for the recipe
         """
         return self._display_description
 
@@ -124,3 +151,13 @@ class OptimizationRecipe(File):
         :return: full path for where the recipe is located in the sparsezoo
         """
         return self.model_metadata.stub
+
+    def load_model(self) -> "Model":
+        """
+        :return: the model associated with the recipe
+        """
+        return Zoo.load_model_from_recipe(
+            recipe=self,
+            override_folder_name=os.path.dirname(self.folder_name),
+            override_parent_path=self.override_parent_path,
+        )

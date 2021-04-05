@@ -18,13 +18,13 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 
 
 import warnings
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, Union
 
-from sparsezoo.objects.model import Model
-from sparsezoo.objects.optimization_recipe import (
-    OptimizationRecipe,
-    OptimizationRecipeTypes,
-)
+
+if TYPE_CHECKING:
+    from sparsezoo.objects.model import Model
+    from sparsezoo.objects.recipe import OptimizationRecipe
+
 from sparsezoo.requests import (
     ModelArgs,
     RecipeArgs,
@@ -89,6 +89,27 @@ class Zoo:
     Provides static functions for loading and searching SparseZoo models and recipes
     """
 
+    _CONSTRUCTORS = {}
+
+    @staticmethod
+    def constructor(construct_key: str):
+        if construct_key not in Zoo._CONSTRUCTORS:
+            raise RuntimeError(f"No constructure registered for {construct_key}")
+        return Zoo._CONSTRUCTORS[construct_key]
+
+    @staticmethod
+    def _register_class(key: str, const_func: Callable):
+        Zoo._CONSTRUCTORS[key] = const_func
+
+    @staticmethod
+    def register(
+        key: str,
+    ):
+        def decorator(const_func: Callable):
+            Zoo._register_class(key, const_func)
+
+        return decorator
+
     @staticmethod
     def load_model(
         domain: str,
@@ -106,7 +127,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         Obtains a Model from the model repo
 
@@ -165,7 +186,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         :param stub: the SparseZoo stub path to the model, can be a string path or
             ModelArgs object
@@ -184,7 +205,7 @@ class Zoo:
             file_name=None,
             force_token_refresh=force_token_refresh,
         )
-        return Model(
+        return Zoo.constructor("Model")(
             **response_json["model"],
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
@@ -192,7 +213,7 @@ class Zoo:
 
     @staticmethod
     def load_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: "OptimizationRecipe",
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -217,7 +238,7 @@ class Zoo:
 
     @staticmethod
     def load_base_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: "OptimizationRecipe",
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -258,7 +279,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         Downloads a model from model repo
 
@@ -323,7 +344,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         :param stub: the SparseZoo stub path to the model, can be a string path or
             ModelArgs object
@@ -343,7 +364,7 @@ class Zoo:
             file_name=None,
             force_token_refresh=force_token_refresh,
         )
-        model = Model(
+        model = Zoo.constructor("Model")(
             **response_json["model"],
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
@@ -370,7 +391,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> List[Model]:
+    ) -> List["Model"]:
         """
         Obtains a list of Models matching the search parameters
 
@@ -429,7 +450,7 @@ class Zoo:
         )
 
         return [
-            Model(
+            Zoo.constructor("Model")(
                 **model,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
@@ -439,7 +460,7 @@ class Zoo:
 
     @staticmethod
     def search_similar_models(
-        model: Union[Model, str, ModelArgs],
+        model: Union["Model", str, ModelArgs],
         match_domain: bool = True,
         match_sub_domain: bool = True,
         match_architecture: bool = True,
@@ -451,7 +472,7 @@ class Zoo:
         match_optim_name: bool = False,
         match_optim_category: bool = False,
         match_optim_target: bool = False,
-    ) -> List[Model]:
+    ) -> List["Model"]:
         """
         Search for similar models to the given one
 
@@ -492,7 +513,7 @@ class Zoo:
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :return: a list of models matching the given model, if any
         """
-        if isinstance(model, Model) or isinstance(model, str):
+        if isinstance(model, str):
             model = Zoo.load_model_from_stub(model)
         return Zoo.search_models(
             domain=model.domain if match_domain else None,
@@ -510,12 +531,12 @@ class Zoo:
 
     @staticmethod
     def search_optimized_models(
-        model: Union[Model, str, ModelArgs],
+        model: Union["Model", str, ModelArgs],
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
-    ) -> List[Model]:
+    ) -> List["Model"]:
         """
         Search for different available optimized versions based off of the current model
 
@@ -535,17 +556,21 @@ class Zoo:
             belongs to if any; e.g. augmented
         :return: the list of matching optimized models, if any
         """
-        return Zoo.search_similar_models(
-            model=model,
-            match_domain=True,
-            match_sub_domain=True,
-            match_architecture=True,
-            match_sub_architecture=True,
-            match_framework=match_framework,
-            match_repo=match_repo,
-            match_dataset=match_dataset,
-            match_training_scheme=match_training_scheme,
-        )
+        return [
+            model
+            for model in Zoo.search_similar_models(
+                model=model,
+                match_domain=True,
+                match_sub_domain=True,
+                match_architecture=True,
+                match_sub_architecture=True,
+                match_framework=match_framework,
+                match_repo=match_repo,
+                match_dataset=match_dataset,
+                match_training_scheme=match_training_scheme,
+            )
+            if not model.is_base
+        ]
 
     @staticmethod
     def search_recipes(
@@ -567,7 +592,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> List[OptimizationRecipe]:
+    ) -> List["OptimizationRecipe"]:
         """
         Obtains a list of Recipes matching the model search parameters
 
@@ -629,7 +654,7 @@ class Zoo:
         )
 
         return [
-            OptimizationRecipe(
+            Zoo.constructor("OptimizationRecipe")(
                 **recipe,
                 model_metadata=recipe["model"],
                 override_folder_name=override_folder_name,
@@ -640,13 +665,13 @@ class Zoo:
 
     @staticmethod
     def search_optimized_recipes(
-        model: Union[Model, str, ModelArgs],
+        model: Union["Model", str, ModelArgs],
         recipe_type: Union[str, None] = None,
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
-    ) -> List[OptimizationRecipe]:
+    ) -> List["OptimizationRecipe"]:
         """
         Search for recipes of the given model
 
@@ -667,7 +692,7 @@ class Zoo:
         :return: the list of matching optimization recipes, if any
         """
         if isinstance(recipe_type, str):
-            recipe_type = OptimizationRecipeTypes(recipe_type).value
+            recipe_type = Zoo.constructor("OptimizationRecipeTypes")(recipe_type).value
 
         optimized_models = Zoo.search_similar_models(
             model=model,
@@ -705,7 +730,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         Obtains a Recipe from the model repo
 
@@ -770,7 +795,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> OptimizationRecipe:
+    ) -> "OptimizationRecipe":
         """
         Loads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter. i.e.
@@ -801,7 +826,7 @@ class Zoo:
         )
 
         recipe = response_json["recipe"]
-        return OptimizationRecipe(
+        return Zoo.constructor("OptimizationRecipe")(
             **recipe,
             model_metadata=recipe["model"],
             override_folder_name=override_folder_name,
@@ -826,7 +851,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> Model:
+    ) -> "Model":
         """
         Downloads a Recipe from the model repo
 
@@ -892,7 +917,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> OptimizationRecipe:
+    ) -> "OptimizationRecipe":
         """
         Downloads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter or part of the stub. i.e.
@@ -921,7 +946,7 @@ class Zoo:
 
         recipe = response_json["recipe"]
 
-        recipe = OptimizationRecipe(
+        recipe = Zoo.constructor("OptimizationRecipe")(
             **recipe,
             model_metadata=recipe["model"],
             override_folder_name=override_folder_name,
@@ -963,6 +988,8 @@ class Zoo:
             recipe_type=recipe_type,
             force_token_refresh=force_token_refresh,
         )
+
+        OptimizationRecipeTypes = Zoo.constructor("OptimizationRecipeTypes")
 
         if recipe.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
             model = Zoo.load_model_from_recipe(
@@ -1010,6 +1037,8 @@ def _get_stub_args_recipe_type(stub_args: Dict[str, str]) -> str:
     recipe_type = stub_args.get("recipe_type")
 
     # validate
+    OptimizationRecipeTypes = Zoo.constructor("OptimizationRecipeTypes")
+
     valid_recipe_types = list(map(lambda typ: typ.value, OptimizationRecipeTypes))
     if recipe_type not in valid_recipe_types and recipe_type is not None:
         raise ValueError(

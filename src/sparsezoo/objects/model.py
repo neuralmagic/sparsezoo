@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Union
 
 import numpy
 
+from sparsezoo.models.zoo import Zoo
 from sparsezoo.objects.data import Data
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.file import File, FileTypes
@@ -196,11 +197,47 @@ class Model(Downloadable, ModelMetadata):
             else None
         )
 
+    @staticmethod
+    @Zoo.register("Model")
+    def construct(
+        display_name: str,
+        display_description: str,
+        files: List[Dict[str, Any]] = None,
+        recipes: List[Dict[str, Any]] = None,
+        results: List[Dict[str, Any]] = None,
+        tags: List[Dict[str, Any]] = None,
+        user: Dict[str, Any] = None,
+        release_version: Dict[str, Any] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        **kwargs,
+    ):
+        return Model(
+            display_name=display_name,
+            display_description=display_description,
+            files=files,
+            recipes=recipes,
+            results=results,
+            tags=tags,
+            user=user,
+            release_version=release_version,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            **kwargs,
+        )
+
     def __repr__(self):
         return f"{self.__class__.__name__}(stub={self.stub})"
 
     def __str__(self):
         return f"{self.__class__.__name__}(stub={self.stub})"
+
+    @property
+    def is_base(self) -> bool:
+        """
+        :return: True if the model is a base model. Otherwise return False
+        """
+        return self.optim_name == "base"
 
     @property
     def display_name(self) -> str:
@@ -506,3 +543,85 @@ class Model(Downloadable, ModelMetadata):
             )
             downloaded_paths.append(file.path)
         return downloaded_paths
+
+    def search_similar_models(
+        self,
+        match_domain: bool = True,
+        match_sub_domain: bool = True,
+        match_architecture: bool = True,
+        match_sub_architecture: bool = True,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = False,
+        match_optim_name: bool = False,
+        match_optim_category: bool = False,
+        match_optim_target: bool = False,
+    ) -> List:
+        """
+        Search for similar models to this model
+
+        :param match_domain: True to match similar models to the current
+            domain of the model the object belongs to; e.g. cv, nlp
+        :param match_sub_domain: True to match similar models to the current
+            sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param match_architecture: True to match similar models to the current
+            architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param match_sub_architecture: True to match similar models to the current
+            sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param match_framework: True to match similar models to the current
+            framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param match_repo: True to match similar models to the current
+            source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param match_dataset: True to match similar models to the current
+            dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param match_training_scheme: True to match similar models to the current
+            training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param match_optim_name: True to match similar models to the current
+            name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param match_optim_category: True to match similar models to the current
+            degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param match_optim_target: True to match similar models to the current
+            deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :return: a list of models matching the given model, if any
+        """
+        return Zoo.search_similar_models(
+            model=self,
+            match_domain=match_domain,
+            match_sub_domain=match_sub_domain,
+            match_architecture=match_architecture,
+            match_sub_architecture=match_sub_architecture,
+            match_framework=match_framework,
+            match_repo=match_repo,
+            match_dataset=match_dataset,
+            match_training_scheme=match_training_scheme,
+            match_optim_name=match_optim_name,
+            match_optim_category=match_optim_category,
+            match_optim_target=match_optim_target,
+        )
+
+    def search_optimized_models(
+        self,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = True,
+    ) -> List:
+        return Zoo.search_optimized_models(
+            model=self,
+            match_framework=match_framework,
+            match_repo=match_repo,
+            match_dataset=match_dataset,
+            match_training_scheme=match_training_scheme,
+        )
