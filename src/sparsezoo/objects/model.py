@@ -212,6 +212,23 @@ class Model(Downloadable, ModelMetadata):
         override_parent_path: Union[str, None] = None,
         **kwargs,
     ):
+        """
+        Constructor for Model to register with Zoo
+
+        :param display_name: the display name for the model
+        :param display_description: the description for the model
+        :param files: a list of model repo files for this model
+        :param recipes: a list of model repo optimization recipes for this model
+        :param results: a list of model repo results for this model
+        :param tags: a list of model repo tags for this model
+        :param user: the model repo user who uploaded this model
+        :param release_version: a model repo release version this model was released with
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :return: The constructed Model
+        """
         return Model(
             display_name=display_name,
             display_description=display_description,

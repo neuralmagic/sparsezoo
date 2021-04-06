@@ -85,6 +85,16 @@ class OptimizationRecipe(File):
         base_stub: Optional[str],
         **kwargs,
     ):
+        """
+        Constructor for Recipe to register with Zoo
+
+        :param model_metadata: the metadata for the model the file is for
+        :param recipe_id: the recipe id
+        :param recipe_type: the type of recipe
+        :param display_description: the display description for the recipe
+        :param base_stub: stub pointing to the base model if any
+        :return: The constructed Recipe
+        """
         return OptimizationRecipe(
             model_metadata=model_metadata,
             recipe_id=recipe_id,
