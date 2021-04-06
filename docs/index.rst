@@ -102,10 +102,10 @@ Additionally, more information can be found via
     :maxdepth: 3
     :caption: General
 
-    quicktour
-    installation
-    models
-    recipes
+    source/quicktour
+    source/installation
+    source/models
+    source/recipes
 
 .. toctree::
     :maxdepth: 2
