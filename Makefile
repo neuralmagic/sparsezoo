@@ -58,8 +58,13 @@ test:
 
 # create docs
 docs:
-	sphinx-apidoc -o "$(DOCDIR)/source/api" src/sparsezoo;
-	cd $(DOCDIR) && $(MAKE) html;
+	@echo "Running docs creation";
+	python utils/docs_builder.py --src $(DOCDIR) --dest $(DOCDIR)/build/html;
+
+docsupdate:
+	@echo "Runnning update to api docs";
+	find $(DOCDIR)/api | grep .rst | xargs rm -rf;
+	sphinx-apidoc -o "$(DOCDIR)/api" src/sparsezoo;
 
 # creates wheel file
 build:
@@ -73,4 +78,3 @@ clean:
 	rm -rf dist;
 	rm -rf src/sparsezoo.egg-info;
 	find $(PYCHECKDIRS) | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf;
-	find $(DOCDIR)/source/api | grep .rst | xargs rm -rf;
