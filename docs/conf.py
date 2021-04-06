@@ -108,7 +108,7 @@ pygments_style = "sphinx"
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-html_logo = "icon-sparsezoo.png"
+html_logo = "source/icon-sparsezoo.png"
 
 html_theme_options = {
     'analytics_id': 'UA-128364174-1',  #  Provided by Google in your dashboard
