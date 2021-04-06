@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
+# ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/icon-sparsezoo.png) SparseZoo
 
 ### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
@@ -70,7 +70,7 @@ Recipes encode the directions for how to sparsify a model into a simple, easily 
 
 **Full Deep Sparse product flow:**  
 
-<img src="https://docs.neuralmagic.com/docs/source/sparsification/flow-overview.svg" width="960px">
+<img src="https://docs.neuralmagic.com/docs/sparsification/flow-overview.svg" width="960px">
 
 ## Quick Tour
 
@@ -224,7 +224,7 @@ clone the repository and install any additional dependencies as required.
 ## Available Models and Recipes
 
 A number of pre-trained baseline and sparsified models across domains and sub domains are available and constantly being added.
-For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md).
+For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/models.md).
 
 ## Resources and Learning More
 
