@@ -667,3 +667,37 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
             assert model_dict[field] is None
         else:
             assert model_dict[field] == value
+
+
+@pytest.mark.parametrize(
+    "recipe_args,other_args",
+    [
+        (
+            (
+                "cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet"
+                + "/pruned-conservative"
+            ),
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+                "override_folder_name": "test_folder",
+            },
+        ),
+        (
+            (
+                "cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
+                + "pruned_quant-moderate/transfer_learn"
+            ),
+            {},
+        ),
+        (
+            (
+                "cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
+                + "pruned_quant-moderate"
+            ),
+            {"recipe_type": "transfer_learn"},
+        ),
+    ],
+)
+def test_download_recipe_base_framework_files(recipe_args, other_args):
+    files = Zoo.download_recipe_base_framework_files(recipe_args, **other_args)
+    assert len(files) > 0

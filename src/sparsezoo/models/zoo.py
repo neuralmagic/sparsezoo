@@ -985,9 +985,7 @@ class Zoo:
         else:
             # search for base model, and return those weights as a starting checkpoint
             if not recipe.base_stub:
-                raise ValueError(
-                    f"Could not find base model for model {model.model_metadata}"
-                )
+                raise ValueError(f"Could not find base model for recipe {recipe.stub}")
 
             base_model = Zoo.load_base_model_from_recipe(
                 recipe,

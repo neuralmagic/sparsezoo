@@ -117,3 +117,10 @@ class OptimizationRecipe(File):
         :return: the stub for the base model of this recipe, if any
         """
         return self._base_stub
+
+    @property
+    def stub(self) -> str:
+        """
+        :return: full path for where the recipe is located in the sparsezoo
+        """
+        return self.model_metadata.stub
