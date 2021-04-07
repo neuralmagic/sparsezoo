@@ -208,20 +208,8 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Model instance
         """
-        metadata = recipe.model_metadata
-        return Zoo.load_model(
-            domain=metadata.domain,
-            sub_domain=metadata.sub_domain,
-            architecture=metadata.architecture,
-            sub_architecture=metadata.sub_architecture,
-            framework=metadata.framework,
-            repo=metadata.repo,
-            dataset=metadata.dataset,
-            training_scheme=metadata.training_scheme,
-            optim_name=metadata.optim_name,
-            optim_category=metadata.optim_category,
-            optim_target=metadata.optim_target,
-            release_version=metadata.release_version,
+        return Zoo.load_model_from_stub(
+            stub=recipe.model_metadata,
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
             force_token_refresh=force_token_refresh,
@@ -996,16 +984,16 @@ class Zoo:
             return checkpoint_framework_files or framework_files
         else:
             # search for base model, and return those weights as a starting checkpoint
+            if not recipe.base_stub:
+                raise ValueError(
+                    f"Could not find base model for model {model.model_metadata}"
+                )
+
             base_model = Zoo.load_base_model_from_recipe(
                 recipe,
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
             )
-
-            if not recipe.base_stub:
-                raise ValueError(
-                    f"Could not find base model for model {model.model_metadata}"
-                )
             framework_files = base_model.download_framework_files(extensions=extensions)
 
             # filter out checkpoint weights if any exist

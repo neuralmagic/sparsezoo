@@ -60,6 +60,7 @@ class File(BaseObject, Downloadable):
     :param display_name: The file name and extension
     :param file_type: The type of file the object represents
     :param operator_version: Version of the file such as onnx OPSET for onnx files
+    :param release_version: The Release Version of the file, as a Dict or ReleaseVersion
     :param checkpoint: True if the model is a checkpoint file
         (for use with transfer learning flows), False otherwise
     :param md5: The md5 hash for the file as stored in the cloud
@@ -92,12 +93,17 @@ class File(BaseObject, Downloadable):
         override_parent_path: Union[str, None] = None,
         **kwargs,
     ):
+        if isinstance(release_version, dict):
+            release_version = ReleaseVersion(**release_version)
+
         if isinstance(model_metadata, dict):
-            if isinstance(release_version, dict):
-                release_version = ReleaseVersion(**release_version)
-            model_metadata = ModelMetadata(
-                release_version=release_version, **model_metadata
-            )
+            if "release_version" not in model_metadata:
+                model_metadata = ModelMetadata(
+                    release_version=release_version, **model_metadata
+                )
+            else:
+                model_metadata = ModelMetadata(**model_metadata)
+
         folder_name = (
             model_metadata.model_id
             if not override_folder_name
@@ -122,6 +128,7 @@ class File(BaseObject, Downloadable):
         self._file_size = file_size
         self._downloads = downloads
         self._url = url
+        self._release_version = release_version
 
     @property
     def model_metadata(self) -> ModelMetadata:
@@ -282,6 +289,13 @@ class File(BaseObject, Downloadable):
         :return: True if the file has already been downloaded, False otherwise
         """
         return os.path.exists(self.path)
+
+    @property
+    def release_version(self) -> ReleaseVersion:
+        """
+        :return: the file's release version
+        """
+        return self._release_version
 
     def downloaded_path(self) -> str:
         """

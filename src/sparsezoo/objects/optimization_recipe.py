@@ -46,6 +46,7 @@ class OptimizationRecipe(File):
     :param recipe_id: the recipe id
     :param recipe_type: the type of optimization recipe
     :param display_description: the display description for the optimization
+    :param base_stub: the stub for the base model of this recipe, if any
     """
 
     def __init__(
