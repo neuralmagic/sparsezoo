@@ -20,7 +20,7 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 from typing import List, Union
 
 from sparsezoo.objects.model import Model
-from sparsezoo.objects.optimization_recipe import OptimizationRecipe
+from sparsezoo.objects.recipe import Recipe
 from sparsezoo.requests import ModelArgs
 
 
@@ -44,9 +44,9 @@ class Zoo:
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
@@ -71,12 +71,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param override_folder_name: Override for the name of the folder to save
@@ -95,9 +95,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
@@ -130,7 +130,7 @@ class Zoo:
 
     @staticmethod
     def load_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: Recipe,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -155,7 +155,7 @@ class Zoo:
 
     @staticmethod
     def load_base_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: Recipe,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -188,9 +188,9 @@ class Zoo:
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
@@ -216,12 +216,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param override_folder_name: Override for the name of the folder to save
@@ -241,9 +241,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             override_folder_name=override_folder_name,
             override_parent_path=override_parent_path,
@@ -288,9 +288,9 @@ class Zoo:
         repo: Union[str, None] = None,
         dataset: Union[str, None] = None,
         training_scheme: Union[str, None] = None,
-        optim_name: Union[str, None] = None,
-        optim_category: Union[str, None] = None,
-        optim_target: Union[str, None] = None,
+        sparse_name: Union[str, None] = None,
+        sparse_category: Union[str, None] = None,
+        sparse_target: Union[str, None] = None,
         release_version: Union[str, None] = None,
         page: int = 1,
         page_length: int = 20,
@@ -317,12 +317,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param page: the page of values to get
@@ -343,9 +343,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             page=page,
             page_length=page_length,
@@ -365,9 +365,9 @@ class Zoo:
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = False,
-        match_optim_name: bool = False,
-        match_optim_category: bool = False,
-        match_optim_target: bool = False,
+        match_sparse_name: bool = False,
+        match_sparse_category: bool = False,
+        match_sparse_target: bool = False,
     ) -> List[Model]:
         """
         Search for similar models to the given one
@@ -397,15 +397,15 @@ class Zoo:
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param match_optim_name: True to match similar models to the current
-            name describing the optimization of the model
+        :param match_sparse_name: True to match similar models to the current
+            name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param match_optim_category: True to match similar models to the current
-            degree of optimization of the model the object
+        :param match_sparse_category: True to match similar models to the current
+            degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param match_optim_target: True to match similar models to the current
-            deployment target of optimization of the model
+        :param match_sparse_target: True to match similar models to the current
+            deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :return: a list of models matching the given model, if any
         """
@@ -420,13 +420,13 @@ class Zoo:
             match_repo=match_repo,
             match_dataset=match_dataset,
             match_training_scheme=match_training_scheme,
-            match_optim_name=match_optim_name,
-            match_optim_category=match_optim_category,
-            match_optim_target=match_optim_target,
+            match_sparse_name=match_sparse_name,
+            match_sparse_category=match_sparse_category,
+            match_sparse_target=match_sparse_target,
         )
 
     @staticmethod
-    def search_optimized_models(
+    def search_sparse_models(
         model: Union[Model, str, ModelArgs],
         match_framework: bool = True,
         match_repo: bool = True,
@@ -434,10 +434,10 @@ class Zoo:
         match_training_scheme: bool = True,
     ) -> List[Model]:
         """
-        Search for different available optimized versions based off of the current model
+        Search for different available sparse versions based off of the current model
 
         :param model: The model object, a SparseZoo model stub path, or a ModelArgs
-            object representing the base model to search different optimizations of
+            object representing the base model to search different sparsifications of
         :param match_framework: True to match similar models to the current
             framework the model the object belongs to was trained on;
             e.g. pytorch, tensorflow
@@ -450,11 +450,11 @@ class Zoo:
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :return: the list of matching optimized models, if any
+        :return: the list of matching sparse models, if any
         """
         if isinstance(model, str):
             model = Zoo.load_model_from_stub(model)
-        return model.search_optimized_models(
+        return model.search_sparse_models(
             match_framework=match_framework,
             match_repo=match_repo,
             match_dataset=match_dataset,
@@ -471,9 +471,9 @@ class Zoo:
         repo: Union[str, None] = None,
         dataset: Union[str, None] = None,
         training_scheme: Union[str, None] = None,
-        optim_name: Union[str, None] = None,
-        optim_category: Union[str, None] = None,
-        optim_target: Union[str, None] = None,
+        sparse_name: Union[str, None] = None,
+        sparse_category: Union[str, None] = None,
+        sparse_target: Union[str, None] = None,
         release_version: Union[str, None] = None,
         recipe_type: Union[str, None] = None,
         page: int = 1,
@@ -481,7 +481,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> List[OptimizationRecipe]:
+    ) -> List[Recipe]:
         """
         Obtains a list of Recipes matching the model search parameters
 
@@ -501,12 +501,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param recipe_type: The recipe type; e.g. original, transfer_learn
@@ -520,7 +520,7 @@ class Zoo:
         :return: A list of Recipe objects for models that match the given
             search parameters
         """
-        return OptimizationRecipe.search_recipes(
+        return Recipe.search_recipes(
             domain=domain,
             sub_domain=sub_domain,
             architecture=architecture,
@@ -529,9 +529,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             recipe_type=recipe_type,
             page=page,
@@ -542,14 +542,14 @@ class Zoo:
         )
 
     @staticmethod
-    def search_optimized_recipes(
+    def search_sparse_recipes(
         model: Union[Model, str, ModelArgs],
         recipe_type: Union[str, None] = None,
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
-    ) -> List[OptimizationRecipe]:
+    ) -> List[Recipe]:
         """
         Search for recipes of the given model
 
@@ -567,9 +567,9 @@ class Zoo:
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :return: the list of matching optimization recipes, if any
+        :return: the list of matching sparsification recipes, if any
         """
-        return OptimizationRecipe.search_optimized_recipes(
+        return Recipe.search_sparse_recipes(
             model=model,
             recipe_type=recipe_type,
             match_framework=match_framework,
@@ -588,15 +588,15 @@ class Zoo:
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         recipe_type: Union[str, None] = None,
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> OptimizationRecipe:
+    ) -> Recipe:
         """
         Obtains a Recipe from the model repo
 
@@ -616,12 +616,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param recipe_type: The recipe type; e.g. original, transfer_learn
         :param release_version: The sparsezoo release version for the model
@@ -632,7 +632,7 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Recipe instance
         """
-        return OptimizationRecipe.load_recipe(
+        return Recipe.load_recipe(
             domain=domain,
             sub_domain=sub_domain,
             architecture=architecture,
@@ -641,9 +641,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,
@@ -658,7 +658,7 @@ class Zoo:
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> OptimizationRecipe:
+    ) -> Recipe:
         """
         Loads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter. i.e.
@@ -677,7 +677,7 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Recipe instance
         """
-        return OptimizationRecipe.load_recipe_from_stub(
+        return Recipe.load_recipe_from_stub(
             stub=stub,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,
@@ -695,9 +695,9 @@ class Zoo:
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         recipe_type: Union[str, None] = None,
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
@@ -723,12 +723,12 @@ class Zoo:
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param recipe_type: The recipe type; e.g. original, transfer_learn
         :param release_version: The sparsezoo release version for the model
@@ -739,7 +739,7 @@ class Zoo:
         :param force_token_refresh: True to refresh the auth token, False otherwise
         :return: The requested Recipe instance
         """
-        return OptimizationRecipe.download_recipe(
+        return Recipe.download_recipe(
             domain=domain,
             sub_domain=sub_domain,
             architecture=architecture,
@@ -748,9 +748,9 @@ class Zoo:
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,
@@ -766,7 +766,7 @@ class Zoo:
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> OptimizationRecipe:
+    ) -> Recipe:
         """
         Downloads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter or part of the stub. i.e.
@@ -786,7 +786,7 @@ class Zoo:
         :param overwrite: True to overwrite the file if it exists, False otherwise
         :return: The requested Recipe instance
         """
-        return OptimizationRecipe.download_recipe_from_stub(
+        return Recipe.download_recipe_from_stub(
             stub=stub,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,

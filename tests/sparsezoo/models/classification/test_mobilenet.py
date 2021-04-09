@@ -19,7 +19,7 @@ from tests.sparsezoo.utils import model_constructor
 
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
+    "sparse_name,sparse_category,sparse_target",
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
         (True, "pytorch", "sparseml", "imagenet", None, "pruned", "conservative", None),
@@ -32,9 +32,9 @@ def test_mobilenet_v1(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         mobilenet_v1,
@@ -43,15 +43,15 @@ def test_mobilenet_v1(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
-    "optim_name,optim_category,optim_target",
+    "sparse_name,sparse_category,sparse_target",
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
     ],
@@ -62,9 +62,9 @@ def test_mobilenet_v2(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         mobilenet_v2,
@@ -73,7 +73,7 @@ def test_mobilenet_v2(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )

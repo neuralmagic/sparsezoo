@@ -26,7 +26,7 @@ from sparsezoo.objects.data import Data
 from sparsezoo.objects.downloadable import Downloadable
 from sparsezoo.objects.file import File, FileTypes
 from sparsezoo.objects.metadata import ModelMetadata
-from sparsezoo.objects.optimization_recipe import OptimizationRecipe
+from sparsezoo.objects.recipe import Recipe
 from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.objects.result import Result
 from sparsezoo.objects.tag import Tag
@@ -53,7 +53,7 @@ class Model(Downloadable, ModelMetadata):
     :param display_name: the display name for the model
     :param display_description: the description for the model
     :param files: a list of model repo files for this model
-    :param recipes: a list of model repo optimization recipes for this model
+    :param recipes: a list of model repo recipes for this model
     :param results: a list of model repo results for this model
     :param tags: a list of model repo tags for this model
     :param user: the model repo user who uploaded this model
@@ -107,7 +107,7 @@ class Model(Downloadable, ModelMetadata):
 
         self._recipes = (
             [
-                OptimizationRecipe(
+                Recipe(
                     model_metadata=metadata,
                     override_folder_name=override_folder_name,
                     override_parent_path=override_parent_path,
@@ -213,9 +213,9 @@ class Model(Downloadable, ModelMetadata):
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
@@ -240,12 +240,12 @@ class Model(Downloadable, ModelMetadata):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param override_folder_name: Override for the name of the folder to save
@@ -265,9 +265,9 @@ class Model(Downloadable, ModelMetadata):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
         )
         return Model.load_model_from_stub(
@@ -307,7 +307,7 @@ class Model(Downloadable, ModelMetadata):
 
     @staticmethod
     def load_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: Recipe,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -333,7 +333,7 @@ class Model(Downloadable, ModelMetadata):
 
     @staticmethod
     def load_base_model_from_recipe(
-        recipe: OptimizationRecipe,
+        recipe: Recipe,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
@@ -378,9 +378,9 @@ class Model(Downloadable, ModelMetadata):
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
@@ -406,12 +406,12 @@ class Model(Downloadable, ModelMetadata):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param override_folder_name: Override for the name of the folder to save
@@ -431,9 +431,9 @@ class Model(Downloadable, ModelMetadata):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
         )
         _LOGGER.debug("download_model: downloading model")
@@ -490,9 +490,9 @@ class Model(Downloadable, ModelMetadata):
         repo: Union[str, None] = None,
         dataset: Union[str, None] = None,
         training_scheme: Union[str, None] = None,
-        optim_name: Union[str, None] = None,
-        optim_category: Union[str, None] = None,
-        optim_target: Union[str, None] = None,
+        sparse_name: Union[str, None] = None,
+        sparse_category: Union[str, None] = None,
+        sparse_target: Union[str, None] = None,
         release_version: Union[str, None] = None,
         page: int = 1,
         page_length: int = 20,
@@ -519,12 +519,12 @@ class Model(Downloadable, ModelMetadata):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param page: the page of values to get
@@ -545,9 +545,9 @@ class Model(Downloadable, ModelMetadata):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
         )
         _LOGGER.debug(
@@ -580,7 +580,7 @@ class Model(Downloadable, ModelMetadata):
         """
         :return: True if the model is a base model. Otherwise return False
         """
-        return self.optim_name == "base"
+        return self.sparse_name == "base"
 
     @property
     def display_name(self) -> str:
@@ -597,16 +597,16 @@ class Model(Downloadable, ModelMetadata):
         return self._display_description
 
     @property
-    def recipes(self) -> List[OptimizationRecipe]:
+    def recipes(self) -> List[Recipe]:
         """
-        :return: list of optimization recipes for the model
+        :return: list of recipes for the model
         """
         return self._recipes
 
     @property
-    def original_recipe(self) -> Union[None, OptimizationRecipe]:
+    def original_recipe(self) -> Union[None, Recipe]:
         """
-        :return: the original optimization recipe used to create the model
+        :return: the original recipe used to create the model
         """
         original = None
 
@@ -618,9 +618,9 @@ class Model(Downloadable, ModelMetadata):
         return original
 
     @property
-    def transfer_learning_recipe(self) -> Union[None, OptimizationRecipe]:
+    def transfer_learning_recipe(self) -> Union[None, Recipe]:
         """
-        :return: the optimization recipe to use for transfer learning from the model
+        :return: the recipe to use for transfer learning from the model
         """
         transfer_learning = None
 
@@ -897,9 +897,9 @@ class Model(Downloadable, ModelMetadata):
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = False,
-        match_optim_name: bool = False,
-        match_optim_category: bool = False,
-        match_optim_target: bool = False,
+        match_sparse_name: bool = False,
+        match_sparse_category: bool = False,
+        match_sparse_target: bool = False,
     ) -> List["Model"]:
         """
         Search for similar models to this model
@@ -927,15 +927,15 @@ class Model(Downloadable, ModelMetadata):
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param match_optim_name: True to match similar models to the current
-            name describing the optimization of the model
+        :param match_sparse_name: True to match similar models to the current
+            name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param match_optim_category: True to match similar models to the current
-            degree of optimization of the model the object
+        :param match_sparse_category: True to match similar models to the current
+            degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param match_optim_target: True to match similar models to the current
-            deployment target of optimization of the model
+        :param match_sparse_target: True to match similar models to the current
+            deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :return: a list of models matching the given model, if any
         """
@@ -949,12 +949,12 @@ class Model(Downloadable, ModelMetadata):
             repo=self.repo if match_repo else None,
             dataset=self.dataset if match_dataset else None,
             training_scheme=self.training_scheme if match_training_scheme else None,
-            optim_name=self.optim_name if match_optim_name else None,
-            optim_category=self.optim_category if match_optim_category else None,
-            optim_target=self.optim_target if match_optim_target else None,
+            sparse_name=self.sparse_name if match_sparse_name else None,
+            sparse_category=self.sparse_category if match_sparse_category else None,
+            sparse_target=self.sparse_target if match_sparse_target else None,
         )
 
-    def search_optimized_models(
+    def search_sparse_models(
         self,
         match_framework: bool = True,
         match_repo: bool = True,
@@ -962,10 +962,10 @@ class Model(Downloadable, ModelMetadata):
         match_training_scheme: bool = True,
     ) -> List["Model"]:
         """
-        Search for different available optimized versions based off of the current model
+        Search for different available sparse versions based off of the current model
 
         :param model: The model object, a SparseZoo model stub path, or a ModelArgs
-            object representing the base model to search different optimizations of
+            object representing the base model to search different sparsifications of
         :param match_framework: True to match similar models to the current
             framework the model the object belongs to was trained on;
             e.g. pytorch, tensorflow
@@ -978,10 +978,10 @@ class Model(Downloadable, ModelMetadata):
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :return: the list of matching optimized models, if any
+        :return: the list of matching sparse models, if any
         """
         _LOGGER.debug(
-            "search_optimized_models: searching for optimized models "
+            "search_sparse_models: searching for sparse models "
             + f"similar to {self}"
         )
         return [

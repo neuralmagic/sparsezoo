@@ -36,9 +36,9 @@ usage: sparsezoo.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                 [--framework FRAMEWORK] [--repo REPO]
                                 [--dataset DATASET]
                                 [--training-scheme TRAINING_SCHEME]
-                                [--optim-name OPTIM_NAME]
-                                [--optim-category OPTIM_CATEGORY]
-                                [--optim-target OPTIM_TARGET]
+                                [--sparse-name OPTIM_NAME]
+                                [--sparse-category OPTIM_CATEGORY]
+                                [--sparse-target OPTIM_TARGET]
                                 [--release-version RELEASE_VERSION]
                                 [--page PAGE] [--page-length PAGE_LENGTH]
 
@@ -67,16 +67,16 @@ optional arguments:
   --training-scheme TRAINING_SCHEME
                         The training scheme used on the model the object
                         belongs to if any; e.g. augmented
-  --optim-name OPTIM_NAME
-                        The name describing the optimization of the model the
+  --sparse-name OPTIM_NAME
+                        The name describing the sparsification of the model the
                         object belongs to, e.g. base, pruned, pruned_quant
-  --optim-category OPTIM_CATEGORY
-                        The degree of optimization of the model the object
+  --sparse-category OPTIM_CATEGORY
+                        The degree of sparsification of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
                         metric), moderate (>=99 baseline metric), aggressive
                         (<99 baseline metric)
-  --optim-target OPTIM_TARGET
-                        The deployment target of optimization of the model the
+  --sparse-target OPTIM_TARGET
+                        The deployment target of sparsification of the model the
                         object belongs to; e.g. edge, deepsparse,
                         deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
@@ -93,8 +93,8 @@ usage: sparsezoo.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                   [--sub-architecture SUB_ARCHITECTURE]
                                   --framework FRAMEWORK --repo REPO --dataset
                                   DATASET [--training-scheme TRAINING_SCHEME]
-                                  --optim-name OPTIM_NAME --optim-category
-                                  OPTIM_CATEGORY [--optim-target OPTIM_TARGET]
+                                  --sparse-name OPTIM_NAME --sparse-category
+                                  OPTIM_CATEGORY [--sparse-target OPTIM_TARGET]
                                   [--release-version RELEASE_VERSION]
                                   [--save-dir SAVE_DIR]
 
@@ -123,16 +123,16 @@ optional arguments:
   --training-scheme TRAINING_SCHEME
                         The training scheme used on the model the object
                         belongs to if any; e.g. augmented
-  --optim-name OPTIM_NAME
-                        The name describing the optimization of the model the
+  --sparse-name OPTIM_NAME
+                        The name describing the sparsification of the model the
                         object belongs to, e.g. base, pruned, pruned_quant
-  --optim-category OPTIM_CATEGORY
-                        The degree of optimization of the model the object
+  --sparse-category OPTIM_CATEGORY
+                        The degree of sparsification of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
                         metric), moderate (>=99 baseline metric), aggressive
                         (<99 baseline metric)
-  --optim-target OPTIM_TARGET
-                        The deployment target of optimization of the model the
+  --sparse-target OPTIM_TARGET
+                        The deployment target of sparsification of the model the
                         object belongs to; e.g. edge, deepsparse,
                         deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
@@ -157,13 +157,13 @@ python3 scripts/sparsezoo.py search --domain cv --sub-domain classification \
 Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
-    --optim-name base --optim-category none
+    --sparse-name base --sparse-category none
 
 #########
 Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
-    --optim-name base --optim-category none --release-version 0.1.0
+    --sparse-name base --sparse-category none --release-version 0.1.0
 
 
 """

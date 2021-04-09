@@ -177,7 +177,7 @@ texinfo_documents = [
         "sparsezoo",
         (
             "Neural network model repository for highly sparse "
-            "models and optimization recipes"
+            "models and recipes"
         ),
         "Miscellaneous",
     ),
