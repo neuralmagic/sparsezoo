@@ -19,6 +19,14 @@ limitations under the License.
 ### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
 <p>
+    <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
+        <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
+    </a>
+    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
+        <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
+    </a>
+</p>
+<p>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25>
     </a>
@@ -36,14 +44,6 @@ limitations under the License.
     </a>
     <a href="https://twitter.com/neuralmagic">
         <img src="https://img.shields.io/twitter/follow/neuralmagic?color=darkgreen&label=Follow&style=social" height=25>
-    </a>
-</p>
-<p>
-    <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
-        <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
-        <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
     </a>
 </p>
 
