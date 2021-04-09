@@ -16,17 +16,19 @@ limitations under the License.
 
 # ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
-[![quality-check Actions Status](https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml/badge.svg)](https://github.com/neuralmagic/sparsezoo/actions)
-
-
 ### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
 <p>
-    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25>
-    </a>
     <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
         <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
+    </a>
+    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
+        <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
+    </a>
+ </p>
+<p>
+    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
+        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/releases">
         <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25>
