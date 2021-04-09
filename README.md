@@ -16,6 +16,9 @@ limitations under the License.
 
 # ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
 
+[![quality-check Actions Status](https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml/badge.svg)](https://github.com/neuralmagic/sparsezoo/actions)
+
+
 ### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
 
 <p>
