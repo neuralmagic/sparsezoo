@@ -22,7 +22,14 @@ from typing import Any, List, Union
 from sparsezoo.utils import convert_to_bool
 
 
-__all__ = ["BASE_API_URL", "ModelArgs", "MODELS_API_URL", "SPARSEZOO_TEST_MODE"]
+__all__ = [
+    "BASE_API_URL",
+    "ModelArgs",
+    "MODELS_API_URL",
+    "SPARSEZOO_TEST_MODE",
+    "RecipeArgs",
+    "RECIPES_API_URL",
+]
 
 SPARSEZOO_TEST_MODE = convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE"))
 
@@ -32,6 +39,7 @@ BASE_API_URL = (
     else "https://api.neuralmagic.com"
 )
 MODELS_API_URL = f"{BASE_API_URL}/models"
+RECIPES_API_URL = f"{BASE_API_URL}/recipes"
 
 
 class ModelArgs:
@@ -280,6 +288,107 @@ class ModelArgs:
             "optim_name",
             "optim_category",
             "optim_target",
+        ]:
+            value = getattr(self, key)
+
+            if value and isinstance(value, List):
+                args.extend([f"{key}={item}" for item in value])
+            elif value:
+                args.append(f"{key}={value}")
+
+        return args
+
+
+class RecipeArgs(ModelArgs):
+    """
+    Arguments for making recipe requests into the sparsezoo
+
+    :param domain: The domain of the model the object belongs to;
+        e.g. cv, nlp
+    :param sub_domain: The sub domain of the model the object belongs to;
+        e.g. classification, segmentation
+    :param architecture: The architecture of the model the object belongs to;
+        e.g. resnet_v1, mobilenet_v1
+    :param sub_architecture: The sub architecture (scaling factor) of the model
+        the object belongs to; e.g. 50, 101, 152
+    :param framework: The framework the model the object belongs to was trained on;
+        e.g. pytorch, tensorflow
+    :param repo: the source repo for the model the object belongs to;
+        e.g. sparseml, torchvision
+    :param dataset: The dataset the model the object belongs to was trained on;
+        e.g. imagenet, cifar10
+    :param training_scheme: The training scheme used on the model the object belongs
+        to if any; e.g. augmented
+    :param optim_name: The name describing the optimization of the model
+        the object belongs to, e.g. base, pruned, pruned_quant,
+    :param optim_category: The degree of optimization of the model the object
+        belongs to; e.g. none, conservative (~100% baseline metric),
+        moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+    :param optim_target: The deployment target of optimization of the model
+        the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+    :param release_version: The sparsezoo release version for the model
+    :param recipe_type: The recipe type; e.g. original, transfer_learn
+    """
+
+    def __init__(
+        self,
+        domain: Union[str, None] = None,
+        sub_domain: Union[str, None] = None,
+        architecture: Union[str, List[str], None] = None,
+        sub_architecture: Union[str, List[str], None] = None,
+        framework: Union[str, List[str], None] = None,
+        repo: Union[str, List[str], None] = None,
+        dataset: Union[str, List[str], None] = None,
+        training_scheme: Union[str, List[str], None] = None,
+        optim_name: Union[str, List[str], None] = None,
+        optim_category: Union[str, List[str], None] = None,
+        optim_target: Union[str, List[str], None] = None,
+        release_version: Union[str, Any, None] = None,
+        recipe_type: Union[str, None] = None,
+        **kwargs,
+    ):
+        super(RecipeArgs, self).__init__(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+            **kwargs,
+        )
+        self._recipe_type = recipe_type
+
+    @property
+    def recipe_type(self) -> Union[str, None]:
+        """
+        :return: The recipe type; e.g. original, transfer_learn
+        """
+        return self._recipe_type
+
+    @property
+    def model_url_args(self) -> List[str]:
+        """
+        :return: arguments for searching in the sparsezoo
+        """
+        args = []
+
+        for key in [
+            "architecture",
+            "sub_architecture",
+            "framework",
+            "repo",
+            "dataset",
+            "training_scheme",
+            "optim_name",
+            "optim_category",
+            "optim_target",
+            "recipe_type",
         ]:
             value = getattr(self, key)
 

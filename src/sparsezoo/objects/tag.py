@@ -24,13 +24,13 @@ __all__ = ["Tag"]
 
 class Tag(BaseObject):
     """
-    A tag for a Model or OptimizationRecipe
+    A tag for a Model or Recipe
 
     :param tag_id: the tag id
     :param display_name: the display name for tag
     :param model_id: the model id if the tag is associated with a Model
     :param recipe_id: the optimization id if tag is associated
-        with an OptimizationRecipe
+        with a Recipe
     :param name: the name for the tag
     """
 
@@ -81,6 +81,6 @@ class Tag(BaseObject):
     @property
     def recipe_id(self) -> str:
         """
-        :return: the optimization id if tag is associated with an OptimizationRecipe
+        :return: the optimization id if tag is associated with a Recipe
         """
         return self._recipe_id
