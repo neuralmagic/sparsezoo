@@ -981,8 +981,7 @@ class Model(Downloadable, ModelMetadata):
         :return: the list of matching sparse models, if any
         """
         _LOGGER.debug(
-            "search_sparse_models: searching for sparse models "
-            + f"similar to {self}"
+            f"search_sparse_models: searching for sparse models similar to {self}"
         )
         return [
             model
