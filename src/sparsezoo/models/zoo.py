@@ -17,7 +17,7 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 """
 
 
-from typing import Callable, List, Union
+from typing import List, Union
 
 from sparsezoo.objects.model import Model
 from sparsezoo.objects.optimization_recipe import OptimizationRecipe
@@ -33,37 +33,6 @@ class Zoo:
     """
     Provides static functions for loading and searching SparseZoo models and recipes
     """
-
-    _CONSTRUCTORS = {}
-
-    @staticmethod
-    def constructor(construct_key: str):
-        """
-        :param construct_key: The constructor key
-        :return: Constructor registered with the key
-        """
-        if construct_key not in Zoo._CONSTRUCTORS:
-            raise RuntimeError(f"No constructure registered for {construct_key}")
-        return Zoo._CONSTRUCTORS[construct_key]
-
-    @staticmethod
-    def _register_constructor(key: str, const_func: Callable):
-        Zoo._CONSTRUCTORS[key] = const_func
-
-    @staticmethod
-    def register(
-        key: str,
-    ):
-        """
-        Registers a constructor with key
-
-        :param key: The key the constructor will be registered with
-        """
-
-        def decorator(const_func: Callable):
-            Zoo._register_constructor(key, const_func)
-
-        return decorator
 
     @staticmethod
     def load_model(
