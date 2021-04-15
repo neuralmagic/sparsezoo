@@ -10,6 +10,7 @@
     "@material-ui/icons": "^4.11.2",
     "@reduxjs/toolkit": "^1.5.1",
     "lodash": "^4.17.21",
+    "moment": "^2.29.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -17,7 +18,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "react-transition-group": "^4.4.1",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "universal-cookie": "^4.0.4"
   },
   "devDependencies": {
     "prettier": "^2.2.1"

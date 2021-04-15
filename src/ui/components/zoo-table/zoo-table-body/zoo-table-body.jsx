@@ -32,13 +32,14 @@ function ZooTableBody({ rows, aligns }) {
   return (
     <TableBody className={classes.root}>
       {rows.map((row, index) => (
-        <TableRow key={`row-${index}`} className={classes.row}>
+        <TableRow key={`row-${index}`}>
           {row.map((column, columnIndex) => (
             <TableCell
               key={`row-${index}-col-${columnIndex}`}
               align={
                 typeof aligns === "string" ? aligns : _.get(aligns, columnIndex, "left")
               }
+              className={classes.row}
               width={`${100 / row.length}%`}
               size="small"
             >

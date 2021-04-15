@@ -16,17 +16,19 @@ limitations under the License.
 
 import React from "react";
 import ModelTable from "../../components/model-table";
+import { useQuery } from "../../hooks";
 
 import makeStyles from "./models-styles";
 
 function Models(props) {
   const { domain, subdomain } = props.match.params;
+  const queries = useQuery();
   const useStyles = makeStyles();
   const classes = useStyles();
 
   return (
     <div className={classes.root}>
-      <ModelTable domain={domain} subdomain={subdomain} />
+      <ModelTable domain={domain} subdomain={subdomain} queries={queries} />
     </div>
   );
 }

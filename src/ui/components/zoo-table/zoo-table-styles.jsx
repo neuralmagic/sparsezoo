@@ -20,31 +20,39 @@ export default function makeZooTableStyles() {
   return makeStyles(
     (theme) => ({
       root: {},
-      loaderTable: {
-        position: "absolute",
-        height: "100%",
-        width: "100%",
-        top: "0",
-        zIndex: 200,
+      loaderText: {
+        color: theme.palette.info.contrastText,
       },
       pagination: {
         borderStyle: "solid",
         borderWidth: "0.5px 0 0 0",
         borderColor: theme.palette.divider,
       },
+      paginatedTableContainer: {
+        maxHeight: 37 + 330,
+        position: "relative",
+      },
       tableContainer: {
-        height: 37 + 330,
         position: "relative",
       },
       tableGroup: {
-        height: 37 + 330 + 52,
+        position: "relative",
+        borderStyle: "solid",
+        borderWidth: "thin",
+        border: theme.palette.divider,
+        borderBottomWidth: 0,
+      },
+      paginatedTableGroup: {
+        maxHeight: 37 + 330 + 52,
         position: "relative",
         borderStyle: "solid",
         borderWidth: "thin",
         border: theme.palette.divider,
       },
-      table: {
-        height: 37 + 330,
+      table: {},
+      paginatedTable: {
+        maxHeight: 37 + 330,
+        borderBottomWidth: 0,
       },
     }),
     { name: "ZooTable" }

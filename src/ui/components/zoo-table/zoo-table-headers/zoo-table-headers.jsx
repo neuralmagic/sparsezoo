@@ -47,7 +47,10 @@ function ZooTableHeaders({ headers, aligns, width }) {
             align={
               typeof aligns === "string" ? aligns : _.get(aligns, headerIndex, "left")
             }
-            width={width[headerIndex]}
+            style={{
+              width: width[headerIndex],
+            }}
+            className={classes.headerContainer}
           >
             <Typography className={classes.header}>{header}</Typography>
           </TableCell>

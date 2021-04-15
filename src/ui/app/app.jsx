@@ -18,9 +18,11 @@ import React, { useEffect } from "react";
 import { Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider } from "@material-ui/core/styles";
+import Cookies from "universal-cookie";
+import moment from "moment";
 
 import makeTheme, { useDarkMode } from "./app-theme";
-import { authThunk, selectAuthState } from "../store";
+import { authThunk, selectAuthState, setAuthToken } from "../store";
 import { makeContentRoutes } from "./../routes";
 import makeStyles from "./app-styles";
 
@@ -36,9 +38,26 @@ function App() {
 
   useEffect(() => {
     if (authState.status === "idle") {
-      dispatch(authThunk());
+      const cookies = new Cookies();
+      const authToken = cookies.get("NM_AUTH_TOKEN");
+      if (authToken !== null) {
+        dispatch(setAuthToken(authToken));
+      } else {
+        dispatch(authThunk());
+      }
+    } else if (authState.status === "succeeded") {
+      const cookies = new Cookies();
+
+      const authToken = cookies.get("NM_AUTH_TOKEN");
+      if (authToken !== authState.token) {
+        const expires = moment().add(7, "days").toDate();
+        cookies.set("NM_AUTH_TOKEN", authState.token, {
+          expires,
+        });
+      }
     }
-  }, [authState.status, dispatch]);
+  }, [authState, dispatch]);
+
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.root}>

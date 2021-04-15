@@ -20,21 +20,32 @@ import _ from "lodash";
 
 import { getModelStub, getFormattedData } from "../utils";
 import { requestSearchModels } from "../api";
+
+const SEARCH_MODELS_PREFIX = "models/searchModels";
+const PARTIAL_SEARCH_MODELS_TYPE = `${SEARCH_MODELS_PREFIX}/partial`;
 /**
  * Async thunk for making a request to search for models
  *
- * @type {AsyncThunk<Promise<*>, {domain: string, subdomain: string, token: string}, {}>}
+ * @type {AsyncThunk<Promise<*>, {domain: string, subdomain: string, token: string, queries: {}}, {}>}
  */
 export const searchModelsThunk = createAsyncThunk(
-  "models/searchModels",
-  async ({ domain, subdomain, token }) => {
+  SEARCH_MODELS_PREFIX,
+  async ({ domain, subdomain, token, queries }, thunkApi) => {
     let page = 1;
     const models = [];
     let body;
     do {
-      body = await requestSearchModels(domain, subdomain, token, page);
+      body = await requestSearchModels({ domain, subdomain, token, page, queries });
       models.push(...body.models);
       page += 1;
+      thunkApi.dispatch({
+        type: PARTIAL_SEARCH_MODELS_TYPE,
+        payload: {
+          domain,
+          subdomain,
+          models,
+        },
+      });
     } while (body.models.length > 0);
 
     return models;
@@ -57,23 +68,33 @@ const modelsSlice = createSlice({
   extraReducers: {
     [searchModelsThunk.pending]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "loading", Object);
+      _.setWith(state.status, `${domain}.${subdomain}`, "loading", {});
       state.error = null;
     },
     [searchModelsThunk.fulfilled]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "succeeded", Object);
+      _.setWith(state.status, `${domain}.${subdomain}`, "succeeded", {});
       state.error = null;
 
       const models = action.payload.filter(
         (model) => !model.tags.map((tag) => tag.name).includes("demo")
       );
-      _.setWith(state.models, `${domain}.${subdomain}`, models, Object);
+      _.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
     [searchModelsThunk.rejected]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "failed", Object);
+      _.setWith(state.status, `${domain}.${subdomain}`, "failed", {});
       state.error = action.error.message;
+    },
+    [PARTIAL_SEARCH_MODELS_TYPE]: (state, action) => {
+      let { domain, subdomain, models } = action.payload;
+      _.setWith(state.status, `${domain}.${subdomain}`, "partial", {});
+      state.error = null;
+
+      models = models.filter(
+        (model) => !model.tags.map((tag) => tag.name).includes("demo")
+      );
+      _.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
   },
 });
@@ -110,7 +131,7 @@ const FILTERABLE_FIELDS = [
   "sparse_target",
 ];
 
-const cvModelsToTableData = (domain, subdomain, models, status) => {
+const visionModelsToTableData = (domain, subdomain, models, status) => {
   const displayName = _.get(
     DISPLAY_NAMES,
     `${domain}.${subdomain}`,
@@ -182,8 +203,7 @@ const cvModelsToTableData = (domain, subdomain, models, status) => {
     data,
     filterOptions,
     status,
-    aligns: ["left", "left", "right", "right"],
-    width: ["14%", "38%", "23%", "23%"],
+    aligns: "left",
   };
 };
 
@@ -194,7 +214,7 @@ export const selectModelTable = createSelector([selectModelsState], (modelsState
     for (let subdomain in modelsState.status[domain]) {
       let data;
       if (domain === "cv") {
-        data = cvModelsToTableData(
+        data = visionModelsToTableData(
           domain,
           subdomain,
           _.get(modelsState.models, `${domain}.${subdomain}`, []),

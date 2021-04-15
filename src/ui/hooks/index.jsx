@@ -14,21 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { makeStyles } from "@material-ui/core/styles";
-
-export default function makeZooTableStyles() {
-  return makeStyles(
-    (theme) => ({
-      root: {},
-      row: {
-        borderColor: theme.palette.divider,
-        borderLeftWidth: "1px",
-        borderLeftStyle: "solid",
-        "&:first-child": {
-          borderLeftWidth: 0,
-        },
-      },
-    }),
-    { name: "ZooTableBody" }
-  );
-}
+export * from "./query";

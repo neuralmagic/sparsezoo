@@ -19,7 +19,9 @@ import { makeStyles } from "@material-ui/core/styles";
 export default function makeModelTableStyles() {
   return makeStyles(
     (theme) => ({
-      root: {},
+      root: {
+        padding: theme.spacing(0.5),
+      },
       gridItem: {
         height: "485px",
       },

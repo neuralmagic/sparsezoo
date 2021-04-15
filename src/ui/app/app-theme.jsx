@@ -28,6 +28,7 @@ export default function makeTheme(darkMode) {
       primary: { main: "#4652B1", contrastText: "#FFFFFF" },
       secondary: { main: "#ff9900", contrastText: "#FFFFFF" },
       disabled: { main: "#777777" },
+      divider: "#000000",
     },
     typography: {
       fontFamily: ["Roboto", "Open Sans", "sans-serif"].join(","),

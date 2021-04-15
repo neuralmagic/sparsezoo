@@ -20,6 +20,7 @@ import PropTypes from "prop-types";
 import Table from "@material-ui/core/Table";
 import TableContainer from "@material-ui/core/TableContainer";
 import TablePagination from "@material-ui/core/TablePagination";
+import Typography from "@material-ui/core/Typography";
 
 import makeStyles from "./zoo-table-styles";
 import ZooTableHeaders from "./zoo-table-headers";
@@ -34,6 +35,7 @@ function ZooTable({
   ariaLabel,
   paginationOptions,
   width,
+  includePagination,
 }) {
   const useStyles = makeStyles();
   const classes = useStyles();
@@ -49,51 +51,57 @@ function ZooTable({
     setPage(0);
   };
 
-  const currentRows =
-    status === "succeeded"
-      ? rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-      : Array(10).fill(Array(headers.length).fill("-"));
+  const paginatedRows = includePagination
+    ? rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+    : rows;
+
   return (
     <div className={classes.root}>
       {status !== "succeeded" && (
-        <div className={classes.tableGroup}>
-          <LoaderOverlay
-            status={status}
-            loaderSize={100}
-            loaderChildren={
-              <div className={classes.loaderTable}>
-                <Table size="small" aria-label={ariaLabel}>
-                  <ZooTableHeaders headers={headers} aligns={aligns} width={width} />
-                  <ZooTableBody rows={currentRows} aligns={aligns} width={width} />
-                </Table>
-              </div>
-            }
-          />
-        </div>
+        <LoaderOverlay
+          status={status}
+          loaderSize={100}
+          loaderChildren={
+            <Typography className={classes.loaderText}>Loading models</Typography>
+          }
+        ></LoaderOverlay>
       )}
 
-      {status === "succeeded" && (
-        <div className={classes.tableGroup}>
-          <TableContainer className={classes.tableContainer}>
-            <div className={classes.table}>
+      {(status === "succeeded" || status === "partial") && (
+        <div
+          className={
+            includePagination ? classes.paginatedTableGroup : classes.tableGroup
+          }
+        >
+          <TableContainer
+            className={
+              includePagination
+                ? classes.paginatedTableContainer
+                : classes.tableContainer
+            }
+          >
+            <div className={includePagination ? classes.paginatedTable : classes.table}>
               <Table stickyHeader size="small" aria-label={ariaLabel}>
                 <ZooTableHeaders headers={headers} aligns={aligns} width={width} />
-                <ZooTableBody rows={currentRows} aligns={aligns} width={width} />
+                <ZooTableBody rows={paginatedRows} aligns={aligns} width={width} />
               </Table>
             </div>
           </TableContainer>
-          <div className={classes.pagination}>
-            <TablePagination
-              rowsPerPageOptions={paginationOptions}
-              count={rows.length}
-              component="div"
-              rowsPerPage={rowsPerPage}
-              page={page}
-              align="right"
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          </div>
+
+          {includePagination && (
+            <div className={classes.pagination}>
+              <TablePagination
+                rowsPerPageOptions={paginationOptions}
+                count={rows.length}
+                component="div"
+                rowsPerPage={rowsPerPage}
+                page={page}
+                align="right"
+                onChangePage={handleChangePage}
+                onChangeRowsPerPage={handleChangeRowsPerPage}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -112,6 +120,7 @@ ZooTable.propTypes = {
     PropTypes.number,
     PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   ]),
+  includePagination: PropTypes.bool,
 };
 
 ZooTable.defaultProps = {
@@ -121,6 +130,7 @@ ZooTable.defaultProps = {
   aligns: "left",
   status: "idle",
   paginationOptions: [10, 25, 100],
+  includePagination: false,
 };
 
 export default ZooTable;

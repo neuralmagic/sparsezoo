@@ -40,7 +40,12 @@ const authSlice = createSlice({
     error: null,
     status: "idle",
   },
-  reducers: {},
+  reducers: {
+    setAuthToken: (state, action) => {
+      state.status = "succeeded";
+      state.token = action.payload;
+    },
+  },
   extraReducers: {
     [authThunk.pending]: (state, action) => {
       state.status = "loading";
@@ -62,7 +67,7 @@ const authSlice = createSlice({
  * Available actions for auth redux store
  */
 // eslint-disable-next-line
-export const {} = authSlice.actions;
+export const { setAuthToken } = authSlice.actions;
 
 /**
  * Simple selector to get the current auth state

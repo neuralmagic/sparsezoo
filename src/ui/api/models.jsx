@@ -16,14 +16,20 @@ limitations under the License.
 
 import { API_ROOT, validateAPIResponseJSON } from "./utils";
 
-export function requestSearchModels(
+export function requestSearchModels({
   domain,
   subdomain,
   token,
   page = 1,
-  page_length = 20
-) {
-  const url = `${API_ROOT}/models/search/${domain}/${subdomain}?page=${page}&page_length=${page_length}`;
+  page_length = 20,
+  queries = {},
+}) {
+  let url = `${API_ROOT}/models/search/${domain}/${subdomain}?page=${page}&page_length=${page_length}`;
+  if (queries) {
+    for (const [key, value] of Object.entries(queries)) {
+      url = `${url}&${key}=${value}`;
+    }
+  }
   return validateAPIResponseJSON(
     fetch(url, {
       method: "GET",

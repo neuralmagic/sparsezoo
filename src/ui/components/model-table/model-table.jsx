@@ -14,16 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import PropTypes from "prop-types";
 
 import _ from "lodash";
 
-import Grid from "@material-ui/core/Grid";
-
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
 import Typography from "@material-ui/core/Typography";
 
 import {
@@ -34,12 +30,8 @@ import {
 } from "../../store";
 import makeStyles from "./model-table-styles";
 import ZooTable from "../zoo-table";
-import FilterSidebar from "../filter-sidebar";
 
-function ModelTable({ domain, subdomain }) {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({});
-
+function ModelTable({ domain, subdomain, includePagination, includeHeader, queries }) {
   const useStyles = makeStyles();
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -57,84 +49,53 @@ function ModelTable({ domain, subdomain }) {
           domain,
           subdomain,
           token: authState.token,
+          queries,
         })
       );
     }
-  }, [authState.token, modelsState.status, dispatch, domain, subdomain]);
+  }, [authState.token, modelsState.status, dispatch, domain, subdomain, queries]);
 
-  const handleFilter = (field, value) => {
-    let selected = _.get(selectedFilters, field, []);
-    if (!selected.includes(value)) {
-      selected.push(value);
-    } else {
-      selected = selected.filter((current) => value !== current);
-    }
-    setSelectedFilters({ ...selectedFilters, [field]: selected });
-  };
-
-  const handleClearFilter = (field) => {
-    setSelectedFilters({ ...selectedFilters, [field]: [] });
-  };
-
-  const handleToggleFilter = () => {
-    setFilterOpen(!filterOpen);
-  };
-
-  const modelData = _.get(results, `${domain}.${subdomain}.data`, []).filter(
-    ({ model }) => {
-      for (let field in selectedFilters) {
-        const selected = _.get(selectedFilters, field, []);
-        if (selected.length > 0 && !selected.includes(model[field])) {
-          return false;
-        }
-      }
-      return true;
-    }
+  const rows = _.get(results, `${domain}.${subdomain}.data`, []).map(
+    (data) => data.row
   );
-  const rows = modelData.map((data) => data.row);
   const status = _.get(results, `${domain}.${subdomain}.status`, "idle");
-
-  let filterOptions = _.get(results, `${domain}.${subdomain}.filterOptions`, []);
-
+  const loaded = status !== "idle" && status !== "loading";
   return (
-    <Grid container className={classes.root}>
-      {filterOpen && (
-        <Grid item xs={3} className={`${classes.gridItem} ${classes.toolbar}`}>
-          <FilterSidebar
-            open={filterOpen}
-            filterOptions={filterOptions}
-            selectedFilters={selectedFilters}
-            handleFilter={handleFilter}
-            handleClear={handleClearFilter}
-          />
-        </Grid>
+    <div className={classes.root}>
+      {loaded && includeHeader && (
+        <Typography variant="h6">
+          {_.get(
+            results,
+            `${domain}.${subdomain}.displayName`,
+            `${domain} ${subdomain}`
+          )}
+        </Typography>
       )}
-      <Grid item xs={filterOpen ? 9 : 12} className={classes.gridItem}>
-        <Toolbar disableGutters className={classes.toollbar}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleToggleFilter}
-            disabled={status !== "succeeded"}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography>
-            {_.get(results, `${domain}.${subdomain}.displayName`, "")}
-          </Typography>
-        </Toolbar>
-        <ZooTable
-          ariaLabel={`${domain}.${subdomain}`}
-          headers={_.get(results, `${domain}.${subdomain}.headers`, [])}
-          rows={rows}
-          status={status}
-          aligns={_.get(results, `${domain}.${subdomain}.aligns`, "left")}
-          width={_.get(results, `${domain}.${subdomain}.width`)}
-        />
-      </Grid>
-    </Grid>
+      <ZooTable
+        ariaLabel={`${domain}.${subdomain}`}
+        headers={_.get(results, `${domain}.${subdomain}.headers`, [])}
+        rows={rows}
+        status={status}
+        aligns={_.get(results, `${domain}.${subdomain}.aligns`, "left")}
+        width={_.get(results, `${domain}.${subdomain}.width`)}
+        includePagination={includePagination}
+      />
+    </div>
   );
 }
+
+ModelTable.propTypes = {
+  domain: PropTypes.string.isRequired,
+  subdomain: PropTypes.string.isRequired,
+  queries: PropTypes.object,
+  includePagination: PropTypes.bool,
+  includeHeader: PropTypes.bool,
+};
+
+ModelTable.defaultProps = {
+  includePagination: false,
+  includeHeader: false,
+  queries: {},
+};
 
 export default ModelTable;

@@ -24,6 +24,15 @@ export default function makeZooTableStyles() {
         fontWeight: "bold",
         display: "inline",
       },
+      headerContainer: {
+        backgroundColor: "white",
+        borderColor: theme.palette.divider,
+        borderLeftWidth: "1px",
+        borderLeftStyle: "solid",
+        "&:first-child": {
+          borderLeftWidth: 0,
+        },
+      },
       filterButton: {
         padding: 0,
         marginLeft: theme.spacing(1),

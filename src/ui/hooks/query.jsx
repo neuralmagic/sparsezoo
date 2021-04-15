@@ -14,21 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { makeStyles } from "@material-ui/core/styles";
+import { useLocation } from "react-router-dom";
 
-export default function makeZooTableStyles() {
-  return makeStyles(
-    (theme) => ({
-      root: {},
-      row: {
-        borderColor: theme.palette.divider,
-        borderLeftWidth: "1px",
-        borderLeftStyle: "solid",
-        "&:first-child": {
-          borderLeftWidth: 0,
-        },
-      },
-    }),
-    { name: "ZooTableBody" }
-  );
-}
+export const useQuery = () => {
+  const searchParams = new URLSearchParams(useLocation().search);
+
+  const query = {};
+  const entries = searchParams.entries();
+  let { done, value } = entries.next();
+  do {
+    if (value) {
+      query[value[0]] = value[1];
+    }
+    let entry = entries.next();
+    done = entry.done;
+    value = entry.value;
+  } while (!done);
+  return query;
+};

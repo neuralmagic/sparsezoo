@@ -42,6 +42,8 @@ function ModelTableRoot() {
           domain={domain}
           subdomain={subdomain}
           key={`${domain}.${subdomain}`}
+          includePagination={true}
+          includeHeader={true}
         />
       ))}
     </div>
