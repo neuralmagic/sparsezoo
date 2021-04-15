@@ -16,11 +16,36 @@ limitations under the License.
 
 import { makeStyles } from "@material-ui/core/styles";
 
-export default function makeAppStyles() {
+export default function makeModelTableStyles() {
   return makeStyles(
     (theme) => ({
-      root: {},
+      root: {
+        height: "100%",
+        paddingLeft: theme.spacing(1),
+        overflowY: "scroll",
+        display: "inline-block",
+        backgroundColor: "rgba(0, 0, 0, 0.04)",
+      },
+      toollbar: {
+        paddingLeft: theme.spacing(1),
+      },
+      chip: {
+        margin: theme.spacing(0.25),
+      },
+      unselectedChip: {
+        margin: theme.spacing(0.25),
+      },
+      label: {
+        display: "inline-block",
+      },
+      clearLabel: {
+        marginLeft: theme.spacing(1),
+        textDecoration: "underline",
+        "&:hover": {
+          cursor: "pointer",
+        },
+      },
     }),
-    { name: "App" }
+    { name: "FilterSidebar" }
   );
 }

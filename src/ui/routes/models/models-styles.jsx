@@ -14,5 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-export const MODEL_TABLE_ROOT_PATH = "/models";
-export const MODEL_TABLE_PATH = "/models/:domain/:subdomain";
+import { makeStyles } from "@material-ui/core/styles";
+
+export default function makeModelTableStyles() {
+  return makeStyles(
+    (theme) => ({
+      root: {},
+    }),
+    { name: "Models" }
+  );
+}

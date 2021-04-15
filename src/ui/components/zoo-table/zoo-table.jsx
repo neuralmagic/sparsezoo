@@ -1,3 +1,19 @@
+/*
+Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
@@ -10,22 +26,6 @@ import ZooTableHeaders from "./zoo-table-headers";
 import ZooTableBody from "./zoo-table-body";
 import LoaderOverlay from "../loader-overlay";
 
-function LoadingZooTable({ headers, aligns }) {
-  const useStyles = makeStyles();
-  const classes = useStyles();
-  return (
-    <div className={classes.loaderTable}>
-      <Table size="small">
-        <ZooTableHeaders headers={headers} aligns={aligns} />
-        <ZooTableBody
-          rows={Array(10).fill(Array(headers.length).fill("-"))}
-          aligns={aligns}
-        />
-      </Table>
-    </div>
-  );
-}
-
 function ZooTable({
   headers,
   rows,
@@ -34,8 +34,6 @@ function ZooTable({
   ariaLabel,
   paginationOptions,
   width,
-  filterColumns,
-  onFilter,
 }) {
   const useStyles = makeStyles();
   const classes = useStyles();
@@ -52,6 +50,10 @@ function ZooTable({
     setPage(0);
   };
 
+  const currentRows =
+    status === "succeeded"
+      ? rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+      : Array(10).fill(Array(headers.length).fill("-"));
   return (
     <div className={classes.root}>
       {status !== "succeeded" && (
@@ -59,7 +61,14 @@ function ZooTable({
           <LoaderOverlay
             status={status}
             loaderSize={100}
-            loaderChildren={<LoadingZooTable headers={headers} aligns={aligns} />}
+            loaderChildren={
+              <div className={classes.loaderTable}>
+                <Table size="small" aria-label={ariaLabel}>
+                  <ZooTableHeaders headers={headers} aligns={aligns} width={width} />
+                  <ZooTableBody rows={currentRows} aligns={aligns} width={width} />
+                </Table>
+              </div>
+            }
           />
         </div>
       )}
@@ -69,31 +78,23 @@ function ZooTable({
           <TableContainer className={classes.tableContainer}>
             <div className={classes.table}>
               <Table stickyHeader size="small" aria-label={ariaLabel}>
-                <ZooTableHeaders
-                  headers={headers}
-                  aligns={aligns}
-                  width={width}
-                  filterColumns={filterColumns}
-                  onFilter={onFilter}
-                />
-                <ZooTableBody
-                  rows={rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage)}
-                  aligns={aligns}
-                  width={width}
-                />
+                <ZooTableHeaders headers={headers} aligns={aligns} width={width} />
+                <ZooTableBody rows={currentRows} aligns={aligns} width={width} />
               </Table>
             </div>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={paginationOptions}
-            count={rows.length}
-            component="div"
-            rowsPerPage={rowsPerPage}
-            page={page}
-            align="right"
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
+          <div className={classes.pagination}>
+            <TablePagination
+              rowsPerPageOptions={paginationOptions}
+              count={rows.length}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              page={page}
+              align="right"
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+          </div>
         </div>
       )}
     </div>

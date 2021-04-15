@@ -1,50 +1,34 @@
-import React, { useState } from "react";
+/*
+Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import React from "react";
 import PropTypes from "prop-types";
 
 import _ from "lodash";
-
-import Popover from "@material-ui/core/Popover";
 
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import FilterListIcon from "@material-ui/icons/FilterList";
-
-import Radio from "@material-ui/core/Radio";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormControl from "@material-ui/core/FormControl";
-import FormLabel from "@material-ui/core/FormLabel";
 
 import makeStyles from "./zoo-table-headers-styles";
 
-function ZooTableHeaders({ headers, aligns, width, filterColumns, onFilter }) {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterAnchor, setFilterAnchor] = useState(null);
-  const [filterOptions, setFilterOptions] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({});
-
+function ZooTableHeaders({ headers, aligns, width }) {
   const useStyles = makeStyles();
   const classes = useStyles();
-
-  const handeOpenFilter = (event, options) => {
-    setFilterAnchor(event.currentTarget);
-    setFilterOpen(true);
-    setFilterOptions(options);
-  };
-
-  const handleCloseFilter = () => {
-    setFilterOpen(false);
-    setFilterAnchor(null);
-    setFilterOptions([]);
-  };
-
-  const handleFilter = (field, value) => {
-    setSelectedFilters({ ...selectedFilters, [field]: value });
-    onFilter(field, value);
-  };
 
   if (width) {
     if (typeof width == "string" || typeof width == "number") {
@@ -53,8 +37,6 @@ function ZooTableHeaders({ headers, aligns, width, filterColumns, onFilter }) {
   } else {
     width = Array(headers.length).fill(`${100 / headers.length}%`);
   }
-
-  console.log(filterOptions);
 
   return (
     <TableHead className={classes.root}>
@@ -68,60 +50,9 @@ function ZooTableHeaders({ headers, aligns, width, filterColumns, onFilter }) {
             width={width[headerIndex]}
           >
             <Typography className={classes.header}>{header}</Typography>
-            {header in filterColumns && (
-              <IconButton
-                className={classes.filterButton}
-                onClick={(event) =>
-                  handeOpenFilter(event, _.get(filterColumns, header, []))
-                }
-              >
-                <FilterListIcon />
-              </IconButton>
-            )}
           </TableCell>
         ))}
       </TableRow>
-      <Popover
-        open={filterOpen}
-        anchorEl={filterAnchor}
-        onClose={handleCloseFilter}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-      >
-        <div className={classes.filterContainer}>
-          {filterOptions.map(({ field, options }) => (
-            <FormControl component="fieldset" key={field}>
-              <FormLabel component="legend">{field}</FormLabel>
-              <RadioGroup
-                aria-label={field}
-                name={field}
-                value={_.get(selectedFilters, field, "all")}
-                onChange={(event, value) => handleFilter(field, value)}
-              >
-                <FormControlLabel
-                  value={"all"}
-                  control={<Radio color="default" />}
-                  label={"All"}
-                />
-                {options.map((option) => (
-                  <FormControlLabel
-                    key={String(option)}
-                    value={option || ""}
-                    control={<Radio color="default" />}
-                    label={option ? option : "None"}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          ))}
-        </div>
-      </Popover>
     </TableHead>
   );
 }

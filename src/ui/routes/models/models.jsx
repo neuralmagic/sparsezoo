@@ -14,5 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-export const MODEL_TABLE_ROOT_PATH = "/models";
-export const MODEL_TABLE_PATH = "/models/:domain/:subdomain";
+import React from "react";
+import ModelTable from "../../components/model-table";
+
+import makeStyles from "./models-styles";
+
+function Models(props) {
+  const { domain, subdomain } = props.match.params;
+  const useStyles = makeStyles();
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      <ModelTable domain={domain} subdomain={subdomain} />
+    </div>
+  );
+}
+
+export default Models;
