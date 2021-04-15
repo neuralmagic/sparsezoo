@@ -93,13 +93,16 @@ function ModelTable({ domain, subdomain }) {
   );
   const rows = modelData.map((data) => data.row);
   const status = _.get(results, `${domain}.${subdomain}.status`, "idle");
+
+  let filterOptions = _.get(results, `${domain}.${subdomain}.filterOptions`, []);
+
   return (
     <Grid container className={classes.root}>
       {filterOpen && (
         <Grid item xs={3} className={`${classes.gridItem} ${classes.toolbar}`}>
           <FilterSidebar
             open={filterOpen}
-            filterOptions={_.get(results, `${domain}.${subdomain}.filterOptions`, [])}
+            filterOptions={filterOptions}
             selectedFilters={selectedFilters}
             handleFilter={handleFilter}
             handleClear={handleClearFilter}

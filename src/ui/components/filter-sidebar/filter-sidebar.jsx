@@ -56,6 +56,7 @@ function FilterSidebar({
               .filter((option) => _.get(selectedFilters, field, []).includes(option))
               .map((option) => (
                 <Chip
+                  key={option || "N/A"}
                   className={classes.chip}
                   size="small"
                   label={option || "N/A"}
@@ -67,6 +68,7 @@ function FilterSidebar({
               .filter((option) => !_.get(selectedFilters, field, []).includes(option))
               .map((option) => (
                 <Chip
+                  key={option || "N/A"}
                   className={classes.unselectedChip}
                   variant="outlined"
                   size="small"

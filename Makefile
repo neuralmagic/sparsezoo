@@ -74,6 +74,10 @@ docsupdate:
 
 # creates wheel file
 build:
+	@echo "Building UI";
+	yarn install;
+	yarn build;
+	@echo "Building python package";
 	python3 setup.py sdist bdist_wheel $(BUILD_ARGS)
 
 # clean package

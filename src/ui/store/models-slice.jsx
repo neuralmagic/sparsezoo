@@ -145,6 +145,34 @@ const cvModelsToTableData = (domain, subdomain, models, status) => {
     (filterOptions) => filterOptions.options.length > 1
   );
 
+  let frequency = models.reduce((previous, model) => {
+    filterOptions.forEach(({ field }) => {
+      let frequencyForField = _.get(previous, `${field}`, {});
+      let value = 1 + _.get(previous, `${field}.${model[field]}`, 0);
+      _.setWith(
+        previous,
+        `${field}`,
+        { ...frequencyForField, [model[field]]: value },
+        {}
+      );
+    });
+    return previous;
+  }, {});
+
+  filterOptions.forEach((filterOption) => {
+    filterOption.options
+      .sort((a, b) => {
+        let aFreq = frequency[filterOption.field][a];
+        let bFreq = frequency[filterOption.field][b];
+        if (aFreq === bFreq) {
+          return a - b;
+        } else {
+          return aFreq - bFreq;
+        }
+      })
+      .reverse();
+  });
+
   return {
     domain,
     subdomain,
