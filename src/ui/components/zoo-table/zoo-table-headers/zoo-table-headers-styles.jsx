@@ -16,7 +16,7 @@ limitations under the License.
 
 import { makeStyles } from "@material-ui/core/styles";
 
-export default function makeZooTableStyles() {
+export default function makeZooTableHeaderStyles() {
   return makeStyles(
     (theme) => ({
       root: {},

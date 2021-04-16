@@ -138,15 +138,36 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
     `${domain} ${subdomain}`
   );
 
-  const data = models.map((model) => ({
-    model,
-    row: [
-      model.display_name,
-      getModelStub(model),
-      getFormattedData(model, "training"),
-      getFormattedData(model, "inference"),
-    ],
-  }));
+  const data = models.map((model) => {
+    const downloads = _.get(model, "files").reduce((size, file) => {
+      if (
+        (file.file_type === "framework" || file.file_type === "onnx") &&
+        !file.checkpoint
+      ) {
+        return size + file.downloads;
+      } else {
+        return size;
+      }
+    }, 0);
+    const tarFile = _.get(model, "files").find((file) => file.file_type === "tar_gz");
+    let file_size = _.get(tarFile, "file_size", 0);
+
+    if (tarFile) {
+      file_size = `${(file_size / 1024 / 1024).toFixed(2)} MB`;
+    }
+
+    return {
+      model,
+      row: [
+        model.display_name,
+        getModelStub(model),
+        file_size,
+        downloads,
+        getFormattedData(model, "training"),
+        getFormattedData(model, "inference"),
+      ],
+    };
+  });
 
   let filterOptions = FILTERABLE_FIELDS.map((field) => {
     const options = Array.from(
@@ -198,12 +219,20 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
     domain,
     subdomain,
     displayName,
-    headers: ["Model Name", "Model Stub", "Training Metric", "Inference Metric"],
+    headers: [
+      "Model Name",
+      "Model Stub",
+      "Content Size",
+      "Downloads",
+      "Training Metric",
+      "Inference Metric",
+    ],
     models,
     data,
     filterOptions,
     status,
     aligns: "left",
+    copy: [false, true, false, false, false],
   };
 };
 

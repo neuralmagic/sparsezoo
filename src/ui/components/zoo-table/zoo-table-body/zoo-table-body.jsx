@@ -22,10 +22,25 @@ import _ from "lodash";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
+import Typography from "@material-ui/core/Typography";
 
 import makeStyles from "./zoo-table-styles";
+import CopyButton from "../../copy-button";
 
-function ZooTableBody({ rows, aligns }) {
+function ZooTableBody({ rows, aligns, copy, width }) {
+  const rowSize = _.get(rows, "0", 1);
+  if (typeof copy === "boolean") {
+    copy = Array(rowSize).fill(copy);
+  }
+
+  if (width) {
+    if (typeof width == "string" || typeof width == "number") {
+      width = Array(rowSize).fill(width);
+    }
+  } else {
+    width = Array(rowSize).fill(`${100 / rowSize}%`);
+  }
+
   const useStyles = makeStyles();
   const classes = useStyles();
 
@@ -40,10 +55,11 @@ function ZooTableBody({ rows, aligns }) {
                 typeof aligns === "string" ? aligns : _.get(aligns, columnIndex, "left")
               }
               className={classes.row}
-              width={`${100 / row.length}%`}
+              width={width}
               size="small"
             >
-              {column}
+              <Typography>{column}</Typography>
+              {copy[columnIndex] && <CopyButton text={column} />}
             </TableCell>
           ))}
         </TableRow>
@@ -60,11 +76,13 @@ ZooTableBody.propTypes = {
     PropTypes.number,
     PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   ]),
+  copy: PropTypes.oneOfType([PropTypes.bool, PropTypes.arrayOf(PropTypes.bool)]),
 };
 
 ZooTableBody.defaultProps = {
   rows: [],
   aligns: "left",
+  copy: false,
 };
 
 export default ZooTableBody;

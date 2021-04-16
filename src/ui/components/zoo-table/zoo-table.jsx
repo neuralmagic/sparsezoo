@@ -35,6 +35,7 @@ function ZooTable({
   ariaLabel,
   paginationOptions,
   width,
+  copy,
   includePagination,
 }) {
   const useStyles = makeStyles();
@@ -83,7 +84,12 @@ function ZooTable({
             <div className={includePagination ? classes.paginatedTable : classes.table}>
               <Table stickyHeader size="small" aria-label={ariaLabel}>
                 <ZooTableHeaders headers={headers} aligns={aligns} width={width} />
-                <ZooTableBody rows={paginatedRows} aligns={aligns} width={width} />
+                <ZooTableBody
+                  rows={paginatedRows}
+                  aligns={aligns}
+                  width={width}
+                  copy={copy}
+                />
               </Table>
             </div>
           </TableContainer>
@@ -120,6 +126,7 @@ ZooTable.propTypes = {
     PropTypes.number,
     PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   ]),
+  copy: PropTypes.oneOfType([PropTypes.bool, PropTypes.arrayOf(PropTypes.bool)]),
   includePagination: PropTypes.bool,
 };
 
@@ -131,6 +138,7 @@ ZooTable.defaultProps = {
   status: "idle",
   paginationOptions: [10, 25, 100],
   includePagination: false,
+  copy: false,
 };
 
 export default ZooTable;

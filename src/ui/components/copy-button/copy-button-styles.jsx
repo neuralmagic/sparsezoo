@@ -16,19 +16,11 @@ limitations under the License.
 
 import { makeStyles } from "@material-ui/core/styles";
 
-export default function makeZooTableBodyStyles() {
+export default function makeModelTableStyles() {
   return makeStyles(
     (theme) => ({
       root: {},
-      row: {
-        borderColor: theme.palette.divider,
-        borderLeftWidth: "1px",
-        borderLeftStyle: "solid",
-        "&:first-child": {
-          borderLeftWidth: 0,
-        },
-      },
     }),
-    { name: "ZooTableBody" }
+    { name: "CopyButton" }
   );
 }

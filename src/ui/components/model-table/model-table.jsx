@@ -77,6 +77,7 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
         rows={rows}
         status={status}
         aligns={_.get(results, `${domain}.${subdomain}.aligns`, "left")}
+        copy={_.get(results, `${domain}.${subdomain}.copy`, false)}
         width={_.get(results, `${domain}.${subdomain}.width`)}
         includePagination={includePagination}
       />
