@@ -34,7 +34,7 @@ function CopyButton({ text, iconButtonSize }) {
       open={showCopiedTooltip}
       onClose={() => setShowCopiedTooltip(false)}
       title="Copied to clipboard"
-      classNames={classes.root}
+      className={classes.root}
     >
       <CopyToClipboard text={text} onCopy={() => setShowCopiedTooltip(true)}>
         <IconButton size={iconButtonSize}>

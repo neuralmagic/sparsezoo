@@ -131,6 +131,17 @@ const FILTERABLE_FIELDS = [
   "sparse_target",
 ];
 
+/**
+ * Formats vision models to a table data format
+ *
+ * @param {string} domain domain of the models
+ * @param {string} subdomain subdomain of the models
+ * @param {{
+ *  files: { checkpoint: boolean, file_type: string, file_size: number}[],
+ *  results: { recorded_value: number, recorded_units: string, result_category: string  }
+ * }[]} models the models of specified domain/subdomain
+ * @param {string} status status of loading models of specified domain/subdomain
+ */
 const visionModelsToTableData = (domain, subdomain, models, status) => {
   const displayName = _.get(
     DISPLAY_NAMES,
@@ -236,6 +247,9 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
   };
 };
 
+/**
+ * Selector for model table for the current loaded data
+ */
 export const selectModelTable = createSelector([selectModelsState], (modelsState) => {
   const table = {};
   for (let domain in modelsState.status) {

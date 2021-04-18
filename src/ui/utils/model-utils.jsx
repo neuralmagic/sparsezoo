@@ -38,9 +38,15 @@ export const getModelStub = (model) => {
 };
 
 /**
- * @param {Object<string, Any>} model the model information
+ * Formats model's result objects of a specific category
+ * @param {object} model the model information
+ * @param {{
+ *  recorded_value: number,
+ *  recorded_units: string,
+ *  result_category: string
+ * }[]} model.results the results of the model
  * @param {string} category the category of result to obtain from the model
- * @returns {Array<string>} The results of category formatted with units
+ * @type {string[]}
  */
 export const getFormattedData = (model, category) => {
   let results = _.get(model, "results", []).filter(

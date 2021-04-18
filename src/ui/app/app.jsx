@@ -40,7 +40,7 @@ function App() {
     if (authState.status === "idle") {
       const cookies = new Cookies();
       const authToken = cookies.get("NM_AUTH_TOKEN");
-      if (authToken !== null) {
+      if (authToken) {
         dispatch(setAuthToken(authToken));
       } else {
         dispatch(authThunk());

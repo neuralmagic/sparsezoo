@@ -66,7 +66,6 @@ const authSlice = createSlice({
 /***
  * Available actions for auth redux store
  */
-// eslint-disable-next-line
 export const { setAuthToken } = authSlice.actions;
 
 /**
