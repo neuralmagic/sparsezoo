@@ -199,7 +199,7 @@ def test_search_models(model_args, other_args):
 )
 def test_search_similar_models(model_args, other_args):
     model = Zoo.load_model(**model_args, **other_args)
-    similar = Zoo.search_optimized_models(model)
+    similar = Zoo.search_similar_models(model)
     assert len(similar) > 0
 
     for sim in similar:
@@ -238,6 +238,7 @@ def test_search_optimized_models(model_args, other_args):
 
     for sim in optimized:
         assert sim
+        assert not sim.is_base
         assert sim.domain == model.domain
         assert sim.sub_domain == model.sub_domain
         assert sim.architecture == model.architecture

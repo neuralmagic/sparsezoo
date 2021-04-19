@@ -17,7 +17,8 @@ Code related to base functionality for making requests
 """
 
 import os
-from typing import Any, List, Union
+import warnings
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from sparsezoo.utils import convert_to_bool
 
@@ -29,7 +30,9 @@ __all__ = [
     "SPARSEZOO_TEST_MODE",
     "RecipeArgs",
     "RECIPES_API_URL",
+    "parse_zoo_stub",
 ]
+
 
 SPARSEZOO_TEST_MODE = convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE"))
 
@@ -40,6 +43,45 @@ BASE_API_URL = (
 )
 MODELS_API_URL = f"{BASE_API_URL}/models"
 RECIPES_API_URL = f"{BASE_API_URL}/recipes"
+
+# optional prefix for stubs
+ZOO_STUB_PREFIX = "zoo:"
+
+
+def parse_zoo_stub(
+    stub: str, valid_params: Optional[List[str]] = None
+) -> Tuple[str, Dict[str, str]]:
+    """
+    :param stub: A SparseZoo model stub. i.e. 'model/stub/path',
+        'zoo:model/stub/path', 'zoo:model/stub/path?param1=value1&param2=value2'
+    :param valid_params: list of expected parameter names to be encoded in the
+        stub. Will raise a warning if any unexpected param names are given. Leave
+        as None to not raise any warnings. Default is None
+    :return: the parsed base stub and a dictionary of parameter names and their values
+    """
+    # strip optional zoo stub prefix
+    if stub.startswith(ZOO_STUB_PREFIX):
+        stub = stub[len(ZOO_STUB_PREFIX) :]
+
+    if "?" not in stub:
+        return stub, {}
+
+    stub_parts = stub.split("?")
+    if len(stub_parts) > 2:
+        raise ValueError(
+            "Invalid SparseZoo stub, query string must be preceded by only one '?'"
+            f"given {stub}"
+        )
+    stub, params = stub_parts
+    params = dict(param.split("=") for param in params.split("&"))
+
+    if valid_params is not None and any(param not in valid_params for param in params):
+        warnings.warn(
+            f"Invalid query string for stub {stub} valid params include {valid_params},"
+            f" given {list(params.keys())}"
+        )
+
+    return stub, params
 
 
 class ModelArgs:

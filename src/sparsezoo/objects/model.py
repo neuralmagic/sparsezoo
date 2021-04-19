@@ -18,7 +18,7 @@ Code related to a model from the sparsezoo
 
 import logging
 from collections import OrderedDict
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 
@@ -31,6 +31,13 @@ from sparsezoo.objects.release_version import ReleaseVersion
 from sparsezoo.objects.result import Result
 from sparsezoo.objects.tag import Tag
 from sparsezoo.objects.user import User
+from sparsezoo.requests import (
+    ModelArgs,
+    download_model_get_request,
+    get_model_get_request,
+    parse_zoo_stub,
+    search_model_get_request,
+)
 from sparsezoo.utils import DataLoader
 
 
@@ -196,11 +203,384 @@ class Model(Downloadable, ModelMetadata):
             else None
         )
 
+    @staticmethod
+    def load_model(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: Union[str, None],
+        framework: str,
+        repo: str,
+        dataset: str,
+        training_scheme: Union[str, None],
+        optim_name: str,
+        optim_category: str,
+        optim_target: Union[str, None],
+        release_version: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> "Model":
+        """
+        Obtains a Model from the model repo
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        _LOGGER.debug("load_model: loading model")
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        return Model.load_model_from_stub(
+            args, override_folder_name, override_parent_path, force_token_refresh
+        )
+
+    @staticmethod
+    def load_model_from_stub(
+        stub: Union[str, ModelArgs],
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> "Model":
+        """
+        :param stub: the SparseZoo stub path to the model, can be a string path or
+            ModelArgs object
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
+        _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
+        response_json = get_model_get_request(
+            args=stub,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
+        )
+        return Model(
+            **response_json["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+
+    @staticmethod
+    def load_model_from_recipe(
+        recipe: OptimizationRecipe,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> "Model":
+        """
+        Loads the model associated with a recipe
+
+        :param recipe: the Recipe associated with the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        _LOGGER.debug(f"load_model_from_recipe: loading model from recipe {recipe}")
+        return Model.load_model_from_stub(
+            stub=recipe.model_metadata,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+        )
+
+    @staticmethod
+    def load_base_model_from_recipe(
+        recipe: OptimizationRecipe,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> Optional["Model"]:
+        """
+        Loads the base model associated with a recipe if any exists
+
+        :param recipe: the Recipe associated with the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        if recipe.base_stub is None:
+            _LOGGER.warn(
+                "load_base_model_from_recipe: No base model found for "
+                + f"recipe {recipe}"
+            )
+            return None
+        _LOGGER.debug(
+            (
+                f"load_base_model_from_recipe: loading base model with {recipe}"
+                + f" with stub {recipe.base_stub}"
+            )
+        )
+        return Model.load_model_from_stub(
+            recipe.base_stub,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+        )
+
+    @staticmethod
+    def download_model(
+        domain: str,
+        sub_domain: str,
+        architecture: str,
+        sub_architecture: Union[str, None],
+        framework: str,
+        repo: str,
+        dataset: str,
+        training_scheme: Union[str, None],
+        optim_name: str,
+        optim_category: str,
+        optim_target: Union[str, None],
+        release_version: Union[str, None] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ) -> "Model":
+        """
+        Downloads a model from model repo
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :return: The requested Model instance
+        """
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        _LOGGER.debug("download_model: downloading model")
+        return Model.download_model_from_stub(
+            args,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+            overwrite=overwrite,
+        )
+
+    @staticmethod
+    def download_model_from_stub(
+        stub: Union[str, ModelArgs],
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ) -> "Model":
+        """
+        :param stub: the SparseZoo stub path to the model, can be a string path or
+            ModelArgs object
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :param overwrite: True to overwrite the file if it exists, False otherwise
+        :return: The requested Model instance
+        """
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
+        _LOGGER.debug(f"download_model_from_stub: downloading model from stub {stub}")
+        response_json = download_model_get_request(
+            args=stub,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
+        )
+        model = Model(
+            **response_json["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+        model.download(overwrite=overwrite, refresh_token=force_token_refresh)
+        return model
+
+    @staticmethod
+    def search_models(
+        domain: str,
+        sub_domain: str,
+        architecture: Union[str, None] = None,
+        sub_architecture: Union[str, None] = None,
+        framework: Union[str, None] = None,
+        repo: Union[str, None] = None,
+        dataset: Union[str, None] = None,
+        training_scheme: Union[str, None] = None,
+        optim_name: Union[str, None] = None,
+        optim_category: Union[str, None] = None,
+        optim_target: Union[str, None] = None,
+        release_version: Union[str, None] = None,
+        page: int = 1,
+        page_length: int = 20,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+    ) -> List["Model"]:
+        """
+        Obtains a list of Models matching the search parameters
+
+        :param domain: The domain of the model the object belongs to;
+            e.g. cv, nlp
+        :param sub_domain: The sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param architecture: The architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param sub_architecture: The sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param framework: The framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param repo: The source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param dataset: The dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param training_scheme: The training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param optim_name: The name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param optim_category: The degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param optim_target: The deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :param release_version: The sparsezoo release version for the model
+        :param page: the page of values to get
+        :param page_length: the page length of values to get
+        :param override_folder_name: Override for the name of the folder to save
+            this file under
+        :param override_parent_path: Path to override the default save path
+            for where to save the parent folder for this file under
+        :param force_token_refresh: True to refresh the auth token, False otherwise
+        :return: The requested Model instance
+        """
+        args = ModelArgs(
+            domain=domain,
+            sub_domain=sub_domain,
+            architecture=architecture,
+            sub_architecture=sub_architecture,
+            framework=framework,
+            repo=repo,
+            dataset=dataset,
+            training_scheme=training_scheme,
+            optim_name=optim_name,
+            optim_category=optim_category,
+            optim_target=optim_target,
+            release_version=release_version,
+        )
+        _LOGGER.debug(
+            f"search_models: searching models with args {args.model_url_args}"
+        )
+        response_json = search_model_get_request(
+            args=args,
+            page=page,
+            page_length=page_length,
+            force_token_refresh=force_token_refresh,
+        )
+
+        return [
+            Model(
+                **model,
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
+            )
+            for model in response_json["models"]
+        ]
+
     def __repr__(self):
         return f"{self.__class__.__name__}(stub={self.stub})"
 
     def __str__(self):
         return f"{self.__class__.__name__}(stub={self.stub})"
+
+    @property
+    def is_base(self) -> bool:
+        """
+        :return: True if the model is a base model. Otherwise return False
+        """
+        return self.optim_name == "base"
 
     @property
     def display_name(self) -> str:
@@ -506,3 +886,115 @@ class Model(Downloadable, ModelMetadata):
             )
             downloaded_paths.append(file.path)
         return downloaded_paths
+
+    def search_similar_models(
+        self,
+        match_domain: bool = True,
+        match_sub_domain: bool = True,
+        match_architecture: bool = True,
+        match_sub_architecture: bool = True,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = False,
+        match_optim_name: bool = False,
+        match_optim_category: bool = False,
+        match_optim_target: bool = False,
+    ) -> List["Model"]:
+        """
+        Search for similar models to this model
+
+        :param match_domain: True to match similar models to the current
+            domain of the model the object belongs to; e.g. cv, nlp
+        :param match_sub_domain: True to match similar models to the current
+            sub domain of the model the object belongs to;
+            e.g. classification, segmentation
+        :param match_architecture: True to match similar models to the current
+            architecture of the model the object belongs to;
+            e.g. resnet_v1, mobilenet_v1
+        :param match_sub_architecture: True to match similar models to the current
+            sub architecture (scaling factor) of the model
+            the object belongs to; e.g. 50, 101, 152
+        :param match_framework: True to match similar models to the current
+            framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param match_repo: True to match similar models to the current
+            source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param match_dataset: True to match similar models to the current
+            dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param match_training_scheme: True to match similar models to the current
+            training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :param match_optim_name: True to match similar models to the current
+            name describing the optimization of the model
+            the object belongs to, e.g. base, pruned, pruned_quant
+        :param match_optim_category: True to match similar models to the current
+            degree of optimization of the model the object
+            belongs to; e.g. none, conservative (~100% baseline metric),
+            moderate (>=99% baseline metric), aggressive (<99% baseline metric)
+        :param match_optim_target: True to match similar models to the current
+            deployment target of optimization of the model
+            the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
+        :return: a list of models matching the given model, if any
+        """
+        _LOGGER.debug(f"search_similar_models: searching for models similar to {self}")
+        return Model.search_models(
+            domain=self.domain if match_domain else None,
+            sub_domain=self.sub_domain if match_sub_domain else None,
+            architecture=self.architecture if match_architecture else None,
+            sub_architecture=self.sub_architecture if match_sub_architecture else None,
+            framework=self.framework if match_framework else None,
+            repo=self.repo if match_repo else None,
+            dataset=self.dataset if match_dataset else None,
+            training_scheme=self.training_scheme if match_training_scheme else None,
+            optim_name=self.optim_name if match_optim_name else None,
+            optim_category=self.optim_category if match_optim_category else None,
+            optim_target=self.optim_target if match_optim_target else None,
+        )
+
+    def search_optimized_models(
+        self,
+        match_framework: bool = True,
+        match_repo: bool = True,
+        match_dataset: bool = True,
+        match_training_scheme: bool = True,
+    ) -> List["Model"]:
+        """
+        Search for different available optimized versions based off of the current model
+
+        :param model: The model object, a SparseZoo model stub path, or a ModelArgs
+            object representing the base model to search different optimizations of
+        :param match_framework: True to match similar models to the current
+            framework the model the object belongs to was trained on;
+            e.g. pytorch, tensorflow
+        :param match_repo: True to match similar models to the current
+            source repo for the model the object belongs to;
+            e.g. sparseml, torchvision
+        :param match_dataset: True to match similar models to the current
+            dataset the model the object belongs to was trained on;
+            e.g. imagenet, cifar10
+        :param match_training_scheme: True to match similar models to the current
+            training scheme used on the model the object
+            belongs to if any; e.g. augmented
+        :return: the list of matching optimized models, if any
+        """
+        _LOGGER.debug(
+            "search_optimized_models: searching for optimized models "
+            + f"similar to {self}"
+        )
+        return [
+            model
+            for model in self.search_similar_models(
+                match_domain=True,
+                match_sub_domain=True,
+                match_architecture=True,
+                match_sub_architecture=True,
+                match_framework=match_framework,
+                match_repo=match_repo,
+                match_dataset=match_dataset,
+                match_training_scheme=match_training_scheme,
+            )
+            if not model.is_base
+        ]
