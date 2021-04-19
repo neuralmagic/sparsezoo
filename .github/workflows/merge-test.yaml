@@ -1,0 +1,24 @@
+name: Merge Tests
+on: 
+  push:
+    branches:
+      - main
+      - 'release/*'
+
+jobs:
+  base-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "⚙️ Install dependencies"
+        run: pip3 install .[dev]
+      - name: "🔬 Running tests"
+        run: make test
+  extensive-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "⚙️ Install dependencies"
+        run: pip3 install .[dev]
+      - name: "🔬 Running tests"
+        run: make test TARGETS=full
