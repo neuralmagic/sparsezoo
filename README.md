@@ -25,6 +25,9 @@ limitations under the License.
     <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
         <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
     </a>
+    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/merge-test.yaml">
+        <img alt="Merge Tests" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Merge%20Tests/main?style=for-the-badge" height=25>
+    </a>
 </p>
 <p>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
