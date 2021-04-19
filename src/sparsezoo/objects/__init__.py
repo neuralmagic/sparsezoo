@@ -15,6 +15,7 @@
 """
 Object classes related to the sparsezoo
 """
+# TODO delete
 
 # flake8: noqa
 
