@@ -25,3 +25,5 @@ jobs:
         run: pip3 install .[dev]
       - name: "🔬 Running tests"
         run: make test
+        env:
+          SPARSEZOO_API_URL: https://staging-api.neuralmagic.com
