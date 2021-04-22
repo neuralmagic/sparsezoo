@@ -17,7 +17,7 @@ limitations under the License.
 import React from "react";
 import PropTypes from "prop-types";
 
-import _ from "lodash";
+import lodash from "lodash";
 
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -28,7 +28,7 @@ import makeStyles from "./zoo-table-styles";
 import CopyButton from "../../copy-button";
 
 function ZooTableBody({ rows, aligns, copy, width }) {
-  const rowSize = _.get(rows, "0", 1);
+  const rowSize = lodash.get(rows, "0", 1);
   if (typeof copy === "boolean") {
     copy = Array(rowSize).fill(copy);
   }
@@ -52,7 +52,9 @@ function ZooTableBody({ rows, aligns, copy, width }) {
             <TableCell
               key={`row-${index}-col-${columnIndex}`}
               align={
-                typeof aligns === "string" ? aligns : _.get(aligns, columnIndex, "left")
+                typeof aligns === "string"
+                  ? aligns
+                  : lodash.get(aligns, columnIndex, "left")
               }
               className={classes.row}
               width={width}

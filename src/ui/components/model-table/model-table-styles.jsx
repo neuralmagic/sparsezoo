@@ -22,9 +22,6 @@ export default function makeModelTableStyles() {
       root: {
         padding: theme.spacing(0.5),
       },
-      gridItem: {
-        height: "485px",
-      },
       toolbar: {},
     }),
     { name: "ModelTable" }

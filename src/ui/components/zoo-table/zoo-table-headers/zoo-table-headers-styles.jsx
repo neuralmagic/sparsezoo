@@ -25,7 +25,7 @@ export default function makeZooTableHeaderStyles() {
         display: "inline",
       },
       headerContainer: {
-        backgroundColor: "white",
+        backgroundColor: theme.palette.background.paper,
         borderColor: theme.palette.divider,
         borderLeftWidth: "1px",
         borderLeftStyle: "solid",

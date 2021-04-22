@@ -19,7 +19,7 @@ import { Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider } from "@material-ui/core/styles";
 import Cookies from "universal-cookie";
-import moment from "moment";
+import jwt_decode from "jwt-decode";
 
 import makeTheme, { useDarkMode } from "./app-theme";
 import { authThunk, selectAuthState, setAuthToken } from "../store";
@@ -40,7 +40,12 @@ function App() {
     if (authState.status === "idle") {
       const cookies = new Cookies();
       const authToken = cookies.get("NM_AUTH_TOKEN");
+
       if (authToken) {
+        const decodedToken = jwt_decode(authToken);
+        if (decodedToken.exp * 1000 < new Date().getTime()) {
+          dispatch(authThunk());
+        }
         dispatch(setAuthToken(authToken));
       } else {
         dispatch(authThunk());
@@ -49,11 +54,9 @@ function App() {
       const cookies = new Cookies();
 
       const authToken = cookies.get("NM_AUTH_TOKEN");
+
       if (authToken !== authState.token) {
-        const expires = moment().add(7, "days").toDate();
-        cookies.set("NM_AUTH_TOKEN", authState.token, {
-          expires,
-        });
+        cookies.set("NM_AUTH_TOKEN", authState.token);
       }
     }
   }, [authState, dispatch]);

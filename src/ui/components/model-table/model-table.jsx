@@ -18,7 +18,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
-import _ from "lodash";
+import lodash from "lodash";
 
 import Typography from "@material-ui/core/Typography";
 
@@ -42,7 +42,7 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
   const results = useSelector(selectModelTable);
 
   useEffect(() => {
-    const status = _.get(modelsState.status, `${domain}.${subdomain}`, "idle");
+    const status = lodash.get(modelsState.status, `${domain}.${subdomain}`, "idle");
     if (authState.token !== null && status === "idle") {
       dispatch(
         searchModelsThunk({
@@ -55,16 +55,16 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
     }
   }, [authState.token, modelsState.status, dispatch, domain, subdomain, queries]);
 
-  const rows = _.get(results, `${domain}.${subdomain}.data`, []).map(
-    (data) => data.row
-  );
-  const status = _.get(results, `${domain}.${subdomain}.status`, "idle");
+  const rows = lodash
+    .get(results, `${domain}.${subdomain}.data`, [])
+    .map((data) => data.row);
+  const status = lodash.get(results, `${domain}.${subdomain}.status`, "idle");
   const loaded = status !== "idle" && status !== "loading";
   return (
     <div className={classes.root}>
       {loaded && includeHeader && (
         <Typography variant="h6">
-          {_.get(
+          {lodash.get(
             results,
             `${domain}.${subdomain}.displayName`,
             `${domain} ${subdomain}`
@@ -73,12 +73,13 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
       )}
       <ZooTable
         ariaLabel={`${domain}.${subdomain}`}
-        headers={_.get(results, `${domain}.${subdomain}.headers`, [])}
+        headers={lodash.get(results, `${domain}.${subdomain}.headers`, [])}
         rows={rows}
         status={status}
-        aligns={_.get(results, `${domain}.${subdomain}.aligns`, "left")}
-        copy={_.get(results, `${domain}.${subdomain}.copy`, false)}
-        width={_.get(results, `${domain}.${subdomain}.width`)}
+        error={authState.error || modelsState.error}
+        aligns={lodash.get(results, `${domain}.${subdomain}.aligns`, "left")}
+        copy={lodash.get(results, `${domain}.${subdomain}.copy`, false)}
+        width={lodash.get(results, `${domain}.${subdomain}.width`)}
         includePagination={includePagination}
       />
     </div>

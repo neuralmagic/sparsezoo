@@ -32,6 +32,7 @@ function ZooTable({
   rows,
   aligns,
   status,
+  error,
   ariaLabel,
   paginationOptions,
   width,
@@ -60,10 +61,15 @@ function ZooTable({
     <div className={classes.root}>
       {status !== "succeeded" && (
         <LoaderOverlay
+          transparent={true}
           status={status}
-          loaderSize={100}
+          error={error}
+          errorTitle="Unable to load models"
+          loaderSize={150}
           loaderChildren={
-            <Typography className={classes.loaderText}>Loading models</Typography>
+            <Typography className={classes.loaderText}>
+              {!error && "Loading models"}
+            </Typography>
           }
         ></LoaderOverlay>
       )}
@@ -120,6 +126,7 @@ ZooTable.propTypes = {
   rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   aligns: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   status: PropTypes.string.isRequired,
+  error: PropTypes.string,
   paginationOptions: PropTypes.arrayOf(PropTypes.number),
   width: PropTypes.oneOfType([
     PropTypes.string,

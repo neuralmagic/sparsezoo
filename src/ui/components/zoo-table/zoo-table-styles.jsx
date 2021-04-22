@@ -20,9 +20,6 @@ export default function makeZooTableStyles() {
   return makeStyles(
     (theme) => ({
       root: {},
-      loaderText: {
-        color: theme.palette.info.contrastText,
-      },
       pagination: {
         borderStyle: "solid",
         borderWidth: "0.5px 0 0 0",
@@ -43,7 +40,6 @@ export default function makeZooTableStyles() {
         borderBottomWidth: 0,
       },
       paginatedTableGroup: {
-        maxHeight: 37 + 330 + 52,
         position: "relative",
         borderStyle: "solid",
         borderWidth: "thin",
@@ -51,7 +47,6 @@ export default function makeZooTableStyles() {
       },
       table: {},
       paginatedTable: {
-        maxHeight: 37 + 330,
         borderBottomWidth: 0,
       },
     }),

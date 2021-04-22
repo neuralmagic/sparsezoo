@@ -16,7 +16,7 @@ limitations under the License.
 
 import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 
-import _ from "lodash";
+import lodash from "lodash";
 
 import { getModelStub, getFormattedData } from "../utils";
 import { requestSearchModels } from "../api";
@@ -68,33 +68,33 @@ const modelsSlice = createSlice({
   extraReducers: {
     [searchModelsThunk.pending]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "loading", {});
+      lodash.setWith(state.status, `${domain}.${subdomain}`, "loading", {});
       state.error = null;
     },
     [searchModelsThunk.fulfilled]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "succeeded", {});
+      lodash.setWith(state.status, `${domain}.${subdomain}`, "succeeded", {});
       state.error = null;
 
       const models = action.payload.filter(
         (model) => !model.tags.map((tag) => tag.name).includes("demo")
       );
-      _.setWith(state.models, `${domain}.${subdomain}`, models, {});
+      lodash.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
     [searchModelsThunk.rejected]: (state, action) => {
       const { domain, subdomain } = action.meta.arg;
-      _.setWith(state.status, `${domain}.${subdomain}`, "failed", {});
+      lodash.setWith(state.status, `${domain}.${subdomain}`, "failed", {});
       state.error = action.error.message;
     },
     [PARTIAL_SEARCH_MODELS_TYPE]: (state, action) => {
       let { domain, subdomain, models } = action.payload;
-      _.setWith(state.status, `${domain}.${subdomain}`, "partial", {});
+      lodash.setWith(state.status, `${domain}.${subdomain}`, "partial", {});
       state.error = null;
 
       models = models.filter(
         (model) => !model.tags.map((tag) => tag.name).includes("demo")
       );
-      _.setWith(state.models, `${domain}.${subdomain}`, models, {});
+      lodash.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
   },
 });
@@ -143,14 +143,14 @@ const FILTERABLE_FIELDS = [
  * @param {string} status status of loading models of specified domain/subdomain
  */
 const visionModelsToTableData = (domain, subdomain, models, status) => {
-  const displayName = _.get(
+  const displayName = lodash.get(
     DISPLAY_NAMES,
     `${domain}.${subdomain}`,
     `${domain} ${subdomain}`
   );
 
   const data = models.map((model) => {
-    const downloads = _.get(model, "files").reduce((size, file) => {
+    const downloads = lodash.get(model, "files").reduce((size, file) => {
       if (
         (file.file_type === "framework" || file.file_type === "onnx") &&
         !file.checkpoint
@@ -160,8 +160,10 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
         return size;
       }
     }, 0);
-    const tarFile = _.get(model, "files").find((file) => file.file_type === "tar_gz");
-    let file_size = _.get(tarFile, "file_size", 0);
+    const tarFile = lodash
+      .get(model, "files")
+      .find((file) => file.file_type === "tar_gz");
+    let file_size = lodash.get(tarFile, "file_size", 0);
 
     if (tarFile) {
       file_size = `${(file_size / 1024 / 1024).toFixed(2)} MB`;
@@ -183,7 +185,7 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
   let filterOptions = FILTERABLE_FIELDS.map((field) => {
     const options = Array.from(
       models.reduce((values, model) => {
-        values.add(_.get(model, field));
+        values.add(lodash.get(model, field));
         return values;
       }, new Set())
     );
@@ -200,9 +202,9 @@ const visionModelsToTableData = (domain, subdomain, models, status) => {
 
   let frequency = models.reduce((previous, model) => {
     filterOptions.forEach(({ field }) => {
-      let frequencyForField = _.get(previous, `${field}`, {});
-      let value = 1 + _.get(previous, `${field}.${model[field]}`, 0);
-      _.setWith(
+      let frequencyForField = lodash.get(previous, `${field}`, {});
+      let value = 1 + lodash.get(previous, `${field}.${model[field]}`, 0);
+      lodash.setWith(
         previous,
         `${field}`,
         { ...frequencyForField, [model[field]]: value },
@@ -260,8 +262,8 @@ export const selectModelTable = createSelector([selectModelsState], (modelsState
         data = visionModelsToTableData(
           domain,
           subdomain,
-          _.get(modelsState.models, `${domain}.${subdomain}`, []),
-          _.get(modelsState.status, `${domain}.${subdomain}`, "idle")
+          lodash.get(modelsState.models, `${domain}.${subdomain}`, []),
+          lodash.get(modelsState.status, `${domain}.${subdomain}`, "idle")
         );
       }
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import _ from "lodash";
+import lodash from "lodash";
 
 /**
  *
@@ -49,9 +49,9 @@ export const getModelStub = (model) => {
  * @type {string[]}
  */
 export const getFormattedData = (model, category) => {
-  let results = _.get(model, "results", []).filter(
-    (result) => result.result_category === category
-  );
+  let results = lodash
+    .get(model, "results", [])
+    .filter((result) => result.result_category === category);
   if (results.length === 0) {
     return ["--"];
   } else {

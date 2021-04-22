@@ -21,8 +21,6 @@ import makeStyles from "./loader-overlay-styles";
 import LoaderLayout from "../loader-layout";
 import FadeTransition from "../fade-transition";
 
-const useStyles = makeStyles();
-
 function LoaderOverlay({
   loading,
   status,
@@ -32,8 +30,11 @@ function LoaderOverlay({
   loaderSize,
   children,
   loaderChildren,
+  transparent,
 }) {
   const transTime = 300;
+  const useStyles = makeStyles(transparent);
+
   const classes = useStyles({ transTime });
 
   if (!loaderSize) {
@@ -76,6 +77,11 @@ LoaderOverlay.propTypes = {
   children: PropTypes.node,
   loaderChildren: PropTypes.node,
   loaderSize: PropTypes.number,
+  transparent: PropTypes.bool,
+};
+
+LoaderOverlay.defaultProps = {
+  transparent: false,
 };
 
 export default LoaderOverlay;

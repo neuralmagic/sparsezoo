@@ -17,7 +17,7 @@ limitations under the License.
 import React from "react";
 import PropTypes from "prop-types";
 
-import _ from "lodash";
+import lodash from "lodash";
 
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
@@ -45,7 +45,9 @@ function ZooTableHeaders({ headers, aligns, width }) {
           <TableCell
             key={header}
             align={
-              typeof aligns === "string" ? aligns : _.get(aligns, headerIndex, "left")
+              typeof aligns === "string"
+                ? aligns
+                : lodash.get(aligns, headerIndex, "left")
             }
             style={{
               width: width[headerIndex],

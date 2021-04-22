@@ -16,7 +16,7 @@ limitations under the License.
 
 import { makeStyles } from "@material-ui/core/styles";
 
-export default function makeLoaderOverlayStyles() {
+export default function makeLoaderOverlayStyles(transparent) {
   return makeStyles(
     (theme) => {
       return {
@@ -26,7 +26,7 @@ export default function makeLoaderOverlayStyles() {
           height: "100%",
           top: 0,
           left: 0,
-          backgroundColor: theme.palette.overlay,
+          backgroundColor: transparent ? "transparent" : theme.palette.overlay,
           color: theme.palette.primary.light,
           zIndex: 1200,
         },
@@ -35,7 +35,7 @@ export default function makeLoaderOverlayStyles() {
           height: "100%",
         },
         error: {
-          width: "80%!important",
+          width: "80%",
           height: "100%",
           paddingLeft: "10%",
           paddingRight: "10%",

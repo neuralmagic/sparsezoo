@@ -31,7 +31,7 @@ export default function makeTheme(darkMode) {
       divider: "#000000",
     },
     typography: {
-      fontFamily: ["Roboto", "Open Sans", "sans-serif"].join(","),
+      fontFamily: ["Helvetica Neue", "Roboto", "Open Sans", "sans-serif"].join(","),
     },
   });
 
