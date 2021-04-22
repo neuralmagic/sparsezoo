@@ -24,25 +24,19 @@ optional arguments:
 """
 
 import os
-import sys
-from datetime import date
 from typing import Tuple, List, Dict
 from setuptools import find_packages, setup
 
+# default variables to be overwritten by the version.py file
+is_release = None
 version = "unknown"
 version_major_minor = version
-# load and overwrite version info from sparseml package
+
+# load and overwrite version and release info from sparseml package
 exec(open(os.path.join("src", "sparsezoo", "version.py")).read())
 print(f"loaded version {version} from src/sparsezoo/version.py")
 
-_PACKAGE_NAME = "sparsezoo"
-_NIGHTLY = "nightly" in sys.argv
-
-if _NIGHTLY:
-    _PACKAGE_NAME += "-nightly"
-    version += "." + date.today().strftime("%Y%m%d")
-    # remove nightly param so it does not break bdist_wheel
-    sys.argv.remove("nightly")
+_PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
 
 _deps = [
     "numpy>=1.0.0",
