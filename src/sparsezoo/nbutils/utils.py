@@ -106,11 +106,11 @@ class SelectDomainWidgetContainer(object):
         return (self._domains_dropdown.value, self._sub_domains_dropdown.value)
 
 
-def _optimazation_id(mod: Model):
+def _sparse_id(mod: Model):
     return (
-        "-".join([mod.optim_name, mod.optim_category])
-        if mod.optim_target is None
-        else "-".join([mod.optim_name, mod.optim_category, mod.optim_target])
+        "-".join([mod.sparse_name, mod.sparse_category])
+        if mod.sparse_target is None
+        else "-".join([mod.sparse_name, mod.sparse_category, mod.sparse_target])
     )
 
 
@@ -172,7 +172,7 @@ class _ModelsWidget(object):
         architecture = self._architecture_selector.value
         dataset = self._dataset_selector.value
         framework = self._framework_selector.value
-        optimization_name = self._opt_name_selector.value
+        sparse_name = self._opt_name_selector.value
 
         architectures = {mod.architecture for mod in self._filtered}
         architectures = list(architectures)
@@ -205,7 +205,7 @@ class _ModelsWidget(object):
         self._framework_selector.value = framework
 
         opt_names = {
-            _optimazation_id(mod)
+            _sparse_id(mod)
             for mod in self._filtered
             if mod.architecture == architecture
             and mod.dataset == dataset
@@ -213,10 +213,10 @@ class _ModelsWidget(object):
         }
         opt_names = list(opt_names)
         opt_names.sort()
-        if optimization_name not in opt_names:
-            optimization_name = opt_names[0] if len(opt_names) > 0 else None
+        if sparse_name not in opt_names:
+            sparse_name = opt_names[0] if len(opt_names) > 0 else None
         self._opt_name_selector.options = opt_names
-        self._opt_name_selector.value = optimization_name
+        self._opt_name_selector.value = sparse_name
 
         self._update_selected()
 
@@ -231,7 +231,7 @@ class _ModelsWidget(object):
                 mod.architecture == self._architecture_selector.value
                 and mod.dataset == self._dataset_selector.value
                 and (mod.framework == self._framework_selector.value)
-                and _optimazation_id(mod) == self._opt_name_selector.value
+                and _sparse_id(mod) == self._opt_name_selector.value
             )
         ]
         if len(mods) > 0:
@@ -302,9 +302,9 @@ class _FilterWidget(object):
             )
             descs = (
                 [
-                    _optimazation_id(mod)
+                    _sparse_id(mod)
                     for mod in self._all_models
-                    if mod.optim_name != "base"
+                    if mod.sparse_name != "base"
                 ]
                 if self._recal_checkbox.value
                 else None
@@ -375,7 +375,7 @@ class ModelSelectWidgetContainer(object):
                 if (
                     (datasets is None or mod.dataset in datasets)
                     and (repos is None or mod.repo in repos)
-                    and (opt_names is None or _optimazation_id(mod) in opt_names)
+                    and (opt_names is None or _sparse_id(mod) in opt_names)
                 )
             ]
             self._models_widget.update(filtered)

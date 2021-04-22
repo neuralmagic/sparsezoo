@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Code related to a model repo optimization file
+Code related to a model repo recipe file
 """
 
 import logging
@@ -38,13 +38,13 @@ from sparsezoo.requests import (
 )
 
 
-__all__ = ["OptimizationRecipeTypes", "OptimizationRecipe"]
+__all__ = ["RecipeTypes", "Recipe"]
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class OptimizationRecipeTypes(Enum):
+class RecipeTypes(Enum):
     """
     Types of recipes available in the sparsezoo
     """
@@ -53,14 +53,14 @@ class OptimizationRecipeTypes(Enum):
     TRANSFER_LEARN = "transfer_learn"
 
 
-class OptimizationRecipe(File):
+class Recipe(File):
     """
     A model repo recipe.
 
     :param model_metadata: the metadata for the model the file is for
     :param recipe_id: the recipe id
-    :param recipe_type: the type of optimization recipe
-    :param display_description: the display description for the optimization
+    :param recipe_type: the type of recipe
+    :param display_description: the display description for the recipe
     :param base_stub: the stub for the base model of this recipe, if any
     """
 
@@ -73,7 +73,7 @@ class OptimizationRecipe(File):
         base_stub: Optional[str],
         **kwargs,
     ):
-        super(OptimizationRecipe, self).__init__(
+        super(Recipe, self).__init__(
             model_metadata=model_metadata, child_folder_name="recipes", **kwargs
         )
         self._recipe_id = recipe_id
@@ -93,15 +93,15 @@ class OptimizationRecipe(File):
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         recipe_type: Union[str, None] = None,
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> "OptimizationRecipe":
+    ) -> "Recipe":
         """
         Obtains a Recipe from the model repo
 
@@ -121,12 +121,12 @@ class OptimizationRecipe(File):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param recipe_type: The recipe type; e.g. original, transfer_learn
         :param release_version: The sparsezoo release version for the model
@@ -146,13 +146,13 @@ class OptimizationRecipe(File):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
         )
         _LOGGER.debug("load_recipe: loading recipe")
-        return OptimizationRecipe.load_recipe_from_stub(
+        return Recipe.load_recipe_from_stub(
             args,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,
@@ -167,7 +167,7 @@ class OptimizationRecipe(File):
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> "OptimizationRecipe":
+    ) -> "Recipe":
         """
         Loads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter. i.e.
@@ -199,7 +199,7 @@ class OptimizationRecipe(File):
         )
 
         recipe = response_json["recipe"]
-        return OptimizationRecipe(
+        return Recipe(
             **recipe,
             model_metadata=recipe["model"],
             override_folder_name=override_folder_name,
@@ -216,15 +216,15 @@ class OptimizationRecipe(File):
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         recipe_type: Union[str, None] = None,
         release_version: Union[str, None] = None,
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> "OptimizationRecipe":
+    ) -> "Recipe":
         """
         Downloads a Recipe from the model repo
 
@@ -244,12 +244,12 @@ class OptimizationRecipe(File):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param recipe_type: The recipe type; e.g. original, transfer_learn
         :param release_version: The sparsezoo release version for the model
@@ -269,13 +269,13 @@ class OptimizationRecipe(File):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
         )
         _LOGGER.debug("download_recipe: downloading recipe")
-        return OptimizationRecipe.download_recipe_from_stub(
+        return Recipe.download_recipe_from_stub(
             args,
             recipe_type=recipe_type,
             override_folder_name=override_folder_name,
@@ -291,7 +291,7 @@ class OptimizationRecipe(File):
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
         overwrite: bool = False,
-    ) -> "OptimizationRecipe":
+    ) -> "Recipe":
         """
         Downloads a recipe from stub. If the stub is a string, it may contain the
         recipe type as a stub parameter or part of the stub. i.e.
@@ -322,7 +322,7 @@ class OptimizationRecipe(File):
 
         recipe = response_json["recipe"]
 
-        recipe = OptimizationRecipe(
+        recipe = Recipe(
             **recipe,
             model_metadata=recipe["model"],
             override_folder_name=override_folder_name,
@@ -341,9 +341,9 @@ class OptimizationRecipe(File):
         repo: Union[str, None] = None,
         dataset: Union[str, None] = None,
         training_scheme: Union[str, None] = None,
-        optim_name: Union[str, None] = None,
-        optim_category: Union[str, None] = None,
-        optim_target: Union[str, None] = None,
+        sparse_name: Union[str, None] = None,
+        sparse_category: Union[str, None] = None,
+        sparse_target: Union[str, None] = None,
         release_version: Union[str, None] = None,
         recipe_type: Union[str, None] = None,
         page: int = 1,
@@ -351,7 +351,7 @@ class OptimizationRecipe(File):
         override_folder_name: Union[str, None] = None,
         override_parent_path: Union[str, None] = None,
         force_token_refresh: bool = False,
-    ) -> List["OptimizationRecipe"]:
+    ) -> List["Recipe"]:
         """
         Obtains a list of Recipes matching the model search parameters
 
@@ -371,12 +371,12 @@ class OptimizationRecipe(File):
             e.g. imagenet, cifar10
         :param training_scheme: The training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :param optim_name: The name describing the optimization of the model
+        :param sparse_name: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
-        :param optim_category: The degree of optimization of the model the object
+        :param sparse_category: The degree of sparsification of the model the object
             belongs to; e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-        :param optim_target: The deployment target of optimization of the model
+        :param sparse_target: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         :param release_version: The sparsezoo release version for the model
         :param recipe_type: The recipe type; e.g. original, transfer_learn
@@ -399,9 +399,9 @@ class OptimizationRecipe(File):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             recipe_type=recipe_type,
         )
@@ -416,7 +416,7 @@ class OptimizationRecipe(File):
         )
 
         return [
-            OptimizationRecipe(
+            Recipe(
                 **recipe,
                 model_metadata=recipe["model"],
                 override_folder_name=override_folder_name,
@@ -426,14 +426,14 @@ class OptimizationRecipe(File):
         ]
 
     @staticmethod
-    def search_optimized_recipes(
+    def search_sparse_recipes(
         model: Union["Model", str, ModelArgs],
         recipe_type: Union[str, None] = None,
         match_framework: bool = True,
         match_repo: bool = True,
         match_dataset: bool = True,
         match_training_scheme: bool = True,
-    ) -> List["OptimizationRecipe"]:
+    ) -> List["Recipe"]:
         """
         Search for recipes of the given model
 
@@ -451,21 +451,21 @@ class OptimizationRecipe(File):
         :param match_training_scheme: True to match similar models to the current
             training scheme used on the model the object
             belongs to if any; e.g. augmented
-        :return: the list of matching optimization recipes, if any
+        :return: the list of matching recipes, if any
         """
         from sparsezoo.objects.model import Model
 
         if isinstance(recipe_type, str):
-            recipe_type = OptimizationRecipeTypes(recipe_type).value
+            recipe_type = RecipeTypes(recipe_type).value
 
         if not isinstance(model, Model):
             model = Model.load_model_from_stub(model)
 
         _LOGGER.debug(
-            ("search_optimized_recipes: searching for recipes " + f"from model {model}")
+            ("search_sparse_recipes: searching for recipes " + f"from model {model}")
         )
 
-        optimized_models = model.search_similar_models(
+        sparse_models = model.search_similar_models(
             match_domain=True,
             match_sub_domain=True,
             match_architecture=True,
@@ -477,7 +477,7 @@ class OptimizationRecipe(File):
         )
         return [
             recipe
-            for model in optimized_models
+            for model in sparse_models
             for recipe in model.recipes
             if recipe_type is None or recipe_type == recipe.recipe_type
         ]
@@ -508,7 +508,7 @@ class OptimizationRecipe(File):
         :return: True if this is the original recipe that created the
             model, False otherwise
         """
-        return self.recipe_type == OptimizationRecipeTypes.ORIGINAL.value
+        return self.recipe_type == RecipeTypes.ORIGINAL.value
 
     @property
     def recipe_type_transfer_learn(self) -> bool:
@@ -516,7 +516,7 @@ class OptimizationRecipe(File):
         :return: True if this is a recipe for transfer learning from the
             created model, False otherwise
         """
-        return self.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value
+        return self.recipe_type == RecipeTypes.TRANSFER_LEARN.value
 
     @property
     def display_name(self):
@@ -614,12 +614,12 @@ class OptimizationRecipe(File):
             + f" base framework files from recipe {self.stub}"
         )
 
-        if self.recipe_type == OptimizationRecipeTypes.TRANSFER_LEARN.value:
+        if self.recipe_type == RecipeTypes.TRANSFER_LEARN.value:
             model = self.load_model(
                 override_folder_name=override_folder_name,
                 override_parent_path=override_parent_path,
             )
-            # return final model's optimized weights for sparse transfer learning
+            # return final model's sparse weights for sparse transfer learning
             framework_files = model.download_framework_files(extensions=extensions)
 
             # download only pre-quantized weights if available
@@ -658,7 +658,7 @@ def _get_stub_args_recipe_type(stub_args: Dict[str, str]) -> str:
     recipe_type = stub_args.get("recipe_type")
 
     # validate
-    valid_recipe_types = list(map(lambda typ: typ.value, OptimizationRecipeTypes))
+    valid_recipe_types = list(map(lambda typ: typ.value, RecipeTypes))
     if recipe_type not in valid_recipe_types and recipe_type is not None:
         raise ValueError(
             f"Invalid recipe_type: '{recipe_type}'. "

@@ -21,7 +21,7 @@ from tests.sparsezoo.utils import model_constructor
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "coco", None, "base", "none", None),
@@ -34,9 +34,9 @@ def test_ssd_resnet50_300(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         ssd_resnet50_300,
@@ -45,16 +45,16 @@ def test_ssd_resnet50_300(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "voc", None, "base", "none", None),
@@ -67,9 +67,9 @@ def test_ssd_resnet50_300_extended(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         ssd_resnet50_300,
@@ -78,7 +78,7 @@ def test_ssd_resnet50_300_extended(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )

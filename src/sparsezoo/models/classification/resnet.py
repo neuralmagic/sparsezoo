@@ -39,9 +39,9 @@ def resnet_18(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -57,12 +57,12 @@ def resnet_18(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -80,9 +80,9 @@ def resnet_18(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -94,9 +94,9 @@ def resnet_34(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -112,12 +112,12 @@ def resnet_34(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -135,9 +135,9 @@ def resnet_34(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -149,9 +149,9 @@ def resnet_50(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -167,12 +167,12 @@ def resnet_50(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -190,9 +190,9 @@ def resnet_50(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -204,9 +204,9 @@ def resnet_50_2x(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -222,12 +222,12 @@ def resnet_50_2x(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -245,9 +245,9 @@ def resnet_50_2x(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -259,9 +259,9 @@ def resnet_101(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -277,12 +277,12 @@ def resnet_101(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -300,9 +300,9 @@ def resnet_101(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -314,9 +314,9 @@ def resnet_101_2x(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -332,12 +332,12 @@ def resnet_101_2x(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -355,9 +355,9 @@ def resnet_101_2x(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,
@@ -369,9 +369,9 @@ def resnet_152(
     repo: str = "sparseml",
     dataset: str = "imagenet",
     training_scheme: Union[str, None] = None,
-    optim_name: str = "base",
-    optim_category: str = "none",
-    optim_target: Union[str, None] = None,
+    sparse_name: str = "base",
+    sparse_category: str = "none",
+    sparse_target: Union[str, None] = None,
     override_folder_name: Union[str, None] = None,
     override_parent_path: Union[str, None] = None,
     force_token_refresh: bool = False,
@@ -387,12 +387,12 @@ def resnet_152(
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param override_folder_name: Override for the name of the folder to save
         this file under
@@ -410,9 +410,9 @@ def resnet_152(
         repo=repo,
         dataset=dataset,
         training_scheme=training_scheme,
-        optim_name=optim_name,
-        optim_category=optim_category,
-        optim_target=optim_target,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
         override_folder_name=override_folder_name,
         override_parent_path=override_parent_path,
         force_token_refresh=force_token_refresh,

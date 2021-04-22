@@ -24,7 +24,7 @@ from .downloadable import *
 from .file import *
 from .metadata import *
 from .model import *
-from .optimization_recipe import *
+from .recipe import *
 from .release_version import *
 from .result import *
 from .tag import *

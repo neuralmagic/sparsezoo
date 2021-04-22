@@ -75,16 +75,16 @@ model.download()
 print(model.onnx_file.downloaded_path())
 ```
 
-#### Searching Optimized Versions
+#### Searching Sparse Versions
 
 ```python
 from sparsezoo import Zoo
 from sparsezoo.models.classification import resnet_50
 
 search_model = resnet_50()
-optimized_models = Zoo.search_optimized_models(search_model)
+sparse_models = Zoo.search_sparse_models(search_model)
 
-print(optimized_models)
+print(sparse_models)
 ```
 
 ### Console Scripts
@@ -134,7 +134,7 @@ sparsezoo download -h
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
     --framework pytorch --repo sparseml --dataset imagenet \
-    --optim-name base --optim-category none
+    --sparse-name base --sparse-category none
 ```
 
 <br>Download pruned and quantized ResNet-50 Model
@@ -144,5 +144,5 @@ sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
     --framework pytorch --repo sparseml \
     --dataset imagenet --training-scheme augmented \
-    --optim-name pruned_quant --optim-category aggressive
+    --sparse-name pruned_quant --sparse-category aggressive
 ```

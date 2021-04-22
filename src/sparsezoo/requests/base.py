@@ -104,12 +104,12 @@ class ModelArgs:
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object belongs
         to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant,
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param release_version: The sparsezoo release version for the model
     """
@@ -124,9 +124,9 @@ class ModelArgs:
         repo: Union[str, List[str], None] = None,
         dataset: Union[str, List[str], None] = None,
         training_scheme: Union[str, List[str], None] = None,
-        optim_name: Union[str, List[str], None] = None,
-        optim_category: Union[str, List[str], None] = None,
-        optim_target: Union[str, List[str], None] = None,
+        sparse_name: Union[str, List[str], None] = None,
+        sparse_category: Union[str, List[str], None] = None,
+        sparse_target: Union[str, List[str], None] = None,
         release_version: Union[str, Any, None] = None,
         **kwargs,
     ):
@@ -138,9 +138,9 @@ class ModelArgs:
         self._repo = repo
         self._dataset = dataset
         self._training_scheme = training_scheme
-        self._optim_name = optim_name
-        self._optim_category = optim_category
-        self._optim_target = optim_target
+        self._sparse_name = sparse_name
+        self._sparse_category = sparse_category
+        self._sparse_target = sparse_target
         self._release_version = release_version
 
     @property
@@ -208,29 +208,29 @@ class ModelArgs:
         return self._training_scheme
 
     @property
-    def optim_name(self) -> Union[str, List[str], None]:
+    def sparse_name(self) -> Union[str, List[str], None]:
         """
-        :return: The name describing the optimization of the model
+        :return: The name describing the sparsification of the model
             the object belongs to, e.g. base, pruned, pruned_quant
         """
-        return self._optim_name
+        return self._sparse_name
 
     @property
-    def optim_category(self) -> Union[str, List[str], None]:
+    def sparse_category(self) -> Union[str, List[str], None]:
         """
-        :return: The degree of optimization of the model the object belongs to;
+        :return: The degree of sparsification of the model the object belongs to;
             e.g. none, conservative (~100% baseline metric),
             moderate (>=99% baseline metric), aggressive (<99% baseline metric)
         """
-        return self._optim_category
+        return self._sparse_category
 
     @property
-    def optim_target(self) -> Union[str, List[str], None]:
+    def sparse_target(self) -> Union[str, List[str], None]:
         """
-        :return: The deployment target of optimization of the model
+        :return: The deployment target of sparsification of the model
             the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
         """
-        return self._optim_target
+        return self._sparse_target
 
     @property
     def release_version(self) -> Union[str, None]:
@@ -268,21 +268,21 @@ class ModelArgs:
         return f"{self.dataset}-{self.training_scheme}"
 
     @property
-    def optimization_id(self) -> str:
+    def sparse_id(self) -> str:
         """
-        :return: Unique id for how the model was optimized containing the
-            optim_name, optim_category, optim_target
+        :return: Unique id for how the model was sparse containing the
+            sparse_name, sparse_category, sparse_target
         """
-        if not self.optim_name:
+        if not self.sparse_name:
             return ""
 
-        if not self.optim_category:
-            return f"{self.optim_name}"
+        if not self.sparse_category:
+            return f"{self.sparse_name}"
 
-        if not self.optim_target:
-            return f"{self.optim_name}-{self.optim_category}"
+        if not self.sparse_target:
+            return f"{self.sparse_name}-{self.sparse_category}"
 
-        return f"{self.optim_name}-{self.optim_category}-{self.optim_target}"
+        return f"{self.sparse_name}-{self.sparse_category}-{self.sparse_target}"
 
     @property
     def model_url_root(self) -> str:
@@ -309,7 +309,7 @@ class ModelArgs:
                 f"{self.framework}" if self.framework else "",
                 f"{self.repo}" if self.repo else "",
                 self.training_id,
-                self.optimization_id,
+                self.sparse_id,
             ]
         )
 
@@ -327,9 +327,9 @@ class ModelArgs:
             "repo",
             "dataset",
             "training_scheme",
-            "optim_name",
-            "optim_category",
-            "optim_target",
+            "sparse_name",
+            "sparse_category",
+            "sparse_target",
         ]:
             value = getattr(self, key)
 
@@ -361,12 +361,12 @@ class RecipeArgs(ModelArgs):
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object belongs
         to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant,
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param release_version: The sparsezoo release version for the model
     :param recipe_type: The recipe type; e.g. original, transfer_learn
@@ -382,9 +382,9 @@ class RecipeArgs(ModelArgs):
         repo: Union[str, List[str], None] = None,
         dataset: Union[str, List[str], None] = None,
         training_scheme: Union[str, List[str], None] = None,
-        optim_name: Union[str, List[str], None] = None,
-        optim_category: Union[str, List[str], None] = None,
-        optim_target: Union[str, List[str], None] = None,
+        sparse_name: Union[str, List[str], None] = None,
+        sparse_category: Union[str, List[str], None] = None,
+        sparse_target: Union[str, List[str], None] = None,
         release_version: Union[str, Any, None] = None,
         recipe_type: Union[str, None] = None,
         **kwargs,
@@ -398,9 +398,9 @@ class RecipeArgs(ModelArgs):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             **kwargs,
         )
@@ -427,9 +427,9 @@ class RecipeArgs(ModelArgs):
             "repo",
             "dataset",
             "training_scheme",
-            "optim_name",
-            "optim_category",
-            "optim_target",
+            "sparse_name",
+            "sparse_category",
+            "sparse_target",
             "recipe_type",
         ]:
             value = getattr(self, key)
