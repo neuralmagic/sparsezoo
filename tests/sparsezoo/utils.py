@@ -41,9 +41,9 @@ def model_constructor(
     repo: str,
     dataset: str,
     training_scheme: Optional[str],
-    optim_name: str,
-    optim_category: str,
-    optim_target: Optional[str],
+    sparse_name: str,
+    sparse_category: str,
+    sparse_target: Optional[str],
 ):
     other_args = {
         "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -57,9 +57,9 @@ def model_constructor(
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             **other_args,
         )
     assert model
@@ -116,7 +116,7 @@ def validate_downloaded_model(
         assert os.path.exists(file.path)
 
     assert len(model.recipes) > (
-        0 if (model.optim_name != "base" and model.optim_name != "arch") else -1
+        0 if (model.sparse_name != "base" and model.sparse_name != "arch") else -1
     )
     for recipe in model.recipes:
         assert os.path.exists(recipe.path)

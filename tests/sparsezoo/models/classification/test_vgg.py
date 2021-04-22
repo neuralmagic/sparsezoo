@@ -30,7 +30,7 @@ from tests.sparsezoo.utils import model_constructor
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -44,9 +44,9 @@ def test_vgg_11(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_11,
@@ -55,16 +55,16 @@ def test_vgg_11(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -77,9 +77,9 @@ def test_vgg_11_bn(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_11bn,
@@ -88,16 +88,16 @@ def test_vgg_11_bn(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -110,9 +110,9 @@ def test_vgg_13(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_13,
@@ -121,16 +121,16 @@ def test_vgg_13(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -143,9 +143,9 @@ def test_vgg_13_bn(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_13bn,
@@ -154,16 +154,16 @@ def test_vgg_13_bn(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -178,9 +178,9 @@ def test_vgg_16(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_16,
@@ -189,16 +189,16 @@ def test_vgg_16(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -211,9 +211,9 @@ def test_vgg_16_bn(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_16bn,
@@ -222,16 +222,16 @@ def test_vgg_16_bn(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -245,9 +245,9 @@ def test_vgg_19(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_19,
@@ -256,16 +256,16 @@ def test_vgg_19(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -278,9 +278,9 @@ def test_vgg_19_bn(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         vgg_19bn,
@@ -289,7 +289,7 @@ def test_vgg_19_bn(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )

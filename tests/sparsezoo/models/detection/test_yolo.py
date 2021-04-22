@@ -21,7 +21,7 @@ from tests.sparsezoo.utils import model_constructor
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "ultralytics", "coco", None, "base", "none", None),
@@ -44,9 +44,9 @@ def test_yolo_v3(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         yolo_v3,
@@ -55,7 +55,7 @@ def test_yolo_v3(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )

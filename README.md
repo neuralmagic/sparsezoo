@@ -25,6 +25,9 @@ limitations under the License.
     <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
         <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
     </a>
+    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/merge-test.yaml">
+        <img alt="Main" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Merge%20Tests/main?style=for-the-badge" height=25>
+    </a>
 </p>
 <p>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
@@ -50,9 +53,9 @@ limitations under the License.
 ## Overview
 
 SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks. 
-It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from.
+It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-sparsified models and recipes to prototype from.
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models optimized to different degrees of inference performance vs. baseline loss recovery. 
+Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
 Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 This repository contains the Python API code to handle the connection and authentication to the cloud.
@@ -145,9 +148,9 @@ from sparsezoo import Zoo
 from sparsezoo.models.classification import resnet_50
 
 search_model = resnet_50()
-optimized_models = Zoo.search_optimized_models(search_model)
+sparse_models = Zoo.search_sparse_models(search_model)
 
-print(optimized_models)
+print(sparse_models)
 ```
 
 ### Console Scripts
@@ -197,7 +200,7 @@ sparsezoo download -h
 sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
     --framework pytorch --repo sparseml --dataset imagenet \
-    --optim-name base --optim-category none
+    --sparse-name base --sparse-category none
 ```
 
 <br>Download pruned and quantized ResNet-50 Model
@@ -207,7 +210,7 @@ sparsezoo download --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50 \
     --framework pytorch --repo sparseml \
     --dataset imagenet --training-scheme augmented \
-    --optim-name pruned_quant --optim-category aggressive
+    --sparse-name pruned_quant --sparse-category aggressive
 ```
 
 For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).

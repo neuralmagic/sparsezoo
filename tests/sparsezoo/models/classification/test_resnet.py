@@ -29,7 +29,7 @@ from tests.sparsezoo.utils import model_constructor
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -43,9 +43,9 @@ def test_resnet_18(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_18,
@@ -54,16 +54,16 @@ def test_resnet_18(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -77,9 +77,9 @@ def test_resnet_34(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_34,
@@ -88,16 +88,16 @@ def test_resnet_34(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -110,9 +110,9 @@ def test_resnet_50(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_50,
@@ -121,16 +121,16 @@ def test_resnet_50(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -175,9 +175,9 @@ def test_resnet_50_extended(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_50,
@@ -186,16 +186,16 @@ def test_resnet_50_extended(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -208,9 +208,9 @@ def test_resnet_50_2x(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_50_2x,
@@ -219,16 +219,16 @@ def test_resnet_50_2x(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -242,9 +242,9 @@ def test_resnet_101(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_101,
@@ -253,16 +253,16 @@ def test_resnet_101(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -275,9 +275,9 @@ def test_resnet_101_2x(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_101_2x,
@@ -286,16 +286,16 @@ def test_resnet_101_2x(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )
 
 
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
-        "optim_name,optim_category,optim_target"
+        "sparse_name,sparse_category,sparse_target"
     ),
     [
         (True, "pytorch", "sparseml", "imagenet", None, "base", "none", None),
@@ -309,9 +309,9 @@ def test_resnet_152(
     repo,
     dataset,
     training_scheme,
-    optim_name,
-    optim_category,
-    optim_target,
+    sparse_name,
+    sparse_category,
+    sparse_target,
 ):
     model_constructor(
         resnet_152,
@@ -320,7 +320,7 @@ def test_resnet_152(
         repo,
         dataset,
         training_scheme,
-        optim_name,
-        optim_category,
-        optim_target,
+        sparse_name,
+        sparse_category,
+        sparse_target,
     )

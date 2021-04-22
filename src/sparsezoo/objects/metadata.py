@@ -46,12 +46,12 @@ class ModelMetadata(BaseObject, ModelArgs):
         e.g. imagenet, cifar10
     :param training_scheme: The training scheme used on the model the object
         belongs to if any; e.g. augmented
-    :param optim_name: The name describing the optimization of the model
+    :param sparse_name: The name describing the sparsification of the model
         the object belongs to, e.g. base, pruned, pruned_quant
-    :param optim_category: The degree of optimization of the model the object
+    :param sparse_category: The degree of sparsification of the model the object
         belongs to; e.g. none, conservative (~100% baseline metric),
         moderate (>=99% baseline metric), aggressive (<99% baseline metric)
-    :param optim_target: The deployment target of optimization of the model
+    :param sparse_target: The deployment target of sparsification of the model
         the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu
     :param release_version: The sparsezoo release version for the model
     :param model_id: The id for the model as stored in the cloud
@@ -69,9 +69,9 @@ class ModelMetadata(BaseObject, ModelArgs):
         repo: str,
         dataset: str,
         training_scheme: Union[str, None],
-        optim_name: str,
-        optim_category: str,
-        optim_target: Union[str, None],
+        sparse_name: str,
+        sparse_category: str,
+        sparse_target: Union[str, None],
         release_version: ReleaseVersion,
         model_id: str,
         base_model: str,
@@ -87,9 +87,9 @@ class ModelMetadata(BaseObject, ModelArgs):
             repo=repo,
             dataset=dataset,
             training_scheme=training_scheme,
-            optim_name=optim_name,
-            optim_category=optim_category,
-            optim_target=optim_target,
+            sparse_name=sparse_name,
+            sparse_category=sparse_category,
+            sparse_target=sparse_target,
             release_version=release_version,
             **kwargs,
         )

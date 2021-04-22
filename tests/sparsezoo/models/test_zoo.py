@@ -35,9 +35,9 @@ from tests.sparsezoo.utils import validate_downloaded_model
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -54,9 +54,9 @@ from tests.sparsezoo.utils import validate_downloaded_model
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
         ),
@@ -82,9 +82,9 @@ def test_load_model(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -101,9 +101,9 @@ def test_load_model(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
         ),
@@ -132,9 +132,9 @@ def test_download_model(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {},
         ]
@@ -162,7 +162,7 @@ def test_load_model_from_stub(stub, model_args, other_args):
             },
             {},
         ),
-        ({"domain": "cv", "sub_domain": "classification", "optim_name": "base"}, {}),
+        ({"domain": "cv", "sub_domain": "classification", "sparse_name": "base"}, {}),
     ],
 )
 def test_search_models(model_args, other_args):
@@ -189,9 +189,9 @@ def test_search_models(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
         ),
@@ -199,7 +199,7 @@ def test_search_models(model_args, other_args):
 )
 def test_search_similar_models(model_args, other_args):
     model = Zoo.load_model(**model_args, **other_args)
-    similar = Zoo.search_optimized_models(model)
+    similar = Zoo.search_similar_models(model)
     assert len(similar) > 0
 
     for sim in similar:
@@ -223,21 +223,22 @@ def test_search_similar_models(model_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
         ),
     ],
 )
-def test_search_optimized_models(model_args, other_args):
+def test_search_sparse_models(model_args, other_args):
     model = Zoo.load_model(**model_args, **other_args)
-    optimized = Zoo.search_optimized_models(model)
-    assert len(optimized) > 0
+    sparse = Zoo.search_sparse_models(model)
+    assert len(sparse) > 0
 
-    for sim in optimized:
+    for sim in sparse:
         assert sim
+        assert not sim.is_base
         assert sim.domain == model.domain
         assert sim.sub_domain == model.sub_domain
         assert sim.architecture == model.architecture
@@ -261,7 +262,7 @@ def test_search_optimized_models(model_args, other_args):
             },
             {},
         ),
-        ({"domain": "cv", "sub_domain": "classification", "optim_name": "pruned"}, {}),
+        ({"domain": "cv", "sub_domain": "classification", "sparse_name": "pruned"}, {}),
         (
             {
                 "domain": "cv",
@@ -311,9 +312,9 @@ def test_search_recipes(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
             {},
@@ -328,9 +329,9 @@ def test_search_recipes(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
             {"recipe_type": "original"},
@@ -345,18 +346,18 @@ def test_search_recipes(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "base",
-                "optim_category": "none",
-                "optim_target": None,
+                "sparse_name": "base",
+                "sparse_category": "none",
+                "sparse_target": None,
             },
             {},
             {"recipe_type": "transfer_learn"},
         ),
     ],
 )
-def test_search_optimized_recipes(model_args, other_args, other_recipe_args):
+def test_search_sparse_recipes(model_args, other_args, other_recipe_args):
     model = Zoo.load_model(**model_args, **other_args)
-    recipes = Zoo.search_optimized_recipes(model, **other_recipe_args)
+    recipes = Zoo.search_sparse_recipes(model, **other_recipe_args)
     assert len(recipes) > 0
 
     for recipe in recipes:
@@ -383,9 +384,9 @@ def test_search_optimized_recipes(model_args, other_args, other_recipe_args):
         ),
     ],
 )
-def test_search_optimized_recipes_from_stub(model_stub, other_args):
+def test_search_sparse_recipes_from_stub(model_stub, other_args):
     model = Zoo.load_model_from_stub(model_stub, **other_args)
-    recipes = Zoo.search_optimized_recipes(model_stub)
+    recipes = Zoo.search_sparse_recipes(model_stub)
     assert len(recipes) > 0
 
     for recipe in recipes:
@@ -413,9 +414,9 @@ def test_search_optimized_recipes_from_stub(model_stub, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -432,9 +433,9 @@ def test_search_optimized_recipes_from_stub(model_stub, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {},
         ),
@@ -448,9 +449,9 @@ def test_search_optimized_recipes_from_stub(model_stub, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned_quant",
-                "optim_category": "moderate",
-                "optim_target": None,
+                "sparse_name": "pruned_quant",
+                "sparse_category": "moderate",
+                "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
             {},
@@ -477,9 +478,9 @@ def test_load_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -496,9 +497,9 @@ def test_load_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {},
         ),
@@ -512,9 +513,9 @@ def test_load_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned_quant",
-                "optim_category": "moderate",
-                "optim_target": None,
+                "sparse_name": "pruned_quant",
+                "sparse_category": "moderate",
+                "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
             {},
@@ -540,9 +541,9 @@ def test_download_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -559,9 +560,9 @@ def test_download_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {},
         ),
@@ -575,9 +576,9 @@ def test_download_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned_quant",
-                "optim_category": "moderate",
-                "optim_target": None,
+                "sparse_name": "pruned_quant",
+                "sparse_category": "moderate",
+                "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
             {},
@@ -608,9 +609,9 @@ def test_load_model_from_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
@@ -627,9 +628,9 @@ def test_load_model_from_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned",
-                "optim_category": "conservative",
-                "optim_target": None,
+                "sparse_name": "pruned",
+                "sparse_category": "conservative",
+                "sparse_target": None,
             },
             {},
         ),
@@ -643,9 +644,9 @@ def test_load_model_from_recipe(recipe_args, other_args):
                 "repo": "sparseml",
                 "dataset": "imagenet",
                 "training_scheme": None,
-                "optim_name": "pruned_quant",
-                "optim_category": "moderate",
-                "optim_target": None,
+                "sparse_name": "pruned_quant",
+                "sparse_category": "moderate",
+                "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
             {},
@@ -659,11 +660,11 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
     for field, value in recipe_args.items():
         if field == "recipe_type":
             continue
-        if field == "optim_name":
+        if field == "sparse_name":
             assert model_dict[field] == "base"
-        elif field == "optim_category":
+        elif field == "sparse_category":
             assert model_dict[field] == "none"
-        elif field == "optim_target":
+        elif field == "sparse_target":
             assert model_dict[field] is None
         else:
             assert model_dict[field] == value

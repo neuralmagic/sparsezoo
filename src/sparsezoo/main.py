@@ -36,9 +36,9 @@ usage: main.py search [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                 [--framework FRAMEWORK] [--repo REPO]
                                 [--dataset DATASET]
                                 [--training-scheme TRAINING_SCHEME]
-                                [--optim-name OPTIM_NAME]
-                                [--optim-category OPTIM_CATEGORY]
-                                [--optim-target OPTIM_TARGET]
+                                [--sparse-name OPTIM_NAME]
+                                [--sparse-category OPTIM_CATEGORY]
+                                [--sparse-target OPTIM_TARGET]
                                 [--release-version RELEASE_VERSION]
                                 [--page PAGE] [--page-length PAGE_LENGTH]
 
@@ -67,16 +67,16 @@ optional arguments:
   --training-scheme TRAINING_SCHEME
                         The training scheme used on the model the object
                         belongs to if any; e.g. augmented
-  --optim-name OPTIM_NAME
-                        The name describing the optimization of the model the
+  --sparse-name OPTIM_NAME
+                        The name describing the sparsification of the model the
                         object belongs to, e.g. base, pruned, pruned_quant
-  --optim-category OPTIM_CATEGORY
-                        The degree of optimization of the model the object
+  --sparse-category OPTIM_CATEGORY
+                        The degree of sparsification of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
                         metric), moderate (>=99 baseline metric), aggressive
                         (<99 baseline metric)
-  --optim-target OPTIM_TARGET
-                        The deployment target of optimization of the model the
+  --sparse-target OPTIM_TARGET
+                        The deployment target of sparsification of the model the
                         object belongs to; e.g. edge, deepsparse,
                         deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
@@ -93,8 +93,8 @@ usage: main.py download [-h] --domain DOMAIN --sub-domain SUB_DOMAIN
                                   [--sub-architecture SUB_ARCHITECTURE]
                                   --framework FRAMEWORK --repo REPO --dataset
                                   DATASET [--training-scheme TRAINING_SCHEME]
-                                  --optim-name OPTIM_NAME --optim-category
-                                  OPTIM_CATEGORY [--optim-target OPTIM_TARGET]
+                                  --sparse-name OPTIM_NAME --sparse-category
+                                  OPTIM_CATEGORY [--sparse-target OPTIM_TARGET]
                                   [--release-version RELEASE_VERSION]
                                   [--save-dir SAVE_DIR]
 
@@ -123,16 +123,16 @@ optional arguments:
   --training-scheme TRAINING_SCHEME
                         The training scheme used on the model the object
                         belongs to if any; e.g. augmented
-  --optim-name OPTIM_NAME
-                        The name describing the optimization of the model the
+  --sparse-name OPTIM_NAME
+                        The name describing the sparsification of the model the
                         object belongs to, e.g. base, pruned, pruned_quant
-  --optim-category OPTIM_CATEGORY
-                        The degree of optimization of the model the object
+  --sparse-category OPTIM_CATEGORY
+                        The degree of sparsification of the model the object
                         belongs to; e.g. none, conservative (~100 baseline
                         metric), moderate (>=99 baseline metric), aggressive
                         (<99 baseline metric)
-  --optim-target OPTIM_TARGET
-                        The deployment target of optimization of the model the
+  --sparse-target OPTIM_TARGET
+                        The deployment target of sparsification of the model the
                         object belongs to; e.g. edge, deepsparse,
                         deepsparse_throughput, gpu
   --release-version RELEASE_VERSION
@@ -157,13 +157,13 @@ python3 scripts/main.py search --domain cv --sub-domain classification \
 Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
-    --optim-name base --optim-category none
+    --sparse-name base --sparse-category none
 
 #########
 Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
     --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
-    --optim-name base --optim-category none --release-version 0.1.0
+    --sparse-name base --sparse-category none --release-version 0.1.0
 
 
 """
@@ -239,25 +239,25 @@ def add_model_arguments(parser, download_required=False):
         "belongs to if any; e.g. augmented",
     )
     parser.add_argument(
-        "--optim-name",
+        "--sparse-name",
         type=str,
         required=download_required,
-        help="The name describing the optimization of the model "
+        help="The name describing the sparsification of the model "
         "the object belongs to, e.g. base, pruned, pruned_quant",
     )
     parser.add_argument(
-        "--optim-category",
+        "--sparse-category",
         type=str,
         required=download_required,
-        help="The degree of optimization of the model the object "
+        help="The degree of sparsification of the model the object "
         "belongs to; e.g. none, conservative (~100 baseline metric), "
         "moderate (>=99 baseline metric), aggressive (<99 baseline metric)",
     )
     parser.add_argument(
-        "--optim-target",
+        "--sparse-target",
         type=str,
         default=None,
-        help="The deployment target of optimization of the model "
+        help="The deployment target of sparsification of the model "
         "the object belongs to; e.g. edge, deepsparse, deepsparse_throughput, gpu",
     )
     parser.add_argument(
@@ -323,9 +323,9 @@ def _get_command_from_model(model: Model):
         "repo",
         "dataset",
         "training_scheme",
-        "optim_name",
-        "optim_category",
-        "optim_target",
+        "sparse_name",
+        "sparse_category",
+        "sparse_target",
     ]
 
     command_strings = [
@@ -349,9 +349,9 @@ def search(args):
         repo=args.repo,
         dataset=args.dataset,
         training_scheme=args.training_scheme,
-        optim_name=args.optim_name,
-        optim_category=args.optim_category,
-        optim_target=args.optim_target,
+        sparse_name=args.sparse_name,
+        sparse_category=args.sparse_category,
+        sparse_target=args.sparse_target,
         release_version=args.release_version,
         page=args.page,
         page_length=args.page_length,
@@ -398,9 +398,9 @@ def main():
             repo=args.repo,
             dataset=args.dataset,
             training_scheme=args.training_scheme,
-            optim_name=args.optim_name,
-            optim_category=args.optim_category,
-            optim_target=args.optim_target,
+            sparse_name=args.sparse_name,
+            sparse_category=args.sparse_category,
+            sparse_target=args.sparse_target,
             release_version=args.release_version,
             override_parent_path=args.save_dir,
             overwrite=args.overwrite,
