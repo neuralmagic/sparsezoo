@@ -38,20 +38,20 @@ export const getModelStub = (model) => {
 };
 
 /**
- * Formats model's result objects of a specific category
+ * Formats model's result objects of a specific type
  * @param {object} model the model information
  * @param {{
  *  recorded_value: number,
  *  recorded_units: string,
- *  result_category: string
+ *  result_type: string
  * }[]} model.results the results of the model
- * @param {string} category the category of result to obtain from the model
+ * @param {string} type the type of result to obtain from the model
  * @type {string[]}
  */
-export const getFormattedData = (model, category) => {
+export const getFormattedData = (model, type) => {
   let results = lodash
     .get(model, "results", [])
-    .filter((result) => result.result_category === category);
+    .filter((result) => result.result_type === type);
   if (results.length === 0) {
     return ["--"];
   } else {
