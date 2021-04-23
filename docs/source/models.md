@@ -53,8 +53,14 @@ The contents of each model are made up of the following:
 
 ### Image Classification
 
-<iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/classification" title="Image Classification Models" width="700px" height="500px"></iframe>
+<div>
+    <iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/classification" title="Image Classification Models" width="700px" height="500px"></iframe>
+</div>
+
 
 ### Object Detection
 
-<iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/detection" title="Object Detect Models" width="700px" height="500px"></iframe>
+<div>
+    <iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/detection" title="Object Detect Models" width="700px" height="500px"></iframe>
+</div>
+
