@@ -54,15 +54,15 @@ The contents of each model are made up of the following:
 ### Image Classification
 
 <div>
-    <iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/classification" title="Image Classification Models" width="100%" height="500px"></iframe>
+    <iframe src="https://www.neuralmagic.com/sparsezoo/models/cv/classification" title="Image Classification Models" width="100%" height="500px"></iframe>
 </div>
 
-Image classification table not loading? View full table [here](https://d1ysw759sjv4re.cloudfront.net/models/cv/classification). 
+Image classification table not loading? View full table [here](https://www.neuralmagic.com/sparsezoo/models/cv/classification). 
 
 ### Object Detection
 
 <div>
-    <iframe src="https://d1ysw759sjv4re.cloudfront.net/models/cv/detection" title="Object Detect Models" width="100%" height="500px"></iframe>
+    <iframe src="https://www.neuralmagic.com/sparsezoo/models/cv/detection" title="Object Detect Models" width="100%" height="500px"></iframe>
 </div>
 
-Object detection table not loading? View full table [here](https://d1ysw759sjv4re.cloudfront.net/models/cv/detection). 
+Object detection table not loading? View full table [here](https://www.neuralmagic.com/sparsezoo/models/cv/detection). 
