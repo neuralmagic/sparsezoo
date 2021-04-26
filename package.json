@@ -1,0 +1,63 @@
+{
+  "name": "sparsezoo",
+  "version": "0.2.0",
+  "private": true,
+  "repository": "git@github.com:neuralmagic/sparsezoo.git",
+  "author": "Neuralmagic, Inc.",
+  "license": "Apache",
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@reduxjs/toolkit": "^1.5.1",
+    "jwt-decode": "^3.1.2",
+    "lodash": "^4.17.21",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-copy-to-clipboard": "^5.0.3",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.3",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.3",
+    "react-transition-group": "^4.4.1",
+    "redux": "^4.0.5",
+    "universal-cookie": "^4.0.4"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  },
+  "scripts": {
+    "lint": "yarn prettier --write src/ui",
+    "start": "REACT_APP_SPARSEZOO_API_URL=$SPARSEZOO_API_URL react-scripts start",
+    "build": "NODE_ENV=production REACT_APP_SPARSEZOO_API_URL=$SPARSEZOO_API_URL && react-scripts build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "prettier": {
+    "printWidth": 88,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "quoteProps": "as-needed",
+    "trailingComma": "es5",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "always"
+  }
+}

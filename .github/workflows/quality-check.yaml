@@ -5,7 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: "⚙️ Install dependencies"
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: "⚙️ Install python dependencies"
         run: pip3 install .[dev]
+      - name: "⚙️ Install js dependencies"
+        run: yarn install
       - name: "🧹 Running quality checks"
         run: make quality
