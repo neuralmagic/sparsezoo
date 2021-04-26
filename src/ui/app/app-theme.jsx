@@ -17,10 +17,19 @@ limitations under the License.
 import { createMuiTheme } from "@material-ui/core/styles";
 import { useState } from "react";
 
+/**
+ * Creates a hook for using dark mode
+ * @returns {boolean}
+ */
 export function useDarkMode() {
   return useState(false);
 }
 
+/**
+ * Creates a material ui theme
+ * @param {boolean} darkMode whether dark mode is enabled
+ * @returns {object}
+ */
 export default function makeTheme(darkMode) {
   const theme = createMuiTheme({
     palette: {

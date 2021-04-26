@@ -16,6 +16,27 @@ limitations under the License.
 
 import { API_ROOT, validateAPIResponseJSON } from "./utils";
 
+/**
+ * API action for searching for models in the model zoo
+ * @param {object} requestBody the requestBody
+ * @param {string} requestBody.domain the domain of the model search
+ * @param {string} requestBody.subdomain the subdomain of the model search
+ * @param {string} requestBody.token the token for the model search authentication
+ * @param {string} requestBody.page the page of search results to return
+ * @param {string} requestBody.page_legth the amount of search results to return
+ * @param {{
+ *  architecture: string,
+ *  sub_architecture: string,
+ *  repo: string,
+ *  framework: string,
+ *  dataset: string,
+ *  training_scheme: string,
+ *  sparse_name: string,
+ *  sparse_category: string,
+ *  sparse_target
+ * }} requestBody.queries the additional queries for the search result
+ * @returns {Promise<Array>}
+ */
 export function requestSearchModels({
   domain,
   subdomain,

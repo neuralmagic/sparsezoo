@@ -18,6 +18,10 @@ import { API_ROOT, validateAPIResponseJSON } from "./utils";
 
 const PUBLIC_AUTH_TYPE = "public";
 
+/**
+ * API action for getting a public authentication token
+ * @returns {Promise<{token: String}>}
+ */
 export function requestPostAuth() {
   const url = `${API_ROOT}/auth`;
   return validateAPIResponseJSON(

@@ -16,6 +16,10 @@ limitations under the License.
 
 import { useLocation } from "react-router-dom";
 
+/**
+ * Creates a hook for getting the query parameters of the url
+ * @returns {object}
+ */
 export const useQuery = () => {
   const searchParams = new URLSearchParams(useLocation().search);
 

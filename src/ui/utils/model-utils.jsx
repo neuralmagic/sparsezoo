@@ -17,7 +17,7 @@ limitations under the License.
 import lodash from "lodash";
 
 /**
- *
+ * Gets a SparseZoo model stub from a model object
  * @param {Object<string, Any>} model the model information
  * @returns {string} SparseZoo model stub
  */
