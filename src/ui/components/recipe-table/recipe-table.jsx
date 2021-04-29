@@ -27,9 +27,6 @@ import {
   selectRecipesState,
   searchRecipesThunk,
   selectRecipesTable,
-  // selectModelsState,
-  // searchModelsThunk,
-  // selectModelTable,
 } from "../../store";
 import makeStyles from "./recipe-table-styles";
 import ZooTable from "../zoo-table";
