@@ -40,35 +40,16 @@ The properties within each model stub are defined as the following:
 
 ### Image Classification
 
-|  Model Tag                                                                                                        | Validation Baseline Metric |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------- |
-|  cv/classification/efficientnet-b0/pytorch/sparseml/imagenet/arch-moderate?recipe_type=original                   |  76.5% top1 accuracy       |   
-|  cv/classification/efficientnet-b4/pytorch/sparseml/imagenet/arch-moderate?recipe_type=original                   |  82.1% top1 accuracy       |   
-|  cv/classification/inception_v3/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original                |  77.4% top1 accuracy       |  
-|  cv/classification/inception_v3/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                    |  76.6% top1 accuracy       |  
-|  cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/base-none?recipe_type=original                      |  70.9% top1 accuracy       |  
-|  cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original            |  70.9% top1 accuracy       |  
-|  cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                |  70.1% top1 accuracy       |  
-|  cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned_quant-moderate?recipe_type=original          |  70.1% top1 accuracy       |  
-|  cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned_quant-moderate?recipe_type=original          |  70.1% top1 accuracy       | 
-|  cv/classification/resnet_v1-101/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                   |  76.6% top1 accuracy       |
-|  cv/classification/resnet_v1-152/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                   |  77.5% top1 accuracy       |
-|  cv/classification/resnet_v1-18/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original                |  69.8% top1 accuracy       |
-|  cv/classification/resnet_v1-34/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original                |  73.3% top1 accuracy       |
-|  cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original                |  76.1% top1 accuracy       |  
-|  cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                    |  75.3% top1 accuracy       |  
-|  cv/classification/resnet_v1-50/pytorch/sparseml/imagenet-augmented/pruned_quant-aggressive?recipe_type=original  |  76.1% top1 accuracy       |  
-|  cv/classification/resnet_v1-50/pytorch/sparseml/imagenette/pruned-conservative?recipe_type=original              |  99.9% top1 accuracy       |  
-|  cv/classification/resnet_v1-50/pytorch/torchvision/imagenette/pruned-conservative?recipe_type=original           |  99.9% top1 accuracy       |  
-|  cv/classification/vgg-11/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                          |  68.3% top1 accuracy       |  
-|  cv/classification/vgg-16/pytorch/sparseml/imagenet/pruned-conservative?recipe_type=original                      |  71.6% top1 accuracy       |  
-|  cv/classification/vgg-16/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                          |  70.8% top1 accuracy       |  
-|  cv/classification/vgg-19/pytorch/sparseml/imagenet/pruned-moderate?recipe_type=original                          |  71.7% top1 accuracy       |
+<div>
+    <iframe src="https://sparsezoo.neuralmagic.com/recipes/cv/classification" title="Image Classification Recipes" width="100%" height="500px"></iframe>
+</div>
+
+Image classification table not loading? View full table [here](https://sparsezoo.neuralmagic.com/recipes/cv/classification). 
 
 ### Object Detection
 
-|  Model Tag                                                                                                        | Validation Baseline Metric |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| cv/detection/ssd-resnet50_300/pytorch/sparseml/coco/pruned-moderate?recipe_type=original                          | 41.8 mAP@0.5               |
-| cv/detection/ssd-resnet50_300/pytorch/sparseml/voc/pruned-moderate?recipe_type=original                           | 51.5 mAP@0.5               |
-| cv/detection/yolo_v3-spp/pytorch/ultralytics/coco/pruned-aggressive?recipe_type=original                          | 62.1 mAP@0.5               |
+<div>
+    <iframe src="https://sparsezoo.neuralmagic.com/recipes/cv/detection" title="Object Detect Recipes" width="100%" height="500px"></iframe>
+</div>
+
+Object detection table not loading? View full table [here](https://sparsezoo.neuralmagic.com/recipes/cv/detection). 

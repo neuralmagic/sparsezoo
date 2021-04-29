@@ -38,6 +38,16 @@ export const getModelStub = (model) => {
 };
 
 /**
+ * Gets a SparseZoo model stub from a model object
+ * @param {Object<string, Any>} recipe the model information
+ * @returns {string} SparseZoo model stub
+ */
+export const getRecipeStub = (recipe) => {
+  const modelStub = getModelStub(recipe.model);
+  return `${modelStub}/${recipe.recipe_type}`;
+};
+
+/**
  * Formats model's result objects of a specific type
  * @param {object} model the model information
  * @param {{
