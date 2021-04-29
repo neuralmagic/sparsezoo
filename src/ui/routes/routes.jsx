@@ -16,8 +16,15 @@ limitations under the License.
 
 import ModelsRoot from "./models-root";
 import Models from "./models";
+import RecipesRoot from "./recipes-root";
+import Recipes from "./recipes";
 
-import { MODEL_TABLE_PATH, MODEL_TABLE_ROOT_PATH } from "./paths";
+import {
+  MODEL_TABLE_PATH,
+  MODEL_TABLE_ROOT_PATH,
+  RECIPE_TABLE_PATH,
+  RECIPE_TABLE_ROOT_PATH,
+} from "./paths";
 
 export function makeContentRoutes() {
   return [
@@ -30,6 +37,16 @@ export function makeContentRoutes() {
       path: MODEL_TABLE_PATH,
       exact: true,
       component: Models,
+    },
+    {
+      path: RECIPE_TABLE_PATH,
+      exact: true,
+      component: Recipes,
+    },
+    {
+      path: RECIPE_TABLE_ROOT_PATH,
+      exact: true,
+      component: RecipesRoot,
     },
   ];
 }
