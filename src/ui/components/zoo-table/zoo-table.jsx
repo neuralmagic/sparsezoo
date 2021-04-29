@@ -38,6 +38,7 @@ function ZooTable({
   width,
   copy,
   includePagination,
+  loadingMessage,
 }) {
   const useStyles = makeStyles();
   const classes = useStyles();
@@ -68,7 +69,7 @@ function ZooTable({
           loaderSize={150}
           loaderChildren={
             <Typography className={classes.loaderText}>
-              {!error && "Loading models"}
+              {!error && loadingMessage}
             </Typography>
           }
         ></LoaderOverlay>
@@ -135,6 +136,7 @@ ZooTable.propTypes = {
   ]),
   copy: PropTypes.oneOfType([PropTypes.bool, PropTypes.arrayOf(PropTypes.bool)]),
   includePagination: PropTypes.bool,
+  loadingMessage: PropTypes.string,
 };
 
 ZooTable.defaultProps = {
@@ -146,6 +148,7 @@ ZooTable.defaultProps = {
   paginationOptions: [10, 25, 100],
   includePagination: false,
   copy: false,
+  loadingMessage: "Loading...",
 };
 
 export default ZooTable;
