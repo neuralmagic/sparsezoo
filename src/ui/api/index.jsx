@@ -16,4 +16,5 @@ limitations under the License.
 
 export * from "./auth";
 export * from "./models";
+export * from "./recipes";
 export * from "./utils";

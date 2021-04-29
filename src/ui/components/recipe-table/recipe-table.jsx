@@ -24,27 +24,31 @@ import Typography from "@material-ui/core/Typography";
 
 import {
   selectAuthState,
-  selectModelsState,
-  searchModelsThunk,
-  selectModelTable,
+  selectRecipesState,
+  searchRecipesThunk,
+  selectRecipesTable,
+  // selectModelsState,
+  // searchModelsThunk,
+  // selectModelTable,
 } from "../../store";
-import makeStyles from "./model-table-styles";
+import makeStyles from "./recipe-table-styles";
 import ZooTable from "../zoo-table";
 
-function ModelTable({ domain, subdomain, includePagination, includeHeader, queries }) {
+function RecipeTable({ domain, subdomain, includePagination, includeHeader, queries }) {
   const useStyles = makeStyles();
   const classes = useStyles();
   const dispatch = useDispatch();
 
   const authState = useSelector(selectAuthState);
-  const modelsState = useSelector(selectModelsState);
+  const recipesState = useSelector(selectRecipesState);
+  console.log(recipesState);
+  const results = useSelector(selectRecipesTable);
 
-  const results = useSelector(selectModelTable);
   useEffect(() => {
-    const status = lodash.get(modelsState.status, `${domain}.${subdomain}`, "idle");
+    const status = lodash.get(recipesState.status, `${domain}.${subdomain}`, "idle");
     if (authState.token !== null && status === "idle") {
       dispatch(
-        searchModelsThunk({
+        searchRecipesThunk({
           domain,
           subdomain,
           token: authState.token,
@@ -52,7 +56,7 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
         })
       );
     }
-  }, [authState.token, modelsState.status, dispatch, domain, subdomain, queries]);
+  }, [authState.token, recipesState.status, dispatch, domain, subdomain, queries]);
 
   const rows = lodash
     .get(results, `${domain}.${subdomain}.data`, [])
@@ -75,18 +79,18 @@ function ModelTable({ domain, subdomain, includePagination, includeHeader, queri
         headers={lodash.get(results, `${domain}.${subdomain}.headers`, [])}
         rows={rows}
         status={status}
-        error={authState.error || modelsState.error}
+        error={authState.error || recipesState.error}
         aligns={lodash.get(results, `${domain}.${subdomain}.aligns`, "left")}
         copy={lodash.get(results, `${domain}.${subdomain}.copy`, false)}
         width={lodash.get(results, `${domain}.${subdomain}.width`)}
         includePagination={includePagination}
-        loadingMessage="Loading models"
+        loadingMessage="Loading recipes"
       />
     </div>
   );
 }
 
-ModelTable.propTypes = {
+RecipeTable.propTypes = {
   domain: PropTypes.string.isRequired,
   subdomain: PropTypes.string.isRequired,
   queries: PropTypes.object,
@@ -94,10 +98,10 @@ ModelTable.propTypes = {
   includeHeader: PropTypes.bool,
 };
 
-ModelTable.defaultProps = {
+RecipeTable.defaultProps = {
   includePagination: false,
   includeHeader: false,
   queries: {},
 };
 
-export default ModelTable;
+export default RecipeTable;

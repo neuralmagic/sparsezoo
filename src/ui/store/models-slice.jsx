@@ -32,20 +32,22 @@ export const searchModelsThunk = createAsyncThunk(
   SEARCH_MODELS_PREFIX,
   async ({ domain, subdomain, token, queries }, thunkApi) => {
     let page = 1;
-    const models = [];
+    let models = [];
     let body;
     do {
       body = await requestSearchModels({ domain, subdomain, token, page, queries });
-      models.push(...body.models);
-      page += 1;
-      thunkApi.dispatch({
-        type: PARTIAL_SEARCH_MODELS_TYPE,
-        payload: {
-          domain,
-          subdomain,
-          models,
-        },
-      });
+      if (body.models.length > 0) {
+        models = [...models, ...body.models];
+        page += 1;
+        thunkApi.dispatch({
+          type: PARTIAL_SEARCH_MODELS_TYPE,
+          payload: {
+            domain,
+            subdomain,
+            models,
+          },
+        });
+      }
     } while (body.models.length > 0);
 
     return models;
@@ -76,9 +78,7 @@ const modelsSlice = createSlice({
       lodash.setWith(state.status, `${domain}.${subdomain}`, "succeeded", {});
       state.error = null;
 
-      const models = action.payload.filter(
-        (model) => !model.tags.map((tag) => tag.name).includes("demo")
-      );
+      const models = action.payload;
       lodash.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
     [searchModelsThunk.rejected]: (state, action) => {
@@ -91,9 +91,6 @@ const modelsSlice = createSlice({
       lodash.setWith(state.status, `${domain}.${subdomain}`, "partial", {});
       state.error = null;
 
-      models = models.filter(
-        (model) => !model.tags.map((tag) => tag.name).includes("demo")
-      );
       lodash.setWith(state.models, `${domain}.${subdomain}`, models, {});
     },
   },

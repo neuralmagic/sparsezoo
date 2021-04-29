@@ -18,13 +18,16 @@ import { configureStore } from "@reduxjs/toolkit";
 
 import authReducer from "./auth-slice";
 import modelsReducer from "./models-slice";
+import recipesReducer from "./recipes-slice";
 
 export default configureStore({
   reducer: {
     auth: authReducer,
     models: modelsReducer,
+    recipes: recipesReducer,
   },
 });
 
 export * from "./auth-slice";
 export * from "./models-slice";
+export * from "./recipes-slice";

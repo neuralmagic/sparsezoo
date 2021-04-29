@@ -14,7 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-export const MODEL_TABLE_ROOT_PATH = "/models";
-export const MODEL_TABLE_PATH = "/models/:domain/:subdomain";
-export const RECIPE_TABLE_ROOT_PATH = "/recipes";
-export const RECIPE_TABLE_PATH = "/recipes/:domain/:subdomain";
+import React from "react";
+import RecipeTable from "../../components/recipe-table";
+import { useQuery } from "../../hooks";
+
+import makeStyles from "./recipes-styles";
+
+function Recipes(props) {
+  const { domain, subdomain } = props.match.params;
+  const queries = useQuery();
+  const useStyles = makeStyles();
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      <RecipeTable domain={domain} subdomain={subdomain} queries={queries} />
+    </div>
+  );
+}
+
+export default Recipes;

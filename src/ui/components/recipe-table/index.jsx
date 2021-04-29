@@ -14,7 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-export const MODEL_TABLE_ROOT_PATH = "/models";
-export const MODEL_TABLE_PATH = "/models/:domain/:subdomain";
-export const RECIPE_TABLE_ROOT_PATH = "/recipes";
-export const RECIPE_TABLE_PATH = "/recipes/:domain/:subdomain";
+export { default } from "./recipe-table";

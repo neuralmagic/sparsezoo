@@ -33,11 +33,12 @@ import { API_ROOT, validateAPIResponseJSON } from "./utils";
  *  training_scheme: string,
  *  sparse_name: string,
  *  sparse_category: string,
- *  sparse_target: string
+ *  sparse_target: string,
+ *  recipe_type: string
  * }} requestBody.queries the additional queries for the search result
  * @returns {Promise<Array>}
  */
-export function requestSearchModels({
+export function requestSearchRecipes({
   domain,
   subdomain,
   token,
@@ -45,7 +46,7 @@ export function requestSearchModels({
   page_length = 20,
   queries = {},
 }) {
-  let url = `${API_ROOT}/models/search/${domain}/${subdomain}?page=${page}&page_length=${page_length}`;
+  let url = `${API_ROOT}/recipes/search/${domain}/${subdomain}?page=${page}&page_length=${page_length}`;
   if (queries) {
     for (const [key, value] of Object.entries(queries)) {
       url = `${url}&${key}=${value}`;
