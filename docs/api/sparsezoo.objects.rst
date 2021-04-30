@@ -67,10 +67,10 @@ sparsezoo.objects.model module
    :undoc-members:
    :show-inheritance:
 
-sparsezoo.objects.optimization\_recipe module
----------------------------------------------
+sparsezoo.objects.recipe module
+-------------------------------
 
-.. automodule:: sparsezoo.objects.optimization_recipe
+.. automodule:: sparsezoo.objects.recipe
    :members:
    :undoc-members:
    :show-inheritance:
