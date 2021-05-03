@@ -32,6 +32,8 @@ jobs:
           && echo "::set-output name=output::1" || echo "::set-output name=output::0"
   python-tests:
     runs-on: ubuntu-latest
+    env:
+      SPARSEZOO_TEST_MODE: "true"
     needs: test-setup
     if: ${{needs.test-setup.outputs.python-diff == 1}}
     steps:
@@ -44,6 +46,8 @@ jobs:
           SPARSEZOO_API_URL: https://staging-api.neuralmagic.com
   extensive-python-tests:
     runs-on: ubuntu-latest
+    env:
+      SPARSEZOO_TEST_MODE: "true"
     needs: test-setup
     if: ${{needs.test-setup.outputs.full-check == 1}}
     steps:
