@@ -41,15 +41,15 @@ The properties within each model stub are defined as the following:
 ### Image Classification
 
 <div>
-    <iframe src="https://sparsezoo.neuralmagic.com/recipes/cv/classification" title="Image Classification Recipes" width="100%" height="500px"></iframe>
+    <iframe src="https://sparsezoo.neuralmagic.com/tables/recipes/cv/classification" title="Image Classification Recipes" width="100%" height="500px"></iframe>
 </div>
 
-Image classification table not loading? View full table [here](https://sparsezoo.neuralmagic.com/recipes/cv/classification). 
+Image classification table not loading? View full table [here](https://sparsezoo.neuralmagic.com/tables/recipes/cv/classification). 
 
 ### Object Detection
 
 <div>
-    <iframe src="https://sparsezoo.neuralmagic.com/recipes/cv/detection" title="Object Detect Recipes" width="100%" height="500px"></iframe>
+    <iframe src="https://sparsezoo.neuralmagic.com/tables/recipes/cv/detection" title="Object Detect Recipes" width="100%" height="500px"></iframe>
 </div>
 
-Object detection table not loading? View full table [here](https://sparsezoo.neuralmagic.com/recipes/cv/detection). 
+Object detection table not loading? View full table [here](https://sparsezoo.neuralmagic.com/tables/recipes/cv/detection). 
