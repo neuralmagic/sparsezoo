@@ -41,8 +41,6 @@ quality:
 	black --check $(PYCHECKDIRS);
 	isort --check-only $(PYCHECKDIRS);
 	flake8 $(PYCHECKDIRS);
-	@echo "Running js/jsx quality checks";
-	yarn prettier --check $(JSCHECKDIRS);
 
 # style the code according to accepted standards for the repo
 style:
