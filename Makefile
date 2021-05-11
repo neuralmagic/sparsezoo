@@ -4,8 +4,6 @@ BUILDDIR := $(PWD)
 PYCHECKDIRS := examples tests src utils scripts notebooks
 PYCHECKGLOBS := 'examples/**/*.py' 'scripts/**/*.py' 'src/**/*.py' 'tests/**/*.py' 'utils/**/*.py' setup.py
 DOCDIR := docs
-JSCHECKDIRS := src public
-JSCHECKGLOBS := 'public/**/*.html' 'public/**/*.js' 'public/**/*.css' 'src/**/*.html' 'src/**/*.jsx' 'tests/**/*.jsx'
 MDCHECKGLOBS := 'docs/**/*.md' 'docs/**/*.rst' 'examples/**/*.md' 'notebooks/**/*.md' 'scripts/**/*.md'
 MDCHECKFILES := CODE_OF_CONDUCT.md CONTRIBUTING.md DEVELOPING.md README.md
 
@@ -53,8 +51,6 @@ style:
 	@echo "Running python styling";
 	black $(PYCHECKDIRS);
 	isort $(PYCHECKDIRS);
-	@echo "Running js/jsx styling";
-	yarn prettier --write $(JSCHECKDIRS);
 
 # run tests for the repo
 test:
@@ -73,9 +69,6 @@ docsupdate:
 
 # creates wheel file
 build:
-	@echo "Building UI";
-	yarn install;
-	yarn build;
 	@echo "Building python package";
 	python3 setup.py sdist bdist_wheel $(BUILD_ARGS)
 
