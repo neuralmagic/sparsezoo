@@ -14,32 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# ![icon for SparseZoo](https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png) SparseZoo
+<h1><img alt="tool icon" src="https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png" />&nbsp;&nbsp;SparseZoo</h1>
 
-### Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes
+<h3>Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes</h3>
 
 <p>
-    <a href="https://docs.neuralmagic.com/sparsezoo/index.html">
-        <img alt="Documentation" src="https://img.shields.io/website/http/docs.neuralmagic.com/sparsezoo/index.html.svg?down_color=red&down_message=offline&up_message=online&style=for-the-badge" height=25>
+    <a href="https://docs.neuralmagic.com/sparsezoo">
+        <img alt="Documentation" src="https://img.shields.io/badge/documentation-darkred?&style=for-the-badge&logo=read-the-docs" height=25>
     </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/quality-check.yaml">
-        <img alt="Quality Check" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Quality%20Checks/main?label=Quality%20Checks&style=for-the-badge" height=25>
+    <a href="https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ/">
+        <img src="https://img.shields.io/badge/slack-purple?style=for-the-badge&logo=slack" height=25>
     </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/test-check.yaml?query=branch%3Amain">
-        <img alt="Main" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Test%20Checks/main?label=Main&&style=for-the-badge" height=25>
+    <a href="https://discuss.neuralmagic.com/">
+        <img src="https://img.shields.io/badge/support%20forums-navy?style=for-the-badge&logo=discourse" height=25>
     </a>
-</p>
-<p>
-    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=purple&style=for-the-badge" height=25>
+    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/test-check.yaml">
+        <img alt="Main" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Test%20Checks/main?label=build&style=for-the-badge" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/releases">
         <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25>
     </a>
+    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
+        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=lightgray&style=for-the-badge" height=25>
+    </a>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/CODE_OF_CONDUCT.md">
         <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
     </a>
-     <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
+    <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
         <img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=25>
     </a>
      <a href="https://medium.com/limitlessai">
@@ -52,33 +53,32 @@ limitations under the License.
 
 ## Overview
 
-SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks. 
-It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-sparsified models and recipes to prototype from.
+SparseZoo is a constantly-growing repository of sparsified (pruned and pruned-quantized) models with matching sparsification recipes for neural networks. 
+It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from. 
+Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
 Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
-This repository contains the Python API code to handle the connection and authentication to the cloud.
+The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
+<img alt="SparseZoo Flow" src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
 
-## Sparsification
+## Highlights
 
-Sparsification is the process of taking a trained deep learning model and removing redundant information from the overprecise and over-parameterized network resulting in a faster and smaller model.
-Techniques for sparsification are all encompassing including everything from inducing sparsity using [pruning](https://neuralmagic.com/blog/pruning-overview/) and [quantization](https://arxiv.org/abs/1609.07061) to enabling naturally occurring sparsity using [activation sparsity](http://proceedings.mlr.press/v119/kurtz20a.html) or [winograd/FFT](https://arxiv.org/abs/1509.09308). 
-When implemented correctly, these techniques result in significantly more performant and smaller models with limited to no effect on the baseline metrics.
-For example, pruning plus quantization can give noticeable improvements in performance while recovering to nearly the same baseline accuracy.
+- [Available Models Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md)
+- [Available Recipes Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/recipes.md)
 
-The Deep Sparse product suite builds on top of sparsification enabling you to easily apply the techniques to your datasets and models using recipe-driven approaches. Recipes encode the directions for how to sparsify a model into a simple, easily editable format.
+## Installation
 
-- Download a sparsification recipe and sparsified model from the [SparseZoo](https://github.com/neuralmagic/sparsezoo).
-- Alternatively, create a recipe for your model using [Sparsify](https://github.com/neuralmagic/sparsify).
-- Apply your recipe with only a few lines of code using [SparseML](https://github.com/neuralmagic/sparseml).
-- Finally, for GPU-level performance on CPUs, deploy your sparse-quantized model with the [DeepSparse Engine](https://github.com/neuralmagic/deepsparse).
+This repository is tested on Python 3.6+, and Linux/Debian systems.
+It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
+Install with pip using:
 
-**Full Deep Sparse product flow:**  
-
-<img src="https://docs.neuralmagic.com/docs/source/sparsification/flow-overview.svg" width="960px">
+```bash
+pip install sparsezoo
+```
 
 ## Quick Tour
 
@@ -215,50 +215,14 @@ sparsezoo download --domain cv --sub-domain classification \
 
 For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
 
-## Installation
+## Resources
 
-This repository is tested on Python 3.6+, and Linux/Debian systems.
-It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
+### Learning More
 
-Install with pip using:
+- Documentation: [SparseML](https://docs.neuralmagic.com/sparseml/), [SparseZoo](https://docs.neuralmagic.com/sparsezoo/), [Sparsify](https://docs.neuralmagic.com/sparsify/), [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
+- Neural Magic: [Blog](https://www.neuralmagic.com/blog/), [Resources](https://www.neuralmagic.com/resources/)
 
-```bash
-pip install sparsezoo
-```
-
-Then if you would like to explore any of the [scripts](https://github.com/neuralmagic/sparsezoo/blob/main/scripts/) or [notebooks](https://github.com/neuralmagic/sparsezoo/blob/main/notebooks/)
-clone the repository and install any additional dependencies as required.
-
-## Available Models and Recipes
-
-A number of pre-trained baseline and sparsified models across domains and sub domains are available and constantly being added.
-For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md).
-
-## Resources and Learning More
-
-- [SparseZoo Documentation](https://docs.neuralmagic.com/sparsezoo/)
-- [SparseML Documentation](https://docs.neuralmagic.com/sparseml/)
-- [Sparsify Documentation](https://docs.neuralmagic.com/sparsify/)
-- [DeepSparse Documentation](https://docs.neuralmagic.com/deepsparse/)
-- Neural Magic [Blog](https://www.neuralmagic.com/blog/), [Resources](https://www.neuralmagic.com/resources/), [Website](https://www.neuralmagic.com/)
-
-## Contributing
-
-We appreciate contributions to the code, examples, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
-
-## Join the Community
-
-For user help or questions about SparseZoo, sign up or log in: **Deep Sparse Community** [Discourse Forum](https://discuss.neuralmagic.com/) and/or [Slack](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there.
-
-You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
-
-For more general questions about Neural Magic, please email us at [learnmore@neuralmagic.com](mailto:learnmore@neuralmagic.com) or fill out this [form](http://neuralmagic.com/contact/).
-
-## License
-
-The project is licensed under the [Apache License Version 2.0](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE).
-
-## Release History
+### Release History
 
 Official builds are hosted on PyPI
 
@@ -266,3 +230,22 @@ Official builds are hosted on PyPI
 - nightly (dev): [sparsezoo-nightly](https://pypi.org/project/sparsezoo-nightly/)
 
 Additionally, more information can be found via [GitHub Releases.](https://github.com/neuralmagic/sparsezoo/releases)
+
+### License
+
+The project is licensed under the [Apache License Version 2.0](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE).
+
+## Community
+
+### Contribute
+
+We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
+
+### Join
+
+For user help or questions about SparseZoo, sign up or log in: **Deep Sparse Community** [Discourse Forum](https://discuss.neuralmagic.com/) and/or [Slack](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). 
+We are growing the community member by member and happy to see you there.
+
+You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
+
+For more general questions about Neural Magic, please fill out this [form](http://neuralmagic.com/contact/).
