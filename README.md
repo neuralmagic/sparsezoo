@@ -69,9 +69,6 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 - [Available Models Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md)
 - [Available Recipes Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/recipes.md)
 
-A number of pre-trained baseline and sparsified models across domains and sub domains are available and constantly being added.
-For an up to date list, please consult the [available models listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md).
-
 ## Installation
 
 This repository is tested on Python 3.6+, and Linux/Debian systems.
