@@ -62,7 +62,7 @@ Recipe-driven approaches built around sparsification algorithms allow you to tak
 
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
-<img src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
+<img alt="SparseZoo Flow" src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
 
 ## Highlights
 
