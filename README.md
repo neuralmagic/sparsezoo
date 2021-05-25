@@ -53,8 +53,9 @@ limitations under the License.
 
 ## Overview
 
-SparseZoo is a constantly-growing repository of highly sparse and sparse-quantized models with matching sparsification recipes for neural networks. 
-It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-sparsified models and recipes to prototype from.
+SparseZoo is a constantly-growing repository of sparsified (pruned and pruned-quantized) models with matching sparsification recipes for neural networks. 
+It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from. 
+Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
 Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
