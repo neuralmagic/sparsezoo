@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<h1><img src="https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png" />&nbsp;&nbsp;SparseZoo</h1>
+<h1><img alt="tool icon" src="https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png" />&nbsp;&nbsp;SparseZoo</h1>
 
 <h3>Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes</h3>
 
