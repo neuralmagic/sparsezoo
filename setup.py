@@ -30,7 +30,7 @@ from setuptools import find_packages, setup
 # default variables to be overwritten by the version.py file
 is_release = None
 version = "unknown"
-version_major_minor = version
+version_base = version
 
 # load and overwrite version and release info from sparseml package
 exec(open(os.path.join("src", "sparsezoo", "version.py")).read())
