@@ -35,7 +35,7 @@ __all__ = ["get_auth_header"]
 _LOGGER = logging.getLogger(__name__)
 
 NM_TOKEN_HEADER = "nm-token-header"
-AUTH_API = os.path.join(BASE_API_URL, "auth")
+AUTH_API = f"{BASE_API_URL}/auth"
 PUBLIC_AUTH_TYPE = "public"
 
 CREDENTIALS_YAML = os.path.abspath(
