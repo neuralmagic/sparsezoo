@@ -19,7 +19,7 @@ Utilities for data loading into numpy for use in ONNX supported systems
 import logging
 import math
 from collections import OrderedDict
-from typing import Dict, Iterable, Iterator, List, Tuple, Union
+from typing import Dict, Generator, Iterable, Iterator, List, Tuple, Union
 
 import numpy
 
@@ -27,7 +27,6 @@ from sparsezoo.utils.numpy import NumpyArrayBatcher, load_numpy_list
 
 
 __all__ = ["Dataset", "RandomDataset", "DataLoader"]
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +60,59 @@ class Dataset(Iterable):
     def __iter__(self) -> Iterator[Union[numpy.ndarray, Dict[str, numpy.ndarray]]]:
         for item in self._data:
             yield item
+
+    def iter_batches(
+        self,
+        batch_size: int,
+        iterations: int,
+    ) -> Generator[List[numpy.ndarray], None, None]:
+        """
+        A method to iterate over data in batches
+
+        :param batch_size: Positive integer representing the size of each batch
+        :param iterations: Positive integer representing number of batches to yield
+
+        :pre: batch_size should be within the range [0, number_of_samples)
+        :pre: iterations should be a positive integer
+
+        :return: A batch generator for self.data
+        """
+        assert iterations >= 0, "number of iterations should be positive"
+        assert (
+            self._data.shape[0] >= batch_size >= 0
+        ), "batch_size should be positive and less than or equal to the  size of data"
+
+        _dataset = self._data
+
+        # handle 1-d numpy arrays
+        if len(_dataset.shape) == 1:
+            _dataset = _dataset.reshape(_dataset.shape[0], 1)
+
+        iteration = 0
+        batch_buffer = []
+        batch_template = [
+            numpy.ascontiguousarray(
+                numpy.zeros((batch_size, *array.shape), dtype=array.dtype)
+            )
+            for array in _dataset[0]
+        ]
+        while iteration < iterations:
+            for sample in _dataset:
+                batch_buffer.append(sample)
+
+                if len(batch_buffer) == batch_size:
+                    yield [
+                        numpy.stack(
+                            [sample[idx] for sample in batch_buffer], out=template
+                        )
+                        for idx, template in enumerate(batch_template)
+                    ]
+
+                    batch_buffer = []
+                    iteration += 1
+
+                    if iteration >= iterations:
+                        break
 
     @property
     def name(self) -> str:
