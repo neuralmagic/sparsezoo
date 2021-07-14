@@ -77,27 +77,17 @@ class Dataset(Iterable):
 
         :return: A batch generator for self.data
         """
-        assert iterations >= 0, "number of iterations should be positive"
-        assert (
-            self._data.shape[0] >= batch_size >= 0
-        ), "batch_size should be positive and less than or equal to the  size of data"
-
-        _dataset = self._data
-
-        # handle 1-d numpy arrays
-        if len(_dataset.shape) == 1:
-            _dataset = _dataset.reshape(_dataset.shape[0], 1)
-
+        dataset = self._data
         iteration = 0
         batch_buffer = []
         batch_template = [
             numpy.ascontiguousarray(
                 numpy.zeros((batch_size, *array.shape), dtype=array.dtype)
             )
-            for array in _dataset[0]
+            for array in dataset[0]
         ]
         while iteration < iterations:
-            for sample in _dataset:
+            for sample in dataset:
                 batch_buffer.append(sample)
 
                 if len(batch_buffer) == batch_size:

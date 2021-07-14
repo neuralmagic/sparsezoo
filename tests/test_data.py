@@ -18,29 +18,23 @@ import pytest as pytest
 from sparsezoo.utils import Dataset
 
 
-@pytest.mark.parametrize(
-    "_data",
-    [
-        Dataset(data=np.empty(shape=(100, 100, 10, 10)), name="4d"),
-    ],
-)
-def test_has_iter_batches(_data):
-    assert hasattr(_data, "iter_batches")
+@pytest.fixture
+def dummy_dataset():
+    _dummy_array_1 = np.random.rand(2, 3)
+    _dummy_array_2 = np.random.rand(34, 3)
+    return Dataset(data=[_dummy_array_1, _dummy_array_2], name="dummy")
 
 
-@pytest.mark.parametrize(
-    "_data",
-    [
-        Dataset(data=np.empty(shape=(100, 100, 10, 10)), name="4d"),
-        Dataset(data=np.empty(shape=(100, 100, 10)), name="3d"),
-        Dataset(data=np.empty(shape=(100, 10)), name="2d"),
-        Dataset(data=np.empty(shape=(100,)), name="1d"),
-    ],
-)
+def test_has_iter_batches(dummy_dataset):
+    assert hasattr(dummy_dataset, "iter_batches")
+
+
 @pytest.mark.parametrize(
     "batch_size",
     [
         1,
+        2,
+        3,
         10,
         100,
     ],
@@ -53,20 +47,24 @@ def test_has_iter_batches(_data):
         100,
     ],
 )
-def test_batched_iteration(_data, batch_size, iterations):
-    data_loader = _data.iter_batches(batch_size=batch_size, iterations=iterations)
-    data_shape = _data.data.shape
-
-    # fix 1-d numpy array shape
-    if len(data_shape) == 1:
-        data_shape = (data_shape[0], 1)
+def test_batched_iteration(dummy_dataset, batch_size, iterations):
+    data_loader = dummy_dataset.iter_batches(
+        batch_size=batch_size, iterations=iterations
+    )
+    data_shape = dummy_dataset.data[0].shape
 
     for iteration, batch in enumerate(data_loader):
-        batch_shape = batch[0].shape
+        batch_element_shape = batch[0].shape
 
         assert isinstance(batch, list)
-        assert len(batch) == data_shape[1]
-        assert len(batch_shape) == len(data_shape) - 1
-        assert all([a == b for a, b in zip(batch_shape[1:], data_shape[2:])])
+        assert batch_element_shape[0] == batch_size
+        assert all(
+            (
+                batch_dimension == data_dimension
+                for batch_dimension, data_dimension in zip(
+                    batch_element_shape[1:], data_shape[1:]
+                )
+            )
+        )
 
     assert iteration + 1 == iterations
