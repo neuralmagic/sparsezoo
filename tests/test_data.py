@@ -18,17 +18,21 @@ import pytest as pytest
 from sparsezoo.utils import Dataset
 
 
-@pytest.fixture
-def dummy_dataset():
-    _dummy_array_1 = np.random.rand(2, 3)
-    _dummy_array_2 = np.random.rand(34, 3)
-    return Dataset(data=[_dummy_array_1, _dummy_array_2], name="dummy")
+@pytest.mark.parametrize(
+    "dataset",
+    [Dataset(data=(np.random.rand(2, 45), np.random.rand(2, 45)), name="tuple")],
+)
+def test_has_iter_batches(dataset):
+    assert hasattr(dataset, "iter_batches")
 
 
-def test_has_iter_batches(dummy_dataset):
-    assert hasattr(dummy_dataset, "iter_batches")
-
-
+@pytest.mark.parametrize(
+    "dataset",
+    [
+        Dataset(data=[np.random.rand(2, 45), np.random.rand(2, 45)], name="list"),
+        Dataset(data=(np.random.rand(2, 45), np.random.rand(2, 45)), name="tuple"),
+    ],
+)
 @pytest.mark.parametrize(
     "batch_size",
     [
@@ -47,11 +51,9 @@ def test_has_iter_batches(dummy_dataset):
         100,
     ],
 )
-def test_batched_iteration(dummy_dataset, batch_size, iterations):
-    data_loader = dummy_dataset.iter_batches(
-        batch_size=batch_size, iterations=iterations
-    )
-    data_shape = dummy_dataset.data[0].shape
+def test_batched_iteration(dataset, batch_size, iterations):
+    data_loader = dataset.iter_batches(batch_size=batch_size, iterations=iterations)
+    data_shape = dataset.data[0].shape
 
     for iteration, batch in enumerate(data_loader):
         batch_element_shape = batch[0].shape
