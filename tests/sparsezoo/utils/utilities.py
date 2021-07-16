@@ -23,6 +23,14 @@ from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
 
 
+__all__ = [
+    "download_and_verify",
+    "model_constructor",
+    "validate_with_ort",
+    "validate_downloaded_model",
+]
+
+
 def download_and_verify(model: str, other_args: Optional[Dict] = None):
     if other_args is None:
         other_args = {
