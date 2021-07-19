@@ -26,7 +26,7 @@ def dummy_dataset():
 
 @pytest.fixture
 def single_input_dataset():
-    data = [np.random.rand(1, 2), np.random.rand(2, 2), np.random.rand(3, 2)]
+    data = [np.random.rand(3, 2), np.random.rand(3, 2), np.random.rand(3, 2)]
     return Dataset(data=data, name="single-input-test-dataset")
 
 
@@ -120,7 +120,7 @@ def test_iter_batches_single_input_batch_shape(
     )
 
     _data_dimensions = single_input_dataset.data[0].shape
-    expected_batch_shape = (batch_size, *_data_dimensions[1:])
+    expected_batch_shape = (batch_size, *_data_dimensions)
 
     for batch in loader:
         batch_data = batch[0]

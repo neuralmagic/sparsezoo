@@ -31,17 +31,10 @@ __all__ = ["Dataset", "RandomDataset", "DataLoader"]
 _LOGGER = logging.getLogger(__name__)
 
 
+#    A utility class to load data in batches for fixed number of iterations
+
+
 class _BatchLoader:
-    """
-    A utility class to load data in batches for fixed number of iterations
-
-    :param data: An iterable of numpy arrays or a list of list of numpy arrays
-        for multi-input models
-    :param batch_size: non-negative integer representing the size of each
-    :param iterations: non-negative integer representing
-        the number of batches to return
-    """
-
     __slots__ = [
         "_data",
         "_batch_size",
@@ -58,6 +51,9 @@ class _BatchLoader:
         iterations: int,
     ):
         self._data = data
+        _single_input = type(self._data[0]) is numpy.ndarray
+        if _single_input:
+            self._data = [self._data]
         self._batch_size = batch_size
         self._iterations = iterations
         if batch_size < 0 or iterations < 0:
@@ -71,113 +67,57 @@ class _BatchLoader:
         self._batches_created = 0
 
     def __iter__(self) -> Generator[List[numpy.ndarray], None, None]:
-        """
-        Iterate over the data in batches,
-        (yields from appropriate generator)
-        return: A generator for batches, each batch is enclosed in a list
-        """
-        if self._is_multi_input:
-            yield from self._multi_input_batch_generator()
-        else:
-            yield from self._single_input_batch_generator()
-
-    @property
-    def _is_multi_input(self) -> bool:
-        """
-        Check if data consists of multi-input elements
-        return: True if data consists of multi-input elements else False
-        """
-        return type(self._data[0]) is not numpy.ndarray
+        yield from self._multi_input_batch_generator()
 
     @property
     def _buffer_is_full(self) -> bool:
-        """
-        Check if buffer has reached the batch size
-        """
         return len(self._batch_buffer) == self._batch_size
 
     @property
     def _all_batches_loaded(self) -> bool:
-        """
-        Check if all batches have been loaded
-        """
         return self._batches_created >= self._iterations
-
-    def _single_input_batch_generator(
-        self,
-    ) -> Generator[List[numpy.ndarray], None, None]:
-        """
-        :returns: A generator for single input batches, each element is
-            of the form [(batch_size, features)]
-        """
-        while not self._all_batches_loaded:
-            for source in self._data:
-                yield from self._batch_generator(source=source)
-                if self._all_batches_loaded:
-                    break
 
     def _multi_input_batch_generator(
         self,
     ) -> Generator[List[numpy.ndarray], None, None]:
-        """
-        :returns: A generator for multi input batches, each element is
-            of the form [[(batch_size, features_a), (batch_size, features_b), ...]]
-        """
+        # A generator for with each element of the form
+        # [[(batch_size, features_a), (batch_size, features_b), ...]]
         while not self._all_batches_loaded:
             yield from self._batch_generator(source=self._data)
 
     def _batch_generator(self, source) -> Generator[List[numpy.ndarray], None, None]:
-        """
-        A helper function to create batches from source
-        """
+        # batches from source
         for sample in source:
             self._batch_buffer.append(sample)
             if self._buffer_is_full:
                 _batch = self._make_batch()
                 yield _batch
-                self._empty_buffer()
+                self._batch_buffer = []
                 self._batches_created += 1
                 if self._all_batches_loaded:
                     break
 
-    def _empty_buffer(self):
-        self._batch_buffer = []
-
     def _init_batch_template(
         self,
     ) -> Iterable[Union[List[numpy.ndarray], numpy.ndarray]]:
-        """
-        Initialize a placeholder for batches
-        :returns: A placeholder numpy array or list of numpy arrays of specific shape
-            and size (filled with zeros) required for future batches
-        """
-        if self._is_multi_input:
-            return [
-                numpy.ascontiguousarray(
-                    numpy.zeros((self._batch_size, *_input.shape), dtype=_input.dtype)
-                )
-                for _input in self._data[0]
-            ]
 
-        return numpy.ascontiguousarray(
-            numpy.zeros(
-                (self._batch_size, *self._data[0].shape[1:]), dtype=self._data[0].dtype
+        # A placeholder for batches
+
+        return [
+            numpy.ascontiguousarray(
+                numpy.zeros((self._batch_size, *_input.shape), dtype=_input.dtype)
             )
-        )
+            for _input in self._data[0]
+        ]
 
     def _make_batch(self) -> Iterable[Union[numpy.ndarray, List[numpy.ndarray]]]:
-        """
-        Copy contents of buffer to batch placeholder
-        return: A numpy array or list of numpy arrays representing the batch
-        """
-        if self._is_multi_input:
-            return [
-                numpy.stack(
-                    [sample[idx] for sample in self._batch_buffer], out=template
-                )
-                for idx, template in enumerate(self._batch_template)
-            ]
-        return [numpy.stack(self._batch_buffer, out=self._batch_template)]
+        # Copy contents of buffer to batch placeholder
+        # and return A list of numpy array(s) representing the batch
+
+        return [
+            numpy.stack([sample[idx] for sample in self._batch_buffer], out=template)
+            for idx, template in enumerate(self._batch_template)
+        ]
 
 
 class Dataset(Iterable):
@@ -229,6 +169,12 @@ class Dataset(Iterable):
     ) -> Generator[List[numpy.ndarray], None, None]:
         """
         A function to iterate over data in batches
+
+        :param batch_size: non-negative integer representing the size of each
+        :param iterations: non-negative integer representing
+            the number of batches to return
+        :returns: A generator for batches, each batch is enclosed in a list
+            Each batch is of the form [(batch_size, *feature_shape)]
         """
         return _BatchLoader(
             data=self.data, batch_size=batch_size, iterations=iterations
