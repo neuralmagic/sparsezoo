@@ -157,7 +157,7 @@ def load_numpy_list(
 
         loaded.append(dat)
 
-    return data
+    return loaded
 
 
 class NumpyArrayBatcher(object):
