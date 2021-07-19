@@ -62,8 +62,8 @@ class _BatchLoader:
         self._iterations = iterations
         if batch_size < 0 or iterations < 0:
             raise ValueError(
-                f"Both batch size and number of _iterations should be non-negative, "
-                f"supplied values (_batch_size, _iterations):{(batch_size, iterations)}"
+                f"Both batch size and number of iterations should be non-negative, "
+                f"supplied values (batch_size, iterations):{(batch_size, iterations)}"
             )
 
         self._batch_buffer = []
