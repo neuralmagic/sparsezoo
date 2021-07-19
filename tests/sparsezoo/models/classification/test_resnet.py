@@ -23,7 +23,7 @@ from sparsezoo.models.classification import (
     resnet_101_2x,
     resnet_152,
 )
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

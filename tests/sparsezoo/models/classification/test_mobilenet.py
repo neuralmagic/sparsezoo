@@ -14,7 +14,7 @@
 import pytest
 
 from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

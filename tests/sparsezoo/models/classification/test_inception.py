@@ -15,7 +15,7 @@
 import pytest
 
 from sparsezoo.models.classification import inception_v3
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

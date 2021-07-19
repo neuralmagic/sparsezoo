@@ -24,7 +24,7 @@ from sparsezoo.models.classification import (
     vgg_19,
     vgg_19bn,
 )
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

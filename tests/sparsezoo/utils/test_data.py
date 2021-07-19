@@ -120,12 +120,11 @@ def test_iter_batches_single_input_batch_shape(
     )
 
     _data_dimensions = single_input_dataset.data[0].shape
+    print("data dimensions", _data_dimensions)
     expected_batch_shape = (batch_size, *_data_dimensions)
-
+    print(expected_batch_shape)
     for batch in loader:
-        batch_data = batch[0]
-        batch_shape = batch_data.shape
-        assert batch_shape == expected_batch_shape
+        assert batch.shape == expected_batch_shape
 
 
 @pytest.mark.parametrize(

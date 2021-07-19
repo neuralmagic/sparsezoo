@@ -38,6 +38,7 @@ class _BatchLoader:
     __slots__ = [
         "_data",
         "_batch_size",
+        "_single_input",
         "_iterations",
         "_batch_buffer",
         "_batch_template",
@@ -51,8 +52,8 @@ class _BatchLoader:
         iterations: int,
     ):
         self._data = data
-        _single_input = type(self._data[0]) is numpy.ndarray
-        if _single_input:
+        self._single_input = type(self._data[0]) is numpy.ndarray
+        if self._single_input:
             self._data = [self._data]
         self._batch_size = batch_size
         self._iterations = iterations
@@ -114,10 +115,14 @@ class _BatchLoader:
         # Copy contents of buffer to batch placeholder
         # and return A list of numpy array(s) representing the batch
 
-        return [
+        batch = [
             numpy.stack([sample[idx] for sample in self._batch_buffer], out=template)
             for idx, template in enumerate(self._batch_template)
         ]
+
+        if self._single_input:
+            batch = batch[0]
+        return batch
 
 
 class Dataset(Iterable):

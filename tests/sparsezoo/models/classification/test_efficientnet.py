@@ -15,7 +15,7 @@
 import pytest
 
 from sparsezoo.models.classification import efficientnet_b0, efficientnet_b4
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(
