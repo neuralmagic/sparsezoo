@@ -15,7 +15,7 @@
 import pytest
 
 from sparsezoo.models.detection import yolo_v3
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

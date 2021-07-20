@@ -17,7 +17,7 @@ from typing import List
 import pytest
 
 from sparsezoo.models import Zoo
-from tests.sparsezoo.utils import download_and_verify
+from tests.sparsezoo.helpers import download_and_verify
 
 
 def _get_models(domain, sub_domain) -> List[str]:

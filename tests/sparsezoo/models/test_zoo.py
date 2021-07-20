@@ -19,7 +19,7 @@ import pytest
 
 from sparsezoo import Zoo
 from sparsezoo.utils import CACHE_DIR
-from tests.sparsezoo.utils import validate_downloaded_model
+from tests.sparsezoo.helpers import validate_downloaded_model
 
 
 @pytest.mark.parametrize(

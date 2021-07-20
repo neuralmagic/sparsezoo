@@ -15,7 +15,7 @@
 import pytest
 
 from sparsezoo.models.detection import ssd_resnet50_300
-from tests.sparsezoo.utils import model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
 @pytest.mark.parametrize(

@@ -19,7 +19,7 @@ Utilities for data loading into numpy for use in ONNX supported systems
 import logging
 import math
 from collections import OrderedDict
-from typing import Dict, Iterable, Iterator, List, Tuple, Union
+from typing import Dict, Generator, Iterable, Iterator, List, Tuple, Union
 
 import numpy
 
@@ -28,8 +28,100 @@ from sparsezoo.utils.numpy import NumpyArrayBatcher, load_numpy_list
 
 __all__ = ["Dataset", "RandomDataset", "DataLoader"]
 
-
 _LOGGER = logging.getLogger(__name__)
+
+
+#    A utility class to load data in batches for fixed number of iterations
+
+
+class _BatchLoader:
+    __slots__ = [
+        "_data",
+        "_batch_size",
+        "_was_wrapped_originally",
+        "_iterations",
+        "_batch_buffer",
+        "_batch_template",
+        "_batches_created",
+    ]
+
+    def __init__(
+        self,
+        data: Iterable[Union[numpy.ndarray, List[numpy.ndarray]]],
+        batch_size: int,
+        iterations: int,
+    ):
+        self._data = data
+        self._was_wrapped_originally = type(self._data[0]) is list
+        if not self._was_wrapped_originally:
+            self._data = [self._data]
+        self._batch_size = batch_size
+        self._iterations = iterations
+        if batch_size <= 0 or iterations <= 0:
+            raise ValueError(
+                f"Both batch size and number of iterations should be positive, "
+                f"supplied values (batch_size, iterations):{(batch_size, iterations)}"
+            )
+
+        self._batch_buffer = []
+        self._batch_template = self._init_batch_template()
+        self._batches_created = 0
+
+    def __iter__(self) -> Generator[List[numpy.ndarray], None, None]:
+        yield from self._multi_input_batch_generator()
+
+    @property
+    def _buffer_is_full(self) -> bool:
+        return len(self._batch_buffer) == self._batch_size
+
+    @property
+    def _all_batches_loaded(self) -> bool:
+        return self._batches_created >= self._iterations
+
+    def _multi_input_batch_generator(
+        self,
+    ) -> Generator[List[numpy.ndarray], None, None]:
+        # A generator for with each element of the form
+        # [[(batch_size, features_a), (batch_size, features_b), ...]]
+        while not self._all_batches_loaded:
+            yield from self._batch_generator(source=self._data)
+
+    def _batch_generator(self, source) -> Generator[List[numpy.ndarray], None, None]:
+        # batches from source
+        for sample in source:
+            self._batch_buffer.append(sample)
+            if self._buffer_is_full:
+                _batch = self._make_batch()
+                yield _batch
+                self._batch_buffer = []
+                self._batches_created += 1
+                if self._all_batches_loaded:
+                    break
+
+    def _init_batch_template(
+        self,
+    ) -> Iterable[Union[List[numpy.ndarray], numpy.ndarray]]:
+        # A placeholder for batches
+        return [
+            numpy.ascontiguousarray(
+                numpy.zeros((self._batch_size, *_input.shape), dtype=_input.dtype)
+            )
+            for _input in self._data[0]
+        ]
+
+    def _make_batch(self) -> Iterable[Union[numpy.ndarray, List[numpy.ndarray]]]:
+        # Copy contents of buffer to batch placeholder
+        # and return A list of numpy array(s) representing the batch
+
+        batch = [
+            numpy.stack([sample[idx] for sample in self._batch_buffer], out=template)
+            for idx, template in enumerate(self._batch_template)
+        ]
+
+        if not self._was_wrapped_originally:
+            # unwrap outer list
+            batch = batch[0]
+        return batch
 
 
 class Dataset(Iterable):
@@ -75,6 +167,22 @@ class Dataset(Iterable):
         :return: The list of data items for the dataset.
         """
         return self._data
+
+    def iter_batches(
+        self, batch_size: int, iterations: int
+    ) -> Generator[List[numpy.ndarray], None, None]:
+        """
+        A function to iterate over data in batches
+
+        :param batch_size: non-negative integer representing the size of each
+        :param iterations: non-negative integer representing
+            the number of batches to return
+        :returns: A generator for batches, each batch is enclosed in a list
+            Each batch is of the form [(batch_size, *feature_shape)]
+        """
+        return _BatchLoader(
+            data=self.data, batch_size=batch_size, iterations=iterations
+        )
 
 
 class RandomDataset(Dataset):
