@@ -38,7 +38,7 @@ class _BatchLoader:
     __slots__ = [
         "_data",
         "_batch_size",
-        "_single_input",
+        "_was_wrapped_originally",
         "_iterations",
         "_batch_buffer",
         "_batch_template",
@@ -52,14 +52,14 @@ class _BatchLoader:
         iterations: int,
     ):
         self._data = data
-        self._single_input = type(self._data[0]) is numpy.ndarray
-        if self._single_input:
+        self._was_wrapped_originally = type(self._data[0]) is list
+        if not self._was_wrapped_originally:
             self._data = [self._data]
         self._batch_size = batch_size
         self._iterations = iterations
-        if batch_size < 0 or iterations < 0:
+        if batch_size <= 0 or iterations <= 0:
             raise ValueError(
-                f"Both batch size and number of iterations should be non-negative, "
+                f"Both batch size and number of iterations should be positive, "
                 f"supplied values (batch_size, iterations):{(batch_size, iterations)}"
             )
 
@@ -101,9 +101,7 @@ class _BatchLoader:
     def _init_batch_template(
         self,
     ) -> Iterable[Union[List[numpy.ndarray], numpy.ndarray]]:
-
         # A placeholder for batches
-
         return [
             numpy.ascontiguousarray(
                 numpy.zeros((self._batch_size, *_input.shape), dtype=_input.dtype)
@@ -120,7 +118,8 @@ class _BatchLoader:
             for idx, template in enumerate(self._batch_template)
         ]
 
-        if self._single_input:
+        if not self._was_wrapped_originally:
+            # unwrap outer list
             batch = batch[0]
         return batch
 
