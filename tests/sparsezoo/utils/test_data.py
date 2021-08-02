@@ -14,17 +14,21 @@
 
 
 from collections import OrderedDict
+from typing import Tuple
 
 import pytest
 
-from sparsezoo.utils.data import DataLoader, RandomDataset
+from sparsezoo.utils.data import DataLoader, Dataset, RandomDataset
 
 
 # TESTS for DataLoader
 
 
 @pytest.fixture
-def dataset():
+def dataset() -> Dataset:
+    """
+    A Dataset containing 4 samples of 3 channel images
+    """
     name, typed_shapes, num_samples = "rd1", {"inp": ([3, 224, 224], None)}, 4
     data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
     yield data
@@ -32,7 +36,10 @@ def dataset():
 
 
 @pytest.fixture
-def dataset_b():
+def dataset_b() -> Dataset:
+    """
+    A Dataset containing 1 sample of a single channel image
+    """
     name, typed_shapes, num_samples = "rd2", {"inp": ([224, 224], None)}, 1
     data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
     yield data
@@ -40,7 +47,10 @@ def dataset_b():
 
 
 @pytest.fixture
-def empty_dataset():
+def empty_dataset() -> Dataset:
+    """
+    A Dataset with no samples
+    """
     name, typed_shapes, num_samples = "rd3", {"inp": ([224, 224], None)}, 0
     data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
     yield data
@@ -48,12 +58,19 @@ def empty_dataset():
 
 
 @pytest.fixture
-def dataset_and_shape(dataset):
+def dataset_and_shape(dataset) -> Tuple[Dataset, Tuple[int, ...]]:
+    """
+    Fixture to get the 3 channel image dataset along with image shape
+    """
     yield dataset, (3, 224, 224)
 
 
 @pytest.fixture
-def loader_and_shape(dataset_and_shape):
+def loader_and_shape(dataset_and_shape) -> Tuple[DataLoader, Tuple[int, ...]]:
+    """
+    Fixture to get a DataLoader instance for the 3 channel image dataset along
+    with expected batch shape
+    """
     _dataset, _shape = dataset_and_shape
     batch_size = 2
     expected_batch_shape = (batch_size, *_shape)
