@@ -11,204 +11,132 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable
 
-import numpy
-import numpy as np
+
+from collections import OrderedDict
+from typing import Tuple
+
 import pytest
 
-from sparsezoo.utils import Dataset
+from sparsezoo.utils.data import DataLoader, Dataset, RandomDataset
+
+
+# TESTS for DataLoader
 
 
 @pytest.fixture
-def dummy_dataset():
-    return Dataset(data=[np.random.rand(100, 10)], name="dummy-dataset")
+def dataset() -> Dataset:
+    """
+    A Dataset containing 4 samples of 3 channel images
+    """
+    name, typed_shapes, num_samples = "rd1", {"inp": ([3, 224, 224], None)}, 4
+    data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
+    yield data
+    del data
 
 
 @pytest.fixture
-def single_input_dataset():
-    data = [np.random.rand(3, 2), np.random.rand(3, 2), np.random.rand(3, 2)]
-    return Dataset(data=data, name="single-input-test-dataset")
+def dataset_b() -> Dataset:
+    """
+    A Dataset containing 1 sample of a single channel image
+    """
+    name, typed_shapes, num_samples = "rd2", {"inp": ([224, 224], None)}, 1
+    data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
+    yield data
+    del data
 
 
 @pytest.fixture
-def multi_input_dataset():
-    data = [
-        [np.random.rand(1, 2), np.random.rand(1, 3)],
-        [np.random.rand(1, 2), np.random.rand(1, 3)],
-    ]
-    return Dataset(data=data, name="multi-input-test-dataset")
+def empty_dataset() -> Dataset:
+    """
+    A Dataset with no samples
+    """
+    name, typed_shapes, num_samples = "rd3", {"inp": ([224, 224], None)}, 0
+    data = RandomDataset(name=name, typed_shapes=typed_shapes, num_samples=num_samples)
+    yield data
+    del data
 
 
 @pytest.fixture
-def both_datasets(single_input_dataset, multi_input_dataset):
-    return [single_input_dataset, multi_input_dataset]
+def dataset_and_shape(dataset) -> Tuple[Dataset, Tuple[int, ...]]:
+    """
+    Fixture to get the 3 channel image dataset along with image shape
+    """
+    yield dataset, (3, 224, 224)
 
 
-def test_has_iter_batches(dummy_dataset):
-    assert hasattr(dummy_dataset, "iter_batches")
-
-
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        10,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        4,
-        10,
-    ],
-)
-def test_iter_batches_returns_iterable(both_datasets, batch_size, iterations):
-    for dataset in both_datasets:
-        loader = dataset.iter_batches(batch_size=batch_size, iterations=iterations)
-        assert isinstance(loader, Iterable)
-
-
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        10,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        4,
-        10,
-    ],
-)
-def test_batch_is_in_list(multi_input_dataset, batch_size, iterations):
-    loader = multi_input_dataset.iter_batches(
-        batch_size=batch_size, iterations=iterations
+@pytest.fixture
+def loader_and_shape(dataset_and_shape) -> Tuple[DataLoader, Tuple[int, ...]]:
+    """
+    Fixture to get a DataLoader instance for the 3 channel image dataset along
+    with expected batch shape
+    """
+    _dataset, _shape = dataset_and_shape
+    batch_size = 2
+    expected_batch_shape = (batch_size, *_shape)
+    loader = DataLoader(
+        _dataset, batch_size=batch_size, iter_steps=3, batch_as_list=False
     )
-    for batch in loader:
-        assert isinstance(batch, list)
+    yield loader, expected_batch_shape
 
 
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        10,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        4,
-        10,
-    ],
-)
-def test_batch_not_in_list_for_single_input(
-    single_input_dataset, batch_size, iterations
-):
-    loader = single_input_dataset.iter_batches(
-        batch_size=batch_size, iterations=iterations
-    )
-    for batch in loader:
-        assert not isinstance(batch, list) and isinstance(batch, numpy.ndarray)
+class TestDataLoader:
+    def test_no_dataset(self):
+        with pytest.raises(ValueError):
+            DataLoader(batch_size=1, iter_steps=1, batch_as_list=True)
 
+    def test_empty_dataset(self, empty_dataset):
+        with pytest.raises(ValueError):
+            DataLoader(empty_dataset, batch_size=1, iter_steps=1, batch_as_list=True)
 
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        10,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        4,
-        10,
-    ],
-)
-def test_iter_batches_single_input_batch_shape(
-    single_input_dataset, batch_size, iterations
-):
-    loader = single_input_dataset.iter_batches(
-        batch_size=batch_size, iterations=iterations
-    )
+    def test_zero_batch_size(self, dataset):
+        with pytest.raises(ValueError):
+            DataLoader(dataset, batch_size=0, iter_steps=1, batch_as_list=True)
 
-    _data_dimensions = single_input_dataset.data[0].shape
-    print("data dimensions", _data_dimensions)
-    expected_batch_shape = (batch_size, *_data_dimensions)
-    print(expected_batch_shape)
-    for batch in loader:
-        assert batch.shape == expected_batch_shape
+    def test_negative_iter_steps(self, dataset):
+        with pytest.raises(ValueError):
+            DataLoader(dataset, batch_size=1, iter_steps=-2, batch_as_list=True)
 
+    def test_datasets_with_different_size(self, dataset, dataset_b):
+        with pytest.raises(ValueError):
+            DataLoader(
+                dataset,
+                dataset_b,
+                batch_size=1,
+                iter_steps=-2,
+                batch_as_list=True,
+            )
 
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        10,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        4,
-        10,
-    ],
-)
-def test_iter_batches_number_of_iterations(both_datasets, batch_size, iterations):
-    for dataset in both_datasets:
-        loader = dataset.iter_batches(batch_size=batch_size, iterations=iterations)
-        for iteration, batch in enumerate(loader):
-            pass
-        assert iteration + 1 == iterations
+    def test_batch_is_list(self, dataset):
+        loader = DataLoader(dataset, batch_size=1, iter_steps=1, batch_as_list=True)
+        assert isinstance(next(loader), list)
 
+    def test_batch_is_not_list(self, dataset):
+        loader = DataLoader(dataset, batch_size=1, iter_steps=1, batch_as_list=False)
+        assert isinstance(next(loader), OrderedDict)
 
-@pytest.mark.parametrize(
-    "batch_size",
-    [
-        1,
-        2,
-        3,
-    ],
-)
-@pytest.mark.parametrize(
-    "iterations",
-    [
-        1,
-        2,
-        3,
-    ],
-)
-def test_iter_batches_multi_input_batch_shape(
-    multi_input_dataset, batch_size, iterations
-):
-    expected_batch_dimensions = [
-        (batch_size, *multi_input.shape) for multi_input in multi_input_dataset.data[0]
-    ]
-    loader = multi_input_dataset.iter_batches(
-        batch_size=batch_size, iterations=iterations
-    )
+    def test_batch_shape_and_number(self, loader_and_shape):
+        _loader, _expected_batch_shape = loader_and_shape
+        _expected_batches = _loader.iter_steps
+        for index, batch in enumerate(_loader):
+            assert batch["inp"].shape == _expected_batch_shape
+        assert index + 1 == _expected_batches
 
-    for batch in loader:
-        assert all(
-            expected_batch_dimensions[idx] == multi_input.shape
-            for idx, multi_input in enumerate(batch)
-        )
+    def test_infinite_iteration(self, dataset):
+        ITERATION_LIMIT = 1000
+        loader = DataLoader(dataset, batch_size=1, iter_steps=-1, batch_as_list=False)
+
+        for index, batch in enumerate(loader):
+            if index == ITERATION_LIMIT:
+                break
+        else:
+            assert False
+
+    def test_batch_index_greater_than_batches(self, dataset_b):
+        with pytest.raises(IndexError):
+            DataLoader(
+                dataset_b,
+                batch_size=1,
+                iter_steps=1,
+                batch_as_list=True,
+            ).get_batch(10)
