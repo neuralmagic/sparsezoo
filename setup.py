@@ -51,6 +51,7 @@ _dev_deps = [
     "beautifulsoup4==4.9.3",
     "black>=20.8b1",
     "flake8>=3.8.3",
+    "flakey>-3.7.0",
     "isort>=5.7.0",
     "m2r2~=0.2.7",
     "myst-parser~=0.14.0",
