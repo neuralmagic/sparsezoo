@@ -23,10 +23,9 @@ from sparsezoo.models.classification import (
     resnet_101_2x,
     resnet_152,
 )
-from tests.sparsezoo.helpers import delay_rerun, model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -61,7 +60,6 @@ def test_resnet_18(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -96,7 +94,6 @@ def test_resnet_34(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -130,7 +127,6 @@ def test_resnet_50(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -196,7 +192,6 @@ def test_resnet_50_extended(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -230,7 +225,6 @@ def test_resnet_50_2x(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -265,7 +259,6 @@ def test_resnet_101(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -299,7 +292,6 @@ def test_resnet_101_2x(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

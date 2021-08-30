@@ -19,10 +19,9 @@ import pytest
 
 from sparsezoo import Zoo
 from sparsezoo.utils import CACHE_DIR
-from tests.sparsezoo.helpers import delay_rerun, validate_downloaded_model
+from tests.sparsezoo.helpers import validate_downloaded_model
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args",
     [
@@ -70,7 +69,6 @@ def test_load_model(model_args, other_args):
     shutil.rmtree(model.dir_path)
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args",
     [
@@ -117,7 +115,6 @@ def test_download_model(model_args, other_args):
     shutil.rmtree(model.dir_path)
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "stub, model_args, other_args",
     [
@@ -152,7 +149,6 @@ def test_load_model_from_stub(stub, model_args, other_args):
     shutil.rmtree(model.dir_path)
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args",
     [
@@ -180,7 +176,6 @@ def test_search_models(model_args, other_args):
         assert len(models) <= other_args["page_length"]
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args",
     [
@@ -215,7 +210,6 @@ def test_search_similar_models(model_args, other_args):
         assert sim.sub_architecture == model.sub_architecture
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args",
     [
@@ -255,7 +249,6 @@ def test_search_sparse_models(model_args, other_args):
         assert sim.training_scheme == model.training_scheme
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
@@ -306,7 +299,6 @@ def test_search_recipes(recipe_args, other_args):
         assert len(recipes) <= other_args["page_length"]
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_args,other_args,other_recipe_args",
     [
@@ -383,7 +375,6 @@ def test_search_sparse_recipes(model_args, other_args, other_recipe_args):
             assert recipe.recipe_type == other_recipe_args["recipe_type"]
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "model_stub,other_args",
     [
@@ -410,7 +401,6 @@ def test_search_sparse_recipes_from_stub(model_stub, other_args):
         assert recipe.model_metadata.training_scheme == model.training_scheme
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
@@ -475,7 +465,6 @@ def test_load_recipe(recipe_args, other_args):
     shutil.rmtree(recipe.dir_path)
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
@@ -539,7 +528,6 @@ def test_download_recipe(recipe_args, other_args):
     shutil.rmtree(recipe.dir_path)
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
@@ -608,7 +596,6 @@ def test_load_model_from_recipe(recipe_args, other_args):
         assert model_dict[field] == value
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
@@ -683,7 +670,6 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
             assert model_dict[field] == value
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
