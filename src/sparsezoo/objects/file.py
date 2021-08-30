@@ -328,6 +328,7 @@ class File(BaseObject, Downloadable):
         overwrite: bool = False,
         refresh_token: bool = False,
         show_progress: bool = True,
+        num_retries: int = 3,
     ):
         """
         Downloads a sparsezoo file.
@@ -344,26 +345,46 @@ class File(BaseObject, Downloadable):
 
             return
 
-        if not self.url:
-            _LOGGER.info(
-                "Getting signed url for "
-                f"{self.model_metadata.model_id}/{self.display_name}"
-            )
-            self._url = self._signed_url(refresh_token)
+        retry_attempts = 0
+        download_exception = None
+        for retry in range(num_retries):
+            if not self.url:
+                _LOGGER.info(
+                    "Getting signed url for "
+                    f"{self.model_metadata.model_id}/{self.display_name}"
+                )
+                self._url = self._signed_url(refresh_token)
 
-        _LOGGER.info(f"Downloading model file {self.display_name} to {self.path}")
+            _LOGGER.debug(f"downloading attempt {retry} for file from {self._url}")
+            _LOGGER.info(f"Downloading model file {self.display_name} to {self.path}")
 
-        # cleaning up target
-        try:
-            os.remove(self.path)
-        except Exception:
-            pass
+            # cleaning up target
+            try:
+                os.remove(self.path)
+            except Exception:
+                pass
 
-        # creating target and downloading
-        create_parent_dirs(self.path)
-        download_file(
-            self.url, self.path, overwrite=overwrite, show_progress=show_progress
-        )
+            # creating target and downloading
+            create_parent_dirs(self.path)
+            try:
+                download_file(
+                    self.url,
+                    self.path,
+                    overwrite=overwrite,
+                    show_progress=show_progress,
+                )
+                download_exception = None
+                return
+            except Exception as e:
+                retry_attempts += 1
+                download_exception = e
+                if retry_attempts > num_retries:
+                    raise
+
+                _LOGGER.debug(f"downloading attempt {retry} failed. Clearing url")
+                self._url = None
+        if download_exception is not None:
+            raise download_exception
 
     def _signed_url(
         self,

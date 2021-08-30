@@ -17,7 +17,7 @@ from typing import List
 import pytest
 
 from sparsezoo.models import Zoo
-from tests.sparsezoo.helpers import download_and_verify
+from tests.sparsezoo.helpers import delay_rerun, download_and_verify
 
 
 def _get_models(domain, sub_domain) -> List[str]:
@@ -32,11 +32,13 @@ def _get_models(domain, sub_domain) -> List[str]:
     return [model.stub for model in models]
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(("model"), _get_models("cv", "classification"))
 def test_classification_models(model):
     download_and_verify(model)
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(("model"), _get_models("cv", "detection"))
 def test_detection_models(model):
     download_and_verify(model)

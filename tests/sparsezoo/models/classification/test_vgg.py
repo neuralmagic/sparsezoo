@@ -24,9 +24,10 @@ from sparsezoo.models.classification import (
     vgg_19,
     vgg_19bn,
 )
-from tests.sparsezoo.helpers import model_constructor
+from tests.sparsezoo.helpers import delay_rerun, model_constructor
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -61,6 +62,7 @@ def test_vgg_11(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -94,6 +96,7 @@ def test_vgg_11_bn(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -127,6 +130,7 @@ def test_vgg_13(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -160,6 +164,7 @@ def test_vgg_13_bn(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -195,6 +200,7 @@ def test_vgg_16(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -228,6 +234,7 @@ def test_vgg_16_bn(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -262,6 +269,7 @@ def test_vgg_19(
     )
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
