@@ -14,6 +14,7 @@
 
 import os
 import shutil
+import time
 from collections import OrderedDict
 from typing import Callable, Dict, List, Optional
 
@@ -21,6 +22,11 @@ import onnxruntime
 from sparsezoo.models import Zoo
 from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
+
+
+def delay_rerun(*args):
+    time.sleep(5)
+    return True
 
 
 def download_and_verify(model: str, other_args: Optional[Dict] = None):

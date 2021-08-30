@@ -15,9 +15,10 @@
 import pytest
 
 from sparsezoo.models.classification import inception_v3
-from tests.sparsezoo.helpers import model_constructor
+from tests.sparsezoo.helpers import delay_rerun, model_constructor
 
 
+@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
