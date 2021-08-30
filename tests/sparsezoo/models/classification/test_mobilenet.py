@@ -14,10 +14,9 @@
 import pytest
 
 from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
-from tests.sparsezoo.helpers import delay_rerun, model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "sparse_name,sparse_category,sparse_target",
@@ -50,7 +49,6 @@ def test_mobilenet_v1(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "sparse_name,sparse_category,sparse_target",

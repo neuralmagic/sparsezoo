@@ -15,10 +15,9 @@
 import pytest
 
 from sparsezoo.models.detection import ssd_resnet50_300
-from tests.sparsezoo.helpers import delay_rerun, model_constructor
+from tests.sparsezoo.helpers import model_constructor
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -52,7 +51,6 @@ def test_ssd_resnet50_300(
     )
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
