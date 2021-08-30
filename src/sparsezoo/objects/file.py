@@ -336,6 +336,7 @@ class File(BaseObject, Downloadable):
         :param overwrite: True to overwrite any previous file, False otherwise
         :param refresh_token: True to refresh the auth token, False otherwise
         :param show_progress: True to print tqdm progress, False otherwise
+        :param num_retries: The number of times to retry downloading the file
         """
         if os.path.exists(self.path) and not overwrite:
             _LOGGER.debug(
