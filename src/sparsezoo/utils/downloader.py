@@ -71,6 +71,7 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
             )
 
     request = requests.get(url_path, stream=True)
+    request.raise_for_status()
     content_length = request.headers.get("content-length")
 
     try:

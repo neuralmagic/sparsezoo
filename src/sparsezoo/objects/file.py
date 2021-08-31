@@ -379,9 +379,7 @@ class File(BaseObject, Downloadable):
                 return
             except Exception as e:
                 download_exception = e
-                _LOGGER.debug(
-                    f"downloading attempt {retry_attempts} failed. Clearing url"
-                )
+                _LOGGER.debug(f"download attempt {retry_attempts} failed. Clearing url")
                 self._url = None
         if download_exception is not None:
             raise download_exception
