@@ -658,12 +658,12 @@ class Recipe(File):
             return base_framework_files or framework_files
 
 
-def _get_stub_args_recipe_type(stub_args: Dict[str, str]) -> str:
+def _get_stub_args_recipe_type(stub_args: Dict[str, str]) -> Optional[str]:
     # check recipe type, default to original, and validate
     recipe_type = stub_args.get("recipe_type")
     valid_recipe_types = list(map(lambda typ: typ.value, RecipeTypes))
 
-    if recipe_type is None or not any(
+    if recipe_type is not None and not any(
         recipe_type.startswith(start) for start in valid_recipe_types
     ):
         raise ValueError(
