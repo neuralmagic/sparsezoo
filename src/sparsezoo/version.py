@@ -18,6 +18,7 @@ Functionality for storing and setting the version info for SparseZoo
 
 
 import logging
+import threading
 from datetime import date
 
 import requests
@@ -39,11 +40,11 @@ def _generate_version():
     )
 
 
-def _version_check(version, package_name, package_integration):
+def _version_check(package_name, package_version, package_integration):
 
     url = f"{LATEST_PACKAGE_VERSION_URL}/\
         packages={package_name}\
-        &versions={version}\
+        &versions={package_version}\
         &integrations={package_integration}"
     response = requests.get(url)  # no token-headers required
     response.raise_for_status()
@@ -77,4 +78,13 @@ version_major, version_minor, version_bug, version_build = version.split(".") + 
 version_major_minor = f"{version_major}.{version_minor}"
 
 
-# thread running in the background to run [_version_check] here
+package_integration = ""  # temp holder
+
+threading.Thread(
+    target=_version_check,
+    kwargs={
+        "package_name": __name__,
+        "package_version": version,
+        "package_integration": package_integration,
+    },
+).start()
