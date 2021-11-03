@@ -16,8 +16,16 @@
 Functionality for storing and setting the version info for SparseZoo
 """
 
+
+import logging
 from datetime import date
 
+import requests
+
+from sparsezoo.requests.base import LATEST_PACKAGE_VERSION_URL
+
+
+_LOGGER = logging.getLogger(__name__)
 
 version_base = "0.9.0"
 is_release = False  # change to True to set the generated version as a release version
@@ -29,6 +37,25 @@ def _generate_version():
         if is_release
         else f"{version_base}.{date.today().strftime('%Y%m%d')}"
     )
+
+
+def _version_check(version, package_name, package_integration):
+
+    url = f"{LATEST_PACKAGE_VERSION_URL}/\
+        packages={package_name}\
+        &versions={version}\
+        &integrations={package_integration}"
+    response = requests.get(url)  # no token-headers required
+    response.raise_for_status()
+
+    response_json = response.json()
+    for checkedPackage in response_json["checkedPackages"]:
+        if not checkedPackage["isLatest"]:
+            _LOGGER.warning(
+                f"Latest version {checkedPackage.isLatestVersion} \
+                available for {checkedPackage.packageName}. \
+                Current version {checkedPackage.userVersion}"
+            )
 
 
 __all__ = [
@@ -48,3 +75,6 @@ version_major, version_minor, version_bug, version_build = version.split(".") + 
     [None] if len(version.split(".")) < 4 else []
 )  # handle conditional for version being 3 parts or 4 (4 containing build date)
 version_major_minor = f"{version_major}.{version_minor}"
+
+
+# thread running in the background to run [_version_check] here

@@ -43,6 +43,7 @@ BASE_API_URL = (
 )
 MODELS_API_URL = f"{BASE_API_URL}/models"
 RECIPES_API_URL = f"{BASE_API_URL}/recipes"
+LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
 
 # optional prefix for stubs
 ZOO_STUB_PREFIX = "zoo:"
