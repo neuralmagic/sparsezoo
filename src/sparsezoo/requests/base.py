@@ -31,6 +31,7 @@ __all__ = [
     "RecipeArgs",
     "RECIPES_API_URL",
     "parse_zoo_stub",
+    "LATEST_PACKAGE_VERSION_URL",
 ]
 
 
