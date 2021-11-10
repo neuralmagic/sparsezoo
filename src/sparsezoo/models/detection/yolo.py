@@ -40,7 +40,7 @@ def yolo_v3(
     force_token_refresh: bool = False,
 ) -> Model:
     """
-    Convenience function for getting an ssd resnet50 300 model
+    Convenience function for getting an yolo_v3 model
 
     :param sub_architecture: The sub architecture of the model the object belongs
         to; e.g. spp
