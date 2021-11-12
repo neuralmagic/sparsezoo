@@ -55,8 +55,7 @@ def package_version_check_request(
                     f"however version {checked_package['latest_package_version']} "
                     "is available.\n"
                     "Consider upgrading via executing the "
-                    f"'pip install {checked_package['package_name']}' "
-                    "command.\n"
+                    f"'pip install --upgrade' command.\n"
                     "To turn off set an environmental variable "
                     "NM_VERSION_CHECK=false"
                 )
