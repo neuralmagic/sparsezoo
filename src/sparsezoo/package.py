@@ -15,6 +15,7 @@
 import logging
 import os
 import threading
+from typing import Optional
 
 import requests
 
@@ -25,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def package_version_check_request(
-    package_name: str, package_integration: str, package_version: str
+    package_name: str, package_version: str, package_integration: Optional[str]
 ):
     """
     Make an api call to api-neuralmagic.com, retrieve payload and check if the
@@ -66,7 +67,7 @@ def package_version_check_request(
 
 
 def version_check_execution_condition(
-    package_name: str, package_integration: str, package_version: str
+    package_name: str, package_version: str, package_integration: Optional[str]
 ):
     """
     Check if conditions are met to run the version-check api
@@ -92,7 +93,7 @@ def version_check_execution_condition(
 
 
 def check_package_version(
-    package_name: str, package_version: str, package_integration: str
+    package_name: str, package_version: str, package_integration: Optional[str] = None
 ):
     """
     Run a background thread to run version-check api
@@ -105,7 +106,7 @@ def check_package_version(
         target=version_check_execution_condition,
         kwargs={
             "package_name": package_name,
-            "package_integration": package_integration,
             "package_version": package_version,
+            "package_integration": package_integration,
         },
     ).start()
