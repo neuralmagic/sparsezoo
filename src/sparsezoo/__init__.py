@@ -15,7 +15,8 @@
 # limitations under the License.
 
 """
-Functionality for accessing models, recipes, and supporting files in the SparseZoo
+- Functionality for accessing models, recipes, and supporting files in the SparseZoo
+- Notify the user the last pypi package version
 """
 
 # flake8: noqa
@@ -25,3 +26,12 @@ from .version import *
 from .main import *
 from .models.zoo import *
 from .objects import *
+from .package import *
+
+
+from sparsezoo.package import check_package_version as _check_package_version
+
+_check_package_version(
+    package_name=__name__ if is_release else f"{__name__}-nightly",
+    package_version=version,
+)

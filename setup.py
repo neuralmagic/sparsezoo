@@ -24,7 +24,8 @@ optional arguments:
 """
 
 import os
-from typing import Tuple, List, Dict
+from typing import Dict, List, Tuple
+
 from setuptools import find_packages, setup
 
 # default variables to be overwritten by the version.py file
