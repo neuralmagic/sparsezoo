@@ -15,6 +15,7 @@
 from typing import List
 
 import pytest
+from flaky import flaky
 
 from sparsezoo.models import Zoo
 from tests.sparsezoo.helpers import download_and_verify
@@ -32,6 +33,7 @@ def _get_models(domain, sub_domain) -> List[str]:
     return [model.stub for model in models]
 
 
+@flaky(max_runs=3)
 @pytest.mark.parametrize(("model"), _get_models("cv", "classification"))
 def test_classification_models(model):
     download_and_verify(model)

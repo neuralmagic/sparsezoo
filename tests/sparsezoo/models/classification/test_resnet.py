@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+from flaky import flaky
 
 from sparsezoo.models.classification import (
     resnet_18,
@@ -60,6 +61,7 @@ def test_resnet_18(
     )
 
 
+@flaky(max_runs=3)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -127,6 +129,7 @@ def test_resnet_50(
     )
 
 
+@flaky(max_runs=3)
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
