@@ -61,7 +61,7 @@ def test_resnet_18(
     )
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"
@@ -129,7 +129,7 @@ def test_resnet_50(
     )
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(
     (
         "download,framework,repo,dataset,training_scheme,"

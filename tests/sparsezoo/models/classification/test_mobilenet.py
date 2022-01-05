@@ -19,7 +19,7 @@ from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
 from tests.sparsezoo.helpers import model_constructor
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "sparse_name,sparse_category,sparse_target",

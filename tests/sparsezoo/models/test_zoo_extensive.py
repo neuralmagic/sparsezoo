@@ -33,7 +33,7 @@ def _get_models(domain, sub_domain) -> List[str]:
     return [model.stub for model in models]
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(("model"), _get_models("cv", "classification"))
 def test_classification_models(model):
     download_and_verify(model)

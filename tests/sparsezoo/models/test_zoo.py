@@ -116,7 +116,7 @@ def test_download_model(model_args, other_args):
     shutil.rmtree(model.dir_path)
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(
     "stub, model_args, other_args",
     [
@@ -403,7 +403,7 @@ def test_search_sparse_recipes_from_stub(model_stub, other_args):
         assert recipe.model_metadata.training_scheme == model.training_scheme
 
 
-@flaky(max_runs=3)
+@flaky
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
