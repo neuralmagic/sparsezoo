@@ -11,12 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import pytest
+from flaky import flaky
 
 from sparsezoo.models.classification import mobilenet_v1, mobilenet_v2
 from tests.sparsezoo.helpers import model_constructor
 
 
+@flaky
 @pytest.mark.parametrize(
     "download,framework,repo,dataset,training_scheme,"
     "sparse_name,sparse_category,sparse_target",
