@@ -43,7 +43,7 @@ def package_version_check_request(
         f"&versions={package_version}"
     )
     try:
-        response = requests.get(url)  # no token-headers required
+        response = requests.post(url)  # no token-headers required
         response.raise_for_status()
         response_json = response.json()
 
