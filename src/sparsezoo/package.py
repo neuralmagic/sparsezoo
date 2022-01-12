@@ -62,7 +62,7 @@ def package_version_check_request(
                 )
     except Exception as err:
         raise RuntimeError(
-            f"Execption occured in the Neural Magic's internal version-api check\n{err}"
+            f"Exception occured in the Neural Magic's internal version-api check\n{err}"
         )
 
 
