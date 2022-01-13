@@ -157,12 +157,25 @@ print(sparse_models)
 
 In addition to the Python APIs, a console script entry point is installed with the package `sparsezoo`.
 This enables easy interaction straight from your console/terminal.
-Note, for some environments the console scripts cannot install properly.
-If this happens for your system and the sparsezoo command is not available, 
-`https://github.com/neuralmagic/sparsezoo/blob/main/scripts/sparsezoo.py` may be used in its place.
+
+#### Downloading
+
+Download command help
 
 ```shell script
-sparsezoo -h
+sparsezoo.download -h
+```
+
+<br>Download ResNet-50 Model
+
+```shell script
+sparsezoo.download zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/base-none
+```
+
+<br>Download pruned and quantized ResNet-50 Model
+
+```shell script
+sparsezoo.download zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned_quant-moderate
 ```
 
 #### Searching
@@ -176,41 +189,14 @@ sparsezoo search -h
 <br>Searching for all classification models in the computer vision domain
 
 ```shell script
-sparsezoo search --domain cv --sub-domain classification \
-    --architecture resnet_v1 --sub-architecture 50
+sparsezoo search --domain cv --sub-domain classification
 ```
 
 <br>Searching for all ResNet-50 models
 
 ```shell script
-sparsezoo search --domain cv --sub-domain classification
-```
-
-#### Downloading
-
-Download command help
-
-```shell script
-sparsezoo download -h
-```
-
-<br>Download ResNet-50 Model
-
-```shell script
-sparsezoo download --domain cv --sub-domain classification \
-    --architecture resnet_v1 --sub-architecture 50 \
-    --framework pytorch --repo sparseml --dataset imagenet \
-    --sparse-name base --sparse-category none
-```
-
-<br>Download pruned and quantized ResNet-50 Model
-
-```shell script
-sparsezoo download --domain cv --sub-domain classification \
-    --architecture resnet_v1 --sub-architecture 50 \
-    --framework pytorch --repo sparseml \
-    --dataset imagenet --training-scheme augmented \
-    --sparse-name pruned_quant --sparse-category aggressive
+sparsezoo search --domain cv --sub-domain classification \
+    --architecture resnet_v1 --sub-architecture 50
 ```
 
 For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
