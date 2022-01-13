@@ -84,7 +84,12 @@ def _setup_extras() -> Dict:
 
 
 def _setup_entry_points() -> Dict:
-    return {"console_scripts": ["sparsezoo=sparsezoo.main:main"]}
+    return {
+        "console_scripts": [
+            "sparsezoo=sparsezoo.main:main",
+            "sparsezoo.download=sparsezoo.download_main:main",
+        ]
+    }
 
 
 def _setup_long_description() -> Tuple[str, str]:

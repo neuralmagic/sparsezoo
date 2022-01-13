@@ -24,6 +24,7 @@
 
 from .version import *
 from .main import *
+from .download_main import *
 from .models.zoo import *
 from .objects import *
 from .package import *
