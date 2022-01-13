@@ -189,14 +189,14 @@ sparsezoo search -h
 <br>Searching for all classification models in the computer vision domain
 
 ```shell script
-sparsezoo search --domain cv --sub-domain classification \
-    --architecture resnet_v1 --sub-architecture 50
+sparsezoo search --domain cv --sub-domain classification
 ```
 
 <br>Searching for all ResNet-50 models
 
 ```shell script
-sparsezoo search --domain cv --sub-domain classification
+sparsezoo search --domain cv --sub-domain classification \
+    --architecture resnet_v1 --sub-architecture 50
 ```
 
 For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
