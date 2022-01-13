@@ -103,8 +103,8 @@ def main():
 
     print("Download results")
     print("====================")
-    print("")
-    print(f"downloaded to {model.dir_path}")
+    print()
+    print(f"{model.display_name} downloaded to {model.dir_path}")
 
 
 if __name__ == "__main__":
