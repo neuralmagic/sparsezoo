@@ -58,7 +58,7 @@ It simplifies and accelerates your time-to-value in building performant deep lea
 Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
-Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
+Recipe-driven approaches built around sparsification algorithms allow you to use the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
@@ -66,8 +66,8 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Highlights
 
-- [Available Models Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md)
-- [Available Recipes Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/recipes.md)
+- [Available Models Listing](./docs/source/models.md)
+- [Available Recipes Listing](./docs/source/recipes.md)
 
 ## Installation
 
@@ -82,7 +82,7 @@ pip install sparsezoo
 
 ## Quick Tour
 
-Each model in the SparseZoo has a specific stub that identifies it. The stubs are made up of the following structure:
+Each model in SparseZoo has a specific stub that identifies it. The stubs are made up of the following structure:
 
 `DOMAIN/SUB_DOMAIN/ARCHITECTURE{-SUB_ARCHITECTURE}/FRAMEWORK/REPO/DATASET{-TRAINING_SCHEME}/SPARSE_NAME-SPARSE_CATEGORY-{SPARSE_TARGET}`
 
@@ -104,18 +104,18 @@ The properties within each model stub are defined as the following:
 
 The contents of each model are made up of the following:
 
-- model.md: The model card containing metadata, descriptions, and information for the model.
-- model.onnx: The [ONNX](https://onnx.ai/) representation of the model's graph.
-- model.onnx.tar.gz: A compressed format for the ONNX file. 
-    Currently ONNX does not support sparse tensors and quantized sparse tensors well for compression.
-- [FRAMEWORK]/model.[EXTENSION]: The native ML framework file(s) for the model in which it was originally trained.
+- `model.md`: The model card containing metadata, descriptions, and information for the model.
+- `model.onnx`: The [ONNX](https://onnx.ai/) representation of the model's graph.
+- `model.onnx`.tar.gz: A compressed format for the ONNX file. 
+    Currently, ONNX does not support sparse tensors and quantized sparse tensors well for compression.
+- `[FRAMEWORK]/model.[EXTENSION]`: The native ML framework file(s) for the model in which it was originally trained.
     Such as PyTorch, Keras, TensorFlow V1
-- recipes/original.[md|yaml]: The original sparsification recipe used to create the model.
-- recipes/[NAME].[md|yaml]: Additional sparsification recipes that can be used with the model such as transfer learning.
-- sample-originals: The original sample data without any preprocessing for use with the model.
-- sample-inputs: The sample data after pre processing for use with the model.
-- sample-outputs: The outputs after running the sample inputs through the model.
-- sample-labels: The labels that classify the sample inputs.
+- `recipes/original.[md|yaml]`: The original sparsification recipe used to create the model.
+- `recipes/[NAME].[md|yaml]`: Additional sparsification recipes that can be used with the model such as transfer learning.
+- `sample-originals`: The original sample data without any preprocessing for use with the model.
+- `sample-inputs`: The sample data after pre-processing for use with the model.
+- `sample-outputs`: The outputs after running the sample inputs through the model.
+- `sample-labels`: The labels that classify the sample inputs.
 
 ### Python APIS
 
@@ -159,7 +159,7 @@ In addition to the Python APIs, a console script entry point is installed with t
 This enables easy interaction straight from your console/terminal.
 Note, for some environments the console scripts cannot install properly.
 If this happens for your system and the sparsezoo command is not available, 
-`https://github.com/neuralmagic/sparsezoo/blob/main/scripts/sparsezoo.py` may be used in its place.
+[`scripts/sparsezoo_script.py`](./scripts/sparsezoo_script.py) may be used in its place.
 
 ```shell script
 sparsezoo -h
@@ -233,19 +233,19 @@ Additionally, more information can be found via [GitHub Releases.](https://githu
 
 ### License
 
-The project is licensed under the [Apache License Version 2.0](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE).
+The project is licensed under the [Apache License Version 2.0](./LICENSE).
 
 ## Community
 
 ### Contribute
 
-We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
+We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here](./CONTRIBUTING.md).
 
 ### Join
 
 For user help or questions about SparseZoo, sign up or log in: **Deep Sparse Community** [Discourse Forum](https://discuss.neuralmagic.com/) and/or [Slack](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). 
-We are growing the community member by member and happy to see you there.
+We are growing the community member by member and are happy to see you there.
 
-You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
+You can get the latest news, webinar, event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
 For more general questions about Neural Magic, please fill out this [form](http://neuralmagic.com/contact/).

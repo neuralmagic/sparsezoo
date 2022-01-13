@@ -55,7 +55,7 @@ File any error found before changes as an Issue and fix any errors found after m
 
 ## GitHub Workflow
 
-1. Fork the `neuralmagic/sparsezoo` repository into your GitHub account: https://github.com/neuralmagic/sparsezoo/fork.
+1. [Fork](https://github.com/neuralmagic/sparsezoo/fork) the `neuralmagic/sparsezoo` repository into your GitHub account.
 
 2. Clone your fork of the GitHub repository, replacing `<username>` with your GitHub username.
 
