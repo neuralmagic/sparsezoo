@@ -86,3 +86,16 @@ class BaseObject:
 
     def _get_properties(self) -> List[str]:
         return list(vars(self).keys())
+
+    def __repr__(self):
+        def _strip_underscores(_name: str):
+            return _name.lstrip("_").rstrip("_")
+
+        return (
+            f"{self.__class__.__qualname__}("
+            + ", ".join(
+                f"{_strip_underscores(attribute)}={value}"
+                for attribute, value in vars(self).items()
+            )
+            + ")"
+        )
