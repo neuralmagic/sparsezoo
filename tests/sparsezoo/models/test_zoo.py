@@ -69,7 +69,7 @@ from tests.sparsezoo.helpers import validate_downloaded_model
 def test_load_model(model_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     model = Zoo.load_model(**model_args, **other_args)
