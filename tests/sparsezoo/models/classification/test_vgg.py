@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
+
 import pytest
 
 from sparsezoo.models.classification import (
@@ -49,15 +52,16 @@ def test_vgg_11(
     sparse_target,
 ):
     model_constructor(
-        vgg_11,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_11,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -82,15 +86,16 @@ def test_vgg_11_bn(
     sparse_target,
 ):
     model_constructor(
-        vgg_11bn,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_11bn,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -115,15 +120,16 @@ def test_vgg_13(
     sparse_target,
 ):
     model_constructor(
-        vgg_13,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_13,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -148,15 +154,16 @@ def test_vgg_13_bn(
     sparse_target,
 ):
     model_constructor(
-        vgg_13bn,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_13bn,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -183,15 +190,16 @@ def test_vgg_16(
     sparse_target,
 ):
     model_constructor(
-        vgg_16,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_16,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -216,15 +224,16 @@ def test_vgg_16_bn(
     sparse_target,
 ):
     model_constructor(
-        vgg_16bn,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_16bn,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -250,15 +259,16 @@ def test_vgg_19(
     sparse_target,
 ):
     model_constructor(
-        vgg_19,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_19,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -283,13 +293,14 @@ def test_vgg_19_bn(
     sparse_target,
 ):
     model_constructor(
-        vgg_19bn,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=vgg_19bn,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )

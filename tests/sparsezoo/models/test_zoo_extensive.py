@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
 from typing import List
 
 import pytest
@@ -36,9 +38,15 @@ def _get_models(domain, sub_domain) -> List[str]:
 @flaky
 @pytest.mark.parametrize(("model"), _get_models("cv", "classification"))
 def test_classification_models(model):
-    download_and_verify(model)
+    download_and_verify(
+        model=model,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+    )
 
 
 @pytest.mark.parametrize(("model"), _get_models("cv", "detection"))
 def test_detection_models(model):
-    download_and_verify(model)
+    download_and_verify(
+        model=model,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+    )

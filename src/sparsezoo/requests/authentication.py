@@ -39,8 +39,10 @@ AUTH_API = f"{BASE_API_URL}/auth"
 PUBLIC_AUTH_TYPE = "public"
 
 CREDENTIALS_YAML = os.path.abspath(
-    os.getenv("SPARSEZOO_CREDENTIALS")
-    if os.getenv("SPARSEZOO_CREDENTIALS")
+    clean_path(
+        os.path.join(os.getenv("SPARSEZOO_CREDENTIALS_PATH"), "credentials.yaml")
+    )
+    if os.getenv("SPARSEZOO_CREDENTIALS_PATH")
     else clean_path(os.path.join("~", ".cache", "sparsezoo", "credentials.yaml"))
 )
 

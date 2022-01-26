@@ -14,6 +14,7 @@
 
 import os
 import shutil
+from datetime import datetime
 
 import pytest
 from flaky import flaky
@@ -41,8 +42,8 @@ from tests.sparsezoo.helpers import validate_downloaded_model
                 "sparse_target": None,
             },
             {
+                "override_folder_name": "test_load_model",
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
             },
         ),
         (
@@ -59,11 +60,18 @@ from tests.sparsezoo.helpers import validate_downloaded_model
                 "sparse_category": "none",
                 "sparse_target": None,
             },
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
     ],
 )
 def test_load_model(model_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     model = Zoo.load_model(**model_args, **other_args)
     model.download(overwrite=True)
     validate_downloaded_model(model, model_args, other_args)
@@ -88,8 +96,8 @@ def test_load_model(model_args, other_args):
                 "sparse_target": None,
             },
             {
+                "override_folder_name": "test_download_model",
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
             },
         ),
         (
@@ -106,11 +114,18 @@ def test_load_model(model_args, other_args):
                 "sparse_category": "none",
                 "sparse_target": None,
             },
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
     ],
 )
 def test_download_model(model_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     model = Zoo.download_model(**model_args, **other_args)
     validate_downloaded_model(model, model_args, other_args)
     shutil.rmtree(model.dir_path)
@@ -138,11 +153,18 @@ def test_download_model(model_args, other_args):
                 "sparse_category": "conservative",
                 "sparse_target": None,
             },
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ]
     ],
 )
 def test_load_model_from_stub(stub, model_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     model = Zoo.load_model_from_stub(stub, **other_args)
     model.download(overwrite=True)
     for key in model_args:
@@ -430,22 +452,6 @@ def test_search_sparse_recipes_from_stub(model_stub, other_args):
             {
                 "domain": "cv",
                 "sub_domain": "classification",
-                "architecture": "mobilenet_v1",
-                "sub_architecture": "1.0",
-                "framework": "pytorch",
-                "repo": "sparseml",
-                "dataset": "imagenet",
-                "training_scheme": None,
-                "sparse_name": "pruned",
-                "sparse_category": "conservative",
-                "sparse_target": None,
-            },
-            {},
-        ),
-        (
-            {
-                "domain": "cv",
-                "sub_domain": "classification",
                 "architecture": "resnet_v1",
                 "sub_architecture": "50",
                 "framework": "pytorch",
@@ -457,11 +463,18 @@ def test_search_sparse_recipes_from_stub(model_stub, other_args):
                 "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
     ],
 )
 def test_load_recipe(recipe_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     recipe = Zoo.load_recipe(**recipe_args, **other_args)
     recipe.download(overwrite=True)
     assert os.path.exists(recipe.path)
@@ -487,24 +500,7 @@ def test_load_recipe(recipe_args, other_args):
             },
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
             },
-        ),
-        (
-            {
-                "domain": "cv",
-                "sub_domain": "classification",
-                "architecture": "mobilenet_v1",
-                "sub_architecture": "1.0",
-                "framework": "pytorch",
-                "repo": "sparseml",
-                "dataset": "imagenet",
-                "training_scheme": None,
-                "sparse_name": "pruned",
-                "sparse_category": "conservative",
-                "sparse_target": None,
-            },
-            {},
         ),
         (
             {
@@ -521,11 +517,18 @@ def test_load_recipe(recipe_args, other_args):
                 "sparse_target": None,
                 "recipe_type": "transfer_learn",
             },
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
     ],
 )
 def test_download_recipe(recipe_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     recipe = Zoo.download_recipe(**recipe_args, **other_args)
     assert os.path.exists(recipe.path)
     shutil.rmtree(recipe.dir_path)
@@ -534,25 +537,6 @@ def test_download_recipe(recipe_args, other_args):
 @pytest.mark.parametrize(
     "recipe_args,other_args",
     [
-        (
-            {
-                "domain": "cv",
-                "sub_domain": "classification",
-                "architecture": "mobilenet_v1",
-                "sub_architecture": "1.0",
-                "framework": "pytorch",
-                "repo": "sparseml",
-                "dataset": "imagenet",
-                "training_scheme": None,
-                "sparse_name": "pruned",
-                "sparse_category": "conservative",
-                "sparse_target": None,
-            },
-            {
-                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
-            },
-        ),
         (
             {
                 "domain": "cv",
@@ -616,25 +600,6 @@ def test_load_model_from_recipe(recipe_args, other_args):
                 "sparse_category": "conservative",
                 "sparse_target": None,
             },
-            {
-                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
-            },
-        ),
-        (
-            {
-                "domain": "cv",
-                "sub_domain": "classification",
-                "architecture": "mobilenet_v1",
-                "sub_architecture": "1.0",
-                "framework": "pytorch",
-                "repo": "sparseml",
-                "dataset": "imagenet",
-                "training_scheme": None,
-                "sparse_name": "pruned",
-                "sparse_category": "conservative",
-                "sparse_target": None,
-            },
             {},
         ),
         (
@@ -683,7 +648,6 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
             ),
             {
                 "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
-                "override_folder_name": "test_folder",
             },
         ),
         (
@@ -691,17 +655,28 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
                 "cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
                 + "pruned_quant-moderate/transfer_learn"
             ),
-            {},
+            {
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
         (
             (
                 "cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
                 + "pruned_quant-moderate"
             ),
-            {"recipe_type": "transfer_learn"},
+            {
+                "recipe_type": "transfer_learn",
+                "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            },
         ),
     ],
 )
 def test_download_recipe_base_framework_files(recipe_args, other_args):
+    other_args["override_parent_path"] = os.path.join(
+        other_args["override_parent_path"],
+        str(os.path.basename(__file__)),
+        str(datetime.now()),
+    )
     files = Zoo.download_recipe_base_framework_files(recipe_args, **other_args)
     assert len(files) > 0
+    # shutil.rmtree(str(other_args['o/verride_parent_path']))

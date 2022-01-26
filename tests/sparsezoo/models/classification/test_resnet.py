@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
+
 import pytest
 from flaky import flaky
 
@@ -49,15 +52,16 @@ def test_resnet_18(
     sparse_target,
 ):
     model_constructor(
-        resnet_18,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_18,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -84,15 +88,16 @@ def test_resnet_34(
     sparse_target,
 ):
     model_constructor(
-        resnet_34,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_34,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -117,15 +122,16 @@ def test_resnet_50(
     sparse_target,
 ):
     model_constructor(
-        resnet_50,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_50,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -183,15 +189,16 @@ def test_resnet_50_extended(
     sparse_target,
 ):
     model_constructor(
-        resnet_50,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_50,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -216,15 +223,16 @@ def test_resnet_50_2x(
     sparse_target,
 ):
     model_constructor(
-        resnet_50_2x,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_50_2x,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -250,15 +258,16 @@ def test_resnet_101(
     sparse_target,
 ):
     model_constructor(
-        resnet_101,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_101,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -283,15 +292,16 @@ def test_resnet_101_2x(
     sparse_target,
 ):
     model_constructor(
-        resnet_101_2x,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_101_2x,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -317,13 +327,14 @@ def test_resnet_152(
     sparse_target,
 ):
     model_constructor(
-        resnet_152,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=resnet_152,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )

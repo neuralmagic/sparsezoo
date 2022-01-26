@@ -562,10 +562,15 @@ class Recipe(File):
         if self._model is None:
             from sparsezoo.objects.model import Model
 
+            override_folder_name = override_folder_name or os.path.dirname(
+                self.folder_name
+            )
+            override_parent_path = override_parent_path or self.override_parent_path
+
             self._model = Model.load_model_from_recipe(
                 recipe=self,
-                override_folder_name=os.path.dirname(self.folder_name),
-                override_parent_path=self.override_parent_path,
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
             )
 
         return self._model
@@ -581,10 +586,15 @@ class Recipe(File):
         if self._base_model is None:
             from sparsezoo.objects.model import Model
 
+            override_folder_name = override_folder_name or os.path.dirname(
+                self.folder_name
+            )
+            override_parent_path = override_parent_path or self.override_parent_path
+
             self._base_model = Model.load_base_model_from_recipe(
                 recipe=self,
-                override_folder_name=os.path.dirname(self.folder_name),
-                override_parent_path=self.override_parent_path,
+                override_folder_name=override_folder_name,
+                override_parent_path=override_parent_path,
             )
         return self._base_model
 

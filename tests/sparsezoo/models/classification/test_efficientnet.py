@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
+
 import pytest
 
 from sparsezoo.models.classification import efficientnet_b0, efficientnet_b4
@@ -39,15 +42,16 @@ def test_efficientnet_b0(
     sparse_target,
 ):
     model_constructor(
-        efficientnet_b0,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=efficientnet_b0,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
 
 
@@ -72,13 +76,14 @@ def test_efficientnet_b4(
     sparse_target,
 ):
     model_constructor(
-        efficientnet_b4,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=efficientnet_b4,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
     )
