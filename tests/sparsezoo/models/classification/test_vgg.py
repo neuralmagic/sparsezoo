@@ -61,7 +61,7 @@ def test_vgg_11(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -95,7 +95,7 @@ def test_vgg_11_bn(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -129,7 +129,7 @@ def test_vgg_13(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -163,7 +163,7 @@ def test_vgg_13_bn(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -199,7 +199,7 @@ def test_vgg_16(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -233,7 +233,7 @@ def test_vgg_16_bn(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -268,7 +268,7 @@ def test_vgg_19(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -302,5 +302,5 @@ def test_vgg_19_bn(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )

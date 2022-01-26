@@ -29,9 +29,7 @@ def download_and_verify(
     print(other_args)
     if other_args is None:
         other_args = {
-            "override_parent_path": os.path.join(
-                CACHE_DIR, "test_download", str(test_name)
-            ),
+            "override_parent_path": os.path.join(CACHE_DIR, "test_download", test_name),
         }
     else:
         other_args["override_parent_path"] = os.path.join(
@@ -53,7 +51,7 @@ def model_constructor(
     sparse_name: str,
     sparse_category: str,
     sparse_target: Optional[str],
-    test_name: Optional[str],
+    test_name: str = "",
 ):
     other_args = {
         "override_parent_path": os.path.join(

@@ -40,7 +40,7 @@ def _get_models(domain, sub_domain) -> List[str]:
 def test_classification_models(model):
     download_and_verify(
         model=model,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -48,5 +48,5 @@ def test_classification_models(model):
 def test_detection_models(model):
     download_and_verify(
         model=model,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )

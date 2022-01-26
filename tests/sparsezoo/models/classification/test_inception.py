@@ -52,5 +52,5 @@ def test_inception_v3(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )

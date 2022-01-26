@@ -61,7 +61,7 @@ def test_resnet_18(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -97,7 +97,7 @@ def test_resnet_34(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -131,7 +131,7 @@ def test_resnet_50(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -198,7 +198,7 @@ def test_resnet_50_extended(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -232,7 +232,7 @@ def test_resnet_50_2x(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -267,7 +267,7 @@ def test_resnet_101(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -301,7 +301,7 @@ def test_resnet_101_2x(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -336,5 +336,5 @@ def test_resnet_152(
         sparse_name=sparse_name,
         sparse_category=sparse_category,
         sparse_target=sparse_target,
-        test_name=os.path.join(str(os.path.basename(__file__)), str(datetime.now())),
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )

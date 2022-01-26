@@ -123,7 +123,7 @@ def test_load_model(model_args, other_args):
 def test_download_model(model_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     model = Zoo.download_model(**model_args, **other_args)
@@ -162,7 +162,7 @@ def test_download_model(model_args, other_args):
 def test_load_model_from_stub(stub, model_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     model = Zoo.load_model_from_stub(stub, **other_args)
@@ -472,7 +472,7 @@ def test_search_sparse_recipes_from_stub(model_stub, other_args):
 def test_load_recipe(recipe_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     recipe = Zoo.load_recipe(**recipe_args, **other_args)
@@ -526,7 +526,7 @@ def test_load_recipe(recipe_args, other_args):
 def test_download_recipe(recipe_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     recipe = Zoo.download_recipe(**recipe_args, **other_args)
@@ -674,7 +674,7 @@ def test_load_base_model_from_recipe(recipe_args, other_args):
 def test_download_recipe_base_framework_files(recipe_args, other_args):
     other_args["override_parent_path"] = os.path.join(
         other_args["override_parent_path"],
-        str(os.path.basename(__file__)),
+        os.path.basename(__file__),
         str(datetime.now()),
     )
     files = Zoo.download_recipe_base_framework_files(recipe_args, **other_args)
