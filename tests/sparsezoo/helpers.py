@@ -24,7 +24,7 @@ from sparsezoo.utils import CACHE_DIR
 
 
 def download_and_verify(
-    model: str, test_name: Optional[str] = "", other_args: Optional[Dict] = None
+    model: str, test_name: str = "", other_args: Optional[Dict] = None
 ):
     print(other_args)
     if other_args is None:
