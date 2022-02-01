@@ -18,7 +18,8 @@
 .. toctree::
     :maxdepth: 3
     :caption: General
-
+    
+    SparseZoo Repository <https://github.com/neuralmagic/sparsezoo/issues>
     source/models
     source/recipes
 
