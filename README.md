@@ -38,7 +38,7 @@ limitations under the License.
         <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=lightgray&style=for-the-badge" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/CODE_OF_CONDUCT.md">
-        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
+        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
     </a>
     <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
         <img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=25>
@@ -58,7 +58,7 @@ It simplifies and accelerates your time-to-value in building performant deep lea
 Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
-Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
+Recipe-driven approaches built around sparsification algorithms allow you to use the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
@@ -66,8 +66,8 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Highlights
 
-- [Model Stub Architecture Overview](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md)
-- [Available Model Recipes](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/recipes.md)
+- [Model Stub Architecture Overview](https://docs.neuralmagic.com/sparsezoo/source/models.html)
+- [Available Model Recipes](https://docs.neuralmagic.com/sparsezoo/source/recipes.html)
 - [sparsezoo.neuralmagic.com](https://sparsezoo.neuralmagic.com)
 
 ## Installation
@@ -83,7 +83,7 @@ pip install sparsezoo
 
 ## Quick Tour
 
-### Python APIS
+### Python APIs
 
 The Python APIs respect this format enabling you to search and download models. Some code examples are given below.
 
@@ -165,7 +165,7 @@ sparsezoo search --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50
 ```
 
-For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
+For a more in-depth read, check out [SparseZoo documentation.](https://docs.neuralmagic.com/sparsezoo/)
 
 ## Resources
 
@@ -195,8 +195,7 @@ We appreciate contributions to the code, examples, integrations, and documentati
 
 ### Join
 
-For user help or questions about SparseZoo, sign up or log in: **Deep Sparse Community** [Discourse Forum](https://discuss.neuralmagic.com/) and/or [Slack](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). 
-We are growing the community member by member and happy to see you there.
+For user help or questions about SparseZoo, sign up or log in to our [**Deep Sparse Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue](https://github.com/neuralmagic/sparsezoo/issues).
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
