@@ -55,7 +55,7 @@ limitations under the License.
 
 [SparseZoo is a constantly-growing repository](https://sparsezoo.neuralmagic.com) of sparsified (pruned and pruned-quantized) models with matching sparsification recipes for neural networks. 
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from. 
-Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
+Read more about sparsification [here.](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification)
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
 Recipe-driven approaches built around sparsification algorithms allow you to use the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
@@ -171,8 +171,8 @@ For a more in-depth read, check out [SparseZoo documentation.](https://docs.neur
 
 ### Learning More
 
-- Documentation: [SparseML](https://docs.neuralmagic.com/sparseml/), [SparseZoo](https://docs.neuralmagic.com/sparsezoo/), [Sparsify](https://docs.neuralmagic.com/sparsify/), [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
-- Neural Magic: [Blog](https://www.neuralmagic.com/blog/), [Resources](https://www.neuralmagic.com/resources/)
+- Documentation: [SparseML,](https://docs.neuralmagic.com/sparseml/) [SparseZoo,](https://docs.neuralmagic.com/sparsezoo/) [Sparsify,](https://docs.neuralmagic.com/sparsify/) [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
+- Neural Magic: [Blog,](https://www.neuralmagic.com/blog/) [Resources](https://www.neuralmagic.com/resources/)
 
 ### Release History
 
@@ -185,18 +185,18 @@ Additionally, more information can be found via [GitHub Releases.](https://githu
 
 ### License
 
-The project is licensed under the [Apache License Version 2.0](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE).
+The project is licensed under the [Apache License Version 2.0.](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE)
 
 ## Community
 
 ### Contribute
 
-We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
+We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here.](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md)
 
 ### Join
 
-For user help or questions about SparseZoo, sign up or log in to our [**Deep Sparse Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue](https://github.com/neuralmagic/sparsezoo/issues).
+For user help or questions about SparseZoo, sign up or log in to our [**Deep Sparse Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
-For more general questions about Neural Magic, please fill out this [form](http://neuralmagic.com/contact/).
+For more general questions about Neural Magic, please fill out this [form.](http://neuralmagic.com/contact/)
