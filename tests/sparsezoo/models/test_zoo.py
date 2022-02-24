@@ -679,4 +679,3 @@ def test_download_recipe_base_framework_files(recipe_args, other_args):
     )
     files = Zoo.download_recipe_base_framework_files(recipe_args, **other_args)
     assert len(files) > 0
-    # shutil.rmtree(str(other_args['o/verride_parent_path']))
