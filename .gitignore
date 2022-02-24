@@ -767,11 +767,5 @@ MigrationBackup/
 # vscode debugger 
 .vscode
 
-# personal text files
-**[Oo]utput*
-
 # ignore all files with name name scratch
 **/[Ss]cratch*
-
-# ignore all files with name name script
-**/[Ss]cript*
