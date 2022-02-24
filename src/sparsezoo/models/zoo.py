@@ -19,7 +19,7 @@ Code for managing the search and creation of sparsezoo Model and Recipe objects
 
 from typing import List, Union
 
-from sparsezoo.objects.model import Model
+from sparsezoo.objects import Model
 from sparsezoo.objects.recipe import Recipe
 from sparsezoo.requests import ModelArgs
 
@@ -833,4 +833,45 @@ class Zoo:
             override_parent_path=override_parent_path,
             overwrite=overwrite,
             extensions=extensions,
+        )
+
+    @staticmethod
+    def get_checkpoints_folders_from_stub(
+        stub: Union[str, ModelArgs],
+    ):
+        """
+        Get all the tarballed checkpoint files
+        """
+        return Model.get_checkpoints_folders_from_stub(
+            stub=stub,
+        )
+
+    @staticmethod
+    def download_checkpoints_folders_from_stub(
+        stub: Union[str, ModelArgs],
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+        download_folders: Union[List[str], str] = None,
+    ):
+        """
+        Download tarballed checkpoints files.
+
+        :param stub: a string model stub that points to a SparseZoo model.
+            recipe_type may be added as a stub parameter or path of path. i.e.
+            "model/stub/path", "zoo:model/stub/path",
+            "zoo:model/stub/path?recipe_type=transfer",
+            "zoo:model/stub/path/transfer"
+        :param download_file_name: name of the file user wish to download
+        :param donwload_all: Option to download all checkpoint files
+        """
+
+        return Model.download_checkpoints_folders_from_stub(
+            stub=stub,
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+            force_token_refresh=force_token_refresh,
+            overwrite=overwrite,
+            download_folders=download_folders,
         )

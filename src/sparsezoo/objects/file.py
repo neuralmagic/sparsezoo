@@ -45,6 +45,7 @@ class FileTypes(Enum):
     ONNX_GZ = "onnx_gz"
     RECIPE = "recipe"
     FRAMEWORK = "framework"
+    CHECKPOINTS = "checkpoints"
     DATA_ORIGINALS = "originals"
     DATA_INPUTS = "inputs"
     DATA_OUTPUTS = "outputs"

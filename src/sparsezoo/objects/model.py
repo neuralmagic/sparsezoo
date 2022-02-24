@@ -164,6 +164,21 @@ class Model(Downloadable, ModelMetadata):
             for res in sorted_files[FileTypes.FRAMEWORK.value]
         ]
 
+        self._checkpoints_folders = (
+            [
+                File(
+                    model_metadata=metadata,
+                    # child_folder_name=metadata.checkpoints,
+                    override_folder_name=override_folder_name,
+                    override_parent_path=override_parent_path,
+                    **res,
+                )
+                for res in sorted_files[FileTypes.CHECKPOINTS.value]
+            ]
+            if sorted_files[FileTypes.CHECKPOINTS.value]
+            else None
+        )
+
         self._onnx_files = (
             [
                 File(
@@ -481,6 +496,69 @@ class Model(Downloadable, ModelMetadata):
         return model
 
     @staticmethod
+    def download_checkpoints_folders_from_stub(
+        stub: Union[str, ModelArgs],
+        download_folders: Union[List[str], str] = None,
+        override_folder_name: Union[str, None] = None,
+        override_parent_path: Union[str, None] = None,
+        force_token_refresh: bool = False,
+        overwrite: bool = False,
+    ):
+        """
+        Download the folder in checkpoints folder if it exists
+
+        :paran download_folders: folder_names. Ex. checkpoint_epoch10.tar.gz
+        """
+
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
+        _LOGGER.debug(f"download_model_from_stub: downloading model from stub {stub}")
+        response_json = download_model_get_request(
+            args=stub,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
+        )
+        model = Model(
+            **response_json["model"],
+            override_folder_name=override_folder_name,
+            override_parent_path=override_parent_path,
+        )
+        return model.download_checkpoints_folders(
+            download_folders=download_folders,
+            overwrite=overwrite,
+            refresh_token=force_token_refresh,
+        )
+
+    @staticmethod
+    def get_checkpoints_folders_from_stub(
+        stub: Union[str, ModelArgs],
+        force_token_refresh: bool = False,
+    ):
+        """
+        :param stub: the SparseZoo stub path to the model, can be a string path or
+            ModelArgs object
+        """
+        if isinstance(stub, str):
+            stub, _ = parse_zoo_stub(stub, valid_params=[])
+        _LOGGER.debug(f"download_model_from_stub: downloading model from stub {stub}")
+        response_json = download_model_get_request(
+            args=stub,
+            file_name=None,
+            force_token_refresh=force_token_refresh,
+        )
+        model = Model(
+            **response_json["model"],
+        )
+        return (
+            [
+                checkpoints_file["display_name"]
+                for checkpoints_file in model.checkpoints_folders
+            ]
+            if model.checkpoints_folders
+            else None
+        )
+
+    @staticmethod
     def search_models(
         domain: str,
         sub_domain: str,
@@ -673,6 +751,13 @@ class Model(Downloadable, ModelMetadata):
         :return: list of Files that are of type framework
         """
         return self._framework_files
+
+    @property
+    def checkpoints_folders(self) -> List[File]:
+        """
+        :return: list of Files that are of type framework
+        """
+        return self._checkpoints_folders
 
     @property
     def onnx_files(self) -> List[File]:
@@ -886,6 +971,73 @@ class Model(Downloadable, ModelMetadata):
             )
             downloaded_paths.append(file.path)
         return downloaded_paths
+
+    def download_checkpoints_folders(
+        self,
+        download_folders: Union[List[str], str] = None,
+        overwrite: bool = False,
+        refresh_token: bool = False,
+        show_progress: bool = True,
+        extensions: Union[List[str], None] = None,
+    ):
+
+        if self.checkpoints_folders:
+            downloaded_paths = []
+            if download_folders:
+                if isinstance(download_folders, str):
+                    download_folders = [download_folders]
+
+                sorted_checkpoint_folders = {
+                    checkpoints_folder.display_name: checkpoints_folder
+                    for checkpoints_folder in self.checkpoints_folders
+                }
+                for download_folder in download_folders:
+                    if download_folder in sorted_checkpoint_folders:
+                        folder = sorted_checkpoint_folders[download_folder]
+                        if extensions and not any(
+                            folder.display_name.endswith(ext) for ext in extensions
+                        ):  # skip files that do not end in valid extension
+                            continue
+                        folder.download(
+                            overwrite=overwrite,
+                            refresh_token=refresh_token,
+                            show_progress=show_progress,
+                        )
+                        downloaded_paths.append(folder.path)
+
+            else:
+                for folder in self.checkpoints_folders:
+                    if extensions and not any(
+                        folder.display_name.endswith(ext) for ext in extensions
+                    ):  # skip files that do not end in valid extension
+                        continue
+                    folder.download(
+                        overwrite=overwrite,
+                        refresh_token=refresh_token,
+                        show_progress=show_progress,
+                    )
+                    downloaded_paths.append(folder.path)
+            return downloaded_paths
+
+        return None
+
+        # for file in self._framework_files:
+        #     if extensions and not any(
+        #         file.display_name.endswith(ext) for ext in extensions
+        #     ):  # skip files that do not end in valid extension
+        #         continue
+
+        #     _LOGGER.info(
+        #         f"Downloading model framework file {file.display_name} {self.stub}"
+        #     )
+        #     file.download(
+        #         overwrite=overwrite,
+        #         refresh_token=refresh_token,
+        #         show_progress=show_progress,
+        #     )
+        #     downloaded_paths.append(file.path)
+        # return downloaded_paths
+        # pass
 
     def search_similar_models(
         self,
