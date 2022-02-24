@@ -38,7 +38,7 @@ limitations under the License.
         <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=lightgray&style=for-the-badge" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/blob/main/CODE_OF_CONDUCT.md">
-        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
+        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
     </a>
     <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
         <img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=25>
@@ -53,12 +53,12 @@ limitations under the License.
 
 ## Overview
 
-SparseZoo is a constantly-growing repository of sparsified (pruned and pruned-quantized) models with matching sparsification recipes for neural networks. 
+[SparseZoo is a constantly-growing repository](https://sparsezoo.neuralmagic.com) of sparsified (pruned and pruned-quantized) models with matching sparsification recipes for neural networks. 
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from. 
-Read more about sparsification [here](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification).
+Read more about sparsification [here.](https://docs.neuralmagic.com/main/source/getstarted.html#sparsification)
 
 Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
-Recipe-driven approaches built around sparsification algorithms allow you to take the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
+Recipe-driven approaches built around sparsification algorithms allow you to use the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
@@ -66,8 +66,9 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Highlights
 
-- [Available Models Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/models.md)
-- [Available Recipes Listing](https://github.com/neuralmagic/sparsezoo/blob/main/docs/source/recipes.md)
+- [Model Stub Architecture Overview](https://docs.neuralmagic.com/sparsezoo/source/models.html)
+- [Available Model Recipes](https://docs.neuralmagic.com/sparsezoo/source/recipes.html)
+- [sparsezoo.neuralmagic.com](https://sparsezoo.neuralmagic.com)
 
 ## Installation
 
@@ -82,42 +83,7 @@ pip install sparsezoo
 
 ## Quick Tour
 
-Each model in the SparseZoo has a specific stub that identifies it. The stubs are made up of the following structure:
-
-`DOMAIN/SUB_DOMAIN/ARCHITECTURE{-SUB_ARCHITECTURE}/FRAMEWORK/REPO/DATASET{-TRAINING_SCHEME}/SPARSE_NAME-SPARSE_CATEGORY-{SPARSE_TARGET}`
-
-The properties within each model stub are defined as the following:
-
-| Model Property   | Definition                                                                                     | Examples                                                                           |
-|:----------------:|:----------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|
-| DOMAIN           | The type of solution the model is architected and trained for                                  | cv, nlp                                                                            |
-| SUB_DOMAIN       | The sub type of solution the model is architected and trained for                              | classification, segmentation                                                       |
-| ARCHITECTURE     | The name of the guiding setup for the network's graph                                          | resnet_v1, mobilenet_v1                                                            |
-| SUB_ARCHITECTURE | (optional) The scaled version of the architecture such as width or depth                       | 50, 101, 152                                                                       |
-| FRAMEWORK        | The machine learning framework the model was defined and trained in                            | pytorch, tensorflow_v1                                                             |
-| REPO             | The model repository the model and baseline weights originated from                            | sparseml, torchvision                                                              |
-| DATASET          | The dataset the model was trained on                                                           | imagenet, cifar10                                                                  |
-| TRAINING_SCHEME  | (optional) A description on how the model was trained                                          | augmented, lower_lr                                                                |
-| SPARSE_NAME      | An overview of what was done to sparsify the model                                             | base, pruned, quant (quantized), pruned_quant, arch (architecture modified)        |
-| SPARSE_CATEGORY  | Descriptor on the degree to which the model is sparsified as compared with the baseline metric | none, conservative (100% baseline), moderate (>= 99% baseline), aggressive (< 99%) |
-| SPARSE_TARGET    | (optional) Descriptor for the target environment the model was sparsified for                  | disk, edge, deepsparse, gpu                                                        |
-
-The contents of each model are made up of the following:
-
-- model.md: The model card containing metadata, descriptions, and information for the model.
-- model.onnx: The [ONNX](https://onnx.ai/) representation of the model's graph.
-- model.onnx.tar.gz: A compressed format for the ONNX file. 
-    Currently ONNX does not support sparse tensors and quantized sparse tensors well for compression.
-- [FRAMEWORK]/model.[EXTENSION]: The native ML framework file(s) for the model in which it was originally trained.
-    Such as PyTorch, Keras, TensorFlow V1
-- recipes/original.[md|yaml]: The original sparsification recipe used to create the model.
-- recipes/[NAME].[md|yaml]: Additional sparsification recipes that can be used with the model such as transfer learning.
-- sample-originals: The original sample data without any preprocessing for use with the model.
-- sample-inputs: The sample data after pre processing for use with the model.
-- sample-outputs: The outputs after running the sample inputs through the model.
-- sample-labels: The labels that classify the sample inputs.
-
-### Python APIS
+### Python APIs
 
 The Python APIs respect this format enabling you to search and download models. Some code examples are given below.
 
@@ -205,14 +171,14 @@ sparsezoo search --domain cv --sub-domain classification \
     --architecture resnet_v1 --sub-architecture 50
 ```
 
-For a more in-depth read, check out [SparseZoo documentation](https://docs.neuralmagic.com/sparsezoo/).
+For a more in-depth read, check out [SparseZoo documentation.](https://docs.neuralmagic.com/sparsezoo/)
 
 ## Resources
 
 ### Learning More
 
-- Documentation: [SparseML](https://docs.neuralmagic.com/sparseml/), [SparseZoo](https://docs.neuralmagic.com/sparsezoo/), [Sparsify](https://docs.neuralmagic.com/sparsify/), [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
-- Neural Magic: [Blog](https://www.neuralmagic.com/blog/), [Resources](https://www.neuralmagic.com/resources/)
+- Documentation: [SparseML,](https://docs.neuralmagic.com/sparseml/) [SparseZoo,](https://docs.neuralmagic.com/sparsezoo/) [Sparsify,](https://docs.neuralmagic.com/sparsify/) [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
+- Neural Magic: [Blog,](https://www.neuralmagic.com/blog/) [Resources](https://www.neuralmagic.com/resources/)
 
 ### Release History
 
@@ -225,19 +191,18 @@ Additionally, more information can be found via [GitHub Releases.](https://githu
 
 ### License
 
-The project is licensed under the [Apache License Version 2.0](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE).
+The project is licensed under the [Apache License Version 2.0.](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE)
 
 ## Community
 
 ### Contribute
 
-We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md).
+We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here.](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md)
 
 ### Join
 
-For user help or questions about SparseZoo, sign up or log in: **Deep Sparse Community** [Discourse Forum](https://discuss.neuralmagic.com/) and/or [Slack](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). 
-We are growing the community member by member and happy to see you there.
+For user help or questions about SparseZoo, sign up or log in to our [**Deep Sparse Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
-For more general questions about Neural Magic, please fill out this [form](http://neuralmagic.com/contact/).
+For more general questions about Neural Magic, please fill out this [form.](http://neuralmagic.com/contact/)

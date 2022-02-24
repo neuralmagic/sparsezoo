@@ -55,6 +55,7 @@ _dev_deps = [
     "flaky>=3.7.0",
     "isort>=5.7.0",
     "m2r2~=0.2.7",
+    "mistune==0.8.4",
     "myst-parser~=0.14.0",
     "onnxruntime>=1.0.0",
     "pytest>=6.0.0",
