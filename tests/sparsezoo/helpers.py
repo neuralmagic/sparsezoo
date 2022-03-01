@@ -26,7 +26,6 @@ from sparsezoo.utils import CACHE_DIR
 def download_and_verify(
     model: str, test_name: str = "", other_args: Optional[Dict] = None
 ):
-    print(other_args)
     if other_args is None:
         other_args = {
             "override_parent_path": os.path.join(CACHE_DIR, "test_download", test_name),
