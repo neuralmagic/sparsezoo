@@ -38,18 +38,18 @@ The properties within each model stub are defined as the following:
 
 The contents of each model are made up of the following:
 
-- model.md: The model card containing metadata, descriptions, and information for the model.
-- model.onnx: The [ONNX](https://onnx.ai/) representation of the model's graph.
-- model.onnx.tar.gz: A compressed format for the ONNX file. 
-    Currently ONNX does not support sparse tensors and quantized sparse tensors well for compression.
-- [FRAMEWORK]/model.[EXTENSION]: The native ML framework file(s) for the model in which it was originally trained.
+- `model.md`: The model card containing metadata, descriptions, and information for the model.
+- `model.onnx`: The [ONNX](https://onnx.ai/) representation of the model's graph.
+- `model.onnx.tar.gz`: A compressed format for the ONNX file. 
+    Currently, ONNX does not support sparse tensors and quantized sparse tensors well for compression.
+- `[FRAMEWORK]/model.[EXTENSION]`: The native ML framework file(s) for the model in which it was originally trained.
     Such as PyTorch, Keras, TensorFlow V1
-- recipes/original.[md|yaml]: The original sparsification recipe used to create the model.
-- recipes/[NAME].[md|yaml]: Additional sparsification recipes that can be used with the model such as transfer learning.
-- sample-originals: The original sample data without any preprocessing for use with the model.
-- sample-inputs: The sample data after pre processing for use with the model.
-- sample-outputs: The outputs after running the sample inputs through the model.
-- sample-labels: The labels that classify the sample inputs.
+- `recipes/original.[md|yaml]`: The original sparsification recipe used to create the model.
+- `recipes/[NAME].[md|yaml]`: Additional sparsification recipes that can be used with the model such as transfer learning.
+- `sample-originals`: The original sample data without any pre-processing for use with the model.
+- `sample-inputs`: The sample data after pre-processing for use with the model.
+- `sample-outputs`: The outputs after running the sample inputs through the model.
+- `sample-labels`: The labels that classify the sample inputs.
 
 ### Image Classification
 
