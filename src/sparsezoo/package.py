@@ -77,18 +77,25 @@ def version_check_execution_condition(
     :param package_integration: package integration of the client
     """
     if (
-        os.getenv("NM_VERSION_CHECK") is None
-        or os.getenv("NM_VERSION_CHECK").lower().strip() != "false"
+        os.getenv("NM_VERSION_CHECK") is not None
+        and os.getenv("NM_VERSION_CHECK").lower().strip() == "false"
     ):
+        LOGGER.info(
+            "Skipping Neural Magic's latest package version check"
+        )
+        return
+
+    try:
         package_version_check_request(
             package_name=package_name,
             package_integration=package_integration,
             package_version=package_version,
         )
-    else:
-        LOGGER.info(
-            "Skipping Neural Magic's internal code exection: "
-            "latest package version check"
+    except Exception as err:
+        LOGGER.warning(
+            "Neural Magic's latest package version check raised an exception. "
+            "To turn off set the following in the environment NM_VERSION_CHECK=false "
+            f"Exception: {err}"
         )
 
 
