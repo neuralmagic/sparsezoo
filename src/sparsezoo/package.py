@@ -80,9 +80,7 @@ def version_check_execution_condition(
         os.getenv("NM_VERSION_CHECK") is not None
         and os.getenv("NM_VERSION_CHECK").lower().strip() == "false"
     ):
-        LOGGER.info(
-            "Skipping Neural Magic's latest package version check"
-        )
+        LOGGER.info("Skipping Neural Magic's latest package version check")
         return
 
     try:
