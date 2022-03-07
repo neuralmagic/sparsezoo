@@ -168,7 +168,6 @@ class Model(Downloadable, ModelMetadata):
             [
                 File(
                     model_metadata=metadata,
-                    # child_folder_name=metadata.checkpoints,
                     override_folder_name=override_folder_name,
                     override_parent_path=override_parent_path,
                     **res,
@@ -176,7 +175,7 @@ class Model(Downloadable, ModelMetadata):
                 for res in sorted_files[FileTypes.CHECKPOINTS.value]
             ]
             if sorted_files[FileTypes.CHECKPOINTS.value]
-            else None
+            else []
         )
 
         self._onnx_files = (
@@ -978,26 +977,31 @@ class Model(Downloadable, ModelMetadata):
         overwrite: bool = False,
         refresh_token: bool = False,
         show_progress: bool = True,
-        extensions: Union[List[str], None] = None,
     ):
+        """
+        Download the given checkpoints folder if it exists. If not given, download all.
+        User can check which folders exist with
+            Zoo.get_checkpoints_folders_from_stub(stub)
+
+        """
 
         if self.checkpoints_folders:
             downloaded_paths = []
+
             if download_folders:
                 if isinstance(download_folders, str):
                     download_folders = [download_folders]
 
+                # enable class File to be extracted via folder name
                 sorted_checkpoint_folders = {
                     checkpoints_folder.display_name: checkpoints_folder
                     for checkpoints_folder in self.checkpoints_folders
                 }
+
                 for download_folder in download_folders:
                     if download_folder in sorted_checkpoint_folders:
+
                         folder = sorted_checkpoint_folders[download_folder]
-                        if extensions and not any(
-                            folder.display_name.endswith(ext) for ext in extensions
-                        ):  # skip files that do not end in valid extension
-                            continue
                         folder.download(
                             overwrite=overwrite,
                             refresh_token=refresh_token,
@@ -1005,12 +1009,9 @@ class Model(Downloadable, ModelMetadata):
                         )
                         downloaded_paths.append(folder.path)
 
+            # download all checkpoints folders
             else:
                 for folder in self.checkpoints_folders:
-                    if extensions and not any(
-                        folder.display_name.endswith(ext) for ext in extensions
-                    ):  # skip files that do not end in valid extension
-                        continue
                     folder.download(
                         overwrite=overwrite,
                         refresh_token=refresh_token,
@@ -1020,24 +1021,6 @@ class Model(Downloadable, ModelMetadata):
             return downloaded_paths
 
         return None
-
-        # for file in self._framework_files:
-        #     if extensions and not any(
-        #         file.display_name.endswith(ext) for ext in extensions
-        #     ):  # skip files that do not end in valid extension
-        #         continue
-
-        #     _LOGGER.info(
-        #         f"Downloading model framework file {file.display_name} {self.stub}"
-        #     )
-        #     file.download(
-        #         overwrite=overwrite,
-        #         refresh_token=refresh_token,
-        #         show_progress=show_progress,
-        #     )
-        #     downloaded_paths.append(file.path)
-        # return downloaded_paths
-        # pass
 
     def search_similar_models(
         self,
