@@ -20,7 +20,7 @@ Functionality for storing and setting the version info for SparseZoo
 from datetime import date
 
 
-version_base = "0.11.0"
+version_base = "0.12.0"
 is_release = False  # change to True to set the generated version as a release version
 
 
