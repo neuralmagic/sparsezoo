@@ -548,14 +548,12 @@ class Model(Downloadable, ModelMetadata):
         model = Model(
             **response_json["model"],
         )
-        return (
-            [
-                checkpoints_file["display_name"]
-                for checkpoints_file in model.checkpoints_folders
-            ]
-            if model.checkpoints_folders
-            else None
-        )
+        ckpt_files = []
+        if model.checkpoints_folders:
+            for checkpoints_file in model.checkpoints_folders:
+                ckpt_file_metadata = checkpoints_file.dict()
+                ckpt_files.append(ckpt_file_metadata["display_name"])
+        return ckpt_files
 
     @staticmethod
     def search_models(
