@@ -511,7 +511,10 @@ class Model(Downloadable, ModelMetadata):
 
         if isinstance(stub, str):
             stub, _ = parse_zoo_stub(stub, valid_params=[])
-        _LOGGER.debug(f"download_model_from_stub: downloading model from stub {stub}")
+        _LOGGER.debug(
+            "download_checkpoints_folders_from_stub: "
+            f"searching for model withs stub: {stub}"
+        )
         response_json = download_model_get_request(
             args=stub,
             file_name=None,
@@ -539,7 +542,9 @@ class Model(Downloadable, ModelMetadata):
         """
         if isinstance(stub, str):
             stub, _ = parse_zoo_stub(stub, valid_params=[])
-        _LOGGER.debug(f"download_model_from_stub: downloading model from stub {stub}")
+        _LOGGER.debug(
+            f"get_checkpoints_folders_from_stub: searching for model withs stub: {stub}"
+        )
         response_json = download_model_get_request(
             args=stub,
             file_name=None,
@@ -547,6 +552,9 @@ class Model(Downloadable, ModelMetadata):
         )
         model = Model(
             **response_json["model"],
+        )
+        _LOGGER.debug(
+            "get_checkpoints_folders_from_stub: Searching for checkpoint files"
         )
         ckpt_files = []
         if model.checkpoints_folders:
@@ -997,6 +1005,10 @@ class Model(Downloadable, ModelMetadata):
                 }
 
                 for download_folder in download_folders:
+                    _LOGGER.debug(
+                        f"download_checkpoints_folders: downloading {download_folder}"
+                    )
+
                     if download_folder in sorted_checkpoint_folders:
 
                         folder = sorted_checkpoint_folders[download_folder]
@@ -1010,6 +1022,9 @@ class Model(Downloadable, ModelMetadata):
             # download all checkpoints folders
             else:
                 for folder in self.checkpoints_folders:
+                    _LOGGER.debug(
+                        f"download_checkpoints_folders: downloading {download_folder}"
+                    )
                     folder.download(
                         overwrite=overwrite,
                         refresh_token=refresh_token,
