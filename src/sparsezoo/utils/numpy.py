@@ -34,7 +34,6 @@ __all__ = [
     "load_numpy",
     "save_numpy",
     "load_numpy_list",
-    "load_numpy_from_tar",
     "NumpyArrayBatcher",
     "tensor_export",
     "tensors_export",
