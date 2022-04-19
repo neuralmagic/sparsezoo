@@ -144,12 +144,12 @@ optional arguments:
 
 ##########
 Example search:
-python3 scripts/main.py search --domain cv --sub-domain classification
+python scripts/main.py search --domain cv --sub-domain classification
 
 
 ##########
 Example search for MobileNetV1:
-python3 scripts/main.py search --domain cv --sub-domain classification \
+python scripts/main.py search --domain cv --sub-domain classification \
     --architecture mobilenet_v1
 
 

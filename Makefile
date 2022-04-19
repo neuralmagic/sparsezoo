@@ -68,7 +68,7 @@ docsupdate:
 # creates wheel file
 build:
 	@echo "Building python package";
-	python3 setup.py sdist bdist_wheel $(BUILD_ARGS)
+	python setup.py sdist bdist_wheel $(BUILD_ARGS)
 
 # clean package
 clean:

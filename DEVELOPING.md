@@ -28,7 +28,7 @@ Here's some details to get started.
 ```bash
 git clone https://github.com/neuralmagic/sparsezoo.git
 cd sparsezoo
-python3 -m pip install -e ./[dev]
+python -m pip install -e ./[dev]
 ```
 
 This will clone the SparseZoo repo, install it, and install the development dependencies.
