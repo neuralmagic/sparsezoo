@@ -192,17 +192,27 @@ class TestDirectory:
         assert os.path.isfile(tar_file_path)
 
     def test_unzip(self, setup):
+        current_working_directory = os.getcwd()
         files, temp_dir = setup
         directory = Directory(name="sample_directory", files=files)
         with pytest.raises(Exception):
             directory.unzip()
         tar_file_path = directory.gzip()
         directory = Directory(name="sample_tar_directory", path=tar_file_path)
-
-        path_to_extract = tempfile.TemporaryDirectory()
-        assert directory.unzip(path_to_extract=path_to_extract.name)
-        # TODO: Add test to check whether the files get unpacked
-        path_to_extract.cleanup()
+        os.chdir(os.path.dirname(tar_file_path))
+        files_before = [
+            path.name
+            for path in pathlib.Path(os.path.dirname(temp_dir.name)).rglob("*")
+            if "." in path.name
+        ]
+        assert directory.unzip()
+        files_after = [
+            path.name
+            for path in pathlib.Path(os.path.dirname(temp_dir.name)).rglob("*")
+            if "." in path.name
+        ]
+        os.chdir(current_working_directory)
+        assert len(files) == len(files_after) - len(files_before)
 
 
 @pytest.mark.parametrize(
@@ -251,12 +261,12 @@ class TestFrameworkFiles:
                 FrameworkFiles(name="sample_directory", path=temp_dir.name, files=files)
             ]
 
-        yield files, temp_dir
+        yield files, temp_dir, files_inside_a_directory
 
         _temp_dir.cleanup()
 
     def test_validate(self, setup):
-        files, temp_dir = setup
+        files, temp_dir, _ = setup
         directory = FrameworkFiles(name="sample_framework_files", files=files)
         assert directory.validate()
 
@@ -265,14 +275,18 @@ class TestFrameworkFiles:
         file_name2 = (
             "non_existent_file"  # should not be found within the FrameworkFiles
         )
+        directory_name = "sample_directory"
 
-        files, temp_dir = setup
-        directory = FrameworkFiles(name="sample_framework_files", files=files)
+        files, temp_dir, files_inside_a_directory = setup
+        framework_files = FrameworkFiles(name="sample_framework_files", files=files)
 
-        file = directory.get_file(file_name=file_name1)
+        file = framework_files.get_file(file_name=file_name1)
         assert file.name == file_name1
-        file = directory.get_file(file_name=file_name2)
+        file = framework_files.get_file(file_name=file_name2)
         assert file is None
+        if files_inside_a_directory:
+            directory = framework_files.get_file(file_name=directory_name)
+            assert directory.name == directory_name
 
 
 @pytest.mark.parametrize(

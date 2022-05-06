@@ -221,11 +221,14 @@ class Directory(File):
          - parent directory of the Directory object (by default)
          - specified path (if `tar_file_path` provided).
 
+        Note: `path_to_extract` is relative to the working dir!
+
         :param path_to_extract: path where the tar archive file is extracted to
         :return boolean flag; True if archive is properly extracted
         """
+
         if path_to_extract is None:
-            path_to_extract = os.path.dirname(self.path)
+            path_to_extract = "."
 
         _, *extension = self.path.split(".")
         if extension != ["tar", "gz"]:
@@ -308,16 +311,17 @@ class FrameworkFiles(Directory):
         :return: File if found, otherwise None
         """
         for file in self.files:
-            if isinstance(file, Directory):
-                file_found = file.get_file(file_name=file_name)
-                return file_found
-            else:
-                if file.name == file_name:
-                    file_found = file
-                    return file_found
+            if file.name == file_name:
+                file_found = file
 
-        logging.warning(f"File with name {file_name} not found!")
-        return None
+            elif isinstance(file, Directory):
+                file_found = file.get_file(file_name=file_name)
+
+            else:
+                logging.warning(f"File with name {file_name} not found!")
+                file_found = None
+
+        return file_found
 
     def _check_valid_folder_name(self, file: File) -> bool:
         # checks that any nested folders’ names
