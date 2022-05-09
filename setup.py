@@ -45,6 +45,8 @@ _deps = [
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
+    "protobuf>=3.19.1",
+
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
