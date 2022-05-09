@@ -41,18 +41,15 @@ class File:
     - json files
     - csv files
     - image files
+
+    :param name: name of the File
+    :param path: path of the File
+    :param url: url of the File
     """
 
     def __init__(
         self, name: str, path: Optional[str] = None, url: Optional[str] = None
     ):
-        """
-        Constructor for a File object.
-
-        :param name: name of the File
-        :param path: path of the File
-        :param url: url of the File
-        """
         self.name = name
         self.url = url
         self.path = path
@@ -169,6 +166,11 @@ class File:
 class Directory(File):
     """
     Object that represents a directory.
+
+    :param files: list of files contained within the Directory
+    :param name: name of the Directory
+    :param path: path of the Directory
+    :param url: url of the Directory
     """
 
     def __init__(
@@ -178,14 +180,7 @@ class Directory(File):
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
-        """
-        Constructor for a Directory object.
 
-        :param files: list of files contained within the Directory
-        :param name: name of the Directory
-        :param path: path of the Directory
-        :param url: url of the Directory
-        """
         self.files = files
 
         if path is None:
@@ -260,6 +255,11 @@ class Directory(File):
 class FrameworkFiles(Directory):
     """
     Object that represents a directory with framework files.
+
+    :param files: list of files contained within the FrameworkFiles
+    :param name: name of the FrameworkFiles
+    :param path: path of the FrameworkFiles
+    :param url: url of the FrameworkFiles
     """
 
     def __init__(
@@ -269,14 +269,6 @@ class FrameworkFiles(Directory):
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
-        """
-        Constructor for a FrameworkFiles object.
-
-        :param files: list of files contained within the FrameworkFiles
-        :param name: name of the FrameworkFiles
-        :param path: path of the FrameworkFiles
-        :param url: url of the FrameworkFiles
-        """
 
         super().__init__(files=files, name=name, path=path, url=url)
 
@@ -363,6 +355,11 @@ class SampleOriginals(Directory):
     """
     Object that represents a directory with unedited data that
     can be used as inputs to a training pipeline.
+
+    :param files: list of files contained within the SampleOriginals
+    :param name: name of the SampleOriginals
+    :param path: path of the SampleOriginals
+    :param url: url of the SampleOriginals
     """
 
     def __init__(
@@ -398,6 +395,11 @@ class NumpyDirectory(Directory):
     """
     Object that represents a directory with unedited data
     that can be used as inputs to a training pipeline.
+
+    :param files: list of files contained within the NumpyDirectory
+    :param name: name of the NumpyDirectory
+    :param path: path of the NumpyDirectory
+    :param url: url of the NumpyDirectory
     """
 
     def __init__(
