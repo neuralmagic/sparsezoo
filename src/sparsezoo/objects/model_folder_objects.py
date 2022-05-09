@@ -25,7 +25,6 @@ import tarfile
 from typing import List, Optional, Union
 
 import onnx
-import yaml
 
 from PIL import Image
 from src.sparsezoo.utils.numpy import load_numpy_list
@@ -61,7 +60,6 @@ class File:
         self.loadable_extensions = {
             ".npz": self._validate_numpy,
             ".onnx": self._validate_onnx,
-            ".yaml": self._validate_yaml,
             ".md": self._validate_markdown,
             ".json": self._validate_json,
             ".csv": self._validate_csv,
@@ -106,16 +104,6 @@ class File:
         if not onnx.load(self.path):
             self._throw_error(
                 error_msg="Onnx file could not been loaded properly",
-                strict_mode=strict_mode,
-            )
-
-    def _validate_yaml(self, strict_mode):
-        try:
-            with open(self.path) as file:
-                yaml.load(file, Loader=yaml.FullLoader)
-        except Exception as error:  # noqa: F841
-            self._throw_error(
-                error_msg="Yaml file could not been loaded properly",
                 strict_mode=strict_mode,
             )
 

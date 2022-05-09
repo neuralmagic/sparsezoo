@@ -21,7 +21,6 @@ from collections import OrderedDict
 import numpy as np
 import onnx
 import pytest
-import yaml
 from onnx.helper import make_graph, make_model, make_node, make_tensor_value_info
 
 from PIL import Image
@@ -64,12 +63,6 @@ def _create_onnx_file(file_path):
     onnx.save_model(model, file_path)
 
 
-def _create_yaml_file(file_path):
-    test_dict = {"test_key": "test_value"}
-    with open(file_path, "w") as outfile:
-        yaml.dump(test_dict, outfile, default_flow_style=False)
-
-
 def _create_md_file(file_path):
     test_string = "test_string"
     with open(file_path, "w") as outfile:
@@ -98,8 +91,6 @@ def _create_sample_file(file_path):
         _create_numpy_file(file_path)
     elif extension == ".onnx":
         _create_onnx_file(file_path)
-    elif extension == ".yaml":
-        _create_yaml_file(file_path)
     elif extension == ".md":
         _create_md_file(file_path)
     elif extension == ".json":
@@ -125,7 +116,6 @@ def _insert_directory_into_path(path: str, directory_str: str, index: int = 4):
     [
         (".npz", True),
         (".onnx", True),
-        (".yaml", True),
         (".md", True),
         (".json", True),
         (".csv", True),
