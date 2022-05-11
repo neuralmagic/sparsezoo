@@ -22,7 +22,7 @@ import os
 import pathlib
 import re
 import tarfile
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import onnx
 
@@ -68,6 +68,24 @@ class File:
             ".jpeg": self._validate_img,
         }
 
+    @classmethod
+    def from_file_dict(cls, file: Dict[str, Any]) -> "File":
+        """
+        Factory method for creating a File class object
+        using a file dictionary
+        (e.g. when using the `request_json` from NeuralMagic).
+        """
+
+        name = file.get("display_name")
+        path = file.get("path")
+        url = file.get("url")
+
+        return File(
+            name=name,
+            path=path,
+            url=url,
+        )
+
     # TODO: Add support for various integrations
     def validate(
         self, strict_mode: bool = True, integration: Optional[str] = None
@@ -83,7 +101,7 @@ class File:
             (e.g. transformers, YOLOv5 etc.)
         :return: boolean flag; True if File instance is loadable, otherwise False
         """
-        _, extension = os.path.splitext(self.path)
+        _, extension = os.path.splitext(self.name)
 
         if extension in self.loadable_extensions.keys():
             validation_function = self.loadable_extensions[extension]
@@ -171,8 +189,6 @@ class Directory(File):
 
         self.files = files
 
-        if path is None:
-            path = self._infer_path_from_files()
         super().__init__(name=name, path=path, url=url)
 
     def gzip(self) -> str:
@@ -227,17 +243,6 @@ class Directory(File):
 
     def __len__(self):
         return len(self.files)
-
-    def _infer_path_from_files(self) -> Union[str, None]:
-        # if Directory object describes a local directory, we may try to infer the path
-        # from the attributes of the files contained within
-        paths = [os.path.dirname(file.path) for file in self.files]
-
-        # assert that all the files have the same dirname.
-        if len(set(paths)) == 1:
-            return paths[0]
-        else:
-            return None
 
 
 class FrameworkFiles(Directory):
