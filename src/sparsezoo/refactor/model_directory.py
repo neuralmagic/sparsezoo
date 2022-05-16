@@ -189,6 +189,7 @@ class ModelDirectory:
                 "benchmarks",
                 "eval_results",
                 "recipes",
+                "sample_labels",
             ]
 
         downloads = {}
@@ -423,11 +424,15 @@ class ModelDirectory:
                 path=sample_outputs.path,
             )
 
+        validation = []  # validation boolean per output
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
             # TODO: This does not work for now, the
             #  outputs are quite different. To be investigated.
-            return all([np.array_equal(x, y) for x, y in zip(target_output, output)])
+            validation.append(
+                all([np.array_equal(x, y) for x, y in zip(target_output, output)])
+            )
+        return all(validation)
 
     def _run_with_deepsparse(self):
         try:

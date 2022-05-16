@@ -14,6 +14,7 @@
 
 import copy
 import os
+import shutil
 import tempfile
 
 import numpy as np
@@ -47,25 +48,25 @@ from tests.sparsezoo.refactor.test_file import _create_sample_file
                 "recipes": ["recipe_foo.md", "recipe_bar.md"],
             },
         ),
-        # (
-        #     "nlp",
-        #     "question_answering",
-        #     0,
-        #     {
-        #         "framework_files": "framework-files",
-        #         "sample_originals": None,  # there are no sample originals
-        #         "sample_inputs": "sample-inputs.tar.gz",
-        #         "sample_outputs": "sample-outputs.tar.gz",
-        #         "sample_labels": None,  # there are no sample labels
-        #         "onnx_model": "model.onnx",
-        #         "onnx_models": None,  # there are no additional onnx models
-        #         "analysis": None,  # there is no analysis file
-        #         "benchmarks": None,  # there is no benchmarks file
-        #         "eval_results": None,  # there is no eval file
-        #         "model_card": "model.md",
-        #         "recipes": None,  # there are recipes in proper format
-        #     },
-        # ),
+        (
+            "nlp",
+            "question_answering",
+            0,
+            {
+                "framework_files": "framework-files",
+                "sample_originals": "sample-originals.tar.gz",
+                "sample_inputs": "sample-inputs.tar.gz",
+                "sample_outputs": "sample-outputs.tar.gz",
+                "sample_labels": "sample-labels.tar.gz",
+                "onnx_model": "model.onnx",
+                "onnx_models": ["model.1.onnx", "model.2.onnx"],
+                "analysis": "analysis.yaml",
+                "benchmarks": "benchmarks.yaml",
+                "eval_results": "eval.yaml",
+                "model_card": "model.md",
+                "recipes": ["recipe_foo.md", "recipe_bar.md"],
+            },
+        ),
     ],
     scope="function",
 )
@@ -153,6 +154,18 @@ class TestModelDirectory:
         ]:
             _create_sample_file(os.path.join(directory_path, name))
 
+            # Create sample labels (if not there, e.g. for transformers)
+            shutil.copyfile(
+                os.path.join(directory_path, "sample-inputs.tar.gz"),
+                os.path.join(directory_path, "sample-labels.tar.gz"),
+            )
+
+            # Create sample originals (if not there, e.g. for transformers)
+            shutil.copyfile(
+                os.path.join(directory_path, "sample-inputs.tar.gz"),
+                os.path.join(directory_path, "sample-originals.tar.gz"),
+            )
+
         return directory_path
 
     @staticmethod
@@ -187,6 +200,26 @@ class TestModelDirectory:
         ]:
             request_json.append({"display_name": name})
 
+        # Create sample labels (if not there, e.g. for transformers)
+        if not any(
+            [x for x in request_json if x["display_name"] == "sample-labels.tar.gz"]
+        ):
+            request_json.append({"display_name": "sample-labels.tar.gz"})
+
+        # Create sample originals (if not there, e.g. for transformers)
+        if not any(
+            [x for x in request_json if x["display_name"] == "sample-originals.tar.gz"]
+        ):
+            sample_originals = copy.deepcopy(
+                [
+                    x
+                    for x in request_json
+                    if x["display_name"] == "sample-inputs.tar.gz"
+                ][0]
+            )
+            sample_originals["display_name"] = "sample-originals.tar.gz"
+            request_json.append(sample_originals)
+
         return request_json
 
     @staticmethod
@@ -200,4 +233,4 @@ class TestModelDirectory:
             elif isinstance(file, dict):
                 pass
             else:
-                expected_file == file.name
+                assert expected_file == file.name
