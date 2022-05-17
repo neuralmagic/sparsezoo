@@ -18,8 +18,8 @@ import pathlib
 import tarfile
 from typing import List, Optional
 
-from src.sparsezoo.refactor.file import File
-from src.sparsezoo.utils.downloader import download_file
+from sparsezoo.refactor.file import File
+from sparsezoo.utils.downloader import download_file
 
 
 __all__ = ["Directory"]
@@ -47,7 +47,30 @@ class Directory(File):
 
         self.files = files
 
+        _, *extension = name.split(".")
+        self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
+
         super().__init__(name=name, path=path, url=url)
+
+    @property
+    def is_archive(self) -> bool:
+        """
+        Boolean flag:
+        - True if the Directory is an archive (tar)
+        - False if the Directory is a local directory (folder).
+        """
+        return self._is_archive
+
+    def get_file_names(self) -> List[str]:
+        """
+        Get the names of the files in the Directory.
+        return: List with names of files
+        """
+        if self._is_archive:
+            tar = tarfile.open(self.path)
+            return [os.path.basename(member.name) for member in tar.getmembers()]
+        else:
+            return [file.name for file in self.files]
 
     def validate(self, strict_mode: bool = True):
         """
@@ -56,7 +79,7 @@ class Directory(File):
         :return: boolean flag; True if files are valid and no errors arise
         """
         validations = {}
-        if self._is_tar():
+        if self.is_archive:
             # we are not validating tar files for now
             validations[self.name] = True
 
@@ -89,7 +112,7 @@ class Directory(File):
             False to not overwrite and raise an error if a file exists
         """
         # Directory can represent a tar file.
-        if self._is_tar():
+        if self.is_archive:
             download_file(
                 url_path=self.url,
                 dest_path=os.path.join(destination_path, self.name),
@@ -122,7 +145,7 @@ class Directory(File):
             save new tar archive Directory to (default = None)
         :return: tar archive Directory
         """
-        if directory._is_tar():
+        if directory.is_archive:
             raise ValueError(
                 "Attempting to create a tar archive "
                 "Directory from a tar archive Directory."
@@ -165,7 +188,7 @@ class Directory(File):
         if extract_directory is None:
             extract_directory = os.path.dirname(tar_directory.path)
 
-        if not tar_directory._is_tar():
+        if not tar_directory.is_archive:
             raise ValueError(
                 "Attempting to extract tar archive, "
                 "but the Directory object is not tar archive"
@@ -188,7 +211,3 @@ class Directory(File):
 
     def __len__(self):
         return len(self.files)
-
-    def _is_tar(self):
-        _, *extension = self.name.split(".")
-        return (extension == ["tar", "gz"]) and not self.files

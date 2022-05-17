@@ -24,12 +24,14 @@ from typing import List, Optional
 
 import onnx
 
-from src.sparsezoo.refactor.directory import Directory
-from src.sparsezoo.refactor.file import File
-from src.sparsezoo.utils.numpy import load_numpy_list
+from sparsezoo.refactor.directory import Directory
+from sparsezoo.refactor.file import File
+from sparsezoo.utils.numpy import load_numpy_list
 
 
 __all__ = ["FrameworkFiles", "NumpyDirectory", "SampleOriginals"]
+
+NUMPY_DIRECTORY_NAMES = ["sample-inputs", "sample-outputs"]
 
 
 class FrameworkFiles(Directory):
@@ -49,10 +51,9 @@ class FrameworkFiles(Directory):
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
-
         super().__init__(files=files, name=name, path=path, url=url)
 
-        self.nested_folders_names = ["checkpoint_(.*)/", "logs/"]
+        self.valid_nested_folder_patterns = ["checkpoint_(.*)/", "logs/"]
 
     # TODO: Add support for model cards (pull integration from
     #  model.md and specify which files to validate)
@@ -107,8 +108,8 @@ class FrameworkFiles(Directory):
     def _check_valid_folder_name(self, file: File) -> bool:
         # checks that any nested folders’ names
         # either follow `checkpoint_id/` or `logs/`
-        checks = [False for _ in self.nested_folders_names]
-        for i, pattern in enumerate(self.nested_folders_names):
+        checks = [False for _ in self.valid_nested_folder_patterns]
+        for i, pattern in enumerate(self.valid_nested_folder_patterns):
             pattern = re.compile(pattern)
             match = re.search(pattern, file.path)
             if match:
@@ -117,7 +118,7 @@ class FrameworkFiles(Directory):
             raise ValueError(
                 f"File: {file.name} has path {file.path}, which does "
                 "not include any of the following "
-                f"directories: {self.nested_folders_names}."
+                f"directories: {self.valid_nested_folder_patterns}."
             )
         return True
 
@@ -222,13 +223,28 @@ class NumpyDirectory(Directory):
                 yield numpy_dict
 
     def _validate_model(self, model: onnx.ModelProto) -> bool:
-        input_names = [inp.name for inp in model.graph.input]
+        file_name = self.name.split(".")[0]
+        if file_name not in NUMPY_DIRECTORY_NAMES:
+            raise ValueError(
+                "Expected the name of NumpyDirectory to be in "
+                f"{NUMPY_DIRECTORY_NAMES + [x + '.tar.gz' for x in NUMPY_DIRECTORY_NAMES]}. "  # noqa E501
+                f"Found name: {self.name}."
+            )
+        validating_inputs = file_name == "sample-inputs"
+        expected_names = (
+            [inp.name for inp in model.graph.input]
+            if validating_inputs
+            else [out.name for out in model.graph.output]
+        )
         for file in self.files:
             numpy_list = load_numpy_list(file.path)
             for numpy_dict in numpy_list:
-                if input_names != list(numpy_dict.keys()):
+                if expected_names != list(numpy_dict.keys()):
+                    key_type = "input" if validating_inputs else "output"
                     raise ValueError(
-                        "The keys in npz dictionary do not match "
-                        "the input names of the provided model."
+                        f"The {key_type} keys in npz dictionary do not match "
+                        f"the {key_type} names of the provided model.\n"
+                        f"Expected keys from onnx model: {expected_names}.\n"
+                        f"Found keys in numpy {key_type}: {list(numpy_dict.keys())}."
                     )
         return True

@@ -24,9 +24,9 @@ import numpy as np
 import onnx
 
 import onnxruntime as ort
-from src.sparsezoo.refactor.directory import Directory
-from src.sparsezoo.refactor.file import File
-from src.sparsezoo.refactor.model_objects import (
+from sparsezoo.refactor.directory import Directory
+from sparsezoo.refactor.file import File
+from sparsezoo.refactor.model_objects import (
     FrameworkFiles,
     NumpyDirectory,
     SampleOriginals,
@@ -416,7 +416,7 @@ class ModelDirectory:
     def _validate_with_onnx_runtime(self):
         sample_outputs = self.sample_outputs
 
-        if sample_outputs._is_tar():
+        if sample_outputs.is_archive:
             sample_outputs = sample_outputs.unzip(sample_outputs)
             sample_outputs = NumpyDirectory(
                 files=sample_outputs.files,
@@ -449,7 +449,7 @@ class ModelDirectory:
         sample_inputs = self.sample_inputs
         onnx_model = self.onnx_model
 
-        if sample_inputs._is_tar():
+        if sample_inputs.is_archive:
             sample_inputs = sample_inputs.unzip(sample_inputs)
             sample_inputs = NumpyDirectory(
                 files=sample_inputs.files,
@@ -468,7 +468,7 @@ class ModelDirectory:
         sample_inputs = self.sample_inputs
         onnx_model = self.onnx_model
 
-        if sample_inputs._is_tar():
+        if sample_inputs.is_archive:
             sample_inputs = sample_inputs.unzip(sample_inputs)
             sample_inputs = NumpyDirectory(
                 files=sample_inputs.files,

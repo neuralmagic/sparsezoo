@@ -20,8 +20,8 @@ import numpy as np
 import onnx
 import pytest
 
-from src.sparsezoo.refactor import File, FrameworkFiles, NumpyDirectory, SampleOriginals
-from src.sparsezoo.utils.numpy import load_numpy_list
+from sparsezoo.refactor import File, FrameworkFiles, NumpyDirectory, SampleOriginals
+from sparsezoo.utils.numpy import load_numpy_list
 from tests.sparsezoo.refactor.test_directory import _create_files_directory
 from tests.sparsezoo.refactor.test_file import _create_onnx_file, _create_sample_file
 
@@ -199,6 +199,7 @@ class TestNumpyDirectory:
 
     def test_validate(self, setup):
         name, path, files, onnx_model = setup
+        name = "sample-inputs"
         numpy_directory = NumpyDirectory(name=name, files=files, path=path)
         assert numpy_directory.path == path
         assert numpy_directory.files == files

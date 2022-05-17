@@ -21,8 +21,8 @@ import onnx
 import yaml
 
 from PIL import Image
-from src.sparsezoo.utils.downloader import download_file
-from src.sparsezoo.utils.numpy import load_numpy_list
+from sparsezoo.utils.downloader import download_file
+from sparsezoo.utils.numpy import load_numpy_list
 
 
 __all__ = ["File"]

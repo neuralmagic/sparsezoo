@@ -18,7 +18,7 @@ import tempfile
 
 import pytest
 
-from src.sparsezoo.refactor import Directory, File
+from sparsezoo.refactor import Directory, File
 from tests.sparsezoo.refactor.test_file import _create_sample_file
 
 
@@ -92,3 +92,10 @@ class TestDirectory:
             os.path.isfile(file.path)
             assert file.validate()
         assert retrieved_directory.validate()
+
+    def test_get_file_names(self, setup):
+        name, path, files = setup
+        directory = Directory(name=name, files=files, path=path)
+        assert set([file.name for file in files]) == set(directory.get_file_names())
+        tar_directory = Directory.gzip(directory)
+        assert set([file.name for file in files]) == set(tar_directory.get_file_names())

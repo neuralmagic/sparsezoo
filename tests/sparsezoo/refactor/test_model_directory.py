@@ -20,9 +20,9 @@ import tempfile
 import numpy as np
 import pytest
 
-from src.sparsezoo import Zoo
-from src.sparsezoo.refactor.model_directory import ModelDirectory
-from src.sparsezoo.requests.download import download_model_get_request
+from sparsezoo import Zoo
+from sparsezoo.refactor.model_directory import ModelDirectory
+from sparsezoo.requests.download import download_model_get_request
 from tests.sparsezoo.refactor.test_file import _create_sample_file
 
 
