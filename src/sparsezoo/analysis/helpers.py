@@ -16,64 +16,52 @@ import numpy
 import onnx
 from onnx import ModelProto, NodeProto, TensorProto, numpy_helper
 
+def get_zero_point(node: NodeProto):
+    return node.input[2] if is_quantized_layer(node) else 0
+
 def is_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     """
     :return: True if node weights have any sparsity, False otherwise
     """
-    param = get_layer_param(model, node)
-    sparsity = get_param_sparsity(param)
-
-    return sparsity > 0
+    return get_param_sparsity(model, node) > 0
 
 def is_four_block_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     """
     :return: True if node weights have any four block sparsity, False otherwise
     """
-    param = get_layer_param(model, node)
-    four_block_sparsity = get_param_four_block_sparsity(param)
+    return get_node_four_block_sparsity(model, node) > 0
 
-    return four_block_sparsity > 0
-
-def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
+def is_quantized_layer(node: NodeProto) -> bool:
     """
     :return: True if the node is not a float32 or float64, False otherwise
     """
-    # TODO: Reimplement
-    param = get_layer_param(model, node)
-    return param.dtype in [numpy.float32, numpy.float64]
+    return node.op_type in ["ConvInteger", "MatMulInteger"]
 
-def get_param_four_block_sparsity(param: numpy.ndarray) -> float:
+def get_node_four_block_sparsity(param: numpy.ndarray) -> float:
     """
     :return: The sparsity of the parameter in terms of blocks of four
     """
 
-    # matmul input channel dimension
+    # TODO: More thought about matmul input channel dimension
     # TODO: vectorize
-    # TODO: quantized case
 
-    param_flattened = param.flatten()
-    if len(param_flattened) % 4 != 0:
-        raise Exception("Parameter shape is not divisible by four")
+    zero_point = get_zero_point(node)
+    param = get_layer_param(model, node)
+    param_four_blocked = numpy.reshape(param, (-1, 4))
 
-    num_nonzero_blocks = 0
-    for block_i in range(0, len(param_flattened), 4):
-        block = param_flattened[block_i: block_i + 4]
+    num_zero_blocks = np.count_nonzero(param_four_blocked == [0, 0, 0, 0])
 
-        if any(block):
-            num_nonzero_blocks += 1
+    return num_zero_blocks / param.size
 
-    return 1 - num_nonzero_blocks / (len(param_flattened) / 4)
-
-def get_param_sparsity(param: numpy.ndarray) -> float:
+def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
     :return: The number proportion of zeros in the given parameter
     """
+    zero_point = get_zero_point(node)
+    param = get_layer_param(model, node)
+    num_zeros = np.count_nonzero(param == zero_point)
 
-    # TODO: vectorize
-    # TODO: quantized case
-
-    param_flattened = param.flatten()
-    return 1 - numpy.count_nonzero(param_flattened) / len(param_flattened)
+    return num_zeros / param.size
 
 def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     """
@@ -105,17 +93,17 @@ def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
         initializer_name = node.input[1]
 
         initializer = get_initializer(model, initializer_name)
-        if initializer is None: raise KeyError("Parameter not found")
+        if initializer is None: raise Exception("Parameter not found")
 
         return numpy_helper.to_array(initializer)
 
-    elif node.op_type in ["MatMul", "Gemm"]:
+    elif node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
         initializer_names = [init.name for init in model.graph.initializer]
         initializer_name = next(name for name in node.input
                                 if name in initializer_names)
 
         initializer = get_initializer(model, initializer_name)
-        if initializer is None: raise KeyError("Parameter not found")
+        if initializer is None: raise Exception("Parameter not found")
 
         return numpy_helper.to_array(initializer)
 
