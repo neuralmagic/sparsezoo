@@ -65,6 +65,16 @@ class TestDirectory:
         assert directory.name == name
         assert directory.validate()
 
+        # test nested directory
+        files = [directory] * 3
+        directory = Directory(name=name, files=files, path=os.path.dirname(path))
+        assert directory.path == os.path.dirname(path)
+        assert directory.files == files
+        assert directory.name == name
+        assert directory.validate()
+
+    # todo add nested
+
     def test_gzip(self, setup):
         name, path, files = setup
         directory = Directory(name=name, files=files, path=path)

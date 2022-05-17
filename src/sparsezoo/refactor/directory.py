@@ -47,7 +47,7 @@ class Directory(File):
 
         self.files = files
 
-        _, *extension = name.split(".")
+        extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
         super().__init__(name=name, path=path, url=url)
@@ -86,13 +86,7 @@ class Directory(File):
         else:
             validations = {}
             for file in self.files:
-                if isinstance(file, Directory):
-                    # we are not validating nested directories for now
-                    raise NotImplementedError(
-                        "Method validate() does not support nested directories yet."
-                    )
-                else:
-                    validations[file.name] = file.validate(strict_mode=strict_mode)
+                validations[file.name] = file.validate(strict_mode=strict_mode)
 
         if not all(validations.values()):
             logging.warning(

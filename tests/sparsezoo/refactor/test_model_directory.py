@@ -33,39 +33,39 @@ from tests.sparsezoo.refactor.test_file import _create_sample_file
             "cv",
             "classification",
             0,
-            {
-                "framework_files": "framework-files",
-                "sample_originals": "sample-originals.tar.gz",
-                "sample_inputs": "sample-inputs.tar.gz",
-                "sample_outputs": "sample-outputs.tar.gz",
-                "sample_labels": "sample-labels.tar.gz",
-                "onnx_model": "model.onnx",
-                "onnx_models": ["model.1.onnx", "model.2.onnx"],
-                "analysis": "analysis.yaml",
-                "benchmarks": "benchmarks.yaml",
-                "eval_results": "eval.yaml",
-                "model_card": "model.md",
-                "recipes": ["recipe_foo.md", "recipe_bar.md"],
-            },
+            [
+                "framework-files",
+                "sample-originals.tar.gz",
+                "sample-inputs.tar.gz",
+                "sample-outputs.tar.gz",
+                "sample-labels.tar.gz",
+                "model.onnx",
+                ["model.1.onnx", "model.2.onnx"],
+                "analysis.yaml",
+                "benchmarks.yaml",
+                "eval.yaml",
+                "model.md",
+                ["recipe_foo.md", "recipe_bar.md"],
+            ],
         ),
         (
             "nlp",
             "question_answering",
             0,
-            {
-                "framework_files": "framework-files",
-                "sample_originals": "sample-originals.tar.gz",
-                "sample_inputs": "sample-inputs.tar.gz",
-                "sample_outputs": "sample-outputs.tar.gz",
-                "sample_labels": "sample-labels.tar.gz",
-                "onnx_model": "model.onnx",
-                "onnx_models": ["model.1.onnx", "model.2.onnx"],
-                "analysis": "analysis.yaml",
-                "benchmarks": "benchmarks.yaml",
-                "eval_results": "eval.yaml",
-                "model_card": "model.md",
-                "recipes": ["recipe_foo.md", "recipe_bar.md"],
-            },
+            [
+                "framework-files",
+                "sample-originals.tar.gz",
+                "sample-inputs.tar.gz",
+                "sample-outputs.tar.gz",
+                "sample-labels.tar.gz",
+                "model.onnx",
+                ["model.1.onnx", "model.2.onnx"],
+                "analysis.yaml",
+                "benchmarks.yaml",
+                "eval.yaml",
+                "model.md",
+                ["recipe_foo.md", "recipe_bar.md"],
+            ],
         ),
     ],
     scope="function",
@@ -224,12 +224,11 @@ class TestModelDirectory:
 
     @staticmethod
     def _validate_model_directory(model_directory, expected_content):
-        for attribute, file in model_directory:
-            expected_file = expected_content[attribute]
+        for file, expected_file in zip(model_directory.files, expected_content):
             if isinstance(file, list):
-                for _file in file:
-                    assert _file.name in expected_file
-
+                assert set([_file.name for _file in file]) == set(
+                    [_expected_file for _expected_file in expected_file]
+                )
             elif isinstance(file, dict):
                 pass
             else:

@@ -223,7 +223,7 @@ class NumpyDirectory(Directory):
                 yield numpy_dict
 
     def _validate_model(self, model: onnx.ModelProto) -> bool:
-        file_name = self.name.split(".")[0]
+        file_name = self.name.split(".")[:-2] if self.is_archive else self.name
         if file_name not in NUMPY_DIRECTORY_NAMES:
             raise ValueError(
                 "Expected the name of NumpyDirectory to be in "

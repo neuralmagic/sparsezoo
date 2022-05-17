@@ -18,7 +18,7 @@ import os
 import re
 import typing
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import onnx
@@ -41,7 +41,7 @@ def file_dictionary(**kwargs):
     return kwargs
 
 
-class ModelDirectory:
+class ModelDirectory(Directory):
     """
     Object to represent SparseZoo Model Directory.
 
@@ -75,7 +75,11 @@ class ModelDirectory:
     ]
 
     def __init__(
-        self, files: List[Dict[str, Any]], directory_path: Optional[str] = None
+        self,
+        files: List[Dict[str, Any]],
+        name: str,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
     ):
 
         self.framework_files: FrameworkFiles = self._directory_from_files(
@@ -126,15 +130,22 @@ class ModelDirectory:
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
 
-        self._directory_path = directory_path
+        files = [
+            self.framework_files,
+            self.sample_originals,
+            self.sample_inputs,
+            self.sample_outputs,
+            self.sample_labels,
+            self.onnx_model,
+            self.onnx_models,
+            self.analysis,
+            self.benchmarks,
+            self.eval_results,
+            self.model_card,
+            self.recipes,
+        ]
 
-    def __iter__(self) -> Tuple[str, Union[File, List[File], Dict]]:
-        """
-        Iterate over attributes of the ModelDirectory.
-        """
-        attributes = [attr for attr in dir(self) if attr in ModelDirectory.ATTRIBUTES]
-        for attribute in attributes:
-            yield attribute, getattr(self, attribute)
+        super().__init__(files=files, name=name, path=path, url=url)
 
     @classmethod
     def from_zoo_api(cls, request_json: List[Dict]) -> "ModelDirectory":
@@ -145,7 +156,7 @@ class ModelDirectory:
         :return: ModelDirectory class object
         """
         files = request_json
-        return ModelDirectory(files=files)
+        return ModelDirectory(files=files, name="model_directory")
 
     @classmethod
     def from_directory(cls, directory_path: str) -> "ModelDirectory":
@@ -161,7 +172,7 @@ class ModelDirectory:
             display_name = os.path.basename(path)
             files.append(file_dictionary(display_name=display_name, path=path))
 
-        return ModelDirectory(files=files, directory_path=directory_path)
+        return ModelDirectory(files=files, name="model_directory", path=directory_path)
 
     def download(self, directory_path: str, override: bool = False) -> bool:
         """
@@ -171,7 +182,7 @@ class ModelDirectory:
         :param override: if True, the method can override old `directory_path`
         :return: boolean flag; was download successful or not.
         """
-        if self._directory_path is not None and not override:
+        if self.path is not None and not override:
             raise ValueError(
                 "ModelDirectory class object was either created "
                 "using 'from_directory` factory method or "
@@ -179,28 +190,11 @@ class ModelDirectory:
                 "Set `override` = True to override."
             )
         else:
-            # TODO: This is a hack for now,
-            #  some files cannot be downloaded if
-            #  ModelDirectory created .from_zoo_api()
+            downloads = []
+            for file in self.files:
+                downloads.append(self._download(file, directory_path))
 
-            SKIP_ATTRIBUTES = [
-                "framework_files",
-                "analysis",
-                "benchmarks",
-                "eval_results",
-                "recipes",
-                "sample_labels",
-            ]
-
-        downloads = {}
-        for attribute, file in self.__iter__():
-            # TODO: Continuing with the hack
-            if attribute in SKIP_ATTRIBUTES:
-                downloads[attribute] = True
-            else:
-                downloads[attribute] = self._download(file, directory_path)
-
-        return all(downloads.values())
+        return all(downloads)
 
     def validate(self) -> bool:
         """
@@ -223,7 +217,7 @@ class ModelDirectory:
         #  using dummy inputs (see respective tests)
         SKIP_ATTRIBUTES = ["framework_files"]
 
-        if self._directory_path is None:
+        if self.path is None:
             raise ValueError(
                 "Cannot validate the ModelDirectory. "
                 "If created using method `from_directory`, "
@@ -493,7 +487,25 @@ class ModelDirectory:
     def _download(
         self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
     ) -> bool:
+
+        # TODO: This is a hack for now,
+        #  some files cannot be downloaded if
+        #  ModelDirectory created .from_zoo_api()
+
+        SKIP_ATTRIBUTES = [
+            "framework-files",
+            "analysis.yaml",
+            "benchmarks.yaml",
+            "eval.yaml",
+            "recipe_foo.md",
+            "recipe_bar.md",
+            "sample-labels.tar.gz",
+        ]
         if isinstance(file, File):
+            # TODO: Continuing with the hack
+            if file.name in SKIP_ATTRIBUTES:
+                return True
+
             if file.url:
                 file.download(destination_path=directory_path)
                 return True
@@ -512,5 +524,5 @@ class ModelDirectory:
 
     @staticmethod
     def _is_file_tar(file):
-        _, *extension = file["display_name"].split(".")
+        extension = file["display_name"].split(".")[-2:]
         return extension == ["tar", "gz"]
