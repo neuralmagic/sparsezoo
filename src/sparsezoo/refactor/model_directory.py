@@ -411,12 +411,7 @@ class ModelDirectory(Directory):
         sample_outputs = self.sample_outputs
 
         if sample_outputs.is_archive:
-            sample_outputs = sample_outputs.unzip(sample_outputs)
-            sample_outputs = NumpyDirectory(
-                files=sample_outputs.files,
-                name=sample_outputs.name,
-                path=sample_outputs.path,
-            )
+            sample_outputs.unzip()
 
         validation = []  # validation boolean per output
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
@@ -463,12 +458,7 @@ class ModelDirectory(Directory):
         onnx_model = self.onnx_model
 
         if sample_inputs.is_archive:
-            sample_inputs = sample_inputs.unzip(sample_inputs)
-            sample_inputs = NumpyDirectory(
-                files=sample_inputs.files,
-                name=sample_inputs.name,
-                path=sample_inputs.path,
-            )
+            sample_inputs.unzip()
 
         ort_sess = ort.InferenceSession(onnx_model.path)
         model = onnx.load(onnx_model.path)

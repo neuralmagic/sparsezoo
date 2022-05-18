@@ -31,7 +31,7 @@ class Directory(File):
     Directory may also represent a tar file.
 
     :param files: list of files contained within the Directory
-        (None for tar files).
+        (None for tar archive files).
     :param name: name of the Directory
     :param path: path of the Directory
     :param url: url of the Directory
@@ -43,14 +43,21 @@ class Directory(File):
         files: Optional[List[File]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
+        # TODO: Adding unpack as a parameter, mainly because of testing
+        # limitations (e.g. I cannot unpack tar archives which I try to
+        # download from SparseZoo but they are not there yet).
+        # We may remove this argument later.
+        unpack: bool = False,
     ):
 
         self.files = files
-
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
         super().__init__(name=name, path=path, url=url)
+
+        if self._is_archive and unpack:
+            self.unzip()
 
     @property
     def is_archive(self) -> bool:
@@ -61,12 +68,16 @@ class Directory(File):
         """
         return self._is_archive
 
+    @is_archive.setter
+    def is_archive(self, value: bool):
+        self._is_archive = value
+
     def get_file_names(self) -> List[str]:
         """
         Get the names of the files in the Directory.
         return: List with names of files
         """
-        if self._is_archive:
+        if self.is_archive:
             tar = tarfile.open(self.path)
             return [os.path.basename(member.name) for member in tar.getmembers()]
         else:
@@ -78,11 +89,10 @@ class Directory(File):
 
         :return: boolean flag; True if files are valid and no errors arise
         """
-        validations = {}
+
         if self.is_archive:
             # we are not validating tar files for now
-            validations[self.name] = True
-
+            validations = {self.name: True}
         else:
             validations = {}
             for file in self.files:
@@ -119,89 +129,87 @@ class Directory(File):
             for file in self.files:
                 if isinstance(file, Directory):
                     raise NotImplementedError(
-                        "Method download() does not support nested directories yet."
+                        "Method download() does not support nested directories."
                     )
                 else:
                     file.download(destination_path=destination_path)
 
-    @classmethod
-    def gzip(
-        cls, directory: "Directory", archive_directory: Optional[str] = None
-    ) -> "Directory":
+    def gzip(self, archive_directory: Optional[str] = None):
         """
-        Factory method that creates a tar archive Directory
-        from the `directory` (folder Directory).
-        The tar archive file would be saved in the parent
-        directory of the `directory`, unless `extract_directory` argument is specified.
+        Creates a tar archive directory from the current directory.
+        The resulting tar archive directory would be created in the parent
+        directory of `self`, unless `extract_directory` argument is specified.
 
-        :param directory: the folder directory (Directory class object)
         :param archive_directory: the local path to
             save new tar archive Directory to (default = None)
-        :return: tar archive Directory
         """
-        if directory.is_archive:
+        if self.is_archive:
             raise ValueError(
                 "Attempting to create a tar archive "
                 "Directory from a tar archive Directory."
             )
         if archive_directory is not None:
             parent_path = archive_directory
+
         else:
-            if directory.path is None:
+            if self.path is None:
                 raise ValueError(
                     "Attempting to zip the folder Directory object files using "
                     "`path` attribute, but `self.path` is None. "
                     "Class object requires pointer to parent "
                     "folder directory to know where to save the tar archive file."
                 )
-            parent_path = pathlib.PurePath(directory.path).parent
+            parent_path = pathlib.PurePath(self.path).parent
 
-        tar_file_name = directory.name + ".tar.gz"
+        tar_file_name = self.name + ".tar.gz"
         tar_file_path = os.path.join(parent_path, tar_file_name)
         with tarfile.open(tar_file_path, "w") as tar:
-            for file in directory.files:
+            for file in self.files:
                 tar.add(file.path)
-        return Directory(name=tar_file_name, path=tar_file_path)
 
-    @classmethod
-    def unzip(
-        cls, tar_directory: "Directory", extract_directory: Optional[str] = None
-    ) -> "Directory":
+        self.name, self.files, self.url, self.path, self.is_archive = (
+            tar_file_name,
+            None,
+            None,
+            tar_file_path,
+            True,
+        )
+
+    def unzip(self, extract_directory: Optional[str] = None):
         """
-        Factory method that extracts a tar archive `tar_directory` into a new
-        folder Directory.
+        Extracts a tar archive Directory.
         The extracted files would be saved in the parent directory of
-        the `tar_directory`, unless `extract_directory` argument is specified.
-
-        :param tar_directory: the tar archive directory (Directory class object)
+        `self`, unless `extract_directory` argument is specified.
         :param extract_directory: the local path to create
-            folder Directory at (and thus save extracted files at)
-        :return: folder Directory
+            folder Directory at (default = None).
         """
         files = []
         if extract_directory is None:
-            extract_directory = os.path.dirname(tar_directory.path)
+            extract_directory = os.path.dirname(self.path)
 
-        if not tar_directory.is_archive:
+        if not self.is_archive:
             raise ValueError(
                 "Attempting to extract tar archive, "
                 "but the Directory object is not tar archive"
             )
 
-        name = os.path.basename(extract_directory)
-        tar = tarfile.open(tar_directory.path, "r")
-        path = extract_directory
+        name = ".".join(self.name.split(".")[:-2])
+        tar = tarfile.open(self.path, "r")
+        path = os.path.join(extract_directory, name)
+
         for member in tar.getmembers():
             member.name = os.path.basename(member.name)
-            tar.extract(member=member, path=extract_directory)
-            files.append(
-                File(
-                    name=member.name, path=os.path.join(extract_directory, member.name)
-                )
-            )
+            tar.extract(member=member, path=path)
+            files.append(File(name=member.name, path=os.path.join(path, member.name)))
         tar.close()
 
-        return Directory(name=name, files=files, path=path)
+        self.name, self.files, self.url, self.path, self.is_archive = (
+            name,
+            files,
+            None,
+            path,
+            False,
+        )
 
     def __len__(self):
         return len(self.files)

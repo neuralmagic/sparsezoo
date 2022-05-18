@@ -144,9 +144,7 @@ class TestSampleOriginals:
         # second temporary directory (of Directory object)
         temp_dir = tempfile.TemporaryDirectory(dir=_temp_dir.name)
 
-        name, path, list_files = _create_files_directory(
-            files_extensions, temp_dir, dir_name="sample_originals"
-        )
+        name, path, list_files = _create_files_directory(files_extensions, temp_dir)
 
         yield name, path, list_files
 
@@ -187,9 +185,7 @@ class TestNumpyDirectory:
         # second temporary directory (of Directory object)
         temp_dir = tempfile.TemporaryDirectory(dir=_temp_dir.name)
 
-        name, path, list_files = _create_files_directory(
-            files_extensions, temp_dir, dir_name="numpy_directory"
-        )
+        name, path, list_files = _create_files_directory(files_extensions, temp_dir)
 
         onnx_model = self._create_onnx_model(temp_dir)
 

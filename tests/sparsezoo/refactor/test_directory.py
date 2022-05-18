@@ -14,6 +14,7 @@
 
 
 import os
+import shutil
 import tempfile
 
 import pytest
@@ -22,7 +23,7 @@ from sparsezoo.refactor import Directory, File
 from tests.sparsezoo.refactor.test_file import _create_sample_file
 
 
-def _create_files_directory(files_extensions, temp_dir, dir_name="directory"):
+def _create_files_directory(files_extensions, temp_dir):
     files = []
     for extension in files_extensions:
         path = tempfile.NamedTemporaryFile(
@@ -32,7 +33,7 @@ def _create_files_directory(files_extensions, temp_dir, dir_name="directory"):
         files.append(File(name=name, path=path.name))
         _create_sample_file(path.name)
 
-    return dir_name, temp_dir.name, files
+    return os.path.basename(temp_dir.name), temp_dir.name, files
 
 
 @pytest.mark.parametrize(
@@ -65,47 +66,71 @@ class TestDirectory:
         assert directory.name == name
         assert directory.validate()
 
-        # test nested directory
-        files = [directory] * 3
-        directory = Directory(name=name, files=files, path=os.path.dirname(path))
-        assert directory.path == os.path.dirname(path)
-        assert directory.files == files
-        assert directory.name == name
+    def test_nested_directory(self, setup):
+        (
+            name,
+            path,
+            files,
+        ) = setup
+        directory = Directory(name=name, files=files, path=path)
+
+        new_files = [directory] * 3
+        new_path = os.path.dirname(directory.path)
+        new_name = os.path.basename(new_path)
+        directory = Directory(name=new_name, files=new_files, path=new_path)
+        assert directory.path == new_path
+        assert directory.files == new_files
+        assert directory.name == new_name
         assert directory.validate()
 
-    # todo add nested
+    def test_zipping_on_creation(self, setup):
+        (
+            name,
+            path,
+            files,
+        ) = setup
+        directory = Directory(name=name, files=files, path=path)
+        directory.gzip()
+        new_directory = Directory(name=directory.name, path=directory.path, unpack=True)
+        pass
+        assert os.path.isdir(new_directory.path)
+        assert new_directory.path == directory.path.replace(".tar.gz", "")
+        assert new_directory.files
+        assert new_directory.name == directory.name.replace(".tar.gz", "")
+        assert not new_directory.is_archive
+        assert new_directory.validate()
 
     def test_gzip(self, setup):
         name, path, files = setup
         directory = Directory(name=name, files=files, path=path)
-        tar_directory = Directory.gzip(directory)
+        name = directory.name
+        directory.gzip()
         tar_name = name + ".tar.gz"
-        assert tar_directory.path == os.path.join(os.path.dirname(path), tar_name)
-        assert tar_directory.files is None
-        assert tar_directory.name == tar_name
-        assert os.path.isfile(tar_directory.path)
-        assert tar_directory.validate()
+        assert os.path.isfile(directory.path)
+
+        assert directory.path == os.path.join(os.path.dirname(path), tar_name)
+        assert not directory.files
+        assert directory.name == tar_name
+        assert directory.is_archive
+        assert directory.validate()
 
     def test_unzip(self, setup):
         name, path, files = setup
         directory = Directory(name=name, files=files, path=path)
-        tar_directory = Directory.gzip(directory=directory)
-        retrieved_directory = Directory.unzip(
-            tar_directory=tar_directory,
-            extract_directory=os.path.join(path, "retrieved_directory"),
-        )
-        assert retrieved_directory.path == os.path.join(path, "retrieved_directory")
-        assert retrieved_directory.files is not None
-        assert retrieved_directory.name == "retrieved_directory"
-        assert os.path.isdir(retrieved_directory.path)
-        for file in retrieved_directory.files:
-            os.path.isfile(file.path)
-            assert file.validate()
-        assert retrieved_directory.validate()
+        directory.gzip()
+        shutil.rmtree(path)
+        directory.unzip()
+        assert os.path.isdir(directory.path)
+
+        assert directory.path == os.path.join(os.path.dirname(path), name)
+        assert all([x.name == y.name for x, y in zip(directory.files, files)])
+        assert directory.name == name
+        assert not directory.is_archive
+        assert directory.validate()
 
     def test_get_file_names(self, setup):
         name, path, files = setup
         directory = Directory(name=name, files=files, path=path)
         assert set([file.name for file in files]) == set(directory.get_file_names())
-        tar_directory = Directory.gzip(directory)
-        assert set([file.name for file in files]) == set(tar_directory.get_file_names())
+        directory.gzip()
+        assert set([file.name for file in files]) == set(directory.get_file_names())
