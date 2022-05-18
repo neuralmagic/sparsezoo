@@ -20,8 +20,8 @@ import numpy as np
 import onnx
 import pytest
 
-from sparsezoo.v2 import File, FrameworkFiles, NumpyDirectory, SampleOriginals
 from sparsezoo.utils.numpy import load_numpy_list
+from sparsezoo.v2 import File, FrameworkFiles, NumpyDirectory, SampleOriginals
 from tests.sparsezoo.v2.test_directory import _create_files_directory
 from tests.sparsezoo.v2.test_file import _create_onnx_file, _create_sample_file
 

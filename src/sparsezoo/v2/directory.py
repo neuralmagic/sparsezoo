@@ -18,8 +18,8 @@ import pathlib
 import tarfile
 from typing import List, Optional
 
-from sparsezoo.v2.file import File
 from sparsezoo.utils.downloader import download_file
+from sparsezoo.v2.file import File
 
 
 __all__ = ["Directory"]

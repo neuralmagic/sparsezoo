@@ -26,11 +26,7 @@ import onnx
 import onnxruntime as ort
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
-from sparsezoo.v2.model_objects import (
-    FrameworkFiles,
-    NumpyDirectory,
-    SampleOriginals,
-)
+from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
 FRAMEWORKS = ["pytorch", "keras", "tensorflow"]
