@@ -24,9 +24,9 @@ import numpy as np
 import onnx
 
 import onnxruntime as ort
-from sparsezoo.refactor.directory import Directory
-from sparsezoo.refactor.file import File
-from sparsezoo.refactor.model_objects import (
+from sparsezoo.v2.directory import Directory
+from sparsezoo.v2.file import File
+from sparsezoo.v2.model_objects import (
     FrameworkFiles,
     NumpyDirectory,
     SampleOriginals,

@@ -28,7 +28,7 @@ from .download_main import *
 from .models.zoo import *
 from .objects import *
 from .package import *
-from .refactor import *
+from .v2 import *
 
 
 from sparsezoo.package import check_package_version as _check_package_version

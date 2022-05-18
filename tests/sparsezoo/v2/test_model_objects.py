@@ -20,10 +20,10 @@ import numpy as np
 import onnx
 import pytest
 
-from sparsezoo.refactor import File, FrameworkFiles, NumpyDirectory, SampleOriginals
+from sparsezoo.v2 import File, FrameworkFiles, NumpyDirectory, SampleOriginals
 from sparsezoo.utils.numpy import load_numpy_list
-from tests.sparsezoo.refactor.test_directory import _create_files_directory
-from tests.sparsezoo.refactor.test_file import _create_onnx_file, _create_sample_file
+from tests.sparsezoo.v2.test_directory import _create_files_directory
+from tests.sparsezoo.v2.test_file import _create_onnx_file, _create_sample_file
 
 
 def _insert_directory_into_path(path: str, directory_str: str, index: int = 4):

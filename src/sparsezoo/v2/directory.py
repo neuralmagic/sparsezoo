@@ -18,7 +18,7 @@ import pathlib
 import tarfile
 from typing import List, Optional
 
-from sparsezoo.refactor.file import File
+from sparsezoo.v2.file import File
 from sparsezoo.utils.downloader import download_file
 
 

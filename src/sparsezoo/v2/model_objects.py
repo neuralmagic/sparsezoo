@@ -24,8 +24,8 @@ from typing import List, Optional
 
 import onnx
 
-from sparsezoo.refactor.directory import Directory
-from sparsezoo.refactor.file import File
+from sparsezoo.v2.directory import Directory
+from sparsezoo.v2.file import File
 from sparsezoo.utils.numpy import load_numpy_list
 
 

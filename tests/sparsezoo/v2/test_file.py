@@ -24,7 +24,7 @@ import yaml
 from onnx.helper import make_graph, make_model, make_node, make_tensor_value_info
 
 from PIL import Image
-from sparsezoo.refactor.file import File
+from sparsezoo.v2.file import File
 from sparsezoo.utils.numpy import save_numpy
 
 
