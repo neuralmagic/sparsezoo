@@ -35,10 +35,10 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
             0,
             [
                 "framework-files",
-                "sample-originals.tar.gz",
-                "sample-inputs.tar.gz",
-                "sample-outputs.tar.gz",
-                "sample-labels.tar.gz",
+                "sample-originals",
+                "sample-inputs",
+                "sample-outputs",
+                "sample-labels",
                 "model.onnx",
                 ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
@@ -54,10 +54,10 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
             0,
             [
                 "framework-files",
-                "sample-originals.tar.gz",
-                "sample-inputs.tar.gz",
-                "sample-outputs.tar.gz",
-                "sample-labels.tar.gz",
+                "sample-originals",
+                "sample-inputs",
+                "sample-outputs",
+                "sample-labels",
                 "model.onnx",
                 ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
@@ -85,11 +85,14 @@ class TestModelDirectory:
 
         temp_dir.cleanup()
 
-    def test_model_directory(self, setup):
+    def test_model_directory_from_zoo(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        self._validate_model_directory(model_directory, expected_content)
+        self._validate_model_directory(model_directory, expected_content, from_zoo=True)
+
+    def test_model_directory_from_directory(self, setup):
+        directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         self._validate_model_directory(model_directory, expected_content)
@@ -223,7 +226,7 @@ class TestModelDirectory:
         return request_json
 
     @staticmethod
-    def _validate_model_directory(model_directory, expected_content):
+    def _validate_model_directory(model_directory, expected_content, from_zoo=False):
         for file, expected_file in zip(model_directory.files, expected_content):
             if isinstance(file, list):
                 assert set([_file.name for _file in file]) == set(
@@ -232,4 +235,6 @@ class TestModelDirectory:
             elif isinstance(file, dict):
                 pass
             else:
+                if from_zoo and file.name.endswith(".tar.gz"):
+                    expected_file += ".tar.gz"
                 assert expected_file == file.name

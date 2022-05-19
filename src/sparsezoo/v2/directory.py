@@ -43,11 +43,6 @@ class Directory(File):
         files: Optional[List[File]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        # TODO: Adding unpack as a parameter, mainly because of testing
-        # limitations (e.g. I cannot unpack tar archives which I try to
-        # download from SparseZoo but they are not there yet).
-        # We may remove this argument later.
-        unpack: bool = False,
     ):
 
         self.files = files
@@ -56,7 +51,7 @@ class Directory(File):
 
         super().__init__(name=name, path=path, url=url)
 
-        if self._is_archive and unpack:
+        if self._unpack():
             self.unzip()
 
     @property
@@ -65,16 +60,24 @@ class Directory(File):
         Boolean flag:
         - True if the Directory is an archive (tar)
         - False if the Directory is a local directory (folder).
+
+        :return: boolean flag; True if Directory is tar archive, False if folder.
         """
         return self._is_archive
 
     @is_archive.setter
     def is_archive(self, value: bool):
+        """
+        Setter property of `is_archive`.
+
+        :param value: boolean flag; True if Directory is tar archive, False if folder.
+        """
         self._is_archive = value
 
     def get_file_names(self) -> List[str]:
         """
         Get the names of the files in the Directory.
+
         return: List with names of files
         """
         if self.is_archive:
@@ -167,13 +170,11 @@ class Directory(File):
             for file in self.files:
                 tar.add(file.path)
 
-        self.name, self.files, self.url, self.path, self.is_archive = (
-            tar_file_name,
-            None,
-            None,
-            tar_file_path,
-            True,
-        )
+        self.name = tar_file_name
+        self.files = None
+        self.url = None
+        self.path = tar_file_path
+        self.is_archive = True
 
     def unzip(self, extract_directory: Optional[str] = None):
         """
@@ -203,13 +204,17 @@ class Directory(File):
             files.append(File(name=member.name, path=os.path.join(path, member.name)))
         tar.close()
 
-        self.name, self.files, self.url, self.path, self.is_archive = (
-            name,
-            files,
-            None,
-            path,
-            False,
-        )
+        self.name = name
+        self.files = files
+        self.url = None
+        self.path = path
+        self.is_archive = False
 
     def __len__(self):
         return len(self.files)
+
+    def _unpack(self):
+        # To unpack the Directory the following criteria need to be fulfilled:
+        # 1) The Directory needs to be a tar archive
+        # 2) The Directory needs to have a `path` attribute.
+        return self.is_archive and self.path

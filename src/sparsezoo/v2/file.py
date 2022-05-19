@@ -68,18 +68,20 @@ class File:
         }
 
     @classmethod
-    def from_file_dict(cls, file: Dict[str, Any]) -> "File":
+    def from_dict(cls, file: Dict[str, Any]) -> "File":
         """
         Factory method for creating a File class object
         from a file dictionary
         (useful when working with the `request_json` from NeuralMagic).
+        :param file: a dictionary which contains an information about
+            the file (as returned by NeuralMagic API)
+        :return: File class object
         """
-
         name = file.get("display_name")
         path = file.get("path")
         url = file.get("url")
 
-        return File(
+        return cls(
             name=name,
             path=path,
             url=url,
@@ -130,15 +132,22 @@ class File:
             (e.g. transformers, YOLOv5 etc.)
         :return: boolean flag; True if File instance is loadable, otherwise False
         """
-        _, extension = os.path.splitext(self.name)
-
-        if extension in self.loadable_extensions.keys():
-            validation_function = self.loadable_extensions[extension]
-            validation_function(strict_mode=strict_mode)
-            return True
+        if not self.name or (not self.path and not self.url):
+            logging.warning(
+                "Failed to validate a file. A valid file needs to "
+                "have a valid `name` AND a valid `path` or `url`."
+            )
+            return False
 
         else:
-            return False
+            _, extension = os.path.splitext(self.name)
+
+            if extension in self.loadable_extensions.keys():
+                validation_function = self.loadable_extensions[extension]
+                validation_function(strict_mode=strict_mode)
+                return True
+            else:
+                return False
 
     def _validate_numpy(self, strict_mode):
         if not load_numpy_list(self.path):

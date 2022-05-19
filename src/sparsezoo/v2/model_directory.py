@@ -55,21 +55,6 @@ class ModelDirectory(Directory):
         it points to the directory of the ModelDirectory. By default: None
     """
 
-    ATTRIBUTES = [
-        "framework_files",
-        "sample_originals",
-        "sample_inputs",
-        "sample_outputs",
-        "sample_labels",
-        "onnx_model",
-        "onnx_models",
-        "analysis",
-        "benchmarks",
-        "eval_results",
-        "model_card",
-        "recipes",
-    ]
-
     def __init__(
         self,
         files: List[Dict[str, Any]],
@@ -295,7 +280,6 @@ class ModelDirectory(Directory):
             directory = directory_class(files=[], name=name, path=path, url=url)
             return directory
 
-        # TODO: Perhaps include nested directory parsing in the future
         # directory is folder
         else:
             # is directory using the 'contents' key.
@@ -344,7 +328,7 @@ class ModelDirectory(Directory):
             )
             return None
         else:
-            file = File.from_file_dict(file)
+            file = File.from_dict(file)
 
             return file
 
@@ -368,7 +352,9 @@ class ModelDirectory(Directory):
         if len(files_found) == 1:
             return files_found[0]
         else:
-            return files_found
+            raise ValueError(
+                f"Found more than one File for `display_name` {display_name}."
+            )
 
     def _directory_from_files(
         self,
@@ -399,7 +385,9 @@ class ModelDirectory(Directory):
         # it is prohibitive for find more than
         # one directory
         elif len(directories_found) != 1:
-            raise ValueError()
+            raise ValueError(
+                f"Found more than one Directory for `display_name` {display_name}."
+            )
         else:
             return directories_found[0]
 
