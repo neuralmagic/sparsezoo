@@ -159,6 +159,7 @@ class ModelDirectory(Directory):
         """
         Attempt to download the files given the `url` attribute
         of the files inside the ModelDirectory.
+        
         :param directory_path: directory to download files to
         :param override: if True, the method can override old `directory_path`
         :return: boolean flag; was download successful or not.
