@@ -18,6 +18,14 @@ import numpy as np
 from onnx import ModelProto, NodeProto, numpy_helper
 
 
+def map_and_accumulate(array, map_fn, acc_fn):
+    """
+    Helper function to apply a map function to each element in the array,
+    then apply the accumulate function to the whole array
+    """
+    return acc_fn(list(map(map_fn, array)))
+
+
 def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
     """
     Helper function to find initializers by name in the model graph
@@ -66,6 +74,7 @@ def is_quantized_layer(node: NodeProto) -> bool:
 
 def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
+    :TODO: Handle case if zero point is a tensor
     :return: The four block sparsity of the node
     """
 
@@ -75,31 +84,36 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     if param is None:
         return 0.0
 
-    # Pad input channels with zeros
-    num_missing_channels = param.shape[1] % 4
-    padding_shape = [param.shape[0], num_missing_channels] + list(param.shape[2:])
-    padding = np.zeros(padding_shape)
-    param = np.concatenate((param, padding), axis=1)
+    # Bool array
+    param_zeros = param == zero_point  # TODO: Handle case if zero point is a tensor
 
-    # TODO: Handle case if zero point is a tensor
-    param_zeros = param == zero_point
-
-    # Transpose so input channel is first
+    # Transpose so input channels are first
     transpose_arg = np.arange(param_zeros.ndim)
     transpose_arg[0] = 1
     transpose_arg[1] = 0
     param_zeros = np.transpose(param_zeros, transpose_arg)
 
-    # Group parameter by blocks and count
-    param_blocks = np.resize(param_zeros, (-1, 4))
+    # Flatten and treat weights as features across input channels
+    param_zeros = np.reshape(param_zeros, (param_zeros.shape[0], -1))
+
+    # Pad weight features with zeros to be divisible by four
+    num_missing_features = (4 - (param_zeros.shape[1] % 4)) % 4
+    if num_missing_features != 0:
+        param_zeros = np.pad(
+            param_zeros, ((0, 0), (0, num_missing_features)), constant_values=True
+        )
+
+    # Group into blocks and count full blocks
+    param_blocks = np.reshape(param_zeros, (-1, 4))
     num_zeros_per_block = np.count_nonzero(param_blocks, axis=1)
-    num_zero_blocks = np.count_nonzero(num_zeros_per_block, axis=0)
+    num_zero_blocks = np.count_nonzero(num_zeros_per_block == 4, axis=0)
 
     return num_zero_blocks / param_blocks.shape[0]
 
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
+    :TODO: Handle case if zero point is a tensor
     :return: The proportion of zeros in the given node
     """
     zero_point = get_zero_point(model, node)

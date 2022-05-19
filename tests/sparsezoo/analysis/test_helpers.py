@@ -220,6 +220,10 @@ def test_get_zero_point(model_name, node_name, expected_value):
 @pytest.mark.parametrize(
     "model_name,node_name,expected_value",
     [
+        ("yolact_none", "Conv_0", 0),
+        ("yolact_none", "Conv_33", 0),
+        ("yolact_none", "LeakyRelu_36", 0),
+        ("yolact_none", "Conv_275", 0),
         ("mobilenet_v1_pruned_moderate", "Conv_72", 0.8999996185302734),
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", 0),
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0),
@@ -240,6 +244,10 @@ def test_get_node_sparsity(model_name, node_name, expected_value):
 @pytest.mark.parametrize(
     "model_name,node_name,expected_bool",
     [
+        ("yolact_none", "Conv_0", False),
+        ("yolact_none", "Conv_33", False),
+        ("yolact_none", "LeakyRelu_36", False),
+        ("yolact_none", "Conv_275", False),
         ("mobilenet_v1_pruned_moderate", "Conv_72", True),
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", False),
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", False),
@@ -260,13 +268,18 @@ def test_is_sparse_layer(model_name, node_name, expected_bool):
 @pytest.mark.parametrize(
     "model_name,node_name,expected_value",
     [
-        ("mobilenet_v1_pruned_moderate", "Conv_57", 0.49978289188015634),
+        ("yolact_none", "Conv_0", 0),
+        ("yolact_none", "Conv_33", 0),
+        ("yolact_none", "LeakyRelu_36", 0),
+        ("yolact_none", "Conv_275", 0),
+        ("mobilenet_v1_pruned_moderate", "Conv_57", 0),
+        ("mobilenet_v1_pruned_moderate", "Conv_72", 0.6695098876953125),
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", 0),
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0),
         ("mobilenet_v1_pruned_moderate", "Gemm_90", 0),
         ("bert_pruned_quantized", "Gather_34", 0),
         ("bert_pruned_quantized", "DequantizeLinear_27", 0),
-        ("bert_pruned_quantized", "MatMul_238_quant", 0.8073354209652727),
+        ("bert_pruned_quantized", "MatMul_238_quant", 0.7999996609157987),
         ("bert_pruned_quantized", "MatMul_157_quant", 0),
     ],
 )
@@ -280,7 +293,12 @@ def test_get_node_four_block_sparsity(model_name, node_name, expected_value):
 @pytest.mark.parametrize(
     "model_name,node_name,expected_bool",
     [
-        ("mobilenet_v1_pruned_moderate", "Conv_57", True),
+        ("yolact_none", "Conv_0", False),
+        ("yolact_none", "Conv_33", False),
+        ("yolact_none", "LeakyRelu_36", False),
+        ("yolact_none", "Conv_275", False),
+        ("mobilenet_v1_pruned_moderate", "Conv_57", False),
+        ("mobilenet_v1_pruned_moderate", "Conv_72", True),
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", False),
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", False),
         ("mobilenet_v1_pruned_moderate", "Gemm_90", False),
