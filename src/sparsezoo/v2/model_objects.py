@@ -91,17 +91,12 @@ class FrameworkFiles(Directory):
         :return: File if found, otherwise None
         """
         for file in self.files:
-            if isinstance(file, Directory):
-                if file.name == file_name:
+            if file.name == file_name:
                     return file
-                else:
+            if isinstance(file, Directory):
                     file = file.get_file(file_name=file_name)
                     if file:
                         return file
-
-            elif file.name == file_name:
-                return file
-
         logging.warning(f"File with name {file_name} not found!")
         return None
 
