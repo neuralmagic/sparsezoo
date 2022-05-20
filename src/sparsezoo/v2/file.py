@@ -37,6 +37,7 @@ def retry(retries: int, retry_sleep_sec: int):
     Retries the wrapped function/method
         - `retry_num` times if the exceptions listed
         -  with `retry_sleep_sec` interval between each attempt
+    
     :param retries: The number of times to repeat the wrapped function/method
     :type retry_sleep_sec: How long to wait between attempts
     """
