@@ -92,11 +92,11 @@ class FrameworkFiles(Directory):
         """
         for file in self.files:
             if file.name == file_name:
-                    return file
+                return file
             if isinstance(file, Directory):
-                    file = file.get_file(file_name=file_name)
-                    if file:
-                        return file
+                file = file.get_file(file_name=file_name)
+                if file:
+                    return file
         logging.warning(f"File with name {file_name} not found!")
         return None
 

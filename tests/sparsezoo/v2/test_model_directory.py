@@ -118,13 +118,16 @@ class TestModelDirectory:
         # assert model_directory.validate()
         assert model_directory
 
-    def test_generate_outputs(self, setup):
+    def test_generate_outputs_onnxruntime(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         output = next(model_directory.generate_outputs(engine_type="onnxruntime"))
         assert all(isinstance(x, np.ndarray) for x in output)
 
+    def test_generate_outputs_deepsparse(self, setup):
+        directory_path, request_json, expected_content, temp_dir = setup
+        model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         output = next(model_directory.generate_outputs(engine_type="deepsparse"))
         assert all(isinstance(x, np.ndarray) for x in output)
 

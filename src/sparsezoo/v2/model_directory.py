@@ -29,6 +29,8 @@ from sparsezoo.v2.file import File
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
+__all__ = ["ModelDirectory"]
+
 FRAMEWORKS = ["pytorch", "keras", "tensorflow"]
 ENGINES = ["onnxruntime", "deepsparse"]
 
@@ -47,10 +49,10 @@ class ModelDirectory(Directory):
     - `from_zoo_api()` -> by using the output from the
         `src.sparsezoo.requests.download.download_model_get_request()` function.
 
-    - `from_directory()` -> by using the directory to the model on your machine.
+    - `from_directory()` -> by using the path to the model directory on your machine.
 
     :param files: list of files, where every file
-        is represented by a dictionary (note: not Fil object)
+        is represented by a dictionary (note: not File object)
     :directory_path: if ModelDirectory created using method `from_directory()`,
         it points to the directory of the ModelDirectory. By default: None
     """
@@ -133,6 +135,7 @@ class ModelDirectory(Directory):
         """
         Factory method for creating ModelDirectory class object
         from the output of the NeuralMagic API.
+
         :param request_json: output of the NeuralMagic API; list of file dictionaries
         :return: ModelDirectory class object
         """
@@ -144,6 +147,7 @@ class ModelDirectory(Directory):
         """
         Factory method for creating ModelDirectory class object
         from the local directory.
+
         :param directory_path: path to the local directory
         :return: ModelDirectory class object
         """
@@ -159,7 +163,7 @@ class ModelDirectory(Directory):
         """
         Attempt to download the files given the `url` attribute
         of the files inside the ModelDirectory.
-        
+
         :param directory_path: directory to download files to
         :param override: if True, the method can override old `directory_path`
         :return: boolean flag; was download successful or not.
@@ -230,9 +234,10 @@ class ModelDirectory(Directory):
         self, engine_type: str
     ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray]]:
         """
-        Chooses the appropriate engine type to load the onnx model.
+        Chooses the appropriate engine type to load the onnx model
         Then, feeds the data (sample original inputs)
-        to generate model outputs (in the iterative fashion).
+        to generate model outputs (in the iterative fashion)
+
         :params engine_type: name of the inference engine
         :returns engine output.
         """
@@ -292,10 +297,10 @@ class ModelDirectory(Directory):
             # is directory locally on the machine
             else:
                 paths_within = glob.glob(os.path.join(path, "*"))
-                files_within = [
+                files_within = (
                     file_dictionary(display_name=os.path.basename(path), path=path)
                     for path in paths_within
-                ]
+                )
 
             files = [self._get_file(file=file) for file in files_within]
             directory = directory_class(files=files, name=name, path=path, url=url)
@@ -353,9 +358,7 @@ class ModelDirectory(Directory):
         if len(files_found) == 1:
             return files_found[0]
         else:
-            raise ValueError(
-                f"Found more than one File for `display_name` {display_name}."
-            )
+            return files_found
 
     def _directory_from_files(
         self,
@@ -404,19 +407,15 @@ class ModelDirectory(Directory):
             # TODO: This does not work for now, the
             #  outputs are quite different. To be investigated.
             validation.append(
-                all([np.array_equal(x, y) for x, y in zip(target_output, output)])
+                all((np.array_equal(x, y) for x, y in zip(target_output, output)))
             )
         return all(validation)
 
     def _run_with_deepsparse(self):
         try:
             import deepsparse  # noqa F401
-        except ValueError:
-            print(
-                "Could not load deepsparse library. "
-                "Make sure that deepsparse is installed "
-                "(e.g. run `pip install deepsparse`)"
-            )
+        except ModuleNotFoundError as e: # noqa F841
+            pass
 
         from deepsparse import compile_model
 
@@ -491,7 +490,7 @@ class ModelDirectory(Directory):
                 return False
 
         elif isinstance(file, list):
-            validations = [self._download(_file, directory_path) for _file in file]
+            validations = (self._download(_file, directory_path) for _file in file)
             return all(validations)
 
         else:

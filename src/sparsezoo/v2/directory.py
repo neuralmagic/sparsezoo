@@ -19,7 +19,7 @@ import tarfile
 from typing import List, Optional
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.file import File
+from sparsezoo.v2.file import File, retry
 
 
 __all__ = ["Directory"]
@@ -31,7 +31,7 @@ class Directory(File):
     Directory may also represent a tar file.
 
     :param files: list of files contained within the Directory
-        (None for tar archive files).
+        (None for tar archive files)
     :param name: name of the Directory
     :param path: path of the Directory
     :param url: url of the Directory
@@ -59,24 +59,24 @@ class Directory(File):
         """
         Boolean flag:
         - True if the Directory is an archive (tar)
-        - False if the Directory is a local directory (folder).
+        - False if the Directory is a local directory (folder)
 
-        :return: boolean flag; True if Directory is tar archive, False if folder.
+        :return: boolean flag; True if Directory is tar archive, False if folder
         """
         return self._is_archive
 
     @is_archive.setter
     def is_archive(self, value: bool):
         """
-        Setter property of `is_archive`.
+        Setter property of `is_archive`
 
-        :param value: boolean flag; True if Directory is tar archive, False if folder.
+        :param value: boolean flag; True if Directory is tar archive, False if folder
         """
         self._is_archive = value
 
     def get_file_names(self) -> List[str]:
         """
-        Get the names of the files in the Directory.
+        Get the names of the files in the Directory
 
         return: List with names of files
         """
@@ -110,9 +110,10 @@ class Directory(File):
 
         return all(validations.values())
 
+    @retry(retries=3, retry_sleep_sec=5)
     def download(self, destination_path: str, overwrite: bool = True):
         """
-        Download the contents of the file from the url.
+        Download the contents of the file from the url
 
         :param destination_path: the local file path to save the downloaded file to
         :param overwrite: True to overwrite any previous files if they exist,
@@ -180,9 +181,10 @@ class Directory(File):
         """
         Extracts a tar archive Directory.
         The extracted files would be saved in the parent directory of
-        `self`, unless `extract_directory` argument is specified.
+        `self`, unless `extract_directory` argument is specified
+
         :param extract_directory: the local path to create
-            folder Directory at (default = None).
+            folder Directory at (default = None)
         """
         files = []
         if extract_directory is None:

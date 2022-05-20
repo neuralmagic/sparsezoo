@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 import json
 import logging
 import os
+import time
+import traceback
 from typing import Any, Dict, Optional
 
 import onnx
@@ -26,6 +29,40 @@ from sparsezoo.utils.numpy import load_numpy_list
 
 
 __all__ = ["File"]
+
+
+def retry(retries: int, retry_sleep_sec: int):
+    """
+    Retry Decorator
+    Retries the wrapped function/method
+        - `retry_num` times if the exceptions listed
+        -  with `retry_sleep_sec` interval between each attempt
+    :param retries: The number of times to repeat the wrapped function/method
+    :type retry_sleep_sec: How long to wait between attempts
+    """
+
+    def decorator(func):
+        """decorator"""
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            """wrapper"""
+            for attempt in range(retries):
+                try:
+                    return func(
+                        *args, **kwargs
+                    )  # should return the raw function's return value
+                except Exception as err:
+                    logging.error(err)
+                    logging.error(traceback.format_exc())
+                    time.sleep(retry_sleep_sec)
+                logging.error("Trying attempt %s of %s.", attempt + 1, retries)
+            logging.error("Func %s retry failed", func)
+            raise Exception("Exceed max retry num: {} failed".format(retries))
+
+        return wrapper
+
+    return decorator
 
 
 class File:
@@ -73,6 +110,7 @@ class File:
         Factory method for creating a File class object
         from a file dictionary
         (useful when working with the `request_json` from NeuralMagic).
+
         :param file: a dictionary which contains an information about
             the file (as returned by NeuralMagic API)
         :return: File class object
@@ -87,6 +125,7 @@ class File:
             url=url,
         )
 
+    @retry(retries=3, retry_sleep_sec=5)
     def download(self, destination_path: str, overwrite: bool = True):
         """
         Download the contents of the file from the url.
@@ -111,7 +150,7 @@ class File:
 
         download_file(
             url_path=self.url,
-            dest_path=os.path.join(destination_path, self.name),
+            dest_path=new_file_path,
             overwrite=overwrite,
         )
 
