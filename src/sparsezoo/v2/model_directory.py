@@ -414,7 +414,7 @@ class ModelDirectory(Directory):
     def _run_with_deepsparse(self):
         try:
             import deepsparse  # noqa F401
-        except ModuleNotFoundError as e: # noqa F841
+        except ModuleNotFoundError as e:  # noqa F841
             pass
 
         from deepsparse import compile_model
