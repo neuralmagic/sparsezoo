@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
 import json
 import logging
 import os
@@ -29,40 +28,6 @@ from sparsezoo.utils.numpy import load_numpy_list
 
 
 __all__ = ["File"]
-
-
-def retry(retries: int, retry_sleep_sec: int):
-    """
-    Retry Decorator
-    Retries the wrapped function/method
-        - `retry_num` times if the exceptions listed
-        -  with `retry_sleep_sec` interval between each attempt
-    :param retries: The number of times to repeat the wrapped function/method
-    :type retry_sleep_sec: How long to wait between attempts
-    """
-
-    def decorator(func):
-        """decorator"""
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            """wrapper"""
-            for attempt in range(retries):
-                try:
-                    return func(
-                        *args, **kwargs
-                    )  # should return the raw function's return value
-                except Exception as err:
-                    logging.error(err)
-                    logging.error(traceback.format_exc())
-                    time.sleep(retry_sleep_sec)
-                logging.error("Trying attempt %s of %s.", attempt + 1, retries)
-            logging.error("Func %s retry failed", func)
-            raise Exception("Exceed max retry num: {} failed".format(retries))
-
-        return wrapper
-
-    return decorator
 
 
 class File:
@@ -125,14 +90,21 @@ class File:
             url=url,
         )
 
-    @retry(retries=3, retry_sleep_sec=5)
-    def download(self, destination_path: str, overwrite: bool = True):
+    def download(
+        self,
+        destination_path: str,
+        overwrite: bool = True,
+        retries: int = 1,
+        retry_sleep_sec: int = 5,
+    ):
         """
         Download the contents of the file from the url.
 
         :param destination_path: the local file path to save the downloaded file to
         :param overwrite: True to overwrite any previous files if they exist,
             False to not overwrite and raise an error if a file exists
+        :param retries: The maximum number of times to ping the API for the response
+        :type retry_sleep_sec: How long to wait between `retry` attempts
         """
         new_file_path = os.path.join(destination_path, self.name)
 
@@ -147,14 +119,26 @@ class File:
                 f"Overwriting the current location of the File: {self.path} "
                 f"with the new location: {new_file_path}."
             )
+            for attempt in range(retries):
+                try:
+                    download_file(
+                        url_path=self.url,
+                        dest_path=new_file_path,
+                        overwrite=overwrite,
+                    )
 
-        download_file(
-            url_path=self.url,
-            dest_path=new_file_path,
-            overwrite=overwrite,
-        )
+                    self.path = new_file_path
+                    return
 
-        self.path = new_file_path
+                except Exception as err:
+                    logging.error(err)
+                    logging.error(traceback.format_exc())
+                    time.sleep(retry_sleep_sec)
+                logging.error(
+                    f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
+                )
+            logging.error("Download retry failed...")
+            raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
     # TODO: Add support for various integrations
     def validate(

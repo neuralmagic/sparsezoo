@@ -16,10 +16,12 @@ import logging
 import os
 import pathlib
 import tarfile
+import time
+import traceback
 from typing import List, Optional
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.file import File, retry
+from sparsezoo.v2.file import File
 
 
 __all__ = ["Directory"]
@@ -110,23 +112,45 @@ class Directory(File):
 
         return all(validations.values())
 
-    @retry(retries=3, retry_sleep_sec=5)
-    def download(self, destination_path: str, overwrite: bool = True):
+    def download(
+        self,
+        destination_path: str,
+        overwrite: bool = True,
+        retries: int = 1,
+        retry_sleep_sec: int = 5,
+    ):
         """
         Download the contents of the file from the url
 
         :param destination_path: the local file path to save the downloaded file to
         :param overwrite: True to overwrite any previous files if they exist,
             False to not overwrite and raise an error if a file exists
+        :param retries: The maximum number of times to ping the API for the response
+        :type retry_sleep_sec: How long to wait between `retry` attempts
         """
         # Directory can represent a tar file.
         if self.is_archive:
-            download_file(
-                url_path=self.url,
-                dest_path=os.path.join(destination_path, self.name),
-                overwrite=overwrite,
-            )
-            self.path = os.path.join(destination_path, self.name)
+            new_file_path = os.path.join(destination_path, self.name)
+            for attempt in range(retries):
+                try:
+                    download_file(
+                        url_path=self.url,
+                        dest_path=new_file_path,
+                        overwrite=overwrite,
+                    )
+
+                    self.path = new_file_path
+                    return
+
+                except Exception as err:
+                    logging.error(err)
+                    logging.error(traceback.format_exc())
+                    time.sleep(retry_sleep_sec)
+                logging.error(
+                    f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
+                )
+            logging.error("Download retry failed...")
+            raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
         # Directory can represent a folder.
         else:
