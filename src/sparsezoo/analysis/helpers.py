@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union
+from typing import Tuple
 
 import numpy as np
 from onnx import ModelProto, NodeProto, numpy_helper
@@ -33,7 +33,64 @@ def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
     return None
 
 
-def get_zero_point(model: ModelProto, node: NodeProto) -> Union[int, np.ndarray]:
+def get_node_sparsity_sizes(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
+    """
+    :param model: The model in which the node's parameter exists
+    :param node: The node whose number of zeros and parameter size is being calculated
+    :return: The number of zeros, the number of total values
+    """
+    zero_point = get_zero_point(model, node)
+    param = get_layer_param(model, node)
+    if param is None:
+        return 0, 0
+
+    num_zeros = np.count_nonzero(param == zero_point)
+
+    return num_zeros, param.size
+
+
+def get_node_four_block_sparsity_sizes(
+    model: ModelProto, node: NodeProto
+) -> Tuple[int, int]:
+    """
+    :param model: The model in which the node's parameter exists
+    :param node: The node whose four block sparsity sizes are being calculated
+    :return: The number of zero blocks, the number of total blocks
+    """
+    # Get param and zero point
+    zero_point = get_zero_point(model, node)
+    param = get_layer_param(model, node)
+    if param is None:
+        return 0, 0
+
+    # Bool array
+    param_zeros = param == zero_point
+
+    # Transpose so input channels are first
+    transpose_arg = np.arange(param_zeros.ndim)
+    transpose_arg[0] = 1
+    transpose_arg[1] = 0
+    param_zeros = np.transpose(param_zeros, transpose_arg)
+
+    # Flatten and treat weights as features across input channels
+    param_zeros = np.reshape(param_zeros, (param_zeros.shape[0], -1))
+
+    # Pad weight features with zeros to be divisible by four
+    num_missing_features = (4 - (param_zeros.shape[1] % 4)) % 4
+    if num_missing_features != 0:
+        param_zeros = np.pad(
+            param_zeros, ((0, 0), (0, num_missing_features)), constant_values=True
+        )
+
+    # Group into blocks and count full blocks
+    param_blocks = np.reshape(param_zeros, (-1, 4))
+    num_zeros_per_block = np.count_nonzero(param_blocks, axis=1)
+    num_zero_blocks = np.count_nonzero(num_zeros_per_block == 4, axis=0)
+
+    return num_zero_blocks, param_blocks.shape[0]
+
+
+def get_zero_point(model: ModelProto, node: NodeProto) -> int:
     """
     :param model: The model in which the node's zero point initializer exists
     :param node: The node to find the zero point of
@@ -84,37 +141,11 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     :return: The four block sparsity of the node
     """
 
-    # Get param and zero point
-    zero_point = get_zero_point(model, node)
-    param = get_layer_param(model, node)
-    if param is None:
+    num_zero_blocks, num_total_blocks = get_node_four_block_sparsity_sizes(model, node)
+    if num_total_blocks == 0:
         return 0.0
 
-    # Bool array
-    param_zeros = param == zero_point
-
-    # Transpose so input channels are first
-    transpose_arg = np.arange(param_zeros.ndim)
-    transpose_arg[0] = 1
-    transpose_arg[1] = 0
-    param_zeros = np.transpose(param_zeros, transpose_arg)
-
-    # Flatten and treat weights as features across input channels
-    param_zeros = np.reshape(param_zeros, (param_zeros.shape[0], -1))
-
-    # Pad weight features with zeros to be divisible by four
-    num_missing_features = (4 - (param_zeros.shape[1] % 4)) % 4
-    if num_missing_features != 0:
-        param_zeros = np.pad(
-            param_zeros, ((0, 0), (0, num_missing_features)), constant_values=True
-        )
-
-    # Group into blocks and count full blocks
-    param_blocks = np.reshape(param_zeros, (-1, 4))
-    num_zeros_per_block = np.count_nonzero(param_blocks, axis=1)
-    num_zero_blocks = np.count_nonzero(num_zeros_per_block == 4, axis=0)
-
-    return num_zero_blocks / param_blocks.shape[0]
+    return num_zero_blocks / num_total_blocks
 
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
@@ -123,14 +154,11 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     :param node: The node whose sparsity is being calculated
     :return: The proportion of zeros in the given node
     """
-    zero_point = get_zero_point(model, node)
-    param = get_layer_param(model, node)
-    if param is None:
+    num_zeros, param_size = get_node_sparsity_sizes(model, node)
+    if param_size == 0:
         return 0.0
 
-    num_zeros = np.count_nonzero(param == zero_point)
-
-    return num_zeros / param.size
+    return num_zeros / param_size
 
 
 def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:

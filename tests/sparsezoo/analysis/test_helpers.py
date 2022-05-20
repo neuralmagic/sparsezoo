@@ -20,7 +20,9 @@ from sparsezoo.analysis import (
     get_layer_and_op_counts,
     get_layer_param,
     get_node_four_block_sparsity,
+    get_node_four_block_sparsity_sizes,
     get_node_sparsity,
+    get_node_sparsity_sizes,
     get_zero_point,
     is_four_block_sparse_layer,
     is_parameterized_prunable_layer,
@@ -196,6 +198,56 @@ def test_is_quantized_layer(model_name, node_name, expected_bool):
     node = get_node_from_name(model, node_name)
 
     assert is_quantized_layer(node) == expected_bool
+
+
+@pytest.mark.parametrize(
+    "model_name,node_name,expected_num_zeros,expected_param_size",
+    [
+        ("mobilenet_v1_pruned_moderate", "Conv_72", 471859, 524288),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", 0, 0),
+        ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0, 0),
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", 0, 1024000),
+        ("bert_pruned_quantized", "Gather_34", 0, 0),
+        ("bert_pruned_quantized", "DequantizeLinear_27", 0, 0),
+        ("bert_pruned_quantized", "MatMul_80_quant", 473571, 589824),  # MatMulInteger
+        ("bert_pruned_quantized", "MatMul_157_quant", 0, 0),  # QLinear
+    ],
+)
+def test_get_node_sparsity_sizes(
+    model_name, node_name, expected_num_zeros, expected_param_size
+):
+    model = get_model_from_name(model_name)
+    node = get_node_from_name(model, node_name)
+
+    assert get_node_sparsity_sizes(model, node) == (
+        expected_num_zeros,
+        expected_param_size,
+    )
+
+
+@pytest.mark.parametrize(
+    "model_name,node_name,expected_num_zero_blocks,expected_num_blocks",
+    [
+        ("mobilenet_v1_pruned_moderate", "Conv_72", 87754, 131072),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", 0, 0),
+        ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0, 0),
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", 0, 256000),
+        ("bert_pruned_quantized", "Gather_34", 0, 0),
+        ("bert_pruned_quantized", "DequantizeLinear_27", 0, 0),
+        ("bert_pruned_quantized", "MatMul_80_quant", 117964, 147456),
+        ("bert_pruned_quantized", "MatMul_157_quant", 0, 0),
+    ],
+)
+def test_get_node_four_block_sparsity_sizes(
+    model_name, node_name, expected_num_zero_blocks, expected_num_blocks
+):
+    model = get_model_from_name(model_name)
+    node = get_node_from_name(model, node_name)
+
+    assert get_node_four_block_sparsity_sizes(model, node) == (
+        expected_num_zero_blocks,
+        expected_num_blocks,
+    )
 
 
 @pytest.mark.parametrize(
