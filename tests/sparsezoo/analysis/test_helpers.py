@@ -88,6 +88,7 @@ def test_get_layer_param(model_name, node_name, expected_shape):
     if expected_shape is None:
         assert param is None
     else:
+        assert param is not None
         assert param.shape == expected_shape
 
 
