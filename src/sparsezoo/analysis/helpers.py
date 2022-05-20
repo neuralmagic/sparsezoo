@@ -40,13 +40,16 @@ def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
 
 def get_zero_point(model: ModelProto, node: NodeProto) -> Union[int, np.ndarray]:
     """
-    :TODO: Handle case where zero point is a tensor
     :return: The zero point of the node
     """
     if is_quantized_layer(node):
         initializer_name = node.input[3]
         initializer = get_initializer(model, initializer_name)
-        return int(numpy_helper.to_array(initializer))
+        zero_point_initializer = numpy_helper.to_array(initializer)
+        if zero_point_initializer.ndim != 0:
+            raise NotImplementedError("Layer-wise zero points are not supported")
+
+        return int(zero_point_initializer)
     else:
         return 0
 
@@ -74,7 +77,6 @@ def is_quantized_layer(node: NodeProto) -> bool:
 
 def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :TODO: Handle case if zero point is a tensor
     :return: The four block sparsity of the node
     """
 
@@ -85,7 +87,7 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
         return 0.0
 
     # Bool array
-    param_zeros = param == zero_point  # TODO: Handle case if zero point is a tensor
+    param_zeros = param == zero_point
 
     # Transpose so input channels are first
     transpose_arg = np.arange(param_zeros.ndim)
@@ -113,7 +115,6 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :TODO: Handle case if zero point is a tensor
     :return: The proportion of zeros in the given node
     """
     zero_point = get_zero_point(model, node)
