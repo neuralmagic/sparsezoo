@@ -18,13 +18,27 @@ import numpy as np
 from onnx import ModelProto, NodeProto, numpy_helper
 
 
+__all__ = [
+    "get_layer_and_op_counts",
+    "get_node_four_block_sparsity",
+    "get_node_four_block_sparsity_sizes",
+    "get_node_sparsity",
+    "get_node_sparsity_sizes",
+    "get_zero_point",
+    "is_four_block_sparse_layer",
+    "is_parameterized_prunable_layer",
+    "is_quantized_layer",
+    "is_sparse_layer",
+]
+
+
 def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
     """
-    Helper function to find initializers by name in the model graph
+    Helper function to find initializers by name in model graph
 
-    :param model: The model used to find the initializer
-    :param initializer_name: The name of the initializer being returned
-    :return: The initalizer if found, None otherwise
+    :param model: model used to find initializer
+    :param initializer_name: name of initializer being returned
+    :return: initalizer if found, None otherwise
     """
     for initializer in model.graph.initializer:
         if initializer.name == initializer_name:
@@ -35,9 +49,10 @@ def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
 
 def get_node_sparsity_sizes(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose number of zeros and parameter size is being calculated
-    :return: The number of zeros, the number of total values
+    :param model: model in which node's parameter exists
+    :param node: node whose number of zeros and parameter size is being calculated
+    :return: number of zeros
+    :return: number of total values in node's parameter
     """
     zero_point = get_zero_point(model, node)
     param = get_layer_param(model, node)
@@ -53,9 +68,10 @@ def get_node_four_block_sparsity_sizes(
     model: ModelProto, node: NodeProto
 ) -> Tuple[int, int]:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose four block sparsity sizes are being calculated
-    :return: The number of zero blocks, the number of total blocks
+    :param model: model in which node's parameter exists
+    :param node: node whose four block sparsity sizes are being calculated
+    :return: number of zero blocks
+    :return: number of total blocks
     """
     # Get param and zero point
     zero_point = get_zero_point(model, node)
@@ -92,9 +108,9 @@ def get_node_four_block_sparsity_sizes(
 
 def get_zero_point(model: ModelProto, node: NodeProto) -> int:
     """
-    :param model: The model in which the node's zero point initializer exists
-    :param node: The node to find the zero point of
-    :return: The zero point of the given node
+    :param model: model in which node's zero point initializer exists
+    :param node: node to find zero point of
+    :return: zero point of given node
     """
     if is_quantized_layer(node):
         initializer_name = node.input[3]
@@ -110,35 +126,35 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
 
 def is_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose sparsity is being checked
-    :return: True if node weights have any sparsity, False otherwise
+    :param model: model in which node's parameter exists
+    :param node: node whose sparsity is being checked
+    :return: true if node weights have any sparsity, False otherwise
     """
     return get_node_sparsity(model, node) > 0
 
 
 def is_four_block_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose four block sparsity is being checked
-    :return: True if node weights have any four block sparsity, False otherwise
+    :param model: model in which node's parameter exists
+    :param node: node whose four block sparsity is being checked
+    :return: true if node weights have any four block sparsity, False otherwise
     """
     return get_node_four_block_sparsity(model, node) > 0
 
 
 def is_quantized_layer(node: NodeProto) -> bool:
     """
-    :param node: The node whose quantized status is being checked
-    :return: True if the node contains quantized weights, False otherwise
+    :param node: node whose quantized status is being checked
+    :return: true if node contains quantized weights, False otherwise
     """
     return node.op_type in ["QLinearConv", "ConvInteger", "MatMulInteger"]
 
 
 def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose four block sparsity is being calculated
-    :return: The four block sparsity of the node
+    :param model: model in which node's parameter exists
+    :param node: node whose four block sparsity is being calculated
+    :return: four block sparsity of node
     """
 
     num_zero_blocks, num_total_blocks = get_node_four_block_sparsity_sizes(model, node)
@@ -150,9 +166,9 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node whose sparsity is being calculated
-    :return: The proportion of zeros in the given node
+    :param model: model in which node's parameter exists
+    :param node: node whose sparsity is being calculated
+    :return: proportion of zeros in given node
     """
     num_zeros, param_size = get_node_sparsity_sizes(model, node)
     if param_size == 0:
@@ -163,8 +179,8 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
 
 def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     """
-    :param model: The model in which the node's parameter exists
-    :param node: The node being checked
+    :param model: model in which node's parameter exists
+    :param node: node being checked
     :return: True if this node performs a operation that is parameterized and
         prunable, False otherwise
     """
@@ -186,11 +202,11 @@ def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
 
 def get_layer_param(model: ModelProto, node: NodeProto) -> np.ndarray:
     """
-    Finds the parameter value of the node (the node's weight)
+    Finds parameter value of node (the node's weight)
 
-    :param model: The model in which the node's parameter exists
-    :param node: The node to which the parameter belongs to
-    :return: A numpy array of the param value, None if not found
+    :param model: model in which node's parameter exists
+    :param node: node to which parameter belongs to
+    :return: a numpy array of param value, None if not found
     """
 
     if node.op_type in ["Conv", "ConvInteger"]:
@@ -221,7 +237,7 @@ def get_layer_and_op_counts(model: ModelProto):
         that op_type. The first dictionary contains op_types which are layers,
         the second contains op_types which are operations.
 
-    :param model: The model whose counts are being checked
+    :param model: model whose counts are being checked
     :return: a layer dictionary and an operation dictionary which hold node counts
     """
     model_op_types = [node.op_type for node in model.graph.node]
