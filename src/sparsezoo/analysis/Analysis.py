@@ -13,18 +13,20 @@
 # limitations under the License.
 
 from functools import partial
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import onnx
+from onnx import ModelProto
 
 from pydantic import BaseModel, Field
 from sparsezoo.analysis.helpers import (
     get_layer_and_op_counts,
+    get_layer_param,
     get_node_four_block_sparsity,
-    get_node_four_block_sparsity_sizes,
+    get_node_num_four_block_zeros_and_size,
+    get_node_num_zeros_and_size,
     get_node_sparsity,
-    get_node_sparsity_sizes,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
@@ -36,10 +38,6 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
-
-# TODO: Unsure of how to type from_onnx_model
-# TODO: Unsure if Node.dtype references the dtype of the zero point or
-#       the dtype of the parameter
 
 
 def map_and_accumulate(array, map_fn, acc_fn):
@@ -80,7 +78,9 @@ class NodeAnalysis(BaseModel):
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
-    # dtype: str = Field(description="This node's parameter's data type")
+    dtype: Optional[str] = Field(
+        description="This node's parameter's data type", default=None
+    )
 
 
 class ModelAnalysis(BaseModel):
@@ -88,9 +88,9 @@ class ModelAnalysis(BaseModel):
     Pydantic model for analysis of a model
     """
 
-    layer_counts: Dict[str, int] = Field(description="Overview of layers")
+    layer_counts: Dict[str, int] = Field(description="Overview of layers", default={})
     op_counts: Dict[str, int] = Field(
-        description="Overview of operations (nodes that are not layers)"
+        description="Overview of operations (nodes that are not layers)", default={}
     )
     num_nodes: int = Field(description="Total number of nodes")
     num_layers: int = Field(description="Total number of layers")
@@ -120,7 +120,7 @@ class ModelAnalysis(BaseModel):
         description="Total number of all sparsified four blocks (excluding biases)"
     )
 
-    nodes: List[NodeAnalysis]
+    nodes: List[NodeAnalysis] = Field(description="List of node analyses", default=[])
 
     @classmethod
     def from_onnx_model(cls, onnx_file_path: str):
@@ -140,11 +140,14 @@ class ModelAnalysis(BaseModel):
             )
         )
         sparsity_sizes = np.array(
-            [get_node_sparsity_sizes(model_onnx, node) for node in param_prunable_nodes]
+            [
+                get_node_num_zeros_and_size(model_onnx, node)
+                for node in param_prunable_nodes
+            ]
         )
         four_block_sparsity_sizes = np.array(
             [
-                get_node_four_block_sparsity_sizes(model_onnx, node)
+                get_node_num_four_block_zeros_and_size(model_onnx, node)
                 for node in param_prunable_nodes
             ]
         )
@@ -162,33 +165,11 @@ class ModelAnalysis(BaseModel):
             model_onnx.graph.node, partial(is_sparse_layer, model_onnx), sum
         )
         num_quantized_layers = map_and_accumulate(
-            model_onnx.graph.node, is_quantized_layer, sum
+            model_onnx.graph.node, partial(is_quantized_layer, model_onnx), sum
         )
         average_sparsity = num_sparse_parameters / num_parameters
         average_four_block_sparsity = num_sparse_four_blocks / num_four_blocks
-        nodes = []
-        for node in model_onnx.graph.node:
-            node_zero_point = get_zero_point(model_onnx, node)
-            num_sparse_values, node_num_values = get_node_sparsity_sizes(
-                model_onnx, node
-            )
-            (
-                num_sparse_four_blocks,
-                node_num_blocks,
-            ) = get_node_four_block_sparsity_sizes(model_onnx, node)
-            node_analysis = NodeAnalysis(
-                name=node.name,
-                sparsity=get_node_sparsity(model_onnx, node),
-                four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
-                param_size=node_num_values,
-                num_sparse_values=num_sparse_values,
-                num_four_blocks=node_num_blocks,
-                num_sparse_four_blocks=num_sparse_four_blocks,
-                quantized_layer=is_quantized_layer(node),
-                zero_point=node_zero_point,
-                # dtype=str(node_zero_point.dtype)
-            )
-            nodes.append(node_analysis)
+        nodes = cls.analyze_nodes(model_onnx)
 
         return cls(
             layer_counts=layer_counts,
@@ -206,3 +187,35 @@ class ModelAnalysis(BaseModel):
             average_four_block_sparsity=average_four_block_sparsity,
             nodes=nodes,
         )
+
+    def analyze_nodes(model_onnx: ModelProto) -> List[NodeAnalysis]:
+        """
+        :param: model that contains the nodes to be analyzed
+        :return: List of node analyses from model graph
+        """
+        nodes = []
+        for node in model_onnx.graph.node:
+            node_zero_point = get_zero_point(model_onnx, node)
+            num_sparse_values, node_num_values = get_node_num_zeros_and_size(
+                model_onnx, node
+            )
+            (
+                num_sparse_four_blocks,
+                node_num_blocks,
+            ) = get_node_num_four_block_zeros_and_size(model_onnx, node)
+            node_param = get_layer_param(model_onnx, node)
+            node_analysis = NodeAnalysis(
+                name=node.name,
+                sparsity=get_node_sparsity(model_onnx, node),
+                four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
+                param_size=node_num_values,
+                num_sparse_values=num_sparse_values,
+                num_four_blocks=node_num_blocks,
+                num_sparse_four_blocks=num_sparse_four_blocks,
+                quantized_layer=is_quantized_layer(model_onnx, node),
+                zero_point=node_zero_point,
+                dtype=str(node_param.dtype) if node_param is not None else None,
+            )
+            nodes.append(node_analysis)
+
+        return nodes
