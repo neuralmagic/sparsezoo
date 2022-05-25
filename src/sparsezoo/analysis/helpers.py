@@ -14,8 +14,6 @@
 
 from typing import Tuple
 
-import torch
-
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
 
@@ -99,7 +97,9 @@ def get_node_num_four_block_zeros_and_size(
     if remainder != 0:
         num_missing_features = 4 - remainder
         param_zeros = numpy.pad(
-            param_zeros, [(0, 0)] * (param_zeros.ndim -1) + [(0, num_missing_features)], constant_values=True
+            param_zeros,
+            [(0, 0)] * (param_zeros.ndim - 1) + [(0, num_missing_features)],
+            constant_values=True,
         )
 
     # Group into blocks and count zero blocks
@@ -116,6 +116,7 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
     :param node: node to find zero point of
     :return: zero point of given node
     """
+
     def _get_node_zero_point_init_name(node: NodeProto) -> str:
         if node.op_type in ["ConvInteger", "MatMulInteger"]:
             return node.input[3]
@@ -123,8 +124,9 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
             return node.input[5]
         if node.op_type == "QLinearMatMul":
             return node.input[7]
-        raise Exception("Node with op type {node.op_type} does not have a zero "
-                        "point initializer")
+        raise Exception(
+            "Node with op type {node.op_type} does not have a zero " "point initializer"
+        )
 
     if node.op_type in ["Gather"]:
         return 0
@@ -150,7 +152,9 @@ def is_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     return get_node_sparsity(model, node) > 0
 
 
-def is_four_block_sparse_layer(model: ModelProto, node: NodeProto, threshold: int = 0.05) -> bool:
+def is_four_block_sparse_layer(
+    model: ModelProto, node: NodeProto, threshold: int = 0.05
+) -> bool:
     """
     :param model: model that contains the given node
     :param node: node whose four block sparsity is being checked
@@ -170,7 +174,12 @@ def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
         param = get_layer_param(model, node)
         return param is not None and param.dtype in [numpy.uint8, numpy.int8]
 
-    return node.op_type in ["QLinearConv", "ConvInteger", "MatMulInteger", "QLinearMatMul"]
+    return node.op_type in [
+        "QLinearConv",
+        "ConvInteger",
+        "MatMulInteger",
+        "QLinearMatMul",
+    ]
 
 
 def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
@@ -180,7 +189,9 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     :return: four block sparsity of node
     """
 
-    num_zero_blocks, num_total_blocks = get_node_num_four_block_zeros_and_size(model, node)
+    num_zero_blocks, num_total_blocks = get_node_num_four_block_zeros_and_size(
+        model, node
+    )
     if num_total_blocks == 0:
         return 0.0
 
@@ -218,6 +229,7 @@ def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
+
     def _get_layer_param_name(model: ModelProto, node: NodeProto) -> str:
         initializer_names = [init.name for init in model.graph.initializer]
 
@@ -239,7 +251,9 @@ def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
 
         if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
             return next(
-                input_name for input_name in node.input if input_name in initializer_names
+                input_name
+                for input_name in node.input
+                if input_name in initializer_names
             )
 
         return None
@@ -266,15 +280,15 @@ def get_layer_and_op_counts(model: ModelProto):
     :param model: model whose counts are being checked
     :return: a layer dictionary and an operation dictionary which hold node counts
     """
-    model_op_types = [node.op_type for node in model.graph.node]
-
     layer_counts = {}
     op_counts = {}
 
     for node in model.graph.node:
-        target_dict = layer_counts if is_parameterized_prunable_layer(model, node) else op_counts
+        target_dict = (
+            layer_counts if is_parameterized_prunable_layer(model, node) else op_counts
+        )
 
-        if not node.op_type in target_dict:
+        if node.op_type not in target_dict:
             target_dict[node.op_type] = 0
 
         target_dict[node.op_type] += 1

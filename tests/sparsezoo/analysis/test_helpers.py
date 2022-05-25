@@ -21,14 +21,15 @@ from sparsezoo.analysis import (
     get_layer_param,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
-    get_node_sparsity,
     get_node_num_zeros_and_size,
+    get_node_sparsity,
     get_zero_point,
     is_four_block_sparse_layer,
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
 )
+
 
 @pytest.fixture()
 def margin_of_error():
@@ -46,7 +47,7 @@ def model_onnxs():
         "pytorch/huggingface/squad/"
         "12layer_pruned80_quant-none-vnni",
         "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
-        "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni"
+        "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
     }
 
     model_onnxs = {}
@@ -57,6 +58,7 @@ def model_onnxs():
         onnx_path = model.onnx_file.downloaded_path()
         model_onnx = onnx.load(onnx_path)
         model_onnxs[model_name] = model_onnx
+
     return model_onnxs
 
 
@@ -64,6 +66,7 @@ def model_onnxs():
 def get_node_from_name():
     def _get_node_from_name(model, node_name):
         return [node for node in list(model.graph.node) if node.name == node_name][0]
+
     return _get_node_from_name
 
 
@@ -93,7 +96,9 @@ def get_node_from_name():
         ("resnet50_pruned_quantized", "Gemm_1335", (1000, 2048)),
     ],
 )
-def test_get_layer_param(model_name, node_name, expected_shape, model_onnxs, get_node_from_name):
+def test_get_layer_param(
+    model_name, node_name, expected_shape, model_onnxs, get_node_from_name
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
@@ -130,10 +135,12 @@ def test_get_layer_param(model_name, node_name, expected_shape, model_onnxs, get
         ("resnet50_pruned_quantized", "QuantizeLinear_1178", False),
         ("resnet50_pruned_quantized", "GlobalAveragePool_1328", False),
         ("resnet50_pruned_quantized", "Gemm_1335", True),
-        ("resnet50_pruned_quantized", "Softmax_1336", False)
+        ("resnet50_pruned_quantized", "Softmax_1336", False),
     ],
 )
-def test_is_parameterized_prunable_layer(model_name, node_name, expected_bool, model_onnxs, get_node_from_name):
+def test_is_parameterized_prunable_layer(
+    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
@@ -145,10 +152,7 @@ def test_is_parameterized_prunable_layer(model_name, node_name, expected_bool, m
     [
         (
             "mobilenet_v1_pruned_moderate",
-            {
-                "Conv": 27,
-                "Gemm": 1
-            },
+            {"Conv": 27, "Gemm": 1},
             {
                 "BatchNormalization": 27,
                 "Relu": 27,
@@ -196,7 +200,9 @@ def test_is_parameterized_prunable_layer(model_name, node_name, expected_bool, m
         ),
     ],
 )
-def test_get_layer_and_op_counts(model_name, expected_layer_counts, expected_op_counts, model_onnxs):
+def test_get_layer_and_op_counts(
+    model_name, expected_layer_counts, expected_op_counts, model_onnxs
+):
     model = model_onnxs[model_name]
 
     layer_counts, op_counts = get_layer_and_op_counts(model)
@@ -219,7 +225,9 @@ def test_get_layer_and_op_counts(model_name, expected_layer_counts, expected_op_
         ("resnet50_pruned_quantized", "Gemm_1335", False),
     ],
 )
-def test_is_quantized_layer(model_name, node_name, expected_bool, model_onnxs, get_node_from_name):
+def test_is_quantized_layer(
+    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
@@ -242,7 +250,12 @@ def test_is_quantized_layer(model_name, node_name, expected_bool, model_onnxs, g
     ],
 )
 def test_get_node_num_zeros_and_size(
-    model_name, node_name, expected_num_zeros, expected_param_size, model_onnxs, get_node_from_name
+    model_name,
+    node_name,
+    expected_num_zeros,
+    expected_param_size,
+    model_onnxs,
+    get_node_from_name,
 ):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
@@ -269,7 +282,12 @@ def test_get_node_num_zeros_and_size(
     ],
 )
 def test_get_node_num_four_block_zeros_and_size(
-    model_name, node_name, expected_num_zero_blocks, expected_num_blocks, model_onnxs, get_node_from_name
+    model_name,
+    node_name,
+    expected_num_zero_blocks,
+    expected_num_blocks,
+    model_onnxs,
+    get_node_from_name,
 ):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
@@ -295,7 +313,9 @@ def test_get_node_num_four_block_zeros_and_size(
         ("resnet50_pruned_quantized", "Gemm_1335", 0),
     ],
 )
-def test_get_zero_point(model_name, node_name, expected_value, model_onnxs, get_node_from_name):
+def test_get_zero_point(
+    model_name, node_name, expected_value, model_onnxs, get_node_from_name
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
@@ -321,11 +341,20 @@ def test_get_zero_point(model_name, node_name, expected_value, model_onnxs, get_
         ("resnet50_pruned_quantized", "Gemm_1335", 0),
     ],
 )
-def test_get_node_sparsity(model_name, node_name, expected_value, model_onnxs, get_node_from_name, margin_of_error):
+def test_get_node_sparsity(
+    model_name,
+    node_name,
+    expected_value,
+    model_onnxs,
+    get_node_from_name,
+    margin_of_error,
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
-    assert get_node_sparsity(model, node) == pytest.approx(expected_value, abs=margin_of_error)
+    assert get_node_sparsity(model, node) == pytest.approx(
+        expected_value, abs=margin_of_error
+    )
 
 
 @pytest.mark.parametrize(
@@ -347,7 +376,9 @@ def test_get_node_sparsity(model_name, node_name, expected_value, model_onnxs, g
         ("resnet50_pruned_quantized", "Gemm_1335", False),
     ],
 )
-def test_is_sparse_layer(model_name, node_name, expected_bool, model_onnxs, get_node_from_name):
+def test_is_sparse_layer(
+    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
@@ -378,10 +409,19 @@ def test_is_sparse_layer(model_name, node_name, expected_bool, model_onnxs, get_
         ("resnet50_pruned_quantized", "Gemm_1335", 0),
     ],
 )
-def test_get_node_four_block_sparsity(model_name, node_name, expected_value, model_onnxs, get_node_from_name, margin_of_error):
+def test_get_node_four_block_sparsity(
+    model_name,
+    node_name,
+    expected_value,
+    model_onnxs,
+    get_node_from_name,
+    margin_of_error,
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
-    assert get_node_four_block_sparsity(model, node) == pytest.approx(expected_value, abs=margin_of_error)
+    assert get_node_four_block_sparsity(model, node) == pytest.approx(
+        expected_value, abs=margin_of_error
+    )
 
 
 @pytest.mark.parametrize(
@@ -408,8 +448,18 @@ def test_get_node_four_block_sparsity(model_name, node_name, expected_value, mod
         ("resnet50_pruned_quantized", "Gemm_1335", 0),
     ],
 )
-def test_is_four_block_sparse_layer(model_name, node_name, expected_bool, model_onnxs, get_node_from_name, margin_of_error):
+def test_is_four_block_sparse_layer(
+    model_name,
+    node_name,
+    expected_bool,
+    model_onnxs,
+    get_node_from_name,
+    margin_of_error,
+):
     model = model_onnxs[model_name]
     node = get_node_from_name(model, node_name)
 
-    assert is_four_block_sparse_layer(model, node, threshold=margin_of_error) == expected_bool
+    assert (
+        is_four_block_sparse_layer(model, node, threshold=margin_of_error)
+        == expected_bool
+    )
