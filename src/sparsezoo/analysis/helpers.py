@@ -14,16 +14,17 @@
 
 from typing import Tuple
 
-import numpy as np
+import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
 
 
 __all__ = [
     "get_layer_and_op_counts",
     "get_node_four_block_sparsity",
-    "get_node_four_block_sparsity_sizes",
+    "get_node_num_four_block_zeros_and_size",
     "get_node_sparsity",
-    "get_node_sparsity_sizes",
+    "get_layer_param",
+    "get_node_num_zeros_and_size",
     "get_zero_point",
     "is_four_block_sparse_layer",
     "is_parameterized_prunable_layer",
@@ -32,11 +33,11 @@ __all__ = [
 ]
 
 
-def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
+def get_initializer(model: ModelProto, initializer_name: str) -> numpy.ndarray:
     """
     Helper function to find initializers by name in model graph
 
-    :param model: model used to find initializer
+    :param model: model that contains the initializer with the given name
     :param initializer_name: name of initializer being returned
     :return: initalizer if found, None otherwise
     """
@@ -47,31 +48,29 @@ def get_initializer(model: ModelProto, initializer_name: str) -> np.ndarray:
     return None
 
 
-def get_node_sparsity_sizes(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
+def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose number of zeros and parameter size is being calculated
-    :return: number of zeros
-    :return: number of total values in node's parameter
+    :return: number of zeros and number of total values in node parameter
     """
     zero_point = get_zero_point(model, node)
     param = get_layer_param(model, node)
     if param is None:
         return 0, 0
 
-    num_zeros = np.count_nonzero(param == zero_point)
+    num_zeros = numpy.count_nonzero(param == zero_point)
 
     return num_zeros, param.size
 
 
-def get_node_four_block_sparsity_sizes(
+def get_node_num_four_block_zeros_and_size(
     model: ModelProto, node: NodeProto
 ) -> Tuple[int, int]:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose four block sparsity sizes are being calculated
-    :return: number of zero blocks
-    :return: number of total blocks
+    :return: number of zero blocks and number of total blocks
     """
     # Get param and zero point
     zero_point = get_zero_point(model, node)
@@ -82,82 +81,117 @@ def get_node_four_block_sparsity_sizes(
     # Bool array
     param_zeros = param == zero_point
 
-    # Transpose so input channels are first
-    transpose_arg = np.arange(param_zeros.ndim)
-    transpose_arg[0] = 1
-    transpose_arg[1] = 0
-    param_zeros = np.transpose(param_zeros, transpose_arg)
+    # Transpose so input channels are last
+    if param_zeros.ndim > 2 or (node.op_type == "Gemm" and "transB" in node.attribute):
+        input_channel_dim = 1
+    else:
+        input_channel_dim = 0
 
-    # Flatten and treat weights as features across input channels
-    param_zeros = np.reshape(param_zeros, (param_zeros.shape[0], -1))
+    transpose_arg = list(range(param_zeros.ndim))
+    del transpose_arg[input_channel_dim]
+    transpose_arg.append(input_channel_dim)
+    param_zeros = numpy.transpose(param_zeros, transpose_arg)
 
     # Pad weight features with zeros to be divisible by four
-    num_missing_features = (4 - (param_zeros.shape[1] % 4)) % 4
-    if num_missing_features != 0:
-        param_zeros = np.pad(
-            param_zeros, ((0, 0), (0, num_missing_features)), constant_values=True
+    remainder = param_zeros.shape[-1] % 4
+    if remainder != 0:
+        num_missing_features = 4 - remainder
+        param_zeros = numpy.pad(
+            param_zeros,
+            [(0, 0)] * (param_zeros.ndim - 1) + [(0, num_missing_features)],
+            constant_values=True,
         )
 
-    # Group into blocks and count full blocks
-    param_blocks = np.reshape(param_zeros, (-1, 4))
-    num_zeros_per_block = np.count_nonzero(param_blocks, axis=1)
-    num_zero_blocks = np.count_nonzero(num_zeros_per_block == 4, axis=0)
+    # Group into blocks and count zero blocks
+    param_blocks = numpy.reshape(param_zeros, (-1, 4))
+    num_zeros_per_block = numpy.count_nonzero(param_blocks, axis=1)
+    num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
 
     return num_zero_blocks, param_blocks.shape[0]
 
 
 def get_zero_point(model: ModelProto, node: NodeProto) -> int:
     """
-    :param model: model in which node's zero point initializer exists
+    :param model: model that contains the given node
     :param node: node to find zero point of
     :return: zero point of given node
     """
-    if is_quantized_layer(node):
-        initializer_name = node.input[3]
-        initializer = get_initializer(model, initializer_name)
-        zero_point_initializer = numpy_helper.to_array(initializer)
-        if zero_point_initializer.ndim != 0:
-            raise NotImplementedError("Layer-wise zero points are not supported")
 
-        return int(zero_point_initializer)
+    def _get_node_zero_point_init_name(node: NodeProto) -> str:
+        if node.op_type in ["ConvInteger", "MatMulInteger"]:
+            return node.input[3]
+        if node.op_type == "QLinearConv":
+            return node.input[5]
+        if node.op_type == "QLinearMatMul":
+            return node.input[7]
+        raise Exception(
+            "Node with op type {node.op_type} does not have a zero " "point initializer"
+        )
+
+    if node.op_type in ["Gather"]:
+        return 0
+
+    if is_quantized_layer(model, node):
+        zero_point_initializer_name = _get_node_zero_point_init_name(node)
+        zero_point_initializer = get_initializer(model, zero_point_initializer_name)
+        zero_point = numpy_helper.to_array(zero_point_initializer)
+        if zero_point.ndim != 0:
+            raise NotImplementedError("Channel-wise zero points are not supported")
+
+        return int(zero_point)
     else:
         return 0
 
 
 def is_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose sparsity is being checked
     :return: true if node weights have any sparsity, False otherwise
     """
     return get_node_sparsity(model, node) > 0
 
 
-def is_four_block_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
+def is_four_block_sparse_layer(
+    model: ModelProto, node: NodeProto, threshold: int = 0.05
+) -> bool:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose four block sparsity is being checked
     :return: true if node weights have any four block sparsity, False otherwise
     """
-    return get_node_four_block_sparsity(model, node) > 0
+    four_block_sparsity = get_node_four_block_sparsity(model, node)
+    sparsity = get_node_sparsity(model, node)
+    return four_block_sparsity > 0 and abs(four_block_sparsity - sparsity) <= threshold
 
 
-def is_quantized_layer(node: NodeProto) -> bool:
+def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
     """
     :param node: node whose quantized status is being checked
     :return: true if node contains quantized weights, False otherwise
     """
-    return node.op_type in ["QLinearConv", "ConvInteger", "MatMulInteger"]
+    if node.op_type == "Gather":
+        param = get_layer_param(model, node)
+        return param is not None and param.dtype in [numpy.uint8, numpy.int8]
+
+    return node.op_type in [
+        "QLinearConv",
+        "ConvInteger",
+        "MatMulInteger",
+        "QLinearMatMul",
+    ]
 
 
 def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose four block sparsity is being calculated
     :return: four block sparsity of node
     """
 
-    num_zero_blocks, num_total_blocks = get_node_four_block_sparsity_sizes(model, node)
+    num_zero_blocks, num_total_blocks = get_node_num_four_block_zeros_and_size(
+        model, node
+    )
     if num_total_blocks == 0:
         return 0.0
 
@@ -166,11 +200,11 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node whose sparsity is being calculated
     :return: proportion of zeros in given node
     """
-    num_zeros, param_size = get_node_sparsity_sizes(model, node)
+    num_zeros, param_size = get_node_num_zeros_and_size(model, node)
     if param_size == 0:
         return 0.0
 
@@ -179,54 +213,60 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
 
 def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     """
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node being checked
     :return: True if this node performs a operation that is parameterized and
         prunable, False otherwise
     """
-    return (
-        node.op_type
-        in [
-            "Conv",
-            "MatMul",
-            "Gemm",
-            "QLinearConv",
-            "QLinearMatMul",
-            "ConvInteger",
-            "MatMulInteger",
-            "Gather",
-        ]
-        and not get_layer_param(model, node) is None
-    )
+    return get_layer_param(model, node) is not None
 
 
-def get_layer_param(model: ModelProto, node: NodeProto) -> np.ndarray:
+def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     """
-    Finds parameter value of node (the node's weight)
+    Finds parameter value of node (the node weight)
 
-    :param model: model in which node's parameter exists
+    :param model: model that contains the given node
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
 
-    if node.op_type in ["Conv", "ConvInteger"]:
-        initializer_name = node.input[1]
-
-    elif node.op_type in ["QLinearConv"]:
-        initializer_name = node.input[3]
-
-    elif node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
+    def _get_layer_param_name(model: ModelProto, node: NodeProto) -> str:
         initializer_names = [init.name for init in model.graph.initializer]
-        initializer_name = next(
-            name for name in node.input if name in initializer_names
-        )
 
-    else:
+        if node.op_type == "Gather":
+            return node.input[0]
+
+        if node.op_type in ["Conv", "ConvInteger"]:
+            return node.input[1]
+
+        if node.op_type == "QLinearConv":
+            return node.input[3]
+
+        if node.op_type == "QLinearMatMul":
+            if node.input[3] in initializer_names:
+                return node.input[3]
+
+            if node.input[0] in initializer_names:
+                return node.input[0]
+
+        if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
+            return next(
+                input_name
+                for input_name in node.input
+                if input_name in initializer_names
+            )
+
         return None
 
+    initializer_name = _get_layer_param_name(model, node)
+    if initializer_name is None:
+        return None
     initializer = get_initializer(model, initializer_name)
     if initializer is None:
-        raise Exception("Parameter not found")
+        if node.op_type in ["Gather"]:
+            return None
+        else:
+            raise Exception(f"Parameter for {node.name} not found")
 
     return numpy_helper.to_array(initializer)
 
@@ -240,19 +280,17 @@ def get_layer_and_op_counts(model: ModelProto):
     :param model: model whose counts are being checked
     :return: a layer dictionary and an operation dictionary which hold node counts
     """
-    model_op_types = [node.op_type for node in model.graph.node]
-
     layer_counts = {}
     op_counts = {}
-    for op_type in model_op_types:
-        op_type_nodes = [node for node in model.graph.node if node.op_type == op_type]
-        op_count = len(op_type_nodes)
-        assert len(op_type_nodes) > 0
 
-        if is_parameterized_prunable_layer(model, op_type_nodes[0]):
-            layer_counts[op_type] = op_count
+    for node in model.graph.node:
+        target_dict = (
+            layer_counts if is_parameterized_prunable_layer(model, node) else op_counts
+        )
 
-        else:
-            op_counts[op_type] = op_count
+        if node.op_type not in target_dict:
+            target_dict[node.op_type] = 0
+
+        target_dict[node.op_type] += 1
 
     return layer_counts, op_counts
