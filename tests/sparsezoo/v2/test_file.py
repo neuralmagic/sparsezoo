@@ -23,7 +23,7 @@ import pytest
 import yaml
 from onnx.helper import make_graph, make_model, make_node, make_tensor_value_info
 
-import matplotlib.pyplot as plt
+from PIL import Image
 from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.file import File
 
@@ -76,8 +76,9 @@ def _create_json_file(file_path):
 
 
 def _create_image_file(file_path):
-    image_array = np.zeros((10, 10, 3), dtype=np.uint8)
-    plt.imsave(file_path, image_array)
+    Image.fromarray(np.zeros((10, 10, 3), dtype=np.uint8)).convert("RGB").save(
+        file_path
+    )
 
 
 def _create_csv_file(file_path):
