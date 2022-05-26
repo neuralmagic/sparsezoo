@@ -113,6 +113,9 @@ class ModelDirectory(Directory):
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
 
+        self.sample_inputs.files.sort(key=lambda x: x.name)
+        self.sample_outputs.files.sort(key=lambda x: x.name)
+
         files = [
             self.framework_files,
             self.sample_originals,
@@ -153,6 +156,11 @@ class ModelDirectory(Directory):
         """
         files = []
         paths = glob.glob(os.path.join(directory_path, "*"))
+        if not paths:
+            raise ValueError(
+                "The directory path is empty. "
+                "Check whether the indicated directory exists."
+            )
         for path in paths:
             display_name = os.path.basename(path)
             files.append(file_dictionary(display_name=display_name, path=path))
@@ -201,7 +209,7 @@ class ModelDirectory(Directory):
         # TODO: This is a hack for now,
         #  some files cannot be validated
         #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["framework_files"]
+        SKIP_ATTRIBUTES = ["framework-files"]
 
         if self.path is None:
             raise ValueError(
@@ -213,14 +221,16 @@ class ModelDirectory(Directory):
             )
 
         validations = {}
-        for attribute, file in self.__iter__():
-            # TODO: Continuing with the hack
-            if attribute in SKIP_ATTRIBUTES:
-                validations[attribute] = True
-            elif isinstance(file, File):
-                validations[attribute] = file.validate()
+        for file in self.files:
+            if isinstance(file, File):
+                # TODO: Continuing with the hack
+                if file.name in SKIP_ATTRIBUTES:
+                    validations[file.name] = True
+                else:
+                    validations[file.name] = file.validate()
             elif isinstance(file, list):
-                validations[attribute] = all([_file.validate() for _file in file])
+                for _file in file:
+                    validations[_file.name] = _file.validate()
             elif isinstance(file, dict):
                 raise NotImplementedError()
 
@@ -396,19 +406,16 @@ class ModelDirectory(Directory):
             return directories_found[0]
 
     def _validate_with_onnx_runtime(self):
-        sample_outputs = self.sample_outputs
-
-        if sample_outputs.is_archive:
-            sample_outputs.unzip()
-
-        validation = []  # validation boolean per output
-        for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
+        validation = []
+        for target_output, output in zip(
+            self.sample_outputs, self._run_with_onnx_runtime()
+        ):
             target_output = list(target_output.values())
-            # TODO: This does not work for now, the
-            #  outputs are quite different. To be investigated.
-            validation.append(
-                all((np.array_equal(x, y) for x, y in zip(target_output, output)))
-            )
+            is_valid = [
+                np.allclose(o1, o2.flatten(), atol=1e-5)
+                for o1, o2 in zip(target_output, output)
+            ]
+            validation += is_valid
         return all(validation)
 
     def _run_with_deepsparse(self):

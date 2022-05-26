@@ -17,7 +17,6 @@ import os
 import shutil
 import tempfile
 
-import numpy as np
 import pytest
 
 from sparsezoo import Zoo
@@ -107,7 +106,7 @@ class TestModelDirectory:
         directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        assert not model_directory.validate()
+        assert model_directory.validate()
 
     def test_validate_from_zoo_api(self, setup):
         _, request_json, expected_content, temp_dir = setup
@@ -122,14 +121,24 @@ class TestModelDirectory:
         directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        output = next(model_directory.generate_outputs(engine_type="onnxruntime"))
-        assert all(isinstance(x, np.ndarray) for x in output)
+        for output_expected, output in zip(
+            model_directory.sample_outputs,
+            model_directory.generate_outputs(engine_type="onnxruntime"),
+        ):
+            output_expected = list(output_expected.values())
+            for o1, o2 in zip(output_expected, output):
+                pytest.approx(o1, abs=1e-5) == o2.flatten()
 
     def test_generate_outputs_deepsparse(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        output = next(model_directory.generate_outputs(engine_type="deepsparse"))
-        assert all(isinstance(x, np.ndarray) for x in output)
+        for output_expected, output in zip(
+            model_directory.sample_outputs,
+            model_directory.generate_outputs(engine_type="deepsparse"),
+        ):
+            output_expected = list(output_expected.values())
+            for o1, o2 in zip(output_expected, output):
+                pytest.approx(o1, abs=1e-5) == o2.flatten()
 
     def test_analysis(self, setup):
         pass
