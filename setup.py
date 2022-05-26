@@ -46,7 +46,6 @@ _deps = [
     "requests>=2.0.0",
     "tqdm>=4.0.0",
     "protobuf>=3.19.1",
-    "matplotlib>=3.0.0",
 
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
