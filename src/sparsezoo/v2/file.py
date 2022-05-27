@@ -15,6 +15,7 @@
 import json
 import logging
 import os
+import re
 import time
 import traceback
 from typing import Any, Dict, Optional
@@ -186,15 +187,50 @@ class File:
                 strict_mode=strict_mode,
             )
 
-    def _validate_markdown(self, strict_mode):
+    def _validate_recipe(self, strict_mode):
+        from sparseml.pytorch.optim import ScheduledModifierManager
+
         try:
-            with open(self.path) as file:
-                file.readlines()
+            manager = ScheduledModifierManager.from_yaml(self.path)  # noqa  F841
         except Exception as error:  # noqa: F841
             self._throw_error(
                 error_msg="Markdown file could not been loaded properly",
                 strict_mode=strict_mode,
             )
+
+    def _validate_model_card(self):
+        try:
+            with open(self.path, "r") as yaml_file:
+                yaml_str = yaml_file.read()
+
+            # extract YAML front matter from markdown recipe card
+            # adapted from
+            # https://github.com/jonbeebe/frontmatter/blob/master/frontmatter
+            yaml_delim = r"(?:---|\+\+\+)"
+            _yaml = r"(.*?)"
+            re_pattern = r"^\s*" + yaml_delim + _yaml + yaml_delim
+            regex = re.compile(re_pattern, re.S | re.M)
+            result = regex.search(yaml_str)
+            yaml_str = result.group(1)
+            yaml_dict = yaml.safe_load(yaml_str)
+            return f"{yaml_dict['domain']}-{yaml_dict['sub_domain']}"
+
+        except Exception as error:  # noqa: F841
+            logging.error(error)
+
+    def _validate_markdown(self, strict_mode):
+        # test if .md file is a model_card
+        is_valid_model_card = self._validate_model_card()
+        # if not, attempt to check if it is a recipe file
+        if not is_valid_model_card:
+            try:
+                from sparseml.pytorch.optim import (  # noqa  F401
+                    ScheduledModifierManager,
+                )
+            except Exception as error:  # noqa  F841
+                # if not model card and unable to check if recipe, assume correct
+                return
+            self._validate_recipe(strict_mode=strict_mode)
 
     def _validate_json(self, strict_mode):
         try:
