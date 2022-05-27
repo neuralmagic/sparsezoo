@@ -37,7 +37,7 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def model_onnxs():
+def get_model_onnx():
     model_stubs = {
         "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
         "pytorch/dbolya/coco/base-none",
@@ -59,7 +59,10 @@ def model_onnxs():
         model_onnx = onnx.load(onnx_path)
         model_onnxs[model_name] = model_onnx
 
-    return model_onnxs
+    def _get_model_onnx(model_name):
+        return model_onnxs[model_name]
+
+    return _get_model_onnx
 
 
 @pytest.fixture()
@@ -97,9 +100,9 @@ def get_node_from_name():
     ],
 )
 def test_get_layer_param(
-    model_name, node_name, expected_shape, model_onnxs, get_node_from_name
+    model_name, node_name, expected_shape, get_model_onnx, get_node_from_name
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     param = get_layer_param(model, node)
@@ -139,9 +142,9 @@ def test_get_layer_param(
     ],
 )
 def test_is_parameterized_prunable_layer(
-    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+    model_name, node_name, expected_bool, get_model_onnx, get_node_from_name
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert is_parameterized_prunable_layer(model, node) == expected_bool
@@ -201,9 +204,9 @@ def test_is_parameterized_prunable_layer(
     ],
 )
 def test_get_layer_and_op_counts(
-    model_name, expected_layer_counts, expected_op_counts, model_onnxs
+    model_name, expected_layer_counts, expected_op_counts, get_model_onnx
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
 
     layer_counts, op_counts = get_layer_and_op_counts(model)
     assert layer_counts == expected_layer_counts
@@ -226,9 +229,9 @@ def test_get_layer_and_op_counts(
     ],
 )
 def test_is_quantized_layer(
-    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+    model_name, node_name, expected_bool, get_model_onnx, get_node_from_name
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert is_quantized_layer(model, node) == expected_bool
@@ -254,10 +257,10 @@ def test_get_node_num_zeros_and_size(
     node_name,
     expected_num_zeros,
     expected_param_size,
-    model_onnxs,
+    get_model_onnx,
     get_node_from_name,
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert get_node_num_zeros_and_size(model, node) == (
@@ -286,10 +289,10 @@ def test_get_node_num_four_block_zeros_and_size(
     node_name,
     expected_num_zero_blocks,
     expected_num_blocks,
-    model_onnxs,
+    get_model_onnx,
     get_node_from_name,
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert get_node_num_four_block_zeros_and_size(model, node) == (
@@ -314,9 +317,9 @@ def test_get_node_num_four_block_zeros_and_size(
     ],
 )
 def test_get_zero_point(
-    model_name, node_name, expected_value, model_onnxs, get_node_from_name
+    model_name, node_name, expected_value, get_model_onnx, get_node_from_name
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert get_zero_point(model, node) == expected_value
@@ -345,11 +348,11 @@ def test_get_node_sparsity(
     model_name,
     node_name,
     expected_value,
-    model_onnxs,
+    get_model_onnx,
     get_node_from_name,
     margin_of_error,
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert get_node_sparsity(model, node) == pytest.approx(
@@ -377,9 +380,9 @@ def test_get_node_sparsity(
     ],
 )
 def test_is_sparse_layer(
-    model_name, node_name, expected_bool, model_onnxs, get_node_from_name
+    model_name, node_name, expected_bool, get_model_onnx, get_node_from_name
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert is_sparse_layer(model, node) == expected_bool
@@ -413,11 +416,11 @@ def test_get_node_four_block_sparsity(
     model_name,
     node_name,
     expected_value,
-    model_onnxs,
+    get_model_onnx,
     get_node_from_name,
     margin_of_error,
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
     assert get_node_four_block_sparsity(model, node) == pytest.approx(
         expected_value, abs=margin_of_error
@@ -452,11 +455,11 @@ def test_is_four_block_sparse_layer(
     model_name,
     node_name,
     expected_bool,
-    model_onnxs,
+    get_model_onnx,
     get_node_from_name,
     margin_of_error,
 ):
-    model = model_onnxs[model_name]
+    model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
     assert (
