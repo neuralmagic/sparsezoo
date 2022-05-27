@@ -14,5 +14,5 @@
 
 # flake8: noqa
 
-from .Analysis import ModelAnalysis, NodeAnalysis
+from .analysis import ModelAnalysis, NodeAnalysis
 from .helpers import *

@@ -24,7 +24,7 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def model_analyses():
+def get_model_analysis():
     model_stubs = {
         "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
         "pytorch/dbolya/coco/base-none",
@@ -46,7 +46,10 @@ def model_analyses():
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_analyses[model_name] = analysis
 
-    return model_analyses
+    def _get_model_analysis(model_name):
+        return model_analyses[model_name]
+
+    return _get_model_analysis
 
 
 @pytest.mark.parametrize(
@@ -58,8 +61,8 @@ def model_analyses():
         ("resnet50_pruned_quantized", {"Gemm": 1, "QLinearConv": 53}),
     ],
 )
-def test_layer_counts(model_name, expected_dict, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_layer_counts(model_name, expected_dict, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.layer_counts == expected_dict
 
@@ -148,8 +151,8 @@ def test_layer_counts(model_name, expected_dict, model_analyses):
         ),
     ],
 )
-def test_op_counts(model_name, expected_dict, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_op_counts(model_name, expected_dict, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.op_counts == expected_dict
 
@@ -163,8 +166,8 @@ def test_op_counts(model_name, expected_dict, model_analyses):
         ("resnet50_pruned_quantized", 128),
     ],
 )
-def test_num_nodes(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_nodes(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_nodes == expected_value
 
@@ -178,8 +181,8 @@ def test_num_nodes(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 54),
     ],
 )
-def test_num_layers(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_layers(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_layers == expected_value
 
@@ -193,8 +196,8 @@ def test_num_layers(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 74),
     ],
 )
-def test_num_operations(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_operations(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_operations == expected_value
 
@@ -208,8 +211,10 @@ def test_num_operations(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 0.79),
     ],
 )
-def test_average_sparsity(model_name, expected_value, model_analyses, margin_of_error):
-    model_analysis = model_analyses[model_name]
+def test_average_sparsity(
+    model_name, expected_value, get_model_analysis, margin_of_error
+):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.average_sparsity == pytest.approx(
         expected_value, abs=margin_of_error
@@ -226,9 +231,9 @@ def test_average_sparsity(model_name, expected_value, model_analyses, margin_of_
     ],
 )
 def test_average_four_block_sparsity(
-    model_name, expected_value, model_analyses, margin_of_error
+    model_name, expected_value, get_model_analysis, margin_of_error
 ):
-    model_analysis = model_analyses[model_name]
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.average_four_block_sparsity == pytest.approx(
         expected_value, abs=margin_of_error
@@ -244,8 +249,8 @@ def test_average_four_block_sparsity(
         ("resnet50_pruned_quantized", 53),
     ],
 )
-def test_num_sparse_layers(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_sparse_layers(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_sparse_layers == expected_value
 
@@ -259,8 +264,8 @@ def test_num_sparse_layers(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 53),
     ],
 )
-def test_num_quantized_layers(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_quantized_layers(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_quantized_layers == expected_value
 
@@ -274,8 +279,8 @@ def test_num_quantized_layers(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 25502912),
     ],
 )
-def test_num_parameters(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_parameters(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_parameters == expected_value
 
@@ -289,8 +294,8 @@ def test_num_parameters(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 20203056),
     ],
 )
-def test_num_sparse_parameters(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_sparse_parameters(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_sparse_parameters == expected_value
 
@@ -304,8 +309,8 @@ def test_num_sparse_parameters(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 6376512),
     ],
 )
-def test_num_four_blocks(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_four_blocks(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_four_blocks == expected_value
 
@@ -319,8 +324,8 @@ def test_num_four_blocks(model_name, expected_value, model_analyses):
         ("resnet50_pruned_quantized", 4982870),
     ],
 )
-def test_num_sparse_four_blocks(model_name, expected_value, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.num_sparse_four_blocks == expected_value
 
@@ -375,8 +380,8 @@ def test_num_sparse_four_blocks(model_name, expected_value, model_analyses):
         ),
     ],
 )
-def test_node_analyses(model_name, expected_node_analysis, model_analyses):
-    model_analysis = model_analyses[model_name]
+def test_node_analyses(model_name, expected_node_analysis, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
     nodes = model_analysis.nodes
     found_nodes = [node for node in nodes if node.name == expected_node_analysis.name]
     assert len(found_nodes) == 1
