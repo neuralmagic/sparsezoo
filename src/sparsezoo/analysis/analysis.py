@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import partial
 from typing import Dict, List, Optional
 
-import numpy as np
+import numpy
 import onnx
 from onnx import ModelProto
 
@@ -38,20 +37,6 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
-
-
-def map_and_accumulate(array, map_fn, acc_fn):
-    """
-    Helper function to apply a map function to each element in the array,
-    then apply the accumulate function to the whole array
-
-    :param: array to apply map function to
-    :param: map function to apply to the array
-    :param: accumulator function to apply after mapping
-
-    :return: The result of applying map function and then accumulator function
-    """
-    return acc_fn(list(map(map_fn, array)))
 
 
 class NodeAnalysis(BaseModel):
@@ -89,13 +74,8 @@ class ModelAnalysis(BaseModel):
     """
 
     layer_counts: Dict[str, int] = Field(description="Overview of layers", default={})
-    op_counts: Dict[str, int] = Field(
+    operation_counts: Dict[str, int] = Field(
         description="Overview of operations (nodes that are not layers)", default={}
-    )
-    num_nodes: int = Field(description="Total number of nodes")
-    num_layers: int = Field(description="Total number of layers")
-    num_operations: int = Field(
-        description="Total number of operations (nodes that are not layers)"
     )
     average_sparsity: float = Field(
         description="Average sparsity across all trainable parameters "
@@ -120,7 +100,9 @@ class ModelAnalysis(BaseModel):
         description="Total number of all sparsified four blocks (excluding biases)"
     )
 
-    nodes: List[NodeAnalysis] = Field(description="List of node analyses", default=[])
+    layers: List[NodeAnalysis] = Field(
+        description="List of analyses for each layer in the model graph", default=[]
+    )
 
     @classmethod
     def from_onnx_model(cls, onnx_file_path: str):
@@ -133,39 +115,35 @@ class ModelAnalysis(BaseModel):
         """
         model_onnx = onnx.load(onnx_file_path)
 
-        param_prunable_nodes = list(
-            filter(
-                partial(is_parameterized_prunable_layer, model_onnx),
-                model_onnx.graph.node,
-            )
-        )
-        sparsity_sizes = np.array(
+        param_prunable_nodes = [
+            node
+            for node in model_onnx.graph.node
+            if is_parameterized_prunable_layer(model_onnx, node)
+        ]
+        sparsity_sizes = numpy.array(
             [
                 get_node_num_zeros_and_size(model_onnx, node)
                 for node in param_prunable_nodes
             ]
         )
-        four_block_sparsity_sizes = np.array(
+        four_block_sparsity_sizes = numpy.array(
             [
                 get_node_num_four_block_zeros_and_size(model_onnx, node)
                 for node in param_prunable_nodes
             ]
         )
 
-        num_sparse_parameters, num_parameters = np.sum(sparsity_sizes, axis=0)
-        num_sparse_four_blocks, num_four_blocks = np.sum(
+        num_sparse_parameters, num_parameters = numpy.sum(sparsity_sizes, axis=0)
+        num_sparse_four_blocks, num_four_blocks = numpy.sum(
             four_block_sparsity_sizes, axis=0
         )
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
-        num_nodes = len(model_onnx.graph.node)
-        num_layers = sum(layer_counts.values())
-        num_operations = sum(op_counts.values())
-        num_sparse_layers = map_and_accumulate(
-            model_onnx.graph.node, partial(is_sparse_layer, model_onnx), sum
+        num_sparse_layers = sum(
+            [is_sparse_layer(model_onnx, node) for node in model_onnx.graph.node]
         )
-        num_quantized_layers = map_and_accumulate(
-            model_onnx.graph.node, partial(is_quantized_layer, model_onnx), sum
+        num_quantized_layers = sum(
+            [is_quantized_layer(model_onnx, node) for node in model_onnx.graph.node]
         )
         average_sparsity = num_sparse_parameters / num_parameters
         average_four_block_sparsity = num_sparse_four_blocks / num_four_blocks
@@ -173,10 +151,7 @@ class ModelAnalysis(BaseModel):
 
         return cls(
             layer_counts=layer_counts,
-            op_counts=op_counts,
-            num_nodes=num_nodes,
-            num_layers=num_layers,
-            num_operations=num_operations,
+            operation_counts=op_counts,
             num_sparse_layers=num_sparse_layers,
             num_quantized_layers=num_quantized_layers,
             num_parameters=num_parameters,
@@ -185,9 +160,10 @@ class ModelAnalysis(BaseModel):
             num_sparse_four_blocks=num_sparse_four_blocks,
             average_sparsity=average_sparsity,
             average_four_block_sparsity=average_four_block_sparsity,
-            nodes=nodes,
+            layers=nodes,
         )
 
+    @staticmethod
     def analyze_nodes(model_onnx: ModelProto) -> List[NodeAnalysis]:
         """
         :param: model that contains the nodes to be analyzed

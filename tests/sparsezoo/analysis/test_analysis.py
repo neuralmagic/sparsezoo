@@ -151,55 +151,10 @@ def test_layer_counts(model_name, expected_dict, get_model_analysis):
         ),
     ],
 )
-def test_op_counts(model_name, expected_dict, get_model_analysis):
+def test_operation_counts(model_name, expected_dict, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
 
-    assert model_analysis.op_counts == expected_dict
-
-
-@pytest.mark.parametrize(
-    "model_name,expected_value",
-    [
-        ("yolact_none", 334),
-        ("mobilenet_v1_pruned_moderate", 92),
-        ("bert_pruned_quantized", 1247),
-        ("resnet50_pruned_quantized", 128),
-    ],
-)
-def test_num_nodes(model_name, expected_value, get_model_analysis):
-    model_analysis = get_model_analysis(model_name)
-
-    assert model_analysis.num_nodes == expected_value
-
-
-@pytest.mark.parametrize(
-    "model_name,expected_value",
-    [
-        ("yolact_none", 85),
-        ("mobilenet_v1_pruned_moderate", 28),
-        ("bert_pruned_quantized", 76),
-        ("resnet50_pruned_quantized", 54),
-    ],
-)
-def test_num_layers(model_name, expected_value, get_model_analysis):
-    model_analysis = get_model_analysis(model_name)
-
-    assert model_analysis.num_layers == expected_value
-
-
-@pytest.mark.parametrize(
-    "model_name,expected_value",
-    [
-        ("yolact_none", 249),
-        ("mobilenet_v1_pruned_moderate", 64),
-        ("bert_pruned_quantized", 1171),
-        ("resnet50_pruned_quantized", 74),
-    ],
-)
-def test_num_operations(model_name, expected_value, get_model_analysis):
-    model_analysis = get_model_analysis(model_name)
-
-    assert model_analysis.num_operations == expected_value
+    assert model_analysis.operation_counts == expected_dict
 
 
 @pytest.mark.parametrize(
@@ -382,9 +337,11 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
 )
 def test_node_analyses(model_name, expected_node_analysis, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    nodes = model_analysis.nodes
-    found_nodes = [node for node in nodes if node.name == expected_node_analysis.name]
-    assert len(found_nodes) == 1
-    found_node = found_nodes[0]
+    layers = model_analysis.layers
+    found_layers = [
+        layer for layer in layers if layer.name == expected_node_analysis.name
+    ]
+    assert len(found_layers) == 1
+    found_layer = found_layers[0]
 
-    assert found_node == expected_node_analysis
+    assert found_layer == expected_node_analysis
