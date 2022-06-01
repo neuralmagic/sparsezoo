@@ -88,9 +88,8 @@ class InferenceRunner:
         :return bolean flag; if True, outputs match expected outputs. False otherwise
         """
         validation = []
-        for target_output, output in zip(
-            self.sample_outputs, self._run_with_onnx_runtime()
-        ):
+        sample_outputs = self.sample_outputs["onnxruntime"]
+        for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
             is_valid = [
                 np.allclose(o1, o2.flatten(), atol=1e-5)
@@ -172,11 +171,15 @@ class ModelDirectory(Directory):
             directory_class=NumpyDirectory,
             display_name="sample-inputs",
         )
-        # TODO: Ignoring the dictionary type for now.
-        self.sample_outputs: Dict[str, NumpyDirectory] = self._directory_from_files(
-            files,
-            directory_class=NumpyDirectory,
-            display_name="sample-outputs",
+        self.sample_outputs: Dict[
+            str, NumpyDirectory
+        ] = self._sample_outputs_list_to_dict(
+            self._directory_from_files(
+                files,
+                directory_class=NumpyDirectory,
+                display_name="sample-outputs",
+                allow_multiple_outputs=True,
+            )
         )  # key by engine name.
         self.sample_labels: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="sample-labels"
@@ -206,7 +209,10 @@ class ModelDirectory(Directory):
         )  # recipe{_tag}.md
 
         self.sample_inputs.files.sort(key=lambda x: x.name)
-        self.sample_outputs.files.sort(key=lambda x: x.name)
+        [
+            sample_outputs.files.sort(key=lambda x: x.name)
+            for sample_outputs in self.sample_outputs.values()
+        ]
 
         files = [
             self.framework_files,
@@ -470,6 +476,7 @@ class ModelDirectory(Directory):
         ] = Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = True,
+        allow_multiple_outputs: Optional[bool] = False,
     ) -> Union[Directory, None]:
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
@@ -491,6 +498,8 @@ class ModelDirectory(Directory):
         # it is prohibitive for find more than
         # one directory
         elif len(directories_found) != 1:
+            if allow_multiple_outputs:
+                return directories_found
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
@@ -534,6 +543,18 @@ class ModelDirectory(Directory):
 
         else:
             raise NotImplementedError()
+
+    @staticmethod
+    def _sample_outputs_list_to_dict(
+        directories: List[NumpyDirectory],
+    ) -> Dict[str, NumpyDirectory]:
+        engine_to_numpydir_map = {}
+        for directory in directories:
+            engine_name = directory.name.split("_")[-1]
+            if engine_name not in ENGINES:
+                raise ValueError("")
+            engine_to_numpydir_map[engine_name] = directory
+        return engine_to_numpydir_map
 
     @staticmethod
     def _is_file_tar(file):

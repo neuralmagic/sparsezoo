@@ -122,7 +122,7 @@ class TestModelDirectory:
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         for output_expected, output in zip(
-            model_directory.sample_outputs,
+            model_directory.sample_outputs["onnxruntime"],
             model_directory.generate_outputs(engine_type="onnxruntime"),
         ):
             output_expected = list(output_expected.values())
@@ -133,12 +133,14 @@ class TestModelDirectory:
         directory_path, request_json, expected_content, temp_dir = setup
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         for output_expected, output in zip(
-            model_directory.sample_outputs,
+            model_directory.sample_outputs["deepsparse"],
             model_directory.generate_outputs(engine_type="deepsparse"),
         ):
             output_expected = list(output_expected.values())
             for o1, o2 in zip(output_expected, output):
-                assert pytest.approx(o1, abs=1e-5) == o2.flatten()
+                assert (
+                    pytest.approx(o1, abs=1e-4) == o2.flatten()
+                )  # lower accuracy, comparing onnxruntime output with deepsparse output
 
     def test_analysis(self, setup):
         pass
