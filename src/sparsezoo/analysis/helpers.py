@@ -17,20 +17,110 @@ from typing import Tuple
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
 
+from sparsezoo.analysis.onnx_helpers import (
+    calculate_flops,
+    extract_node_id,
+    extract_node_shapes,
+    get_kernel_shape,
+    get_node_attributes,
+    get_node_params,
+    is_prunable_node,
+)
+
 
 __all__ = [
     "get_layer_and_op_counts",
     "get_node_four_block_sparsity",
     "get_node_num_four_block_zeros_and_size",
     "get_node_sparsity",
-    "get_layer_param",
+    "get_node_weight",
+    "get_node_bias",
     "get_node_num_zeros_and_size",
     "get_zero_point",
     "is_four_block_sparse_layer",
     "is_parameterized_prunable_layer",
     "is_quantized_layer",
     "is_sparse_layer",
+    "get_num_operations",
 ]
+
+def _get_node_input(node, index, default=None):
+    """
+    :param node: node that contains the desired input
+    :param index: index of desired input
+    :param default: default value if node.input does not contain index
+    """
+    if len(node.input) -1 >= index:
+        return node.input[index]
+    else:
+        return default
+
+
+def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
+    """
+    Finds parameter value of node (the node weight)
+
+    :param model: model that contains the given node
+    :param node: node to which parameter belongs to
+    :return: a numpy array of param value, None if not found
+    """
+
+    def _get_node_bias_name(model: ModelProto, node: NodeProto) -> str:
+        initializer_names = [init.name for init in model.graph.initializer]
+
+        if node.op_type in ["Conv", "Gemm"]:
+            return _get_node_input(node, 2, default=None)
+
+        if node.op_type == "QLinearConv":
+            return _get_node_input(node, 8, default=None)
+
+        return None
+
+    initializer_name = _get_node_bias_name(model, node)
+    if initializer_name is None:
+        return None
+    initializer = get_initializer(model, initializer_name)
+    if initializer is None:
+        raise Exception(f"Parameter for {node.name} not found")
+
+    return numpy_helper.to_array(initializer)
+
+
+def get_num_operations(model: ModelProto, node: NodeProto) -> int:
+    """
+    Gets an approximation of the number of floating point or integer operations
+    TODO: Only calculates flops, not ops
+
+    :param model: model that contains the given node
+    :param node: node which performs the operations
+    :return: number of operations performed by node
+    """
+
+    node_shapes = extract_node_shapes(model)
+    attributes = get_node_attributes(node)
+
+    weight = get_node_weight(model, node)
+    bias = get_node_bias(model, node)
+    weight_shape = list(weight.shape) if weight is not None else None
+    bias_shape = list(bias.shape) if bias is not None else None
+
+    node_shape = node_shapes.get(extract_node_id(node))
+    input_shapes = node_shape.input_shapes if node_shape is not None else None
+    output_shapes = node_shape.output_shapes if node_shape is not None else None
+
+    kernel_shape = get_kernel_shape(attributes)
+
+    flops = calculate_flops(
+        node.op_type,
+        input_shape=input_shapes,
+        output_shape=output_shapes,
+        weight_shape=weight_shape,
+        kernel_shape=kernel_shape,
+        bias_shape=bias_shape,
+        attributes=attributes,
+    )
+
+    return int(flops) if flops is not None else 0
 
 
 def get_initializer(model: ModelProto, initializer_name: str) -> numpy.ndarray:
@@ -55,13 +145,13 @@ def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int
     :return: number of zeros and number of total values in node parameter
     """
     zero_point = get_zero_point(model, node)
-    param = get_layer_param(model, node)
-    if param is None:
+    weight = get_node_weight(model, node)
+    if weight is None:
         return 0, 0
 
-    num_zeros = numpy.count_nonzero(param == zero_point)
+    num_zeros = numpy.count_nonzero(weight == zero_point)
 
-    return num_zeros, param.size
+    return num_zeros, weight.size
 
 
 def get_node_num_four_block_zeros_and_size(
@@ -74,40 +164,40 @@ def get_node_num_four_block_zeros_and_size(
     """
     # Get param and zero point
     zero_point = get_zero_point(model, node)
-    param = get_layer_param(model, node)
-    if param is None:
+    weight = get_node_weight(model, node)
+    if weight is None:
         return 0, 0
 
     # Bool array
-    param_zeros = param == zero_point
+    weight_zeros = weight == zero_point
 
     # Transpose so input channels are last
-    if param_zeros.ndim > 2 or (node.op_type == "Gemm" and "transB" in node.attribute):
+    if weight_zeros.ndim > 2 or (node.op_type == "Gemm" and "transB" in node.attribute):
         input_channel_dim = 1
     else:
         input_channel_dim = 0
 
-    transpose_arg = list(range(param_zeros.ndim))
+    transpose_arg = list(range(weight_zeros.ndim))
     del transpose_arg[input_channel_dim]
     transpose_arg.append(input_channel_dim)
-    param_zeros = numpy.transpose(param_zeros, transpose_arg)
+    weight_zeros = numpy.transpose(weight_zeros, transpose_arg)
 
     # Pad weight features with zeros to be divisible by four
-    remainder = param_zeros.shape[-1] % 4
+    remainder = weight_zeros.shape[-1] % 4
     if remainder != 0:
         num_missing_features = 4 - remainder
-        param_zeros = numpy.pad(
-            param_zeros,
-            [(0, 0)] * (param_zeros.ndim - 1) + [(0, num_missing_features)],
+        weight_zeros = numpy.pad(
+            weight_zeros,
+            [(0, 0)] * (weight_zeros.ndim - 1) + [(0, num_missing_features)],
             constant_values=True,
         )
 
     # Group into blocks and count zero blocks
-    param_blocks = numpy.reshape(param_zeros, (-1, 4))
-    num_zeros_per_block = numpy.count_nonzero(param_blocks, axis=1)
+    weight_blocks = numpy.reshape(weight_zeros, (-1, 4))
+    num_zeros_per_block = numpy.count_nonzero(weight_blocks, axis=1)
     num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
 
-    return num_zero_blocks, param_blocks.shape[0]
+    return num_zero_blocks, weight_blocks.shape[0]
 
 
 def get_zero_point(model: ModelProto, node: NodeProto) -> int:
@@ -119,11 +209,11 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
 
     def _get_node_zero_point_init_name(node: NodeProto) -> str:
         if node.op_type in ["ConvInteger", "MatMulInteger"]:
-            return node.input[3]
+            return _get_node_input(node, 3, default=None)
         if node.op_type == "QLinearConv":
-            return node.input[5]
+            return _get_node_input(node, 5, default=None)
         if node.op_type == "QLinearMatMul":
-            return node.input[7]
+            return _get_node_input(node, 7, default=None)
         raise Exception(
             "Node with op type {node.op_type} does not have a zero " "point initializer"
         )
@@ -171,8 +261,8 @@ def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
     :return: true if node contains quantized weights, False otherwise
     """
     if node.op_type == "Gather":
-        param = get_layer_param(model, node)
-        return param is not None and param.dtype in [numpy.uint8, numpy.int8]
+        weight = get_node_weight(model, node)
+        return weight is not None and weight.dtype in [numpy.uint8, numpy.int8]
 
     return node.op_type in [
         "QLinearConv",
@@ -204,11 +294,11 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     :param node: node whose sparsity is being calculated
     :return: proportion of zeros in given node
     """
-    num_zeros, param_size = get_node_num_zeros_and_size(model, node)
-    if param_size == 0:
+    num_zeros, weight_size = get_node_num_zeros_and_size(model, node)
+    if weight_size == 0:
         return 0.0
 
-    return num_zeros / param_size
+    return num_zeros / weight_size
 
 
 def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
@@ -218,10 +308,10 @@ def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     :return: True if this node performs a operation that is parameterized and
         prunable, False otherwise
     """
-    return get_layer_param(model, node) is not None
+    return get_node_weight(model, node) is not None
 
 
-def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
+def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     """
     Finds parameter value of node (the node weight)
 
@@ -230,24 +320,24 @@ def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     :return: a numpy array of param value, None if not found
     """
 
-    def _get_layer_param_name(model: ModelProto, node: NodeProto) -> str:
+    def _get_node_weight_name(model: ModelProto, node: NodeProto) -> str:
         initializer_names = [init.name for init in model.graph.initializer]
 
         if node.op_type == "Gather":
-            return node.input[0]
+            return _get_node_input(node, 0, default=None)
 
         if node.op_type in ["Conv", "ConvInteger"]:
-            return node.input[1]
+            return _get_node_input(node, 1, default=None)
 
         if node.op_type == "QLinearConv":
-            return node.input[3]
+            return _get_node_input(node, 3, default=None)
 
         if node.op_type == "QLinearMatMul":
-            if node.input[3] in initializer_names:
-                return node.input[3]
+            if _get_node_input(node, 3, default=None) in initializer_names:
+                return _get_node_input(node, 3, default=None)
 
-            if node.input[0] in initializer_names:
-                return node.input[0]
+            if _get_node_input(node, 0, default=None) in initializer_names:
+                return _get_node_input(node, 0, default=None)
 
         if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
             return next(
@@ -258,7 +348,7 @@ def get_layer_param(model: ModelProto, node: NodeProto) -> numpy.ndarray:
 
         return None
 
-    initializer_name = _get_layer_param_name(model, node)
+    initializer_name = _get_node_weight_name(model, node)
     if initializer_name is None:
         return None
     initializer = get_initializer(model, initializer_name)

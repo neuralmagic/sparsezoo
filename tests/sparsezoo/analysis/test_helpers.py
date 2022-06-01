@@ -16,13 +16,15 @@ import onnx
 import pytest
 
 from sparsezoo import Zoo
-from sparsezoo.analysis import (
+from sparsezoo.analysis.helpers import (
     get_layer_and_op_counts,
-    get_layer_param,
+    get_node_weight,
+    get_node_bias,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
     get_node_num_zeros_and_size,
     get_node_sparsity,
+    get_num_operations,
     get_zero_point,
     is_four_block_sparse_layer,
     is_parameterized_prunable_layer,
@@ -99,18 +101,58 @@ def get_node_from_name():
         ("resnet50_pruned_quantized", "Gemm_1335", (1000, 2048)),
     ],
 )
-def test_get_layer_param(
+def test_get_node_weight(
     model_name, node_name, expected_shape, get_model_onnx, get_node_from_name
 ):
     model = get_model_onnx(model_name)
     node = get_node_from_name(model, node_name)
 
-    param = get_layer_param(model, node)
+    weight = get_node_weight(model, node)
     if expected_shape is None:
-        assert param is None
+        assert weight is None
     else:
-        assert param is not None
-        assert param.shape == expected_shape
+        assert weight is not None
+        assert weight.shape == expected_shape
+
+
+@pytest.mark.parametrize(
+    "model_name,node_name,expected_shape",
+    [
+        ("mobilenet_v1_pruned_moderate", "Conv_0", None),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", None),
+        ("mobilenet_v1_pruned_moderate", "Pad_82", None),
+        ("mobilenet_v1_pruned_moderate", "AveragePool_83", None),
+        ("mobilenet_v1_pruned_moderate", "Shape_84", None),
+        ("mobilenet_v1_pruned_moderate", "Gather_86", None),
+        ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", None),
+        ("mobilenet_v1_pruned_moderate", "Concat_88", None),
+        ("mobilenet_v1_pruned_moderate", "Reshape_89", None),
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", (1000,)),
+        ("mobilenet_v1_pruned_moderate", "Softmax_91", None),
+        ("bert_pruned_quantized", "Gather_34", None),
+        ("bert_pruned_quantized", "DequantizeLinear_27", None),
+        ("bert_pruned_quantized", "MatMul_80_quant", None),
+        ("bert_pruned_quantized", "MatMul_157_quant", None),
+        ("resnet50_pruned_quantized", "DequantizeLinear_22", None),
+        ("resnet50_pruned_quantized", "Conv_431_quant", (512,)),
+        ("resnet50_pruned_quantized", "Add_1168", None),
+        ("resnet50_pruned_quantized", "QuantizeLinear_1178", None),
+        ("resnet50_pruned_quantized", "GlobalAveragePool_1328", None),
+        ("resnet50_pruned_quantized", "Gemm_1335", (1000,)),
+    ],
+)
+def test_get_node_bias(
+    model_name, node_name, expected_shape, get_model_onnx, get_node_from_name
+):
+    model = get_model_onnx(model_name)
+    node = get_node_from_name(model, node_name)
+
+    bias = get_node_bias(model, node)
+    if expected_shape is None:
+        assert bias is None
+    else:
+        assert bias is not None
+        assert bias.shape == expected_shape
 
 
 @pytest.mark.parametrize(
@@ -466,3 +508,40 @@ def test_is_four_block_sparse_layer(
         is_four_block_sparse_layer(model, node, threshold=margin_of_error)
         == expected_bool
     )
+
+
+@pytest.mark.parametrize(
+    "model_name,node_name,expected_value",
+    [
+        ("mobilenet_v1_pruned_moderate", "Conv_0", 10838016),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", 401408),
+        ("mobilenet_v1_pruned_moderate", "Pad_82", 0),
+        ("mobilenet_v1_pruned_moderate", "AveragePool_83", 50176),
+        ("mobilenet_v1_pruned_moderate", "Shape_84", 0),
+        ("mobilenet_v1_pruned_moderate", "Gather_86", 0),
+        ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0),
+        ("mobilenet_v1_pruned_moderate", "Concat_88", 0),
+        ("mobilenet_v1_pruned_moderate", "Reshape_89", 0),
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", 2049000),
+        ("mobilenet_v1_pruned_moderate", "Softmax_91", 0),
+        ("bert_pruned_quantized", "Gather_34", 0),
+        ("bert_pruned_quantized", "DequantizeLinear_27", 0),
+        ("bert_pruned_quantized", "MatMul_80_quant", 0),
+        ("bert_pruned_quantized", "MatMul_157_quant", 0),
+        ("resnet50_pruned_quantized", "Conv_431_quant", 0),
+        ("resnet50_pruned_quantized", "DequantizeLinear_22", 0),
+        ("resnet50_pruned_quantized", "Conv_431_quant", 0),
+        ("resnet50_pruned_quantized", "Add_1168", 100352),
+        ("resnet50_pruned_quantized", "QuantizeLinear_1178", 0),
+        ("resnet50_pruned_quantized", "GlobalAveragePool_1328", 100352),
+        ("resnet50_pruned_quantized", "Gemm_1335", 4097000),
+        ("resnet50_pruned_quantized", "Softmax_1336", 0),
+    ],
+)
+def test_get_num_operations(
+    model_name, node_name, expected_value, get_model_onnx, get_node_from_name
+):
+    model = get_model_onnx(model_name)
+    node = get_node_from_name(model, node_name)
+
+    assert get_num_operations(model, node) == expected_value

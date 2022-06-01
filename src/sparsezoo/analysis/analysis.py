@@ -21,11 +21,12 @@ from onnx import ModelProto
 from pydantic import BaseModel, Field
 from sparsezoo.analysis.helpers import (
     get_layer_and_op_counts,
-    get_layer_param,
+    get_node_weight,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
     get_node_num_zeros_and_size,
     get_node_sparsity,
+    get_num_operations,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
@@ -46,6 +47,10 @@ class NodeAnalysis(BaseModel):
 
     name: str = Field(description="This node's name")
     sparsity: float = Field(description="Proportion of zeros in this node's parameter")
+    num_ops: int = Field(
+        description="The number of (floating point and/or integer) operations "
+        "performed in this node"
+    )
     four_block_sparsity: float = Field(
         description="Proportion of zero blocks in this node's parameter"
     )
@@ -76,6 +81,10 @@ class ModelAnalysis(BaseModel):
     layer_counts: Dict[str, int] = Field(description="Overview of layers", default={})
     operation_counts: Dict[str, int] = Field(
         description="Overview of operations (nodes that are not layers)", default={}
+    )
+    num_ops: int = Field(
+        description="The total number of (floating point and/or integer) operations "
+        "performed in one forward pass of the model"
     )
     average_sparsity: float = Field(
         description="Average sparsity across all trainable parameters "
@@ -139,6 +148,9 @@ class ModelAnalysis(BaseModel):
         )
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
+        num_ops = sum(
+            [get_num_operations(model_onnx, node) for node in model_onnx.graph.node]
+        )
         num_sparse_layers = sum(
             [is_sparse_layer(model_onnx, node) for node in model_onnx.graph.node]
         )
@@ -152,6 +164,7 @@ class ModelAnalysis(BaseModel):
         return cls(
             layer_counts=layer_counts,
             operation_counts=op_counts,
+            num_ops=num_ops,
             num_sparse_layers=num_sparse_layers,
             num_quantized_layers=num_quantized_layers,
             num_parameters=num_parameters,
@@ -179,7 +192,7 @@ class ModelAnalysis(BaseModel):
                 num_sparse_four_blocks,
                 node_num_blocks,
             ) = get_node_num_four_block_zeros_and_size(model_onnx, node)
-            node_param = get_layer_param(model_onnx, node)
+            node_weight = get_node_weight(model_onnx, node)
             node_analysis = NodeAnalysis(
                 name=node.name,
                 sparsity=get_node_sparsity(model_onnx, node),
@@ -190,7 +203,7 @@ class ModelAnalysis(BaseModel):
                 num_sparse_four_blocks=num_sparse_four_blocks,
                 quantized_layer=is_quantized_layer(model_onnx, node),
                 zero_point=node_zero_point,
-                dtype=str(node_param.dtype) if node_param is not None else None,
+                dtype=str(node_weight.dtype) if node_weight is not None else None,
             )
             nodes.append(node_analysis)
 
