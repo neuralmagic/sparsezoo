@@ -33,7 +33,6 @@ _LOGGER = logging.getLogger(__name__)
 __all__ = [
     "extract_node_id",
     "extract_node_shapes",
-    "get_node_params",
     "get_node_attributes",
     "is_prunable_node",
     "get_kernel_shape",
@@ -555,104 +554,6 @@ def gemm_node_params(
     return weight, bias
 
 
-def matmul_node_params(
-    model: ModelProto, node: NodeProto, include_values: bool = True
-) -> Tuple[NodeParam, Union[NodeParam, None]]:
-    """
-    Get the params (weight) for a matmul node in an ONNX ModelProto.
-    In the future will retrieve a following bias addition as the bias for the matmul.
-
-    :param model: the model proto loaded from the ONNX file
-    :param node: the conv node to get the params for
-    :param include_values: True to include the param values as NumPy arrays
-        in the returned NodeParam objects.
-        False to not load the values -- in this event NodeParam.val will be None
-    :return: a tuple containing the weight, bias (if it is present)
-    """
-    # todo, expand this to grab a bias add if one occurs after the matmul for fcs
-    node_id = extract_node_id(node)
-
-    if str(node.op_type).lower() != "matmul":
-        raise ValueError("node_id of {} is not a matmul: {}".format(node_id, node))
-
-    weight = _get_matmul_gemm_weight(model, node, include_values)
-    bias = None
-
-    return weight, bias
-
-
-def get_node_params(
-    model: ModelProto, node: NodeProto, include_values: bool = True
-) -> Tuple[NodeParam, Union[NodeParam, None]]:
-    """
-    Get the params (weight and bias) for a node in an ONNX ModelProto.
-    Must be an op type of one of [conv, gemm, matmul]
-
-    :param model: the model proto loaded from the ONNX file
-    :param node: the conv node to get the params for
-    :param include_values: True to include the param values as NumPy arrays
-        in the returned NodeParam objects.
-        False to not load the values -- in this event NodeParam.val will be None
-    :return: a tuple containing the weight, bias (if it is present)
-    """
-    node_id = extract_node_id(node)
-
-    if str(node.op_type).lower() == "conv":
-        return conv_node_params(model, node, include_values)
-
-    if str(node.op_type).lower() == "gemm":
-        return gemm_node_params(model, node, include_values)
-
-    if str(node.op_type).lower() == "matmul":
-        return matmul_node_params(model, node, include_values)
-
-    raise ValueError(
-        (
-            "node_id of {} is not a supported node (conv, gemm, matmul) "
-            "for params: {}"
-        ).format(node_id, node)
-    )
-
-
-"""
-Named tuple for defining the paramters of a batch normalization operator
-"""
-BatchNormParams = NamedTuple(
-    "BatchNormParams",
-    [
-        ("epsilon", float),
-        ("momentum", numpy.ndarray),
-        ("scale", numpy.ndarray),
-        ("bias", numpy.ndarray),
-        ("mean", numpy.ndarray),
-        ("var", numpy.ndarray),
-    ],
-)
-
-
-def get_batch_norm_params(
-    model: onnx.ModelProto, bn_node: onnx.NodeProto
-) -> BatchNormParams:
-    """
-    Get the params and relevant attributes of a batch normalization operator.
-    Following the ONNX operators spec, will default epsilon and momentum to
-    1e-5 and 0.9 respectively when not defined.
-
-    :param model: the model proto loaded from the ONNX file
-    :param bn_node: the batch normalization node to get the params for
-    :return: a BatchNormParams named tuple
-    """
-    bn_attributes = get_node_attributes(bn_node)
-    return BatchNormParams(
-        epsilon=(bn_attributes["epsilon"] if "epsilon" in bn_attributes else 1e-5),
-        momentum=(bn_attributes["momentum"] if "momentum" in bn_attributes else 0.9),
-        scale=_get_node_param_init_by_idx(model, bn_node, 1),
-        bias=_get_node_param_init_by_idx(model, bn_node, 2),
-        mean=_get_node_param_init_by_idx(model, bn_node, 3),
-        var=_get_node_param_init_by_idx(model, bn_node, 4),
-    )
-
-
 def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     """
     :param node: the ONNX node to get the attibutes for
@@ -750,27 +651,6 @@ def get_node_output_nodes(model: ModelProto, node: NodeProto) -> List[NodeProto]
         nodes.extend(get_nodes_by_input_id(model, output_id))
 
     return nodes
-
-
-def is_prunable_node(model: ModelProto, node: NodeProto) -> bool:
-    """
-    :param model: the model the node is from
-    :param node: an ONNX node or op_type string
-    :return: True if the given node is prunable, False otherwise
-    """
-    prunable_types = ["conv", "gemm", "matmul"]
-
-    if str(node.op_type).lower() not in prunable_types:
-        return False
-
-    try:
-        # try to get the weight param, if this fails then
-        # it's not a trainable version of the node and therefore not prunable
-        get_node_params(model, node, include_values=False)
-    except Exception:
-        return False
-
-    return True
 
 
 def is_foldable_node(node: Union[str, NodeProto]) -> bool:
@@ -882,49 +762,6 @@ SparsityMeasurement = NamedTuple(
 )
 
 
-def onnx_nodes_sparsities(
-    model: Union[str, ModelProto],
-) -> Tuple[SparsityMeasurement, Dict[str, SparsityMeasurement]]:
-    """
-    Retrieve the sparsities for each Conv or Gemm op in an ONNX graph
-    for the associated weight inputs.
-
-    :param model: ONNX model to use
-    :return: a tuple containing the overall sparsity measurement for the model,
-        each conv or gemm node found in the model
-    """
-    model = check_load_model(model)
-    node_inp_sparsities = OrderedDict()  # type: Dict[str, SparsityMeasurement]
-    params_count = 0
-    params_zero_count = 0
-
-    for node in get_prunable_nodes(model):
-        node_id = extract_node_id(node)
-        node_key = "{}(id={})".format(node.op_type, node_id)
-        weight, bias = get_node_params(model, node)
-
-        zeros = weight.val.size - numpy.count_nonzero(weight.val)
-        sparsity = float(zeros) / float(weight.val.size)
-        density = 1.0 - sparsity
-        node_inp_sparsities[
-            "{}_inp={}".format(node_key, weight.name)
-        ] = SparsityMeasurement(node_id, weight.val.size, zeros, sparsity, density)
-
-        params_count += weight.val.size
-        params_zero_count += zeros
-
-    return (
-        SparsityMeasurement(
-            "ModelProto",
-            params_count,
-            params_zero_count,
-            float(params_zero_count) / float(params_count),
-            float(params_count - params_zero_count) / float(params_count),
-        ),
-        node_inp_sparsities,
-    )
-
-
 def model_inputs(model: Union[str, ModelProto]) -> List:
     """
     Get the input to the model from an ONNX model
@@ -973,7 +810,7 @@ def get_kernel_shape(attributes: Dict[str, Any]) -> Union[List[float], None]:
         return None
 
 
-def calculate_flops(
+def calculate_num_operations(
     op_type: str,
     input_shape: Union[List[List], None] = None,
     output_shape: Union[List[List], None] = None,
@@ -1008,7 +845,7 @@ def calculate_flops(
         or op_type == "Sub"
         or op_type == "Clip"
     ):
-        flops = _numpy_prod_with_none_check(output_shape)
+        num_operations = _numpy_prod_with_none_check(output_shape)
     elif (
         op_type == "Relu"
         or op_type == "LeakyRelu"
@@ -1016,27 +853,27 @@ def calculate_flops(
         or op_type == "Tanh"
         or op_type == "BatchNormalization"
     ):
-        flops = _numpy_prod_with_none_check(output_shape)
+        num_operations = _numpy_prod_with_none_check(output_shape)
     elif op_type == "GlobalAveragePool" or op_type == "GlobalMaxPool":
-        flops = _numpy_prod_with_none_check(input_shape)
+        num_operations = _numpy_prod_with_none_check(input_shape)
     elif op_type == "MaxPool" or op_type == "AveragePool":
-        flops = (
+        num_operations = (
             numpy.prod(output_shape) * numpy.prod(kernel_shape)
             if output_shape is not None and kernel_shape is not None
             else None
         )
-    elif op_type == "MatMul":
-        flops = _calculate_flops_matmul(
+    elif op_type in ["MatMul", "MatMulInteger", "QLinearMatMul"]:
+        num_operations = _calculate_num_ops_matmul(
             op_type,
             input_shape=input_shape,
             output_shape=output_shape,
             weight_shape=weight_shape,
         )
     elif op_type == "Gemm":
-        flops = _numpy_prod_with_none_check(weight_shape)
-        flops = flops * 2 if flops is not None else None
-    elif op_type == "Conv":
-        flops = (
+        num_operations = _numpy_prod_with_none_check(weight_shape)
+        num_operations = num_operations * 2 if num_operations is not None else None
+    elif op_type in ["Conv", "ConvInteger", "QLinearConv"]:
+        num_operations = (
             numpy.prod(kernel_shape) * weight_shape[1] * numpy.prod(output_shape)
             if kernel_shape is not None
             and weight_shape is not None
@@ -1045,27 +882,27 @@ def calculate_flops(
         )
 
         if (
-            flops
+            num_operations
             and attributes
             and "group" in attributes
             and attributes["group"]
             and attributes["group"] > 1
         ):
             # adjust flops for group / depthwise convolutions
-            flops = flops / attributes["group"]
+            num_operations = num_operations / attributes["group"]
     else:
-        flops = None
+        num_operations = None
 
-    if flops is not None and bias_shape is not None:
+    if num_operations is not None and bias_shape is not None:
         if op_type == "Conv":
-            flops += numpy.prod(bias_shape) * output_shape[0][-1] * output_shape[0][-2]
+            num_operations += numpy.prod(bias_shape) * output_shape[0][-1] * output_shape[0][-2]
         else:
-            flops += numpy.prod(bias_shape)
+            num_operations += numpy.prod(bias_shape)
 
-    return flops
+    return num_operations
 
 
-def _calculate_flops_matmul(
+def _calculate_num_ops_matmul(
     op_type: str,
     input_shape: Union[List[List], None] = None,
     output_shape: Union[List[List], None] = None,

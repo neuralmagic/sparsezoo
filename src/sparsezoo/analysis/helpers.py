@@ -18,13 +18,11 @@ import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
 
 from sparsezoo.analysis.onnx_helpers import (
-    calculate_flops,
+    calculate_num_operations,
     extract_node_id,
     extract_node_shapes,
     get_kernel_shape,
     get_node_attributes,
-    get_node_params,
-    is_prunable_node,
 )
 
 
@@ -89,7 +87,6 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
 def get_num_operations(model: ModelProto, node: NodeProto) -> int:
     """
     Gets an approximation of the number of floating point or integer operations
-    TODO: Only calculates flops, not ops
 
     :param model: model that contains the given node
     :param node: node which performs the operations
@@ -110,7 +107,7 @@ def get_num_operations(model: ModelProto, node: NodeProto) -> int:
 
     kernel_shape = get_kernel_shape(attributes)
 
-    flops = calculate_flops(
+    num_operations = calculate_num_operations(
         node.op_type,
         input_shape=input_shapes,
         output_shape=output_shapes,
@@ -120,7 +117,7 @@ def get_num_operations(model: ModelProto, node: NodeProto) -> int:
         attributes=attributes,
     )
 
-    return int(flops) if flops is not None else 0
+    return int(num_operations) if num_operations is not None else 0
 
 
 def get_initializer(model: ModelProto, initializer_name: str) -> numpy.ndarray:
