@@ -127,7 +127,7 @@ class TestModelDirectory:
         ):
             output_expected = list(output_expected.values())
             for o1, o2 in zip(output_expected, output):
-                pytest.approx(o1, abs=1e-5) == o2.flatten()
+                assert pytest.approx(o1, abs=1e-5) == o2.flatten()
 
     def test_generate_outputs_deepsparse(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
@@ -138,7 +138,7 @@ class TestModelDirectory:
         ):
             output_expected = list(output_expected.values())
             for o1, o2 in zip(output_expected, output):
-                pytest.approx(o1, abs=1e-5) == o2.flatten()
+                assert pytest.approx(o1, abs=1e-5) == o2.flatten()
 
     def test_analysis(self, setup):
         pass

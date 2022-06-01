@@ -50,7 +50,12 @@ class InferenceRunner:
     :params onnx_model: File object holding the onnx model
     """
 
-    def __init__(self, sample_inputs: NumpyDirectory, sample_outputs: NumpyDirectory, onnx_file: File):
+    def __init__(
+        self,
+        sample_inputs: NumpyDirectory,
+        sample_outputs: NumpyDirectory,
+        onnx_file: File,
+    ):
         self.sample_inputs = sample_inputs
         self.sample_outputs = sample_outputs
         self.onnx_file = onnx_file
@@ -219,7 +224,9 @@ class ModelDirectory(Directory):
         ]
 
         self.inference_runner = InferenceRunner(
-            sample_inputs=self.sample_inputs, sample_outputs=self.sample_outputs, onnx_file=self.onnx_model
+            sample_inputs=self.sample_inputs,
+            sample_outputs=self.sample_outputs,
+            onnx_file=self.onnx_model,
         )
 
         super().__init__(files=files, name=name, path=path, url=url)
@@ -269,9 +276,7 @@ class ModelDirectory(Directory):
         :returns engine output. The outputs are yielded
             in iterative fashion.
         """
-        for output in self.inference_runner.generate_outputs(
-            engine_type=engine_type
-        ):
+        for output in self.inference_runner.generate_outputs(engine_type=engine_type):
             yield output
 
     def download(self, directory_path: str, override: bool = False) -> bool:
@@ -306,8 +311,7 @@ class ModelDirectory(Directory):
         return: a boolean flag; if True, the validation has been successful
         """
 
-        if not self.inference_runner.validate_with_onnx_runtime(
-        ):
+        if not self.inference_runner.validate_with_onnx_runtime():
             logging.warning(
                 "Failed to validate the compatibility of "
                 "`sample_inputs` files with the `model.onnx` model."
