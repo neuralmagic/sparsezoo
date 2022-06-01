@@ -160,6 +160,21 @@ def test_operation_counts(model_name, expected_dict, get_model_analysis):
 @pytest.mark.parametrize(
     "model_name,expected_value",
     [
+        ("yolact_none", 77531963888),
+        ("mobilenet_v1_pruned_moderate", 562709842),
+        ("bert_pruned_quantized", 4795867008),
+        ("resnet50_pruned_quantized", 4098685864),
+    ],
+)
+def test_num_ops(model_name, expected_value, get_model_analysis):
+    model_analysis = get_model_analysis(model_name)
+
+    assert model_analysis.num_ops == expected_value
+
+
+@pytest.mark.parametrize(
+    "model_name,expected_value",
+    [
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 0.65),
         ("bert_pruned_quantized", 0.63),
@@ -292,6 +307,7 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "yolact_none",
             NodeAnalysis(
                 name="Conv_0",
+                num_ops=271040000,
                 sparsity=0.0,
                 four_block_sparsity=0.0,
                 param_size=864,
@@ -307,6 +323,7 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "mobilenet_v1_pruned_moderate",
             NodeAnalysis(
                 name="Conv_72",
+                num_ops=25690112,
                 sparsity=0.8999996185302734,
                 four_block_sparsity=0.7120437622070312,
                 param_size=524288,
@@ -322,6 +339,7 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "bert_pruned_quantized",
             NodeAnalysis(
                 name="MatMul_80_quant",
+                num_ops=1179648,
                 sparsity=0.8029022216796875,
                 four_block_sparsity=0.7999945746527778,
                 param_size=589824,

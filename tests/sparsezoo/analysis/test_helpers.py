@@ -18,12 +18,12 @@ import pytest
 from sparsezoo import Zoo
 from sparsezoo.analysis.helpers import (
     get_layer_and_op_counts,
-    get_node_weight,
     get_node_bias,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
     get_node_num_zeros_and_size,
     get_node_sparsity,
+    get_node_weight,
     get_num_operations,
     get_zero_point,
     is_four_block_sparse_layer,
@@ -175,6 +175,7 @@ def test_get_node_bias(
         ("bert_pruned_quantized", "MatMul_157_quant", False),
         ("resnet50_pruned_quantized", "Conv_431_quant", True),
         ("resnet50_pruned_quantized", "DequantizeLinear_22", False),
+        ("resnet50_pruned_quantized", "Conv_431_quant", True),
         ("resnet50_pruned_quantized", "Add_1168", False),
         ("resnet50_pruned_quantized", "QuantizeLinear_1178", False),
         ("resnet50_pruned_quantized", "GlobalAveragePool_1328", False),

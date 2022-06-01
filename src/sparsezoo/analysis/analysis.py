@@ -20,12 +20,13 @@ from onnx import ModelProto
 
 from pydantic import BaseModel, Field
 from sparsezoo.analysis.helpers import (
+    extract_node_shapes,
     get_layer_and_op_counts,
-    get_node_weight,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
     get_node_num_zeros_and_size,
     get_node_sparsity,
+    get_node_weight,
     get_num_operations,
     get_zero_point,
     is_parameterized_prunable_layer,
@@ -46,11 +47,11 @@ class NodeAnalysis(BaseModel):
     """
 
     name: str = Field(description="This node's name")
-    sparsity: float = Field(description="Proportion of zeros in this node's parameter")
     num_ops: int = Field(
         description="The number of (floating point and/or integer) operations "
         "performed in this node"
     )
+    sparsity: float = Field(description="Proportion of zeros in this node's parameter")
     four_block_sparsity: float = Field(
         description="Proportion of zero blocks in this node's parameter"
     )
@@ -148,8 +149,12 @@ class ModelAnalysis(BaseModel):
         )
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
+        node_shapes = extract_node_shapes(model_onnx)
         num_ops = sum(
-            [get_num_operations(model_onnx, node) for node in model_onnx.graph.node]
+            [
+                get_num_operations(model_onnx, node, node_shapes=node_shapes)
+                for node in model_onnx.graph.node
+            ]
         )
         num_sparse_layers = sum(
             [is_sparse_layer(model_onnx, node) for node in model_onnx.graph.node]
@@ -182,8 +187,11 @@ class ModelAnalysis(BaseModel):
         :param: model that contains the nodes to be analyzed
         :return: List of node analyses from model graph
         """
+        node_shapes = extract_node_shapes(model_onnx)
+
         nodes = []
         for node in model_onnx.graph.node:
+            num_ops = get_num_operations(model_onnx, node, node_shapes=node_shapes)
             node_zero_point = get_zero_point(model_onnx, node)
             num_sparse_values, node_num_values = get_node_num_zeros_and_size(
                 model_onnx, node
@@ -195,6 +203,7 @@ class ModelAnalysis(BaseModel):
             node_weight = get_node_weight(model_onnx, node)
             node_analysis = NodeAnalysis(
                 name=node.name,
+                num_ops=num_ops,
                 sparsity=get_node_sparsity(model_onnx, node),
                 four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
                 param_size=node_num_values,

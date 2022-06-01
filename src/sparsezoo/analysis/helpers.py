@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
 
 from sparsezoo.analysis.onnx_helpers import (
+    NodeShape,
     calculate_num_operations,
     extract_node_id,
     extract_node_shapes,
@@ -40,7 +41,9 @@ __all__ = [
     "is_quantized_layer",
     "is_sparse_layer",
     "get_num_operations",
+    "extract_node_shapes",
 ]
+
 
 def _get_node_input(node, index, default=None):
     """
@@ -48,7 +51,7 @@ def _get_node_input(node, index, default=None):
     :param index: index of desired input
     :param default: default value if node.input does not contain index
     """
-    if len(node.input) -1 >= index:
+    if len(node.input) - 1 >= index:
         return node.input[index]
     else:
         return default
@@ -64,8 +67,6 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     """
 
     def _get_node_bias_name(model: ModelProto, node: NodeProto) -> str:
-        initializer_names = [init.name for init in model.graph.initializer]
-
         if node.op_type in ["Conv", "Gemm"]:
             return _get_node_input(node, 2, default=None)
 
@@ -84,7 +85,11 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     return numpy_helper.to_array(initializer)
 
 
-def get_num_operations(model: ModelProto, node: NodeProto) -> int:
+def get_num_operations(
+    model: ModelProto,
+    node: NodeProto,
+    node_shapes: Optional[Dict[str, NodeShape]] = None,
+) -> int:
     """
     Gets an approximation of the number of floating point or integer operations
 
@@ -93,7 +98,8 @@ def get_num_operations(model: ModelProto, node: NodeProto) -> int:
     :return: number of operations performed by node
     """
 
-    node_shapes = extract_node_shapes(model)
+    if node_shapes is None:
+        node_shapes = extract_node_shapes(model)
     attributes = get_node_attributes(node)
 
     weight = get_node_weight(model, node)
