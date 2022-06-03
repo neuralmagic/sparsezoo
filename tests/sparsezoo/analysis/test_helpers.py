@@ -32,6 +32,10 @@ from sparsezoo.analysis.helpers import (
     is_sparse_layer,
 )
 
+from sparsezoo.analysis.onnx_helpers import (
+    extract_node_shapes,
+)
+
 
 @pytest.fixture()
 def margin_of_error():
@@ -39,8 +43,8 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def get_model_onnx():
-    model_stubs = {
+def model_stubs():
+    return {
         "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
         "pytorch/dbolya/coco/base-none",
         "mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
@@ -50,14 +54,21 @@ def get_model_onnx():
         "12layer_pruned80_quant-none-vnni",
         "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
         "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
+        "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/resnet50_pruned85_vnni.onnx"
     }
 
+
+@pytest.fixture(scope="session")
+def get_model_onnx(model_stubs):
     model_onnxs = {}
     for model_name, model_stub in model_stubs.items():
         model_stub = model_stubs[model_name]
-        model = Zoo.load_model_from_stub(model_stub)
-        model.onnx_file.download()
-        onnx_path = model.onnx_file.downloaded_path()
+        if model_stub[:4] == "zoo:":
+            model = Zoo.load_model_from_stub(model_stub)
+            model.onnx_file.download()
+            onnx_path = model.onnx_file.downloaded_path()
+        else:
+            onnx_path = model_stub
         model_onnx = onnx.load(onnx_path)
         model_onnxs[model_name] = model_onnx
 
@@ -65,6 +76,20 @@ def get_model_onnx():
         return model_onnxs[model_name]
 
     return _get_model_onnx
+
+
+@pytest.fixture(scope="session")
+def get_model_node_shapes(model_stubs, get_model_onnx):
+    model_node_shapes = {}
+    for model_name, model_stub in model_stubs.items():
+        model = get_model_onnx(model_name)
+        node_shapes = extract_node_shapes(model)
+        model_node_shapes[model_name] = node_shapes
+
+    def _get_model_node_shapes(model_name):
+        return model_node_shapes[model_name]
+
+    return _get_model_node_shapes
 
 
 @pytest.fixture()
@@ -87,7 +112,7 @@ def get_node_from_name():
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", None),
         ("mobilenet_v1_pruned_moderate", "Concat_88", None),
         ("mobilenet_v1_pruned_moderate", "Reshape_89", None),
-        ("mobilenet_v1_pruned_moderate", "Gemm_90", (1000, 1024)),
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", (1024, 1000)),
         ("mobilenet_v1_pruned_moderate", "Softmax_91", None),
         ("bert_pruned_quantized", "Gather_34", (2, 768)),
         ("bert_pruned_quantized", "DequantizeLinear_27", None),
@@ -98,7 +123,7 @@ def get_node_from_name():
         ("resnet50_pruned_quantized", "Add_1168", None),
         ("resnet50_pruned_quantized", "QuantizeLinear_1178", None),
         ("resnet50_pruned_quantized", "GlobalAveragePool_1328", None),
-        ("resnet50_pruned_quantized", "Gemm_1335", (1000, 2048)),
+        ("resnet50_pruned_quantized", "Gemm_1335", (2048, 1000)),
     ],
 )
 def test_get_node_weight(
@@ -538,9 +563,58 @@ def test_is_four_block_sparse_layer(
     ],
 )
 def test_get_num_operations(
-    model_name, node_name, expected_value, get_model_onnx, get_node_from_name
+    model_name, node_name, expected_value, get_model_onnx, get_node_from_name, get_model_node_shapes
 ):
     model = get_model_onnx(model_name)
+    node_shapes = get_model_node_shapes(model_name)
     node = get_node_from_name(model, node_name)
 
-    assert get_num_operations(model, node) == expected_value
+    assert get_num_operations(model, node, node_shapes=node_shapes) == expected_value
+
+
+
+
+
+from sparsezoo.analysis.ops_calcs import (
+    get_num_dense_and_sparse_ops,
+)
+
+
+@pytest.mark.parametrize(
+    "model_name,node_name,expected_value",
+    [
+        #("mobilenet_v1_pruned_moderate", "Conv_0", 10838016),
+        #("mobilenet_v1_pruned_moderate", "BatchNormalization_16", 401408),
+        #("mobilenet_v1_pruned_moderate", "Pad_82", 0),
+        #("mobilenet_v1_pruned_moderate", "AveragePool_83", 50176),
+        #("mobilenet_v1_pruned_moderate", "Shape_84", 0),
+        #("mobilenet_v1_pruned_moderate", "Gather_86", 0),
+        #("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0),
+        #("mobilenet_v1_pruned_moderate", "Concat_88", 0),
+        #("mobilenet_v1_pruned_moderate", "Reshape_89", 0),
+
+        #("mobilenet_v1_pruned_moderate", "Gemm_90", (-1, -1)),
+        ("resnet50_pruned85_vnni", "Gemm_1335", (-1, -1))
+
+        #("mobilenet_v1_pruned_moderate", "Softmax_91", 0),
+        #("bert_pruned_quantized", "Gather_34", 0),
+        #("bert_pruned_quantized", "DequantizeLinear_27", 0),
+        #("bert_pruned_quantized", "MatMul_80_quant", 1179648),
+        #("bert_pruned_quantized", "MatMul_157_quant", 224722944),
+        #("resnet50_pruned_quantized", "Conv_431_quant", 51380736),
+        #("resnet50_pruned_quantized", "DequantizeLinear_22", 0),
+        #("resnet50_pruned_quantized", "Add_1168", 100352),
+        #("resnet50_pruned_quantized", "QuantizeLinear_1178", 0),
+        #("resnet50_pruned_quantized", "GlobalAveragePool_1328", 100352),
+        #("resnet50_pruned_quantized", "Gemm_1335", 4097000),
+        #("resnet50_pruned_quantized", "Softmax_1336", 0),
+    ],
+)
+def test_get_num_dense_and_sparse_ops(
+    model_name, node_name, expected_value, get_model_onnx, get_node_from_name, get_model_node_shapes
+):
+    model = get_model_onnx(model_name)
+    node_shapes = get_model_node_shapes(model_name)
+    node = get_node_from_name(model, node_name)
+
+    assert get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes) == expected_value

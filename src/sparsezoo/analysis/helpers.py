@@ -78,11 +78,8 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     initializer_name = _get_node_bias_name(model, node)
     if initializer_name is None:
         return None
-    initializer = get_initializer(model, initializer_name)
-    if initializer is None:
-        raise Exception(f"Parameter for {node.name} not found")
 
-    return numpy_helper.to_array(initializer)
+    return get_initializer_value(model, node, initializer_name)
 
 
 def get_num_operations(
@@ -126,7 +123,7 @@ def get_num_operations(
     return int(num_operations) if num_operations is not None else 0
 
 
-def get_initializer(model: ModelProto, initializer_name: str) -> numpy.ndarray:
+def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: str) -> numpy.ndarray:
     """
     Helper function to find initializers by name in model graph
 
@@ -134,11 +131,30 @@ def get_initializer(model: ModelProto, initializer_name: str) -> numpy.ndarray:
     :param initializer_name: name of initializer being returned
     :return: initalizer if found, None otherwise
     """
+    def _is_transposed_initializer(node: NodeProto, initailizer_name: str) -> bool:
+        input_index = list(node.input).index(initailizer_name)
+
+        node_attributes = get_node_attributes(node)
+
+        if node.op_type in ["Gemm"]:
+            if input_index == 0 and "transA" in node_attributes and node_attributes["transA"] == 1:
+                return True
+            if input_index == 1 and "transB" in node_attributes and node_attributes["transB"] == 1:
+                return True
+
+        return False
+
     for initializer in model.graph.initializer:
         if initializer.name == initializer_name:
-            return initializer
+            break
+    else:
+        return None
 
-    return None
+    value = numpy_helper.to_array(initializer)
+    if _is_transposed_initializer(node, initializer_name):
+        value = value.T
+
+    return value
 
 
 def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
@@ -175,7 +191,7 @@ def get_node_num_four_block_zeros_and_size(
     weight_zeros = weight == zero_point
 
     # Transpose so input channels are last
-    if weight_zeros.ndim > 2 or (node.op_type == "Gemm" and "transB" in node.attribute):
+    if weight_zeros.ndim > 2:
         input_channel_dim = 1
     else:
         input_channel_dim = 0
@@ -226,8 +242,7 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
 
     if is_quantized_layer(model, node):
         zero_point_initializer_name = _get_node_zero_point_init_name(node)
-        zero_point_initializer = get_initializer(model, zero_point_initializer_name)
-        zero_point = numpy_helper.to_array(zero_point_initializer)
+        zero_point = get_initializer_value(model, node, zero_point_initializer_name)
         if zero_point.ndim != 0:
             raise NotImplementedError("Channel-wise zero points are not supported")
 
@@ -354,14 +369,11 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     initializer_name = _get_node_weight_name(model, node)
     if initializer_name is None:
         return None
-    initializer = get_initializer(model, initializer_name)
-    if initializer is None:
-        if node.op_type in ["Gather"]:
-            return None
-        else:
-            raise Exception(f"Parameter for {node.name} not found")
+    weight = get_initializer_value(model, node, initializer_name)
+    if weight is None and node.op_type != "Gather":
+        raise Exception(f"Parameter for {node.name} not found")
 
-    return numpy_helper.to_array(initializer)
+    return weight
 
 
 def get_layer_and_op_counts(model: ModelProto):
