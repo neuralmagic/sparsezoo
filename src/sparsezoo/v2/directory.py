@@ -152,15 +152,10 @@ class Directory(File):
             logging.error("Download retry failed...")
             raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
-        # Directory can represent a folder.
+        # Directory can represent a folder or directory.
         else:
             for file in self.files:
-                if isinstance(file, Directory):
-                    raise NotImplementedError(
-                        "Method download() does not support nested directories."
-                    )
-                else:
-                    file.download(destination_path=destination_path)
+                file.download(destination_path=destination_path)
 
     def gzip(self, archive_directory: Optional[str] = None):
         """
