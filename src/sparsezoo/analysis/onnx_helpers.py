@@ -15,7 +15,7 @@
 """
 Utility / helper functions
 
-NOTE: Copied from sparseml/onnx/utils/helpers.py with minimal edits
+NOTE: Adapted from sparseml/onnx/utils/helpers.py with minimal edits
 """
 
 import logging
@@ -35,8 +35,6 @@ __all__ = [
     "extract_node_id",
     "extract_node_shapes",
     "get_node_attributes",
-    "get_kernel_shape",
-    "calculate_num_operations",
     "NodeShape",
 ]
 
@@ -259,9 +257,6 @@ Simple named tuple for mapping a node value to the init name it came from
 """
 NodeParam = NamedTuple("NodeParam", [("name", str), ("val", numpy.ndarray)])
 
-_TRIVIAL_OP_TYPES = {"Reshape", "Transpose"}
-
-
 def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     """
     :param node: the ONNX node to get the attibutes for
@@ -291,6 +286,7 @@ def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     return attributes
 
 
+''' TODO: Remove
 def get_kernel_shape(attributes: Dict[str, Any]) -> Union[List[float], None]:
     """
     Get the kernel shape from a dictionary of a model's attributes
@@ -477,3 +473,5 @@ def _array_as_numeric(array: Union[List, None]) -> Union[List, None]:
     else:
         to_float = numpy.vectorize(_attempt_cast_as_float)
         return to_float(array)
+
+'''

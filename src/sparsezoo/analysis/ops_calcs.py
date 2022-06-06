@@ -5,10 +5,8 @@ from onnx import ModelProto, NodeProto, numpy_helper
 
 from sparsezoo.analysis.onnx_helpers import (
     NodeShape,
-    calculate_num_operations,
     extract_node_id,
     extract_node_shapes,
-    get_kernel_shape,
     get_node_attributes,
 )
 
@@ -109,7 +107,6 @@ def _get_linear_bias_dense_sparse_ops(bias, zero_point=0):
 def get_num_dense_and_sparse_ops(model: ModelProto, node: NodeProto, node_shapes: Optional[Dict[str, NodeShape]] = None):
     if node_shapes is None:
         node_shapes = extract_node_shapes(model)
-        raise Exception("TODO: Remove this exception")
 
     node_shape = node_shapes.get(extract_node_id(node))
     input_shapes = node_shape.input_shapes if node_shape is not None else None
@@ -122,10 +119,24 @@ def get_num_dense_and_sparse_ops(model: ModelProto, node: NodeProto, node_shapes
 
     node_attributes = get_node_attributes(node)
 
-    #if node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"] + ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"] + ["GlobalAveragePool", "GlobalMaxPool"]
-    #if node.op_type in ["MaxPool", "AveragePool"]:
+    if (
+        node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"]
+        or node.op_type in ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"]
+    ):
+        output_shape = output_shapes[0]
+        return (numpy.prod(output_shape), 0) if output_shape is not None else (0, 0)
 
-    print(node.op_type)
+    if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
+        input_shape = input_shapes[0]
+        return (numpy.prod(input_shape), 0) if input_shape is not None else (0, 0)
+
+    if node.op_type in ["MaxPool", "AveragePool"]:
+        output_shape = output_shapes[0]
+        if not "kernel_shape" in node_attributes:
+            raise Exception(f"No kernel_shape found in node attributes of {node.op_type}")
+        kernel_shape = node_attributes["kernel_shape"]
+        return (numpy.prod(output_shape) * numpy.prod(kernel_shape), 0)
+
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
         input_shape = input_shapes[0]
 
@@ -163,4 +174,4 @@ def get_num_dense_and_sparse_ops(model: ModelProto, node: NodeProto, node_shapes
 
         return num_dense_ops, num_sparse_ops
 
-    return None
+    return 0, 0

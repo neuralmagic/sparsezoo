@@ -19,10 +19,8 @@ from onnx import ModelProto, NodeProto, numpy_helper
 
 from sparsezoo.analysis.onnx_helpers import (
     NodeShape,
-    calculate_num_operations,
     extract_node_id,
     extract_node_shapes,
-    get_kernel_shape,
     get_node_attributes,
 )
 
@@ -43,18 +41,6 @@ __all__ = [
     "get_num_operations",
     "extract_node_shapes",
 ]
-
-
-def _get_node_input(node, index, default=None):
-    """
-    :param node: node that contains the desired input
-    :param index: index of desired input
-    :param default: default value if node.input does not contain index
-    """
-    if len(node.input) - 1 >= index:
-        return node.input[index]
-    else:
-        return default
 
 
 def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
@@ -87,6 +73,7 @@ def get_num_operations(
     node: NodeProto,
     node_shapes: Optional[Dict[str, NodeShape]] = None,
 ) -> int:
+    return 0
     """
     Gets an approximation of the number of floating point or integer operations
 
@@ -95,6 +82,7 @@ def get_num_operations(
     :return: number of operations performed by node
     """
 
+    '''
     if node_shapes is None:
         node_shapes = extract_node_shapes(model)
     attributes = get_node_attributes(node)
@@ -121,6 +109,9 @@ def get_num_operations(
     )
 
     return int(num_operations) if num_operations is not None else 0
+    '''
+
+
 
 
 def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: str) -> numpy.ndarray:
@@ -173,6 +164,11 @@ def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int
 
 
 def group_four_block(array, pad_value=True):
+    """
+    :param array: array to group into four blocks
+    :param pad_value: value to pad remainder block with
+    :return: array grouped into blocks with shape [-1, 4]
+    """
     # Transpose so input channels are last
     if array.ndim > 2:
         input_channel_dim = 1
@@ -375,7 +371,7 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     initializer_name = _get_node_weight_name(model, node)
     if initializer_name is None:
         return None
-        
+
     weight = get_initializer_value(model, node, initializer_name)
     if weight is None and node.op_type != "Gather":
         raise Exception(f"Parameter for {node.name} not found")
@@ -406,3 +402,15 @@ def get_layer_and_op_counts(model: ModelProto):
         target_dict[node.op_type] += 1
 
     return layer_counts, op_counts
+
+
+def _get_node_input(node, index, default=None):
+    """
+    :param node: node that contains the desired input
+    :param index: index of desired input
+    :param default: default value if node.input does not contain index
+    """
+    if len(node.input) - 1 >= index:
+        return node.input[index]
+    else:
+        return default
