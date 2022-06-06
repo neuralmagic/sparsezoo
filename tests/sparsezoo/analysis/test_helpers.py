@@ -45,15 +45,15 @@ def margin_of_error():
 @pytest.fixture(scope="session")
 def model_stubs():
     return {
-        "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
-        "pytorch/dbolya/coco/base-none",
-        "mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
-        "pytorch/sparseml/imagenet/pruned-moderate",
-        "bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
-        "pytorch/huggingface/squad/"
-        "12layer_pruned80_quant-none-vnni",
-        "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
-        "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
+        #"yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
+        #"pytorch/dbolya/coco/base-none",
+        #"mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
+        #"pytorch/sparseml/imagenet/pruned-moderate",
+        #"bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
+        #"pytorch/huggingface/squad/"
+        #"12layer_pruned80_quant-none-vnni",
+        #"resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
+        #"/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
         "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/resnet50_pruned85_vnni.onnx"
     }
 
@@ -594,7 +594,8 @@ from sparsezoo.analysis.ops_calcs import (
         #("mobilenet_v1_pruned_moderate", "Reshape_89", 0),
 
         #("mobilenet_v1_pruned_moderate", "Gemm_90", (-1, -1)),
-        ("resnet50_pruned85_vnni", "Gemm_1335", (-1, -1))
+        #("resnet50_pruned85_vnni", "Gemm_1335", (4096000, 0))
+        ("resnet50_pruned85_vnni", "Conv_158_quant", (4096000, 0))
 
         #("mobilenet_v1_pruned_moderate", "Softmax_91", 0),
         #("bert_pruned_quantized", "Gather_34", 0),
@@ -617,4 +618,5 @@ def test_get_num_dense_and_sparse_ops(
     node_shapes = get_model_node_shapes(model_name)
     node = get_node_from_name(model, node_name)
 
+    #print(get_num_operations(model, node, node_shapes=node_shapes))
     assert get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes) == expected_value

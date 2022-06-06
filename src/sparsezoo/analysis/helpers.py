@@ -132,11 +132,10 @@ def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: 
     :return: initalizer if found, None otherwise
     """
     def _is_transposed_initializer(node: NodeProto, initailizer_name: str) -> bool:
-        input_index = list(node.input).index(initailizer_name)
-
-        node_attributes = get_node_attributes(node)
-
         if node.op_type in ["Gemm"]:
+            input_index = list(node.input).index(initailizer_name)
+            node_attributes = get_node_attributes(node)
+
             if input_index == 0 and "transA" in node_attributes and node_attributes["transA"] == 1:
                 return True
             if input_index == 1 and "transB" in node_attributes and node_attributes["transB"] == 1:
@@ -173,6 +172,33 @@ def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int
     return num_zeros, weight.size
 
 
+def group_four_block(array, pad_value=True):
+    # Transpose so input channels are last
+    if array.ndim > 2:
+        input_channel_dim = 1
+    else:
+        input_channel_dim = 0
+
+    transpose_arg = list(range(array.ndim))
+    del transpose_arg[input_channel_dim]
+    transpose_arg.append(input_channel_dim)
+    array = numpy.transpose(array, transpose_arg)
+
+    # Pad array features with zeros to be divisible by four
+    remainder = array.shape[-1] % 4
+    if remainder != 0:
+        num_missing_features = 4 - remainder
+        array = numpy.pad(
+            array,
+            [(0, 0)] * (array.ndim - 1) + [(0, num_missing_features)],
+            constant_values=True,
+        )
+
+    # Group into blocks and count zero blocks
+    array_blocks = numpy.reshape(array, (-1, 4))
+    return array_blocks
+
+
 def get_node_num_four_block_zeros_and_size(
     model: ModelProto, node: NodeProto
 ) -> Tuple[int, int]:
@@ -187,33 +213,11 @@ def get_node_num_four_block_zeros_and_size(
     if weight is None:
         return 0, 0
 
-    # Bool array
-    weight_zeros = weight == zero_point
+    # Group into blocks
+    weight_blocks = group_four_block(weight, pad_value=zero_point)
 
-    # Transpose so input channels are last
-    if weight_zeros.ndim > 2:
-        input_channel_dim = 1
-    else:
-        input_channel_dim = 0
-
-    transpose_arg = list(range(weight_zeros.ndim))
-    del transpose_arg[input_channel_dim]
-    transpose_arg.append(input_channel_dim)
-    weight_zeros = numpy.transpose(weight_zeros, transpose_arg)
-
-    # Pad weight features with zeros to be divisible by four
-    remainder = weight_zeros.shape[-1] % 4
-    if remainder != 0:
-        num_missing_features = 4 - remainder
-        weight_zeros = numpy.pad(
-            weight_zeros,
-            [(0, 0)] * (weight_zeros.ndim - 1) + [(0, num_missing_features)],
-            constant_values=True,
-        )
-
-    # Group into blocks and count zero blocks
-    weight_blocks = numpy.reshape(weight_zeros, (-1, 4))
-    num_zeros_per_block = numpy.count_nonzero(weight_blocks, axis=1)
+    # Count non-zero blocks
+    num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
     num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
 
     return num_zero_blocks, weight_blocks.shape[0]
@@ -351,11 +355,13 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
             return _get_node_input(node, 3, default=None)
 
         if node.op_type == "QLinearMatMul":
-            if _get_node_input(node, 3, default=None) in initializer_names:
-                return _get_node_input(node, 3, default=None)
+            input_b_name = _get_node_input(node, 3, default=None)
+            if input_b_name in initializer_names:
+                return input_b_name
 
-            if _get_node_input(node, 0, default=None) in initializer_names:
-                return _get_node_input(node, 0, default=None)
+            input_a_name = _get_node_input(node, 3, default=None)
+            if input_a_name in initializer_names:
+                return input_a_name
 
         if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
             return next(

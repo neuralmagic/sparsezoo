@@ -370,8 +370,10 @@ def calculate_num_operations(
         num_operations = _numpy_prod_with_none_check(weight_shape)
         num_operations = num_operations * 2 if num_operations is not None else None
     elif op_type in ["Conv", "ConvInteger", "QLinearConv"]:
+        # num values in kernel * num output maps * output spatial dimensions
+        # But I think it should actually be times 2 b/c op + equals
         num_operations = (
-            numpy.prod(kernel_shape) * weight_shape[1] * numpy.prod(output_shape)
+            numpy.prod(kernel_shape) * weight_shape[1] * numpy.prod(output_shape) * 2
             if kernel_shape is not None
             and weight_shape is not None
             and output_shape is not None
@@ -391,12 +393,12 @@ def calculate_num_operations(
         num_operations = None
 
     if num_operations is not None and bias_shape is not None:
-        if op_type == "Conv":
+        if op_type in ["Conv", "ConvInteger", "QLinearConv"]:
             num_operations += (
-                numpy.prod(bias_shape) * output_shape[0][-1] * output_shape[0][-2]
+                numpy.prod(bias_shape) * output_shape[0][-1] * output_shape[0][-2] * 2
             )
         else:
-            num_operations += numpy.prod(bias_shape)
+            num_operations += numpy.prod(bias_shape) * 2
 
     return num_operations
 
