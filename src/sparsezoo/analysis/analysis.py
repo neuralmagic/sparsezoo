@@ -27,7 +27,7 @@ from sparsezoo.analysis.helpers import (
     get_node_num_zeros_and_size,
     get_node_sparsity,
     get_node_weight,
-    get_num_operations,
+    get_num_dense_and_sparse_ops,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
@@ -152,7 +152,7 @@ class ModelAnalysis(BaseModel):
         node_shapes = extract_node_shapes(model_onnx)
         num_ops = sum(
             [
-                get_num_operations(model_onnx, node, node_shapes=node_shapes)
+                get_num_dense_and_sparse_ops(model_onnx, node, node_shapes=node_shapes)
                 for node in model_onnx.graph.node
             ]
         )
@@ -191,7 +191,7 @@ class ModelAnalysis(BaseModel):
 
         nodes = []
         for node in model_onnx.graph.node:
-            num_ops = get_num_operations(model_onnx, node, node_shapes=node_shapes)
+            num_ops = get_num_dense_and_sparse_ops(model_onnx, node, node_shapes=node_shapes)
             node_zero_point = get_zero_point(model_onnx, node)
             num_sparse_values, node_num_values = get_node_num_zeros_and_size(
                 model_onnx, node

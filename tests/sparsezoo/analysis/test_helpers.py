@@ -24,15 +24,13 @@ from sparsezoo.analysis.helpers import (
     get_node_num_zeros_and_size,
     get_node_sparsity,
     get_node_weight,
-    get_num_operations,
+    get_num_dense_and_sparse_ops,
     get_zero_point,
     is_four_block_sparse_layer,
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
-)
-
-from sparsezoo.analysis.onnx_helpers import (
+    get_num_dense_and_sparse_ops,
     extract_node_shapes,
 )
 
@@ -538,51 +536,6 @@ def test_is_four_block_sparse_layer(
 @pytest.mark.parametrize(
     "model_name,node_name,expected_value",
     [
-        ("mobilenet_v1_pruned_moderate", "Conv_0", 10838016),
-        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", 401408),
-        ("mobilenet_v1_pruned_moderate", "Pad_82", 0),
-        ("mobilenet_v1_pruned_moderate", "AveragePool_83", 50176),
-        ("mobilenet_v1_pruned_moderate", "Shape_84", 0),
-        ("mobilenet_v1_pruned_moderate", "Gather_86", 0),
-        ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", 0),
-        ("mobilenet_v1_pruned_moderate", "Concat_88", 0),
-        ("mobilenet_v1_pruned_moderate", "Reshape_89", 0),
-        ("mobilenet_v1_pruned_moderate", "Gemm_90", 2049000),
-        ("mobilenet_v1_pruned_moderate", "Softmax_91", 0),
-        ("bert_pruned_quantized", "Gather_34", 0),
-        ("bert_pruned_quantized", "DequantizeLinear_27", 0),
-        ("bert_pruned_quantized", "MatMul_80_quant", 1179648),
-        ("bert_pruned_quantized", "MatMul_157_quant", 224722944),
-        ("resnet50_pruned_quantized", "Conv_431_quant", 51380736),
-        ("resnet50_pruned_quantized", "DequantizeLinear_22", 0),
-        ("resnet50_pruned_quantized", "Add_1168", 100352),
-        ("resnet50_pruned_quantized", "QuantizeLinear_1178", 0),
-        ("resnet50_pruned_quantized", "GlobalAveragePool_1328", 100352),
-        ("resnet50_pruned_quantized", "Gemm_1335", 4097000),
-        ("resnet50_pruned_quantized", "Softmax_1336", 0),
-    ],
-)
-def test_get_num_operations(
-    model_name, node_name, expected_value, get_model_onnx, get_node_from_name, get_model_node_shapes
-):
-    model = get_model_onnx(model_name)
-    node_shapes = get_model_node_shapes(model_name)
-    node = get_node_from_name(model, node_name)
-
-    assert get_num_operations(model, node, node_shapes=node_shapes) == expected_value
-
-
-
-
-
-from sparsezoo.analysis.ops_calcs import (
-    get_num_dense_and_sparse_ops,
-)
-
-
-@pytest.mark.parametrize(
-    "model_name,node_name,expected_value",
-    [
         ("mobilenet_v1_pruned_moderate", "Conv_0", (21676032, 0)),
         ("mobilenet_v1_pruned_moderate", "Conv_27", (13778, 0)),
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", (401408, 0)),
@@ -619,5 +572,4 @@ def test_get_num_dense_and_sparse_ops(
     node_shapes = get_model_node_shapes(model_name)
     node = get_node_from_name(model, node_name)
 
-    #print(get_num_operations(model, node, node_shapes=node_shapes))
     assert get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes) == expected_value

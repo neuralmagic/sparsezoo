@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any, List
 
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
+from onnx.helper import get_attribute_value
 
-from sparsezoo.analysis.onnx_helpers import (
+from sparsezoo.analysis.node_shape import (
     NodeShape,
     extract_node_id,
     extract_node_shapes,
-    get_node_attributes,
 )
 
 
@@ -38,9 +38,20 @@ __all__ = [
     "is_parameterized_prunable_layer",
     "is_quantized_layer",
     "is_sparse_layer",
-    "get_num_operations",
+    "get_num_dense_and_sparse_ops",
     "extract_node_shapes",
 ]
+
+def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
+    """
+    :param node: node to which the attributes belong to
+    :return: a dictionary of attribute name and value pairs
+    """
+    attributes = {}
+    for attribute in node.attribute:
+        attributes[attribute.name] = get_attribute_value(attribute)
+
+    return attributes
 
 
 def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
@@ -68,12 +79,11 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     return get_initializer_value(model, node, initializer_name)
 
 
-def get_num_operations(
+def get_num_dense_and_sparse_ops(
     model: ModelProto,
     node: NodeProto,
     node_shapes: Optional[Dict[str, NodeShape]] = None,
 ) -> int:
-    return 0
     """
     Gets an approximation of the number of floating point or integer operations
 
@@ -81,37 +91,76 @@ def get_num_operations(
     :param node: node which performs the operations
     :return: number of operations performed by node
     """
-
-    '''
     if node_shapes is None:
         node_shapes = extract_node_shapes(model)
-    attributes = get_node_attributes(node)
-
-    weight = get_node_weight(model, node)
-    bias = get_node_bias(model, node)
-    weight_shape = list(weight.shape) if weight is not None else None
-    bias_shape = list(bias.shape) if bias is not None else None
 
     node_shape = node_shapes.get(extract_node_id(node))
     input_shapes = node_shape.input_shapes if node_shape is not None else None
     output_shapes = node_shape.output_shapes if node_shape is not None else None
 
-    kernel_shape = get_kernel_shape(attributes)
+    weight = get_node_weight(model, node)
+    bias = get_node_bias(model, node)
+    zero_point = get_zero_point(model, node)
+    is_four_block_sparse = is_four_block_sparse_layer(model, node)
 
-    num_operations = calculate_num_operations(
-        node.op_type,
-        input_shape=input_shapes,
-        output_shape=output_shapes,
-        weight_shape=weight_shape,
-        kernel_shape=kernel_shape,
-        bias_shape=bias_shape,
-        attributes=attributes,
-    )
+    node_attributes = get_node_attributes(node)
 
-    return int(num_operations) if num_operations is not None else 0
-    '''
+    if (
+        node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"]
+        or node.op_type in ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"]
+    ):
+        output_shape = output_shapes[0]
+        return (numpy.prod(output_shape), 0) if output_shape is not None else (0, 0)
 
+    if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
+        input_shape = input_shapes[0]
+        return (numpy.prod(input_shape), 0) if input_shape is not None else (0, 0)
 
+    if node.op_type in ["MaxPool", "AveragePool"]:
+        output_shape = output_shapes[0]
+        if not "kernel_shape" in node_attributes:
+            raise Exception(f"No kernel_shape found in node attributes of {node.op_type}")
+        kernel_shape = node_attributes["kernel_shape"]
+        return (numpy.prod(output_shape) * numpy.prod(kernel_shape), 0)
+
+    if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
+        input_shape = input_shapes[0]
+
+        # If no weight supplied, treat other input as dense weight
+        if weight is None:
+            weight_shape = input_shapes[1]
+            weight = numpy.full(weight_shape, zero_point - 1)
+
+        # Weight operations
+        num_dense_ops, num_sparse_ops = _get_gemm_dense_sparse_ops(weight, input_shape, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
+
+        # Bias operations
+        if not bias is None:
+            bias_dense_ops, bias_sparse_ops = _get_linear_bias_dense_sparse_ops(bias, zero_point)
+            num_dense_ops += bias_dense_ops
+            num_sparse_ops += bias_sparse_ops
+
+        return num_dense_ops, num_sparse_ops
+
+    if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
+        input_shape = input_shapes[0]
+        output_shape = output_shapes[0]
+        pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
+        strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
+        group = node_attributes["group"] if "group" in node_attributes else 1
+
+        # Weight operations
+        num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
+
+        # Bias operations
+        if not bias is None:
+            bias_dense_ops, bias_sparse_ops = _get_conv_bias_dense_sparse_ops(bias, output_shape, zero_point)
+            num_dense_ops += bias_dense_ops
+            num_sparse_ops += bias_sparse_ops
+
+        return num_dense_ops, num_sparse_ops
+
+    return 0, 0
 
 
 def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: str) -> numpy.ndarray:
@@ -404,7 +453,7 @@ def get_layer_and_op_counts(model: ModelProto):
     return layer_counts, op_counts
 
 
-def _get_node_input(node, index, default=None):
+def _get_node_input(node: NodeProto, index: int, default: Optional[Any] = None):
     """
     :param node: node that contains the desired input
     :param index: index of desired input
@@ -414,3 +463,138 @@ def _get_node_input(node, index, default=None):
         return node.input[index]
     else:
         return default
+
+
+def _get_gemm_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], zero_point: int = 0, is_four_block_sparse: bool = False):
+    """
+    Calculates number of operations performed by performing matrix multiplication
+
+    :param weight: input matrix to matmul (with parameterized weights)
+    :param input_shape: shape of other input matrix
+    :param zero_point: number representing zero value of weight
+    :param is_four_block_sparse: true if the weight is four block sparse
+    :return: number of dense and sparse operations performed
+    """
+    if is_four_block_sparse:
+        weight_blocks = group_four_block(weight, pad_value=zero_point)
+        num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
+
+        num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
+        num_non_zero_blocks = numpy.count_nonzero(num_zeros_per_block != 4, axis=0)
+
+        num_dense_ops = 2 * input_shape[-2] * num_non_zero_blocks * 4
+        num_sparse_ops = 2 * input_shape[-2] * num_zero_blocks * 4
+    else:
+        num_zeros = numpy.count_nonzero(weight == zero_point)
+        num_non_zeros = numpy.count_nonzero(weight != zero_point)
+
+        num_dense_ops = 2 * input_shape[-2] * num_non_zeros
+        num_sparse_ops = 2 * input_shape[-2] * num_zeros
+
+    return num_dense_ops, num_sparse_ops
+
+def _get_weight_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: List[int], kernel_shape: List[int], pads: List[int]) -> numpy.ndarray:
+    """
+    Calculates which spatial coordinates in the kernel will be applied to a pixel
+    at coordinates (x, y) and returns a subview of the weight containing only
+    those spatial coordinates
+
+    :param weight: matrix with shape [out_channels, in_channels, kernel_h, kernel_w]
+    :param x: x coordinate of pixel in the input
+    :param y: y coordinate of pixel in the input
+    :param spatial_shape: spatial dimensions of input
+    :param kernel_shape: spatial dimensions of kernel
+    :param pads: list of paddings around the input
+    :return: a subview of the weight matrix containing only the spatial
+    coordinates that will be multiplied with the pixel at coordinate (x, y)
+    """
+    distance_from_right = (spatial_shape[1] - x - 1)
+    k_x_start = kernel_shape[1] - pads[2] - distance_from_right - 1
+    k_x_start = max(k_x_start, 0)
+    k_x_end   = kernel_shape[1] + pads[0] + x
+    k_x_end   = min(k_x_end, kernel_shape[1])
+
+    distance_from_bottom = (spatial_shape[0] - y - 1)
+    k_y_start = kernel_shape[0] - pads[3] - distance_from_bottom - 1
+    k_y_start = max(k_y_start, 0)
+    k_y_end   = kernel_shape[0] + pads[1] + y
+    k_y_end   = min(k_y_end, kernel_shape[0])
+
+    return weight[:, :, k_y_start: k_y_end, k_x_start: k_x_end]
+
+
+def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], pads: List[int], strides: List[int], group: int, zero_point: int = 0, is_four_block_sparse: bool = False) -> Tuple[int, int]:
+    """
+    Calculates number of operations performed by applying a convolutional weight
+
+    :param weight: matrix of values to be convoluted
+    :param input_shape: dimensions of the input to the weight operation
+    :param pads: padding for spatial axes, [L, T, R, B]
+    :param strides: stride along spatial axes
+    :param group: number of groups input channels and output channels are divided into
+    :param zero_point: number representing zero value of weight
+    :param is_four_block_sparse: true if the weight is four block sparse
+    :return: number of dense and sparse operations performed
+    """
+    spatial_shape = input_shape[2:]
+    kernel_shape = weight.shape[2:]
+
+    dense_sum, sparse_sum = 0, 0
+
+    # For each pixel in the input
+    for x in range(0, spatial_shape[1], strides[1]):
+        for y in range(0, spatial_shape[0], strides[0]):
+
+            # Calculate a subview of the weight that contains only the spatial
+            # coordinates that apply to this pixel
+            sub_kernels = _get_weight_subview(weight, x, y, spatial_shape, kernel_shape, pads)
+
+            # Flatten 2D kernel into list of values with shape [o_c, i_c, -1]
+            sub_kernels_values = numpy.reshape(sub_kernels, (sub_kernels.shape[0], sub_kernels.shape[1], -1))
+
+            # For each relevant kernel spatial coordinate, apply gemm across input channels
+            for sub_kernels_value in sub_kernels_values:
+                gemm_dense_ops, gemm_sparse_ops = _get_gemm_dense_sparse_ops(sub_kernels_value, [1, weight.shape[1]], zero_point, is_four_block_sparse)
+                dense_sum += gemm_dense_ops
+                sparse_sum += gemm_sparse_ops
+
+    # Adjust for depthwise convolutions
+    dense_sum = dense_sum // group
+    sparse_sum = sparse_sum // group
+
+    return dense_sum, sparse_sum
+
+
+def _get_conv_bias_dense_sparse_ops(bias: numpy.ndarray, output_shape: List[int], zero_point: int = 0) -> Tuple[int, int]:
+    """
+    Calculates number of operations performed by applying a convolutional bias
+
+    :param bias: matrix of bias values to be applied
+    :param output_shape: dimensions of the output after the bias operation
+    :param zero_point: number representing zero value of bias
+    :return: number of dense and sparse operations performed
+    """
+    output_spatial_shape = output_shape[-2:]
+    dense_ops_per_pixel, sparse_ops_per_pixel = _get_linear_bias_dense_sparse_ops(bias, zero_point)
+
+    num_dense_ops = dense_ops_per_pixel * numpy.prod(output_spatial_shape)
+    num_sparse_ops = sparse_ops_per_pixel * numpy.prod(output_spatial_shape)
+
+    return num_dense_ops, num_sparse_ops
+
+
+def _get_linear_bias_dense_sparse_ops(bias: numpy.ndarray, zero_point: int = 0) -> Tuple[int, int]:
+    """
+    Calculates number of operations performed by applying a bias
+
+    :param bias: matrix of bias values to be applied
+    :param zero_point: number representing zero value of bias
+    :return: number of dense and sparse operations performed
+    """
+    num_zeros = numpy.count_nonzero(bias == zero_point)
+    num_non_zeros = numpy.count_nonzero(bias != zero_point)
+
+    num_dense_ops = num_non_zeros * 2
+    num_sparse_ops = num_zeros * 2
+
+    return num_dense_ops, num_sparse_ops
