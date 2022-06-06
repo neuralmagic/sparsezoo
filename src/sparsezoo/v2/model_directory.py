@@ -40,10 +40,9 @@ def file_dictionary(**kwargs):
 
 
 class InferenceRunner:
-    # TODO: Turn sample_outputs into Dict[str, NumpyDirectory]
     """
     Helper class for running inference
-    given sample_inputs, sample_outputs and onnx model.
+    given `sample_inputs`, `sample_outputs` and the onnx model.
 
     :params sample_inputs: File object containing sample inputs to the inference engine
     :params sample_outputs: File object containing sample outputs the inference engine
@@ -85,7 +84,7 @@ class InferenceRunner:
         Validates that output from the engine matches the expected output
 
         :params engine_type: name of the inference engine
-        :return bolean flag; if True, outputs match expected outputs. False otherwise
+        :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
         validation = []
         for target_output, output in zip(
