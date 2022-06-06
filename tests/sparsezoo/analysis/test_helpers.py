@@ -45,15 +45,15 @@ def margin_of_error():
 @pytest.fixture(scope="session")
 def model_stubs():
     return {
-        #"yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
-        #"pytorch/dbolya/coco/base-none",
-        #"mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
-        #"pytorch/sparseml/imagenet/pruned-moderate",
-        #"bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
-        #"pytorch/huggingface/squad/"
-        #"12layer_pruned80_quant-none-vnni",
-        #"resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
-        #"/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
+        "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
+        "pytorch/dbolya/coco/base-none",
+        "mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
+        "pytorch/sparseml/imagenet/pruned-moderate",
+        "bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
+        "pytorch/huggingface/squad/"
+        "12layer_pruned80_quant-none-vnni",
+        "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
+        "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
         "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/resnet50_pruned85_vnni.onnx"
     }
 
@@ -69,6 +69,7 @@ def get_model_onnx(model_stubs):
             onnx_path = model.onnx_file.downloaded_path()
         else:
             onnx_path = model_stub
+        print(onnx_path)
         model_onnx = onnx.load(onnx_path)
         model_onnxs[model_name] = model_onnx
 
@@ -583,8 +584,9 @@ from sparsezoo.analysis.ops_calcs import (
 @pytest.mark.parametrize(
     "model_name,node_name,expected_value",
     [
-        #("mobilenet_v1_pruned_moderate", "Conv_0", 10838016),
-        #("mobilenet_v1_pruned_moderate", "BatchNormalization_16", 401408),
+        ("mobilenet_v1_pruned_moderate", "Conv_0", (21676032, 0)),
+        ("mobilenet_v1_pruned_moderate", "Conv_27", (14112, 0)),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", (401408, 0)),
         #("mobilenet_v1_pruned_moderate", "Pad_82", 0),
         #("mobilenet_v1_pruned_moderate", "AveragePool_83", 50176),
         #("mobilenet_v1_pruned_moderate", "Shape_84", 0),
@@ -593,21 +595,21 @@ from sparsezoo.analysis.ops_calcs import (
         #("mobilenet_v1_pruned_moderate", "Concat_88", 0),
         #("mobilenet_v1_pruned_moderate", "Reshape_89", 0),
 
-        #("mobilenet_v1_pruned_moderate", "Gemm_90", (-1, -1)),
-        #("resnet50_pruned85_vnni", "Gemm_1335", (4096000, 0))
-        ("resnet50_pruned85_vnni", "Conv_158_quant", (4096000, 0))
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", (2048000, 0)),
+        ("resnet50_pruned85_vnni", "Gemm_1335", (4096000, 0)),
+        ("resnet50_pruned85_vnni", "Conv_158_quant", (35073024, 196539392)),
 
         #("mobilenet_v1_pruned_moderate", "Softmax_91", 0),
         #("bert_pruned_quantized", "Gather_34", 0),
         #("bert_pruned_quantized", "DequantizeLinear_27", 0),
-        #("bert_pruned_quantized", "MatMul_80_quant", 1179648),
-        #("bert_pruned_quantized", "MatMul_157_quant", 224722944),
-        #("resnet50_pruned_quantized", "Conv_431_quant", 51380736),
+        ("bert_pruned_quantized", "MatMul_80_quant", (235936, 943712)),
+        ("bert_pruned_quantized", "MatMul_157_quant", (224722944, 0)),
+        ("resnet50_pruned_quantized", "Conv_431_quant", (51380736, 0)),
         #("resnet50_pruned_quantized", "DequantizeLinear_22", 0),
         #("resnet50_pruned_quantized", "Add_1168", 100352),
         #("resnet50_pruned_quantized", "QuantizeLinear_1178", 0),
         #("resnet50_pruned_quantized", "GlobalAveragePool_1328", 100352),
-        #("resnet50_pruned_quantized", "Gemm_1335", 4097000),
+        ("resnet50_pruned_quantized", "Gemm_1335", (4098000, 0)),
         #("resnet50_pruned_quantized", "Softmax_1336", 0),
     ],
 )
@@ -618,5 +620,5 @@ def test_get_num_dense_and_sparse_ops(
     node_shapes = get_model_node_shapes(model_name)
     node = get_node_from_name(model, node_name)
 
-    #print(get_num_operations(model, node, node_shapes=node_shapes))
+    print(get_num_operations(model, node, node_shapes=node_shapes))
     assert get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes) == expected_value
