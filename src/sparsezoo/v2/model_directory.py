@@ -31,8 +31,7 @@ from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOri
 
 __all__ = ["ModelDirectory"]
 
-FRAMEWORKS = ["pytorch", "keras", "tensorflow"]
-ENGINES = ["onnxruntime", "deepsparse"]
+ENGINES = ["onnxruntime", "deepsparse", "pytorch", "keras", "tensorflow_v1"]
 
 
 def file_dictionary(**kwargs):
