@@ -552,7 +552,11 @@ class ModelDirectory(Directory):
         for directory in directories:
             engine_name = directory.name.split("_")[-1]
             if engine_name not in ENGINES:
-                raise ValueError("")
+                raise ValueError(
+                    f"The name of the 'sample_outputs' directory should "
+                    f"end with an engine name (one of the {ENGINES}). "
+                    f"However, the name is {directory.name}."
+                )
             engine_to_numpydir_map[engine_name] = directory
         return engine_to_numpydir_map
 
