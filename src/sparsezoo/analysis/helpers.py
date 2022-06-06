@@ -359,7 +359,7 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
             if input_b_name in initializer_names:
                 return input_b_name
 
-            input_a_name = _get_node_input(node, 3, default=None)
+            input_a_name = _get_node_input(node, 0, default=None)
             if input_a_name in initializer_names:
                 return input_a_name
 
@@ -375,6 +375,7 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     initializer_name = _get_node_weight_name(model, node)
     if initializer_name is None:
         return None
+        
     weight = get_initializer_value(model, node, initializer_name)
     if weight is None and node.op_type != "Gather":
         raise Exception(f"Parameter for {node.name} not found")

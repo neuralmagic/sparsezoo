@@ -28,18 +28,18 @@ def _get_gemm_dense_sparse_ops(weight, input_shape, zero_point=0, is_four_block_
         num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
         num_non_zero_blocks = numpy.count_nonzero(num_zeros_per_block != 4, axis=0)
 
-        num_dense_ops = 2 * input_shape[0] * num_non_zero_blocks * 4
-        num_sparse_ops = 2 * input_shape[0] * num_zero_blocks * 4
+        num_dense_ops = 2 * input_shape[-2] * num_non_zero_blocks * 4
+        num_sparse_ops = 2 * input_shape[-2] * num_zero_blocks * 4
     else:
         num_zeros = numpy.count_nonzero(weight == zero_point)
         num_non_zeros = numpy.count_nonzero(weight != zero_point)
 
-        num_dense_ops = 2 * input_shape[0] * num_non_zeros
-        num_sparse_ops = 2 * input_shape[0] * num_zeros
+        num_dense_ops = 2 * input_shape[-2] * num_non_zeros
+        num_sparse_ops = 2 * input_shape[-2] * num_zeros
 
     return num_dense_ops, num_sparse_ops
 
-def _get_pixel_subkernels(weight, x, y, spatial_shape, kernel_shape, pads):
+def _get_kernel_subview(weight, x, y, spatial_shape, kernel_shape, pads):
     distance_from_right = (spatial_shape[1] - x - 1)
     k_x_start = kernel_shape[1] - pads[2] - distance_from_right - 1
     k_x_start = max(k_x_start, 0)
@@ -66,7 +66,7 @@ def _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group,
         for y in range(0, spatial_shape[0], strides[0]):
 
             # Calculate a subview of the kernel values that apply to this pixel
-            sub_kernels = _get_pixel_subkernels(weight, x, y, spatial_shape, kernel_shape, pads)
+            sub_kernels = _get_kernel_subview(weight, x, y, spatial_shape, kernel_shape, pads)
 
             # Flatten kernel values [o_c, i_c, -1] where -1 is a list of spatial coordinate values
             sub_kernels_values = numpy.reshape(sub_kernels, (sub_kernels.shape[0], sub_kernels.shape[1], -1))
@@ -78,7 +78,6 @@ def _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group,
                 sparse_sum += gemm_sparse_ops
 
     # Adjust for depthwise convolutions
-    assert dense_sum % group == 0 # TODO: Remove
     dense_sum = dense_sum // group
     sparse_sum = sparse_sum // group
 
@@ -126,8 +125,14 @@ def get_num_dense_and_sparse_ops(model: ModelProto, node: NodeProto, node_shapes
     #if node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"] + ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"] + ["GlobalAveragePool", "GlobalMaxPool"]
     #if node.op_type in ["MaxPool", "AveragePool"]:
 
-    if node.op_type in ["Gemm", "MatMul", "MatMulInteger"]:
+    print(node.op_type)
+    if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
         input_shape = input_shapes[0]
+
+        # If no weight supplied, treat other input as dense weight
+        if weight is None:
+            weight_shape = input_shapes[1]
+            weight = numpy.full(weight_shape, zero_point - 1)
 
         # Weight operations
         num_dense_ops, num_sparse_ops = _get_gemm_dense_sparse_ops(weight, input_shape, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
@@ -144,10 +149,8 @@ def get_num_dense_and_sparse_ops(model: ModelProto, node: NodeProto, node_shapes
         input_shape = input_shapes[0]
         output_shape = output_shapes[0]
         pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
-        pads = [10, 10, 10, 10] # TODO: Remove
         strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
         group = node_attributes["group"] if "group" in node_attributes else 1
-        print(node_attributes)
 
         # Weight operations
         num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
