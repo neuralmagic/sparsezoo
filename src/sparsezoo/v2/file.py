@@ -219,7 +219,7 @@ class File:
             # returns a string "{domain}-{sub_domain}, if valid
             # this makes the method reusable to fetch the integration
             # name for the integration validation
-            return f"{yaml_dict['domain']}-{yaml_dict['sub_domain']}"
+            return yaml_dict
 
         except Exception as error:  # noqa: F841
             logging.error(error)
