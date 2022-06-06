@@ -152,7 +152,7 @@ class Directory(File):
             logging.error("Download retry failed...")
             raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
-        # Directory can represent a folder/directory.
+        # Directory can represent a folder or directory.
         else:
             for file in self.files:
                 file.download(destination_path=destination_path)
