@@ -188,6 +188,9 @@ class File:
             )
 
     def _validate_recipe(self, strict_mode):
+        # only validate whether a file is a recipe if sparseml is installed.
+        # this is optional, since we do not want to have an explicit dependency
+        # on sparseml in sparsezoo.
         from sparseml.pytorch.optim import ScheduledModifierManager
 
         try:
@@ -228,7 +231,8 @@ class File:
                     ScheduledModifierManager,
                 )
             except Exception as error:  # noqa  F841
-                # if not model card and unable to check if recipe, assume correct
+                # if not model card and unable to check if recipe,
+                # optimistically assume the .md file is valid.
                 return
             self._validate_recipe(strict_mode=strict_mode)
 
