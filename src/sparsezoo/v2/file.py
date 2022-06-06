@@ -216,6 +216,9 @@ class File:
             result = regex.search(yaml_str)
             yaml_str = result.group(1)
             yaml_dict = yaml.safe_load(yaml_str)
+            # returns a string "{domain}-{sub_domain}, if valid
+            # this makes the method reusable to fetch the integration
+            # name for the integration validation
             return f"{yaml_dict['domain']}-{yaml_dict['sub_domain']}"
 
         except Exception as error:  # noqa: F841
