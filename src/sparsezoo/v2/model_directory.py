@@ -129,8 +129,8 @@ class ModelDirectory(Directory):
             self.recipes,
         ]
 
-        self.integration_validator = IntegrationValidator(model_directory = self)
         super().__init__(files=files, name=name, path=path, url=url)
+        self.integration_validator = IntegrationValidator(model_directory=self)
 
     @classmethod
     def from_zoo_api(cls, request_json: List[Dict]) -> "ModelDirectory":

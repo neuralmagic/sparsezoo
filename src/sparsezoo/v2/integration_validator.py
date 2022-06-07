@@ -83,6 +83,6 @@ class IntegrationValidator:
 
     @staticmethod
     def _get_integration_name(model_card):
-        yaml_dict = model_card._validate_model_card
+        yaml_dict = model_card._validate_model_card()
         integration_name = f"{yaml_dict['domain']}-{yaml_dict['sub_domain']}"
         return integration_name
