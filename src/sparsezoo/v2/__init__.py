@@ -18,3 +18,4 @@ from .directory import *
 from .file import *
 from .model_directory import *
 from .model_objects import *
+from .integration_validator import *

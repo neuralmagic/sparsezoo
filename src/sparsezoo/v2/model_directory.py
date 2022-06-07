@@ -27,6 +27,7 @@ import onnxruntime as ort
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
+from sparsezoo.v2.integration_validator import IntegrationValidator
 
 
 __all__ = ["ModelDirectory"]
@@ -128,6 +129,7 @@ class ModelDirectory(Directory):
             self.recipes,
         ]
 
+        self.integration_validator = IntegrationValidator(model_directory = self)
         super().__init__(files=files, name=name, path=path, url=url)
 
     @classmethod
@@ -191,40 +193,8 @@ class ModelDirectory(Directory):
         return: a boolean flag; if True, the validation has been successful
         """
 
-        if not self._validate_with_onnx_runtime():
-            logging.warning(
-                "Failed to validate the compatibility of "
-                "`sample_inputs` files with the `model.onnx` model."
-            )
-            return False
-
-        # TODO: This is a hack for now,
-        #  some files cannot be validated
-        #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["framework_files"]
-
-        if self.path is None:
-            raise ValueError(
-                "Cannot validate the ModelDirectory. "
-                "If created using method `from_directory`, "
-                "please make sure that the `directory_path` is correct. "
-                "If created using method `from_zoo_api`, "
-                "call `download()` method prior to `validate()`"
-            )
-
-        validations = {}
-        for attribute, file in self.__iter__():
-            # TODO: Continuing with the hack
-            if attribute in SKIP_ATTRIBUTES:
-                validations[attribute] = True
-            elif isinstance(file, File):
-                validations[attribute] = file.validate()
-            elif isinstance(file, list):
-                validations[attribute] = all([_file.validate() for _file in file])
-            elif isinstance(file, dict):
-                raise NotImplementedError()
-
-        return all(validations.values())
+        self.integration_validator.validate()
+        return True
 
     def analyze(self):
         # TODO: This will be the onboarding task for Kyle
