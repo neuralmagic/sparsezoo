@@ -39,6 +39,7 @@ __all__ = [
     "is_quantized_layer",
     "is_sparse_layer",
     "get_num_dense_and_sparse_ops",
+    "NodeShape",
     "extract_node_shapes",
 ]
 
@@ -83,6 +84,7 @@ def get_num_dense_and_sparse_ops(
     model: ModelProto,
     node: NodeProto,
     node_shapes: Optional[Dict[str, NodeShape]] = None,
+    is_four_block_sparse: Optional[bool] = None
 ) -> int:
     """
     Gets an approximation of the number of floating point or integer operations
@@ -101,9 +103,13 @@ def get_num_dense_and_sparse_ops(
     weight = get_node_weight(model, node)
     bias = get_node_bias(model, node)
     zero_point = get_zero_point(model, node)
-    is_four_block_sparse = is_four_block_sparse_layer(model, node)
+    if is_four_block_sparse is None:
+        is_four_block_sparse = is_four_block_sparse_layer(model, node)
 
     node_attributes = get_node_attributes(node)
+
+    print("Got prep values")
+    print(f"{node.op_type}")
 
     if (
         node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"]
@@ -151,6 +157,7 @@ def get_num_dense_and_sparse_ops(
 
         # Weight operations
         num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
+        print("_get_conv_weight_dense_sparse_ops done")
 
         # Bias operations
         if not bias is None:
