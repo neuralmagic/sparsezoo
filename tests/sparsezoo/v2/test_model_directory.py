@@ -17,7 +17,6 @@ import os
 import shutil
 import tempfile
 
-import numpy as np
 import pytest
 
 from sparsezoo import Zoo
@@ -30,17 +29,18 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
     "domain, sub_domain, model_index, expected_content",
     [
         (
-            "cv",
-            "classification",
+            "nlp",
+            "question_answering",
             0,
             [
-                "framework-files",
-                "sample-originals",
-                "sample-inputs",
-                "sample-outputs",
-                "sample-labels",
+                "training",
+                "sample_originals",
+                "sample_inputs",
+                "sample_outputs",
+                "sample_labels",
+                "onnx",
+                "logs",
                 "model.onnx",
-                ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
                 "benchmarks.yaml",
                 "eval.yaml",
@@ -53,13 +53,14 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
             "question_answering",
             0,
             [
-                "framework-files",
-                "sample-originals",
-                "sample-inputs",
-                "sample-outputs",
-                "sample-labels",
+                "training",
+                "sample_originals",
+                "sample_inputs",
+                "sample_outputs",
+                "sample_labels",
+                "onnx",
+                "logs",
                 "model.onnx",
-                ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
                 "benchmarks.yaml",
                 "eval.yaml",
@@ -107,7 +108,7 @@ class TestModelDirectory:
         directory_path, request_json, expected_content, temp_dir = setup
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        assert not model_directory.validate()
+        assert model_directory.validate()
 
     def test_validate_from_zoo_api(self, setup):
         _, request_json, expected_content, temp_dir = setup
@@ -120,16 +121,51 @@ class TestModelDirectory:
 
     def test_generate_outputs_onnxruntime(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
-
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        output = next(model_directory.generate_outputs(engine_type="onnxruntime"))
-        assert all(isinstance(x, np.ndarray) for x in output)
+
+        # test whether the functionality saves the numpy files to tar properly
+        tar_file_expected_path = os.path.join(
+            directory_path, "sample_outputs_onnxruntime.tar.gz"
+        )
+        if os.path.isfile(tar_file_expected_path):
+            os.remove(tar_file_expected_path)
+
+        for output_expected, output in zip(
+            model_directory.sample_outputs["onnxruntime"],
+            model_directory.generate_outputs(
+                engine_type="onnxruntime", save_to_tar=True
+            ),
+        ):
+            output_expected = list(output_expected.values())
+            for o1, o2 in zip(output_expected, output):
+                assert pytest.approx(o1, abs=1e-5) == o2.flatten()
+
+        assert os.path.isfile(tar_file_expected_path)
 
     def test_generate_outputs_deepsparse(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        output = next(model_directory.generate_outputs(engine_type="deepsparse"))
-        assert all(isinstance(x, np.ndarray) for x in output)
+
+        # test whether the functionality saves the numpy files to tar properly
+        tar_file_expected_path = os.path.join(
+            directory_path, "sample_outputs_deepsparse.tar.gz"
+        )
+        if os.path.isfile(tar_file_expected_path):
+            os.remove(tar_file_expected_path)
+
+        for output_expected, output in zip(
+            model_directory.sample_outputs,
+            model_directory.generate_outputs(
+                engine_type="deepsparse", save_to_tar=True
+            ),
+        ):
+            output_expected = list(output_expected.values())
+            for o1, o2 in zip(output_expected, output):
+                assert (
+                    pytest.approx(o1, abs=1e-4) == o2.flatten()
+                )  # lower accuracy, comparing onnxruntime output with deepsparse output
+
+        assert os.path.isfile(tar_file_expected_path)
 
     def test_analysis(self, setup):
         pass
@@ -137,14 +173,14 @@ class TestModelDirectory:
     @staticmethod
     def _get_local_directory(model):
         model.download()
-        directory_path = os.path.dirname(model.framework_files[0].dir_path)
+        directory_path = os.path.dirname(model.training[0].dir_path)
 
         # Adding several hacks to make files in
         # directory_path adhere to the desired format
 
         # Create framework-files
         framework_files = os.path.join(directory_path, "framework-files")
-        os.rename(model.framework_files[0].dir_path, framework_files)
+        os.rename(model.training[0].dir_path, framework_files)
 
         # Create onnx_models(opsets)
         for opset in range(1, 3):
