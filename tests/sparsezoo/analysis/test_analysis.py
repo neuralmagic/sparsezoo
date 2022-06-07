@@ -25,17 +25,16 @@ def margin_of_error():
 
 @pytest.fixture(scope="session")
 def get_model_analysis():
-    print("get_model_analysis")
     model_stubs = {
         "yolact_none": "zoo:cv/segmentation/yolact-darknet53/"
         "pytorch/dbolya/coco/base-none",
-        #"mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
-        #"pytorch/sparseml/imagenet/pruned-moderate",
-        #"bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
-        #"pytorch/huggingface/squad/"
-        #"12layer_pruned80_quant-none-vnni",
-        #"resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
-        #"/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
+        "mobilenet_v1_pruned_moderate": "zoo:cv/classification/mobilenet_v1-1.0/"
+        "pytorch/sparseml/imagenet/pruned-moderate",
+        "bert_pruned_quantized": "zoo:nlp/question_answering/bert-base/"
+        "pytorch/huggingface/squad/"
+        "12layer_pruned80_quant-none-vnni",
+        "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
+        "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
     }
 
     model_analyses = {}
@@ -44,7 +43,6 @@ def get_model_analysis():
         model = Zoo.load_model_from_stub(model_stub)
         model.onnx_file.download()
         onnx_path = model.onnx_file.downloaded_path()
-        print("ModelAnalysis")
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_analyses[model_name] = analysis
 
@@ -58,9 +56,9 @@ def get_model_analysis():
     "model_name,expected_dict",
     [
         ("yolact_none", {"Conv": 85}),
-        #("mobilenet_v1_pruned_moderate", {"Conv": 27, "Gemm": 1}),
-        #("bert_pruned_quantized", {"Gather": 3, "MatMulInteger": 73}),
-        #("resnet50_pruned_quantized", {"Gemm": 1, "QLinearConv": 53}),
+        ("mobilenet_v1_pruned_moderate", {"Conv": 27, "Gemm": 1}),
+        ("bert_pruned_quantized", {"Gather": 3, "MatMulInteger": 73}),
+        ("resnet50_pruned_quantized", {"Gemm": 1, "QLinearConv": 53}),
     ],
 )
 def test_layer_counts(model_name, expected_dict, get_model_analysis):
@@ -153,63 +151,40 @@ def test_layer_counts(model_name, expected_dict, get_model_analysis):
         ),
     ],
 )
-def test_operation_counts(model_name, expected_dict, get_model_analysis):
+def test_non_parameterized_operator_counts(model_name, expected_dict, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
 
-    assert model_analysis.operation_counts == expected_dict
+    assert model_analysis.non_parameterized_operator_counts == expected_dict
 
 
 @pytest.mark.parametrize(
     "model_name,expected_value",
     [
-        ("yolact_none", 77531963888),
-        ("mobilenet_v1_pruned_moderate", 562709842),
-        ("bert_pruned_quantized", 4795867008),
-        ("resnet50_pruned_quantized", 4098685864),
+        ("yolact_none", 153019919040),
+        ("mobilenet_v1_pruned_moderate", 265460942),
+        ("bert_pruned_quantized", 14649704064),
+        ("resnet50_pruned_quantized", 3135906792),
     ],
 )
-def test_num_ops(model_name, expected_value, get_model_analysis):
+def test_num_dense_ops(model_name, expected_value, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
 
-    assert model_analysis.num_ops == expected_value
+    assert model_analysis.num_dense_ops == expected_value
 
 
 @pytest.mark.parametrize(
     "model_name,expected_value",
     [
         ("yolact_none", 0),
-        ("mobilenet_v1_pruned_moderate", 0.65),
-        ("bert_pruned_quantized", 0.63),
-        ("resnet50_pruned_quantized", 0.79),
+        ("mobilenet_v1_pruned_moderate", 847771932),
+        ("bert_pruned_quantized", 40317182208),
+        ("resnet50_pruned_quantized", 4948878824),
     ],
 )
-def test_average_sparsity(
-    model_name, expected_value, get_model_analysis, margin_of_error
-):
+def test_num_sparse_ops(model_name, expected_value, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
 
-    assert model_analysis.average_sparsity == pytest.approx(
-        expected_value, abs=margin_of_error
-    )
-
-
-@pytest.mark.parametrize(
-    "model_name,expected_value",
-    [
-        ("yolact_none", 0.0),
-        ("mobilenet_v1_pruned_moderate", 0.45),
-        ("bert_pruned_quantized", 0.62),
-        ("resnet50_pruned_quantized", 0.78),
-    ],
-)
-def test_average_four_block_sparsity(
-    model_name, expected_value, get_model_analysis, margin_of_error
-):
-    model_analysis = get_model_analysis(model_name)
-
-    assert model_analysis.average_four_block_sparsity == pytest.approx(
-        expected_value, abs=margin_of_error
-    )
+    assert model_analysis.num_sparse_ops == expected_value
 
 
 @pytest.mark.parametrize(
@@ -293,7 +268,7 @@ def test_num_four_blocks(model_name, expected_value, get_model_analysis):
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 487183),
         ("bert_pruned_quantized", 16986888),
-        ("resnet50_pruned_quantized", 4982870),
+        ("resnet50_pruned_quantized", 4982327),
     ],
 )
 def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
@@ -302,7 +277,44 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
     assert model_analysis.num_sparse_four_blocks == expected_value
 
 
-"""
+@pytest.mark.parametrize(
+    "model_name,expected_value",
+    [
+        ("yolact_none", 0),
+        ("mobilenet_v1_pruned_moderate", 0.65),
+        ("bert_pruned_quantized", 0.63),
+        ("resnet50_pruned_quantized", 0.79),
+    ],
+)
+def test_average_sparsity(
+    model_name, expected_value, get_model_analysis, margin_of_error
+):
+    model_analysis = get_model_analysis(model_name)
+
+    assert model_analysis.average_sparsity == pytest.approx(
+        expected_value, abs=margin_of_error
+    )
+
+
+@pytest.mark.parametrize(
+    "model_name,expected_value",
+    [
+        ("yolact_none", 0.0),
+        ("mobilenet_v1_pruned_moderate", 0.45),
+        ("bert_pruned_quantized", 0.62),
+        ("resnet50_pruned_quantized", 0.78),
+    ],
+)
+def test_average_four_block_sparsity(
+    model_name, expected_value, get_model_analysis, margin_of_error
+):
+    model_analysis = get_model_analysis(model_name)
+
+    assert model_analysis.average_four_block_sparsity == pytest.approx(
+        expected_value, abs=margin_of_error
+    )
+
+
 @pytest.mark.parametrize(
     "model_name,expected_node_analysis",
     [
@@ -310,14 +322,17 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "yolact_none",
             NodeAnalysis(
                 name="Conv_0",
-                num_ops=271040000,
+                parameterized_and_prunable=True,
+                num_dense_ops=541446592,
+                num_sparse_ops=0,
                 sparsity=0.0,
                 four_block_sparsity=0.0,
-                param_size=864,
-                num_sparse_values=0,
+                is_sparse_layer=False,
+                is_quantized_layer=False,
+                num_parameters=864,
+                num_sparse_parameters=0,
                 num_four_blocks=288,
                 num_sparse_four_blocks=0,
-                quantized_layer=False,
                 zero_point=0,
                 dtype="float32",
             ),
@@ -326,14 +341,17 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "mobilenet_v1_pruned_moderate",
             NodeAnalysis(
                 name="Conv_72",
-                num_ops=25690112,
+                parameterized_and_prunable=True,
+                num_dense_ops=5138042,
+                num_sparse_ops=46242182,
                 sparsity=0.8999996185302734,
                 four_block_sparsity=0.7120437622070312,
-                param_size=524288,
-                num_sparse_values=471859,
+                is_sparse_layer=True,
+                is_quantized_layer=False,
+                num_parameters=524288,
+                num_sparse_parameters=471859,
                 num_four_blocks=131072,
                 num_sparse_four_blocks=93329,
-                quantized_layer=False,
                 zero_point=0,
                 dtype="float32",
             ),
@@ -342,14 +360,17 @@ def test_num_sparse_four_blocks(model_name, expected_value, get_model_analysis):
             "bert_pruned_quantized",
             NodeAnalysis(
                 name="MatMul_80_quant",
-                num_ops=1179648,
+                parameterized_and_prunable=True,
+                num_dense_ops=90599424,
+                num_sparse_ops=362385408,
                 sparsity=0.8029022216796875,
                 four_block_sparsity=0.7999945746527778,
-                param_size=589824,
-                num_sparse_values=473571,
+                is_sparse_layer=True,
+                is_quantized_layer=True,
+                num_parameters=589824,
+                num_sparse_parameters=473571,
                 num_four_blocks=147456,
                 num_sparse_four_blocks=117964,
-                quantized_layer=True,
                 zero_point=128,
                 dtype="uint8",
             ),
@@ -366,4 +387,3 @@ def test_node_analyses(model_name, expected_node_analysis, get_model_analysis):
     found_layer = found_layers[0]
 
     assert found_layer == expected_node_analysis
-"""

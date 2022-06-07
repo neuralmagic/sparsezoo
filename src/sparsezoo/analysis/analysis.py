@@ -15,7 +15,6 @@
 from typing import Dict, List, Optional
 
 import numpy
-import tqdm
 import onnx
 from onnx import ModelProto, NodeProto
 
@@ -62,6 +61,8 @@ class NodeAnalysis(BaseModel):
     four_block_sparsity: float = Field(
         description="Proportion of zero blocks in this node's parameter"
     )
+    is_sparse_layer: bool = Field(description="Does this node have sparse weights")
+    is_quantized_layer: bool = Field(description="Does this node have quantized weights")
     num_parameters: int = Field(description="Size of this node's parameter")
     num_sparse_parameters: int = Field(
         description="Number of zeros in this node's parameter"
@@ -72,8 +73,6 @@ class NodeAnalysis(BaseModel):
     num_sparse_four_blocks: int = Field(
         description="Number of four blocks with all zeros in this node's parameter"
     )
-    is_sparse_layer: bool = Field(description="Does this node have sparse weights")
-    is_quantized_layer: bool = Field(description="Does this node have quantized weights")
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
@@ -83,13 +82,10 @@ class NodeAnalysis(BaseModel):
 
     @classmethod
     def from_node(cls, model_onnx: ModelProto, node: NodeProto, node_shapes: Optional[Dict[str, NodeShape]] = None):
-        print("from_node")
         num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(model_onnx, node, node_shapes=node_shapes)
-        print("get_num_dense_and_sparse_ops done")
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(model_onnx, node)
         num_sparse_four_blocks, num_four_blocks = get_node_num_four_block_zeros_and_size(model_onnx, node)
         node_weight = get_node_weight(model_onnx, node)
-        print("part1")
 
         return cls(
             name=node.name,
@@ -162,7 +158,6 @@ class ModelAnalysis(BaseModel):
         :param onnx_file_path: path to onnx file being analyzed
         :return: instance of ModelAnalysis class
         """
-        print("from_onnx_model")
         model_onnx = onnx.load(onnx_file_path)
 
         layer_analyses = cls.analyze_nodes(model_onnx)
@@ -173,17 +168,22 @@ class ModelAnalysis(BaseModel):
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
 
+        num_parameters = sum([layer_analysis.num_parameters for layer_analysis in param_prunable_layer_analyses])
+        num_sparse_parameters = sum([layer_analysis.num_sparse_parameters for layer_analysis in param_prunable_layer_analyses])
+        num_four_blocks = sum([layer_analysis.num_four_blocks for layer_analysis in param_prunable_layer_analyses])
+        num_sparse_four_blocks = sum([layer_analysis.num_sparse_four_blocks for layer_analysis in param_prunable_layer_analyses])
+
         return cls(
             layer_counts=layer_counts,
             non_parameterized_operator_counts=op_counts,
             num_dense_ops=sum([layer_analysis.num_dense_ops for layer_analysis in layer_analyses]),
             num_sparse_ops=sum([layer_analysis.num_sparse_ops for layer_analysis in layer_analyses]),
-            num_sparse_layers=len([None for layer_analysis in param_prunable_layer_analyses if layer_analysis.is_sparse_layer]),
-            num_quantized_layers=len([None for layer_analysis in param_prunable_layer_analyses if layer_analysis.is_quantized_layer]),
-            num_parameters=sum([layer_analysis.num_parameters for layer_analysis in param_prunable_layer_analyses]),
-            num_sparse_parameters=sum([layer_analysis.num_sparse_parameters for layer_analysis in param_prunable_layer_analyses]),
-            num_four_blocks=sum([layer_analysis.num_four_blocks for layer_analysis in param_prunable_layer_analyses]),
-            num_sparse_four_blocks=sum([layer_analysis.num_sparse_four_blocks for layer_analysis in param_prunable_layer_analyses]),
+            num_sparse_layers=len([None for layer_analysis in layer_analyses if layer_analysis.is_sparse_layer]),
+            num_quantized_layers=len([None for layer_analysis in layer_analyses if layer_analysis.is_quantized_layer]),
+            num_parameters=num_parameters,
+            num_sparse_parameters=num_sparse_parameters,
+            num_four_blocks=num_four_blocks,
+            num_sparse_four_blocks=num_sparse_four_blocks,
             average_sparsity=(num_sparse_parameters / num_parameters),
             average_four_block_sparsity=(num_sparse_four_blocks / num_four_blocks),
             layers=layer_analyses,
@@ -195,13 +195,11 @@ class ModelAnalysis(BaseModel):
         :param: model that contains the nodes to be analyzed
         :return: List of node analyses from model graph
         """
-        print("analyze_nodes")
         node_shapes = extract_node_shapes(model_onnx)
 
         nodes = []
-        for node in tqdm.tqdm(model_onnx.graph.node):
+        for node in model_onnx.graph.node:
             node_analysis = NodeAnalysis.from_node(model_onnx, node, node_shapes=node_shapes)
-            print("NodeAnalysis done")
             nodes.append(node_analysis)
 
         return nodes

@@ -108,28 +108,24 @@ def get_num_dense_and_sparse_ops(
 
     node_attributes = get_node_attributes(node)
 
-    print("Got prep values")
-    print(f"{node.op_type}")
-
     if (
         node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"]
         or node.op_type in ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"]
     ):
-        output_shape = output_shapes[0]
-        return (numpy.prod(output_shape), 0) if output_shape is not None else (0, 0)
+        return (numpy.prod(output_shapes), 0) if output_shapes is not None else (0, 0)
 
     if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
-        input_shape = input_shapes[0]
-        return (numpy.prod(input_shape), 0) if input_shape is not None else (0, 0)
+        return (numpy.prod(input_shapes), 0) if input_shapes is not None else (0, 0)
 
     if node.op_type in ["MaxPool", "AveragePool"]:
-        output_shape = output_shapes[0]
         if not "kernel_shape" in node_attributes:
             raise Exception(f"No kernel_shape found in node attributes of {node.op_type}")
         kernel_shape = node_attributes["kernel_shape"]
-        return (numpy.prod(output_shape) * numpy.prod(kernel_shape), 0)
+        return (numpy.prod(output_shapes) * numpy.prod(kernel_shape), 0) if output_shapes is not None else None
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
+        if input_shapes is None:
+            return (0, 0)
         input_shape = input_shapes[0]
 
         # If no weight supplied, treat other input as dense weight
@@ -157,7 +153,6 @@ def get_num_dense_and_sparse_ops(
 
         # Weight operations
         num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
-        print("_get_conv_weight_dense_sparse_ops done")
 
         # Bias operations
         if not bias is None:
@@ -500,11 +495,11 @@ def _get_gemm_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], ze
 
     return num_dense_ops, num_sparse_ops
 
-def _get_weight_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: List[int], kernel_shape: List[int], pads: List[int]) -> numpy.ndarray:
+def _get_kernel_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: List[int], kernel_shape: List[int], pads: List[int]) -> List[int]:
     """
     Calculates which spatial coordinates in the kernel will be applied to a pixel
-    at coordinates (x, y) and returns a subview of the weight containing only
-    those spatial coordinates
+    at coordinates (x, y) and returns the coordinates of a subview of the kernel
+    containing only those spatial coordinates
 
     :param weight: matrix with shape [out_channels, in_channels, kernel_h, kernel_w]
     :param x: x coordinate of pixel in the input
@@ -512,22 +507,22 @@ def _get_weight_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: Li
     :param spatial_shape: spatial dimensions of input
     :param kernel_shape: spatial dimensions of kernel
     :param pads: list of paddings around the input
-    :return: a subview of the weight matrix containing only the spatial
+    :return: the coordinates of a subview of the kernel containing only the
     coordinates that will be multiplied with the pixel at coordinate (x, y)
     """
-    distance_from_right = (spatial_shape[1] - x - 1)
-    k_x_start = kernel_shape[1] - pads[2] - distance_from_right - 1
-    k_x_start = max(k_x_start, 0)
-    k_x_end   = kernel_shape[1] + pads[0] + x
-    k_x_end   = min(k_x_end, kernel_shape[1])
-
     distance_from_bottom = (spatial_shape[0] - y - 1)
-    k_y_start = kernel_shape[0] - pads[3] - distance_from_bottom - 1
-    k_y_start = max(k_y_start, 0)
-    k_y_end   = kernel_shape[0] + pads[1] + y
-    k_y_end   = min(k_y_end, kernel_shape[0])
+    y0 = kernel_shape[0] - pads[3] - distance_from_bottom - 1
+    y0 = max(y0, 0)
+    y1 = kernel_shape[0] + pads[1] + y
+    y1 = min(y1, kernel_shape[0])
 
-    return weight[:, :, k_y_start: k_y_end, k_x_start: k_x_end]
+    distance_from_right = (spatial_shape[1] - x - 1)
+    x0 = kernel_shape[1] - pads[2] - distance_from_right - 1
+    x0 = max(x0, 0)
+    x1 = kernel_shape[1] + pads[0] + x
+    x1 = min(x1, kernel_shape[1])
+
+    return y0, y1, x0, x1
 
 
 def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], pads: List[int], strides: List[int], group: int, zero_point: int = 0, is_four_block_sparse: bool = False) -> Tuple[int, int]:
@@ -546,24 +541,30 @@ def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[i
     spatial_shape = input_shape[2:]
     kernel_shape = weight.shape[2:]
 
+    weight_spatial_flattened = numpy.reshape(weight, (*weight.shape[:2], -1))
+    kernel_dense_sparse_ops = [
+        _get_gemm_dense_sparse_ops(weight_spatial_flattened[:, :, i], [1, weight.shape[1]], zero_point, is_four_block_sparse)
+        for i in range(weight_spatial_flattened.shape[2])
+    ]
+    kernel_dense_sparse_ops = numpy.reshape(kernel_dense_sparse_ops, (*kernel_shape, 2))
+
     dense_sum, sparse_sum = 0, 0
 
     # For each pixel in the input
     for x in range(0, spatial_shape[1], strides[1]):
         for y in range(0, spatial_shape[0], strides[0]):
 
-            # Calculate a subview of the weight that contains only the spatial
-            # coordinates that apply to this pixel
-            sub_kernels = _get_weight_subview(weight, x, y, spatial_shape, kernel_shape, pads)
+            # Calculate a subview of the kernels which contains only the
+            # coordinates which apply to this pixel
+            kernel_subview_coords = _get_kernel_subview(weight, x, y, spatial_shape, kernel_shape, pads)
 
-            # Flatten 2D kernel into list of values with shape [o_c, i_c, -1]
-            sub_kernels_values = numpy.reshape(sub_kernels, (sub_kernels.shape[0], sub_kernels.shape[1], -1))
+            # Get the number of dense and sparse ops associated with each pixel
+            # in the kernel subview
+            kernel_ops_subview = kernel_dense_sparse_ops[kernel_subview_coords[0]: kernel_subview_coords[1],
+                                                         kernel_subview_coords[2]: kernel_subview_coords[3]]
 
-            # For each relevant kernel spatial coordinate, apply gemm across input channels
-            for sub_kernels_value in sub_kernels_values:
-                gemm_dense_ops, gemm_sparse_ops = _get_gemm_dense_sparse_ops(sub_kernels_value, [1, weight.shape[1]], zero_point, is_four_block_sparse)
-                dense_sum += gemm_dense_ops
-                sparse_sum += gemm_sparse_ops
+            dense_sum += numpy.sum(kernel_ops_subview[:, :, 0])
+            sparse_sum += numpy.sum(kernel_ops_subview[:, :, 1])
 
     # Adjust for depthwise convolutions
     dense_sum = dense_sum // group
