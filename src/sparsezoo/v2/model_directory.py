@@ -18,12 +18,13 @@ import os
 import re
 import typing
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import onnx
 
 import onnxruntime as ort
+from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
@@ -39,10 +40,9 @@ def file_dictionary(**kwargs):
 
 
 class InferenceRunner:
-    # TODO: Turn sample_outputs into Dict[str, NumpyDirectory]
     """
     Helper class for running inference
-    given sample_inputs, sample_outputs and onnx model.
+    given `sample_inputs`, `sample_outputs` and the onnx model.
 
     :params sample_inputs: File object containing sample inputs to the inference engine
     :params sample_outputs: File object containing sample outputs the inference engine
@@ -59,32 +59,74 @@ class InferenceRunner:
         self.sample_outputs = sample_outputs
         self.onnx_file = onnx_file
 
+        self.engine_type_to_iterator = {
+            "onnxruntime": self._run_with_onnx_runtime,
+            "deepsparse": self._run_with_deepsparse,
+        }
+
     def generate_outputs(
-        self, engine_type: str
-    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray]]:
+        self, engine_type: str, save_to_tar: bool
+    ) -> Tuple[List[np.ndarray]]:
         """
         Chooses the appropriate engine type to load the onnx model
         Then, feeds the data (sample inputs)
         to generate model outputs (in the iterative fashion)
 
         :params engine_type: name of the inference engine
-        :returns engine output
+        :params save_to_tar: boolean flag; if True, the output generated
+            by the engine from `sample_inputs` directory will be saved to
+            the archive file `sample_outputs_{engine_type}.tar.gz
+            (located in the same folder as `sample_inputs`).
+            If False, the function will yield model outputs in the
+            iterative fashion (one per input)
+        :returns Sequentially return a tuple of list
+            containing numpy arrays, representing the output
+            from the inference engine
         """
         if engine_type not in ENGINES:
             raise ValueError(f"The argument `engine_type` must be one of {ENGINES}")
-        elif engine_type == "onnxruntime":
-            for output in self._run_with_onnx_runtime():
-                yield output
-        else:
-            for output in self._run_with_deepsparse():
-                yield output
+
+        iterator = self.engine_type_to_iterator[engine_type]
+
+        # pre-compute the generator, to optionally to use it for
+        # saving to tar
+        outputs = (x for x in iterator())
+
+        if save_to_tar:
+            output_files = []
+
+            path = os.path.join(
+                os.path.dirname(self.sample_inputs.path),
+                f"sample_outputs_{engine_type}",
+            )
+            if not os.path.exists(path):
+                os.mkdir(path)
+
+            for input, output in zip(self.sample_inputs.files, outputs):
+                # if input's name is `inp-XXXX.npz`
+                # output's name should be `out-XXXX.npz`
+                name = input.name.replace("inp", "out")
+                # we need to remove `.npz`, this is
+                # required by save_numpy() function
+                save_numpy(
+                    array=output, export_dir=path, name="".join(name.split(".")[:-1])
+                )
+                output_files.append(File(name=name, path=os.path.join(path, name)))
+
+            output_directory = NumpyDirectory(
+                name=os.path.basename(path), path=path, files=output_files
+            )
+            output_directory.gzip()
+
+        for output in outputs:
+            yield output
 
     def validate_with_onnx_runtime(self) -> bool:
         """
         Validates that output from the engine matches the expected output
 
         :params engine_type: name of the inference engine
-        :return bolean flag; if True, outputs match expected outputs. False otherwise
+        :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
         validation = []
         sample_outputs = self.sample_outputs["onnxruntime"]
@@ -271,17 +313,26 @@ class ModelDirectory(Directory):
         return ModelDirectory(files=files, name="model_directory", path=directory_path)
 
     def generate_outputs(
-        self, engine_type: str = "onnxruntime"
-    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray]]:
+        self, engine_type: str, save_to_tar: bool = False
+    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray], None]:
         """
         Chooses the appropriate engine type to obtain inference outputs
-        from the `InferenceRunner` class object.
+        from the `InferenceRunner` class object. The function yields model
+        outputs sequentially (in the iterative fashion)
 
         :params engine_type: name of the inference engine
-        :returns engine output. The outputs are yielded
-            in iterative fashion.
+        :params save_to_tar: boolean flag; if True, the output generated
+            by the `inference_runner` will be additionally saved to
+            the archive file `sample_outputs_{engine_type}.tar.gz
+            (located in the `self.path` directory).
+        :returns returns a data structure
+            containing numpy arrays, representing the output
+            from the inference engine
         """
-        for output in self.inference_runner.generate_outputs(engine_type=engine_type):
+
+        for output in self.inference_runner.generate_outputs(
+            engine_type=engine_type, save_to_tar=save_to_tar
+        ):
             yield output
 
     def download(self, directory_path: str, override: bool = False) -> bool:
