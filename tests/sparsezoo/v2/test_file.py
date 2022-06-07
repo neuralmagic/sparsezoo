@@ -28,6 +28,17 @@ from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.file import File
 
 
+MODEL_CARD = """
+---
+domain: "nlp"
+sub_domain: "question_answering"
+architecture: "bert"
+sub_architecture: "base"
+framework: "pytorch"
+---
+"""
+
+
 def _create_yaml_file(file_path):
     test_dict = {"test_key": "test_value"}
     with open(file_path, "w") as outfile:
@@ -64,9 +75,8 @@ def _create_onnx_file(file_path):
 
 
 def _create_md_file(file_path):
-    test_string = "test_string"
     with open(file_path, "w") as outfile:
-        outfile.write(test_string)
+        outfile.write(MODEL_CARD)
 
 
 def _create_json_file(file_path):
@@ -81,7 +91,9 @@ def _create_image_file(file_path):
 
 
 def _create_csv_file(file_path):
-    _create_md_file(file_path)
+    test_string = "test_string"
+    with open(file_path, "w") as outfile:
+        outfile.write(test_string)
 
 
 def _create_sample_file(file_path):
