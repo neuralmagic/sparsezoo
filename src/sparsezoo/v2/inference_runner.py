@@ -145,7 +145,7 @@ class InferenceRunner:
         try:
             import deepsparse  # noqa F401
         except ModuleNotFoundError as e:  # noqa F841
-            pass
+            raise e
 
         from deepsparse import compile_model
 
