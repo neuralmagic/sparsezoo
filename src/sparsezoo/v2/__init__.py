@@ -16,5 +16,6 @@
 
 from .directory import *
 from .file import *
+from .inference_runner import *
 from .model_directory import *
 from .model_objects import *

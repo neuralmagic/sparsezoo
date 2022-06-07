@@ -17,22 +17,19 @@ import logging
 import os
 import re
 import typing
-from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
-import onnx
 
-import onnxruntime as ort
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
+from sparsezoo.v2.inference_runner import InferenceRunner
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
 
-FRAMEWORKS = ["pytorch", "keras", "tensorflow"]
-ENGINES = ["onnxruntime", "deepsparse"]
+ENGINES = ["pytorch", "keras", "tensorflow", "onnxruntime", "deepsparse"]
 
 
 def file_dictionary(**kwargs):
@@ -113,6 +110,9 @@ class ModelDirectory(Directory):
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
 
+        self.sample_inputs.files.sort(key=lambda x: x.name)
+        self.sample_outputs.files.sort(key=lambda x: x.name)
+
         files = [
             self.framework_files,
             self.sample_originals,
@@ -127,6 +127,12 @@ class ModelDirectory(Directory):
             self.model_card,
             self.recipes,
         ]
+
+        self.inference_runner = InferenceRunner(
+            sample_inputs=self.sample_inputs,
+            sample_outputs=self.sample_outputs,
+            onnx_file=self.onnx_model,
+        )
 
         super().__init__(files=files, name=name, path=path, url=url)
 
@@ -153,11 +159,39 @@ class ModelDirectory(Directory):
         """
         files = []
         paths = glob.glob(os.path.join(directory_path, "*"))
+        if not paths:
+            raise ValueError(
+                "The directory path is empty. "
+                "Check whether the indicated directory exists."
+            )
         for path in paths:
             display_name = os.path.basename(path)
             files.append(file_dictionary(display_name=display_name, path=path))
 
         return ModelDirectory(files=files, name="model_directory", path=directory_path)
+
+    def generate_outputs(
+        self, engine_type: str, save_to_tar: bool = False
+    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray], None]:
+        """
+        Chooses the appropriate engine type to obtain inference outputs
+        from the `InferenceRunner` class object. The function yields model
+        outputs sequentially (in the iterative fashion)
+
+        :params engine_type: name of the inference engine
+        :params save_to_tar: boolean flag; if True, the output generated
+            by the `inference_runner` will be additionally saved to
+            the archive file `sample_outputs_{engine_type}.tar.gz
+            (located in the `self.path` directory).
+        :returns returns a data structure
+            containing numpy arrays, representing the output
+            from the inference engine
+        """
+
+        for output in self.inference_runner.generate_outputs(
+            engine_type=engine_type, save_to_tar=save_to_tar
+        ):
+            yield output
 
     def download(self, directory_path: str, override: bool = False) -> bool:
         """
@@ -191,7 +225,7 @@ class ModelDirectory(Directory):
         return: a boolean flag; if True, the validation has been successful
         """
 
-        if not self._validate_with_onnx_runtime():
+        if not self.inference_runner.validate_with_onnx_runtime():
             logging.warning(
                 "Failed to validate the compatibility of "
                 "`sample_inputs` files with the `model.onnx` model."
@@ -201,7 +235,7 @@ class ModelDirectory(Directory):
         # TODO: This is a hack for now,
         #  some files cannot be validated
         #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["framework_files"]
+        SKIP_ATTRIBUTES = ["framework-files"]
 
         if self.path is None:
             raise ValueError(
@@ -213,14 +247,16 @@ class ModelDirectory(Directory):
             )
 
         validations = {}
-        for attribute, file in self.__iter__():
-            # TODO: Continuing with the hack
-            if attribute in SKIP_ATTRIBUTES:
-                validations[attribute] = True
-            elif isinstance(file, File):
-                validations[attribute] = file.validate()
+        for file in self.files:
+            if isinstance(file, File):
+                # TODO: Continuing with the hack
+                if file.name in SKIP_ATTRIBUTES:
+                    validations[file.name] = True
+                else:
+                    validations[file.name] = file.validate()
             elif isinstance(file, list):
-                validations[attribute] = all([_file.validate() for _file in file])
+                for _file in file:
+                    validations[_file.name] = _file.validate()
             elif isinstance(file, dict):
                 raise NotImplementedError()
 
@@ -229,26 +265,6 @@ class ModelDirectory(Directory):
     def analyze(self):
         # TODO: This will be the onboarding task for Kyle
         pass
-
-    def generate_outputs(
-        self, engine_type: str
-    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray]]:
-        """
-        Chooses the appropriate engine type to load the onnx model
-        Then, feeds the data (sample original inputs)
-        to generate model outputs (in the iterative fashion)
-
-        :params engine_type: name of the inference engine
-        :returns engine output.
-        """
-        if engine_type not in ENGINES:
-            raise ValueError(f"The argument `engine_type` must be one of {ENGINES}")
-        elif engine_type == "onnxruntime":
-            for output in self._run_with_onnx_runtime():
-                yield output
-        else:
-            for output in self._run_with_deepsparse():
-                yield output
 
     def _get_directory(
         self,
@@ -390,73 +406,10 @@ class ModelDirectory(Directory):
         # one directory
         elif len(directories_found) != 1:
             raise ValueError(
-                f"Found more than one Directory for `display_name` {display_name}."
+                f"Found more than one Directory for `display_name`: {display_name}."
             )
         else:
             return directories_found[0]
-
-    def _validate_with_onnx_runtime(self):
-        sample_outputs = self.sample_outputs
-
-        if sample_outputs.is_archive:
-            sample_outputs.unzip()
-
-        validation = []  # validation boolean per output
-        for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
-            target_output = list(target_output.values())
-            # TODO: This does not work for now, the
-            #  outputs are quite different. To be investigated.
-            validation.append(
-                all((np.array_equal(x, y) for x, y in zip(target_output, output)))
-            )
-        return all(validation)
-
-    def _run_with_deepsparse(self):
-        try:
-            import deepsparse  # noqa F401
-        except ModuleNotFoundError as e:  # noqa F841
-            pass
-
-        from deepsparse import compile_model
-
-        sample_inputs = self.sample_inputs
-        onnx_model = self.onnx_model
-
-        if sample_inputs.is_archive:
-            sample_inputs = sample_inputs.unzip(sample_inputs)
-            sample_inputs = NumpyDirectory(
-                files=sample_inputs.files,
-                name=sample_inputs.name,
-                path=sample_inputs.path,
-            )
-
-        engine = compile_model(onnx_model.path, batch_size=1)
-
-        for index, input_data in enumerate(sample_inputs):
-            model_input = [np.expand_dims(x, 0) for x in input_data.values()]
-            output = engine.run(model_input)
-            yield output
-
-    def _run_with_onnx_runtime(self):
-        sample_inputs = self.sample_inputs
-        onnx_model = self.onnx_model
-
-        if sample_inputs.is_archive:
-            sample_inputs.unzip()
-
-        ort_sess = ort.InferenceSession(onnx_model.path)
-        model = onnx.load(onnx_model.path)
-        input_names = [inp.name for inp in model.graph.input]
-
-        for index, input_data in enumerate(sample_inputs):
-            model_input = OrderedDict(
-                [
-                    (k, np.expand_dims(v, 0))
-                    for k, v in zip(input_names, input_data.values())
-                ]
-            )
-            output = ort_sess.run(None, model_input)
-            yield output
 
     def _download(
         self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
