@@ -18,13 +18,11 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py with minimal edits
 
 import logging
 from copy import deepcopy
-from functools import reduce
 from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
-import numpy
 import onnx
 from onnx import ModelProto, NodeProto
-from onnx.helper import get_attribute_value, make_empty_tensor_value_info
+from onnx.helper import make_empty_tensor_value_info
 
 
 _LOGGER = logging.getLogger(__name__)

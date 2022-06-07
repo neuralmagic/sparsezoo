@@ -17,6 +17,7 @@ import pytest
 
 from sparsezoo import Zoo
 from sparsezoo.analysis.helpers import (
+    extract_node_shapes,
     get_layer_and_op_counts,
     get_node_bias,
     get_node_four_block_sparsity,
@@ -30,8 +31,6 @@ from sparsezoo.analysis.helpers import (
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
-    get_num_dense_and_sparse_ops,
-    extract_node_shapes,
 )
 
 
@@ -52,7 +51,8 @@ def model_stubs():
         "12layer_pruned80_quant-none-vnni",
         "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
         "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
-        "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/resnet50_pruned85_vnni.onnx"
+        "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/"
+        "resnet50_pruned85_vnni.onnx",
     }
 
 
@@ -538,7 +538,7 @@ def test_is_four_block_sparse_layer(
     [
         ("mobilenet_v1_pruned_moderate", "Conv_0", (21676032, 0)),
         ("mobilenet_v1_pruned_moderate", "Conv_27", (13778, 0)),
-        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", (401408, 0)),
+        ("mobilenet_v1_pruned_moderate", "BatchNormalization_16", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "Pad_82", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "AveragePool_83", (50176, 0)),
         ("mobilenet_v1_pruned_moderate", "Shape_84", (0, 0)),
@@ -546,30 +546,36 @@ def test_is_four_block_sparse_layer(
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "Concat_88", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "Reshape_89", (0, 0)),
-
-        ("mobilenet_v1_pruned_moderate", "Gemm_90", (2050000, 0)),
-        ("resnet50_pruned85_vnni", "Gemm_1335", (4098000, 0)),
-        ("resnet50_pruned85_vnni", "Conv_158_quant", (34748552, 194119544)),
-
+        ("mobilenet_v1_pruned_moderate", "Gemm_90", (2049000, 0)),
+        ("resnet50_pruned85_vnni", "Gemm_1335", (4097000, 0)),
+        ("resnet50_pruned85_vnni", "Conv_158_quant", (85894048, 142773344)),
         ("mobilenet_v1_pruned_moderate", "Softmax_91", (0, 0)),
         ("bert_pruned_quantized", "Gather_34", (0, 0)),
         ("bert_pruned_quantized", "DequantizeLinear_27", (0, 0)),
         ("bert_pruned_quantized", "MatMul_80_quant", (90599424, 362385408)),
         ("bert_pruned_quantized", "MatMul_157_quant", (226492416, 0)),
-        ("resnet50_pruned_quantized", "Conv_431_quant", (16144128, 87419136)),
+        ("resnet50_pruned_quantized", "Conv_431_quant", (36158080, 67003776)),
         ("resnet50_pruned_quantized", "DequantizeLinear_22", (0, 0)),
         ("resnet50_pruned_quantized", "Add_1168", (100352, 0)),
         ("resnet50_pruned_quantized", "QuantizeLinear_1178", (0, 0)),
         ("resnet50_pruned_quantized", "GlobalAveragePool_1328", (100352, 0)),
-        ("resnet50_pruned_quantized", "Gemm_1335", (4098000, 0)),
+        ("resnet50_pruned_quantized", "Gemm_1335", (4097000, 0)),
         ("resnet50_pruned_quantized", "Softmax_1336", (0, 0)),
     ],
 )
 def test_get_num_dense_and_sparse_ops(
-    model_name, node_name, expected_value, get_model_onnx, get_node_from_name, get_model_node_shapes
+    model_name,
+    node_name,
+    expected_value,
+    get_model_onnx,
+    get_node_from_name,
+    get_model_node_shapes,
 ):
     model = get_model_onnx(model_name)
     node_shapes = get_model_node_shapes(model_name)
     node = get_node_from_name(model, node_name)
 
-    assert get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes) == expected_value
+    assert (
+        get_num_dense_and_sparse_ops(model, node, node_shapes=node_shapes)
+        == expected_value
+    )

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Optional, Tuple, Any, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
@@ -42,6 +42,7 @@ __all__ = [
     "NodeShape",
     "extract_node_shapes",
 ]
+
 
 def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     """
@@ -84,8 +85,8 @@ def get_num_dense_and_sparse_ops(
     model: ModelProto,
     node: NodeProto,
     node_shapes: Optional[Dict[str, NodeShape]] = None,
-    is_four_block_sparse: Optional[bool] = None
-) -> int:
+    is_four_block_sparse: Optional[bool] = None,
+) -> Tuple[int, int]:
     """
     Gets an approximation of the number of floating point or integer operations
 
@@ -108,37 +109,56 @@ def get_num_dense_and_sparse_ops(
 
     node_attributes = get_node_attributes(node)
 
-    if (
-        node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"]
-        or node.op_type in ["Relu", "LeakyRelu", "Sigmoid", "Tanh", "BatchNormalization"]
-    ):
+    if node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"] or node.op_type in [
+        "Relu",
+        "LeakyRelu",
+        "Sigmoid",
+        "Tanh",
+    ]:
         return (numpy.prod(output_shapes), 0) if output_shapes is not None else (0, 0)
+
+    # If BN is followed by matmul or conv, then it is folded into the following
+    # layer weights. Assume this is true for all cases
+    if node.op_type == "BatchNormalization":
+        return (0, 0)
 
     if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
         return (numpy.prod(input_shapes), 0) if input_shapes is not None else (0, 0)
 
     if node.op_type in ["MaxPool", "AveragePool"]:
-        if not "kernel_shape" in node_attributes:
-            raise Exception(f"No kernel_shape found in node attributes of {node.op_type}")
+        if "kernel_shape" not in node_attributes:
+            raise Exception(
+                f"No kernel_shape found in node attributes of {node.op_type}"
+            )
         kernel_shape = node_attributes["kernel_shape"]
-        return (numpy.prod(output_shapes) * numpy.prod(kernel_shape), 0) if output_shapes is not None else None
+        return (
+            (numpy.prod(output_shapes) * numpy.prod(kernel_shape), 0)
+            if output_shapes is not None
+            else None
+        )
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
-        if input_shapes is None:
+        if input_shapes is None or len(input_shapes) == 0:
             return (0, 0)
         input_shape = input_shapes[0]
 
         # If no weight supplied, treat other input as dense weight
+        # TODO: Paste asana talk. When runtime implements activation sparsity
         if weight is None:
             weight_shape = input_shapes[1]
             weight = numpy.full(weight_shape, zero_point - 1)
 
         # Weight operations
-        num_dense_ops, num_sparse_ops = _get_gemm_dense_sparse_ops(weight, input_shape, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
+        num_dense_ops, num_sparse_ops = _get_gemm_dense_sparse_ops(
+            weight,
+            input_shape,
+            zero_point=zero_point,
+            is_four_block_sparse=is_four_block_sparse,
+        )
 
         # Bias operations
-        if not bias is None:
-            bias_dense_ops, bias_sparse_ops = _get_linear_bias_dense_sparse_ops(bias, zero_point)
+        if bias is not None:
+            bias_dense_ops, bias_sparse_ops = _get_bias_dense_sparse_ops(output_shapes)
             num_dense_ops += bias_dense_ops
             num_sparse_ops += bias_sparse_ops
 
@@ -152,11 +172,19 @@ def get_num_dense_and_sparse_ops(
         group = node_attributes["group"] if "group" in node_attributes else 1
 
         # Weight operations
-        num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(weight, input_shape, pads, strides, group, zero_point=zero_point, is_four_block_sparse=is_four_block_sparse)
+        num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(
+            weight,
+            input_shape,
+            pads,
+            strides,
+            group,
+            zero_point=zero_point,
+            is_four_block_sparse=is_four_block_sparse,
+        )
 
         # Bias operations
-        if not bias is None:
-            bias_dense_ops, bias_sparse_ops = _get_conv_bias_dense_sparse_ops(bias, output_shape, zero_point)
+        if bias is not None:
+            bias_dense_ops, bias_sparse_ops = _get_bias_dense_sparse_ops(output_shapes)
             num_dense_ops += bias_dense_ops
             num_sparse_ops += bias_sparse_ops
 
@@ -165,7 +193,9 @@ def get_num_dense_and_sparse_ops(
     return 0, 0
 
 
-def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: str) -> numpy.ndarray:
+def get_initializer_value(
+    model: ModelProto, node: NodeProto, initializer_name: str
+) -> numpy.ndarray:
     """
     Helper function to find initializers by name in model graph
 
@@ -173,14 +203,23 @@ def get_initializer_value(model: ModelProto, node: NodeProto, initializer_name: 
     :param initializer_name: name of initializer being returned
     :return: initalizer if found, None otherwise
     """
+
     def _is_transposed_initializer(node: NodeProto, initailizer_name: str) -> bool:
         if node.op_type in ["Gemm"]:
             input_index = list(node.input).index(initailizer_name)
             node_attributes = get_node_attributes(node)
 
-            if input_index == 0 and "transA" in node_attributes and node_attributes["transA"] == 1:
+            if (
+                input_index == 0
+                and "transA" in node_attributes
+                and node_attributes["transA"] == 1
+            ):
                 return True
-            if input_index == 1 and "transB" in node_attributes and node_attributes["transB"] == 1:
+            if (
+                input_index == 1
+                and "transB" in node_attributes
+                and node_attributes["transB"] == 1
+            ):
                 return True
 
         return False
@@ -367,6 +406,10 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     if weight_size == 0:
         return 0.0
 
+    # Embedding layer with one zero
+    if num_zeros == 1 and node.op_type == "Gather":
+        return 0.0
+
     return num_zeros / weight_size
 
 
@@ -467,7 +510,12 @@ def _get_node_input(node: NodeProto, index: int, default: Optional[Any] = None):
         return default
 
 
-def _get_gemm_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], zero_point: int = 0, is_four_block_sparse: bool = False):
+def _get_gemm_dense_sparse_ops(
+    weight: numpy.ndarray,
+    input_shape: List[int],
+    zero_point: int = 0,
+    is_four_block_sparse: bool = False,
+) -> Tuple[int, int]:
     """
     Calculates number of operations performed by performing matrix multiplication
 
@@ -495,7 +543,15 @@ def _get_gemm_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], ze
 
     return num_dense_ops, num_sparse_ops
 
-def _get_kernel_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: List[int], kernel_shape: List[int], pads: List[int]) -> List[int]:
+
+def _get_kernel_subview(
+    weight: numpy.ndarray,
+    x: int,
+    y: int,
+    spatial_shape: List[int],
+    kernel_shape: List[int],
+    pads: List[int],
+) -> Tuple[int, int, int, int]:
     """
     Calculates which spatial coordinates in the kernel will be applied to a pixel
     at coordinates (x, y) and returns the coordinates of a subview of the kernel
@@ -510,13 +566,13 @@ def _get_kernel_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: Li
     :return: the coordinates of a subview of the kernel containing only the
     coordinates that will be multiplied with the pixel at coordinate (x, y)
     """
-    distance_from_bottom = (spatial_shape[0] - y - 1)
+    distance_from_bottom = spatial_shape[0] - y - 1
     y0 = kernel_shape[0] - pads[3] - distance_from_bottom - 1
     y0 = max(y0, 0)
     y1 = kernel_shape[0] + pads[1] + y
     y1 = min(y1, kernel_shape[0])
 
-    distance_from_right = (spatial_shape[1] - x - 1)
+    distance_from_right = spatial_shape[1] - x - 1
     x0 = kernel_shape[1] - pads[2] - distance_from_right - 1
     x0 = max(x0, 0)
     x1 = kernel_shape[1] + pads[0] + x
@@ -525,7 +581,15 @@ def _get_kernel_subview(weight: numpy.ndarray, x: int, y: int, spatial_shape: Li
     return y0, y1, x0, x1
 
 
-def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[int], pads: List[int], strides: List[int], group: int, zero_point: int = 0, is_four_block_sparse: bool = False) -> Tuple[int, int]:
+def _get_conv_weight_dense_sparse_ops(
+    weight: numpy.ndarray,
+    input_shape: List[int],
+    pads: List[int],
+    strides: List[int],
+    group: int,
+    zero_point: int = 0,
+    is_four_block_sparse: bool = False,
+) -> Tuple[int, int]:
     """
     Calculates number of operations performed by applying a convolutional weight
 
@@ -543,25 +607,35 @@ def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[i
 
     weight_spatial_flattened = numpy.reshape(weight, (*weight.shape[:2], -1))
     kernel_dense_sparse_ops = [
-        _get_gemm_dense_sparse_ops(weight_spatial_flattened[:, :, i], [1, weight.shape[1]], zero_point, is_four_block_sparse)
+        _get_gemm_dense_sparse_ops(
+            weight_spatial_flattened[:, :, i],
+            [1, weight.shape[1]],
+            zero_point,
+            is_four_block_sparse,
+        )
         for i in range(weight_spatial_flattened.shape[2])
     ]
     kernel_dense_sparse_ops = numpy.reshape(kernel_dense_sparse_ops, (*kernel_shape, 2))
 
     dense_sum, sparse_sum = 0, 0
 
+    # TODO: This can be sped up by augmenting coordinates according to padding
     # For each pixel in the input
     for x in range(0, spatial_shape[1], strides[1]):
         for y in range(0, spatial_shape[0], strides[0]):
 
             # Calculate a subview of the kernels which contains only the
             # coordinates which apply to this pixel
-            kernel_subview_coords = _get_kernel_subview(weight, x, y, spatial_shape, kernel_shape, pads)
+            kernel_subview_coords = _get_kernel_subview(
+                weight, x, y, spatial_shape, kernel_shape, pads
+            )
 
             # Get the number of dense and sparse ops associated with each pixel
             # in the kernel subview
-            kernel_ops_subview = kernel_dense_sparse_ops[kernel_subview_coords[0]: kernel_subview_coords[1],
-                                                         kernel_subview_coords[2]: kernel_subview_coords[3]]
+            kernel_ops_subview = kernel_dense_sparse_ops[
+                kernel_subview_coords[0] : kernel_subview_coords[1],
+                kernel_subview_coords[2] : kernel_subview_coords[3],
+            ]
 
             dense_sum += numpy.sum(kernel_ops_subview[:, :, 0])
             sparse_sum += numpy.sum(kernel_ops_subview[:, :, 1])
@@ -573,36 +647,11 @@ def _get_conv_weight_dense_sparse_ops(weight: numpy.ndarray, input_shape: List[i
     return dense_sum, sparse_sum
 
 
-def _get_conv_bias_dense_sparse_ops(bias: numpy.ndarray, output_shape: List[int], zero_point: int = 0) -> Tuple[int, int]:
-    """
-    Calculates number of operations performed by applying a convolutional bias
-
-    :param bias: matrix of bias values to be applied
-    :param output_shape: dimensions of the output after the bias operation
-    :param zero_point: number representing zero value of bias
-    :return: number of dense and sparse operations performed
-    """
-    output_spatial_shape = output_shape[-2:]
-    dense_ops_per_pixel, sparse_ops_per_pixel = _get_linear_bias_dense_sparse_ops(bias, zero_point)
-
-    num_dense_ops = dense_ops_per_pixel * numpy.prod(output_spatial_shape)
-    num_sparse_ops = sparse_ops_per_pixel * numpy.prod(output_spatial_shape)
-
-    return num_dense_ops, num_sparse_ops
-
-
-def _get_linear_bias_dense_sparse_ops(bias: numpy.ndarray, zero_point: int = 0) -> Tuple[int, int]:
+def _get_bias_dense_sparse_ops(output_shapes: List[List[int]]) -> Tuple[int, int]:
     """
     Calculates number of operations performed by applying a bias
 
-    :param bias: matrix of bias values to be applied
-    :param zero_point: number representing zero value of bias
-    :return: number of dense and sparse operations performed
+    :param output_shapes: Shape of output of bias step
+    :return:
     """
-    num_zeros = numpy.count_nonzero(bias == zero_point)
-    num_non_zeros = numpy.count_nonzero(bias != zero_point)
-
-    num_dense_ops = num_non_zeros * 2
-    num_sparse_ops = num_zeros * 2
-
-    return num_dense_ops, num_sparse_ops
+    return numpy.prod(output_shapes), 0

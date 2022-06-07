@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import pytest
 
 from sparsezoo import Zoo
@@ -45,6 +46,9 @@ def get_model_analysis():
         onnx_path = model.onnx_file.downloaded_path()
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_analyses[model_name] = analysis
+
+        with open(f"/Users/poketopa/Desktop/{model_name}.json", "w") as json_file:
+            json_file.write(analysis.json())
 
     def _get_model_analysis(model_name):
         return model_analyses[model_name]
@@ -151,7 +155,9 @@ def test_layer_counts(model_name, expected_dict, get_model_analysis):
         ),
     ],
 )
-def test_non_parameterized_operator_counts(model_name, expected_dict, get_model_analysis):
+def test_non_parameterized_operator_counts(
+    model_name, expected_dict, get_model_analysis
+):
     model_analysis = get_model_analysis(model_name)
 
     assert model_analysis.non_parameterized_operator_counts == expected_dict
@@ -160,10 +166,10 @@ def test_non_parameterized_operator_counts(model_name, expected_dict, get_model_
 @pytest.mark.parametrize(
     "model_name,expected_value",
     [
-        ("yolact_none", 153019919040),
-        ("mobilenet_v1_pruned_moderate", 265460942),
+        ("yolact_none", 152945774384),
+        ("mobilenet_v1_pruned_moderate", 260417254),
         ("bert_pruned_quantized", 14649704064),
-        ("resnet50_pruned_quantized", 3135906792),
+        ("resnet50_pruned_quantized", 3124791808),
     ],
 )
 def test_num_dense_ops(model_name, expected_value, get_model_analysis):
@@ -192,7 +198,7 @@ def test_num_sparse_ops(model_name, expected_value, get_model_analysis):
     [
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 12),
-        ("bert_pruned_quantized", 75),
+        ("bert_pruned_quantized", 73),
         ("resnet50_pruned_quantized", 53),
     ],
 )
@@ -323,7 +329,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="Conv_0",
                 parameterized_and_prunable=True,
-                num_dense_ops=541446592,
+                num_dense_ops=531766592,
                 num_sparse_ops=0,
                 sparsity=0.0,
                 four_block_sparsity=0.0,
