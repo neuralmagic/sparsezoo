@@ -119,26 +119,49 @@ class TestModelDirectory:
 
     def test_generate_outputs_onnxruntime(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
-
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
+
+        # test whether the functionality saves the numpy files to tar properly
+        tar_file_expected_path = os.path.join(
+            directory_path, "sample_outputs_onnxruntime.tar.gz"
+        )
+        if os.path.isfile(tar_file_expected_path):
+            os.remove(tar_file_expected_path)
+
         for output_expected, output in zip(
             model_directory.sample_outputs,
-            model_directory.generate_outputs(engine_type="onnxruntime"),
+            model_directory.generate_outputs(
+                engine_type="onnxruntime", save_to_tar=True
+            ),
         ):
             output_expected = list(output_expected.values())
             for o1, o2 in zip(output_expected, output):
                 assert pytest.approx(o1, abs=1e-5) == o2.flatten()
+
+        assert os.path.isfile(tar_file_expected_path)
 
     def test_generate_outputs_deepsparse(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
+
+        # test whether the functionality saves the numpy files to tar properly
+        tar_file_expected_path = os.path.join(
+            directory_path, "sample_outputs_deepsparse.tar.gz"
+        )
+        if os.path.isfile(tar_file_expected_path):
+            os.remove(tar_file_expected_path)
+
         for output_expected, output in zip(
             model_directory.sample_outputs,
-            model_directory.generate_outputs(engine_type="deepsparse"),
+            model_directory.generate_outputs(
+                engine_type="deepsparse", save_to_tar=True
+            ),
         ):
             output_expected = list(output_expected.values())
             for o1, o2 in zip(output_expected, output):
                 assert pytest.approx(o1, abs=1e-5) == o2.flatten()
+
+        assert os.path.isfile(tar_file_expected_path)
 
     def test_analysis(self, setup):
         pass
