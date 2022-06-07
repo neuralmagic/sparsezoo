@@ -29,17 +29,18 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
     "domain, sub_domain, model_index, expected_content",
     [
         (
-            "cv",
-            "classification",
+            "nlp",
+            "question_answering",
             0,
             [
-                "framework-files",
-                "sample-originals",
-                "sample-inputs",
-                "sample-outputs",
-                "sample-labels",
+                "training",
+                "sample_originals",
+                "sample_inputs",
+                "sample_outputs",
+                "sample_labels",
+                "onnx",
+                "logs",
                 "model.onnx",
-                ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
                 "benchmarks.yaml",
                 "eval.yaml",
@@ -52,13 +53,14 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
             "question_answering",
             0,
             [
-                "framework-files",
-                "sample-originals",
-                "sample-inputs",
-                "sample-outputs",
-                "sample-labels",
+                "training",
+                "sample_originals",
+                "sample_inputs",
+                "sample_outputs",
+                "sample_labels",
+                "onnx",
+                "logs",
                 "model.onnx",
-                ["model.1.onnx", "model.2.onnx"],
                 "analysis.yaml",
                 "benchmarks.yaml",
                 "eval.yaml",
@@ -171,14 +173,14 @@ class TestModelDirectory:
     @staticmethod
     def _get_local_directory(model):
         model.download()
-        directory_path = os.path.dirname(model.framework_files[0].dir_path)
+        directory_path = os.path.dirname(model.training[0].dir_path)
 
         # Adding several hacks to make files in
         # directory_path adhere to the desired format
 
         # Create framework-files
         framework_files = os.path.join(directory_path, "framework-files")
-        os.rename(model.framework_files[0].dir_path, framework_files)
+        os.rename(model.training[0].dir_path, framework_files)
 
         # Create onnx_models(opsets)
         for opset in range(1, 3):

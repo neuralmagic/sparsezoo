@@ -197,20 +197,20 @@ class ModelDirectory(Directory):
         url: Optional[str] = None,
     ):
 
-        self.framework_files: FrameworkFiles = self._directory_from_files(
+        self.training: FrameworkFiles = self._directory_from_files(
             files,
             directory_class=FrameworkFiles,
-            display_name="framework-files",
+            display_name="training",
         )
         self.sample_originals: SampleOriginals = self._directory_from_files(
             files,
             directory_class=SampleOriginals,
-            display_name="sample-originals",
+            display_name="sample_originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample-inputs",
+            display_name="sample_inputs",
         )
         self.sample_outputs: Dict[
             str, NumpyDirectory
@@ -218,20 +218,26 @@ class ModelDirectory(Directory):
             self._directory_from_files(
                 files,
                 directory_class=NumpyDirectory,
-                display_name="sample-outputs",
+                display_name="sample_outputs",
                 allow_multiple_outputs=True,
             )
         )  # key by engine name.
+
         self.sample_labels: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="sample-labels"
+            files, directory_class=Directory, display_name="sample_labels"
         )
+
+        self.onnx_folder: Directory = self._directory_from_files(
+            files, display_name="onnx", regex=False
+        )  # onnx folder
+
+        self.logs: Directory = self._directory_from_files(
+            files, display_name="logs", regex=False
+        )  # logs folder
+
         self.onnx_model: File = self._file_from_files(
             files, display_name="model.onnx"
         )  # model.onnx
-
-        self.onnx_models: List[File] = self._file_from_files(
-            files, display_name="model.(.*).onnx", regex=True
-        )  # model{.opset}.onnx
 
         self.analysis: File = self._file_from_files(
             files, display_name="analysis.yaml"
@@ -256,13 +262,14 @@ class ModelDirectory(Directory):
         ]
 
         files = [
-            self.framework_files,
+            self.training,
             self.sample_originals,
             self.sample_inputs,
             self.sample_outputs,
             self.sample_labels,
+            self.onnx_folder,
+            self.logs,
             self.onnx_model,
-            self.onnx_models,
             self.analysis,
             self.benchmarks,
             self.eval_results,
@@ -377,7 +384,7 @@ class ModelDirectory(Directory):
         # TODO: This is a hack for now,
         #  some files cannot be validated
         #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["framework-files"]
+        SKIP_ATTRIBUTES = ["training"]
 
         if self.path is None:
             raise ValueError(
@@ -400,7 +407,7 @@ class ModelDirectory(Directory):
                 for _file in file:
                     validations[_file.name] = _file.validate()
             elif isinstance(file, dict):
-                raise NotImplementedError()
+                pass
 
         return all(validations.values())
 
