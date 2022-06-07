@@ -51,8 +51,6 @@ def model_stubs():
         "12layer_pruned80_quant-none-vnni",
         "resnet50_pruned_quantized": "zoo:cv/classification/resnet_v1-50"
         "/pytorch/sparseml/imagenet/pruned85_quant-none-vnni",
-        "resnet50_pruned85_vnni": "/Users/poketopa/Desktop/neuralmagic/models/"
-        "resnet50_pruned85_vnni.onnx",
     }
 
 
@@ -61,12 +59,9 @@ def get_model_onnx(model_stubs):
     model_onnxs = {}
     for model_name, model_stub in model_stubs.items():
         model_stub = model_stubs[model_name]
-        if model_stub[:4] == "zoo:":
-            model = Zoo.load_model_from_stub(model_stub)
-            model.onnx_file.download()
-            onnx_path = model.onnx_file.downloaded_path()
-        else:
-            onnx_path = model_stub
+        model = Zoo.load_model_from_stub(model_stub)
+        model.onnx_file.download()
+        onnx_path = model.onnx_file.downloaded_path()
         model_onnx = onnx.load(onnx_path)
         model_onnxs[model_name] = model_onnx
 
@@ -547,8 +542,6 @@ def test_is_four_block_sparse_layer(
         ("mobilenet_v1_pruned_moderate", "Concat_88", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "Reshape_89", (0, 0)),
         ("mobilenet_v1_pruned_moderate", "Gemm_90", (2049000, 0)),
-        ("resnet50_pruned85_vnni", "Gemm_1335", (4097000, 0)),
-        ("resnet50_pruned85_vnni", "Conv_158_quant", (85894048, 142773344)),
         ("mobilenet_v1_pruned_moderate", "Softmax_91", (0, 0)),
         ("bert_pruned_quantized", "Gather_34", (0, 0)),
         ("bert_pruned_quantized", "DequantizeLinear_27", (0, 0)),

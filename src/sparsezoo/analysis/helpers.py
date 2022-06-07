@@ -143,7 +143,6 @@ def get_num_dense_and_sparse_ops(
         input_shape = input_shapes[0]
 
         # If no weight supplied, treat other input as dense weight
-        # TODO: Paste asana talk. When runtime implements activation sparsity
         if weight is None:
             weight_shape = input_shapes[1]
             weight = numpy.full(weight_shape, zero_point - 1)
@@ -166,7 +165,6 @@ def get_num_dense_and_sparse_ops(
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
         input_shape = input_shapes[0]
-        output_shape = output_shapes[0]
         pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
         strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
         group = node_attributes["group"] if "group" in node_attributes else 1

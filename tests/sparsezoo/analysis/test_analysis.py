@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import pytest
 
 from sparsezoo import Zoo
@@ -46,9 +45,6 @@ def get_model_analysis():
         onnx_path = model.onnx_file.downloaded_path()
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_analyses[model_name] = analysis
-
-        with open(f"/Users/poketopa/Desktop/{model_name}.json", "w") as json_file:
-            json_file.write(analysis.json())
 
     def _get_model_analysis(model_name):
         return model_analyses[model_name]

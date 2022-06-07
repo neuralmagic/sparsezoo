@@ -179,37 +179,19 @@ class ModelAnalysis(BaseModel):
 
         layer_analyses = cls.analyze_nodes(model_onnx)
 
-        param_prunable_layer_analyses = [
-            layer_analysis
-            for layer_analysis in layer_analyses
-            if layer_analysis.parameterized_and_prunable
-        ]
-
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
 
         num_parameters = sum(
-            [
-                layer_analysis.num_parameters
-                for layer_analysis in layer_analyses
-            ]
+            [layer_analysis.num_parameters for layer_analysis in layer_analyses]
         )
         num_sparse_parameters = sum(
-            [
-                layer_analysis.num_sparse_parameters
-                for layer_analysis in layer_analyses
-            ]
+            [layer_analysis.num_sparse_parameters for layer_analysis in layer_analyses]
         )
         num_four_blocks = sum(
-            [
-                layer_analysis.num_four_blocks
-                for layer_analysis in layer_analyses
-            ]
+            [layer_analysis.num_four_blocks for layer_analysis in layer_analyses]
         )
         num_sparse_four_blocks = sum(
-            [
-                layer_analysis.num_sparse_four_blocks
-                for layer_analysis in layer_analyses
-            ]
+            [layer_analysis.num_sparse_four_blocks for layer_analysis in layer_analyses]
         )
 
         return cls(
