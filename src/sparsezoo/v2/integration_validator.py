@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
+import os
 #from sparsezoo.v2.model_directory import ModelDirectory
 from sparsezoo.v2.directory import Directory
+from sparsezoo.v2.file import File
 
 __all__ = ["IntegrationValidator"]
 
@@ -57,18 +60,11 @@ class IntegrationValidator:
 
         expected_file_names = minimum_file_names if self.minimal_validation else file_names
 
-        for file in directory.files:
-            if isinstance(file, Directory):
-                # assuming that we can have at maximum one more nesting level
-                # i.e model_directory/training/checkpoint_XXXX/
-                [expected_file_names.remove(_file.name) for _file in file.files]
+        directory.validate()
 
-            else:
-                expected_file_names.remove(file.name)
-
-            file.validate()
         if (len(expected_file_names) != 0) and (not self.minimum_file_names):
             raise ValueError(f"Validation failed. The following files were not found in the `training` directory: {expected_file_names}.")
+        return True
 
 
 

@@ -271,7 +271,6 @@ class ModelDirectory(Directory):
             self.onnx_folder,
             self.logs,
             self.onnx_model,
-            self.onnx_models,
             self.analysis,
             self.benchmarks,
             self.eval_results,
