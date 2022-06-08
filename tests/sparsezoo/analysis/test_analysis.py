@@ -46,6 +46,9 @@ def get_model_analysis():
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_analyses[model_name] = analysis
 
+        with open(f"/Users/poketopa/Desktop/{model_name}.json", "w") as jsonfile:
+            jsonfile.write(analysis.json())
+
     def _get_model_analysis(model_name):
         return model_analyses[model_name]
 
@@ -164,7 +167,7 @@ def test_non_parameterized_operator_counts(
     [
         ("yolact_none", 152945774384),
         ("mobilenet_v1_pruned_moderate", 260417254),
-        ("bert_pruned_quantized", 14649704064),
+        ("bert_pruned_quantized", 18590812800),
         ("resnet50_pruned_quantized", 3124791808),
     ],
 )
@@ -179,7 +182,7 @@ def test_num_dense_ops(model_name, expected_value, get_model_analysis):
     [
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 847771932),
-        ("bert_pruned_quantized", 40317182208),
+        ("bert_pruned_quantized", 52275962880),
         ("resnet50_pruned_quantized", 4948878824),
     ],
 )

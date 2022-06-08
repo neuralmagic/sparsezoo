@@ -17,12 +17,14 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py with minimal edits
 """
 
 import logging
+import numpy
 from copy import deepcopy
 from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
 import onnx
 from onnx import ModelProto, NodeProto
 from onnx.helper import make_empty_tensor_value_info
+from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,6 +48,21 @@ def extract_node_id(node: NodeProto) -> str:
     outputs = node.output
 
     return str(outputs[0])
+
+
+def extract_dtype(proto: Any) -> numpy.dtype:
+    """
+    Extract dtype info from a proto
+    Used for reconstructing a node input for shape inference
+
+    :param proto: the proto to get dtype info for
+    :return: the numpy dtype of the tensor belonging to the proto
+    """
+    tensor_type = proto.type.tensor_type
+    if not tensor_type.HasField("elem_type"):
+        return None
+
+    return TENSOR_TYPE_TO_NP_TYPE[proto.type.tensor_type.elem_type]
 
 
 def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
@@ -107,10 +124,24 @@ def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
     sess_options.log_severity_level = 3
     sess = onnxruntime.InferenceSession(model_copy.SerializeToString(), sess_options)
 
+    input_dict = {}
+    for input in model_copy.graph.input:
+        input_shape = extract_shape(input)
+        dtype = extract_dtype(input)
+        # TODO: Double check this will not lead to errors
+        input_dict[input.name] = numpy.ones(input_shape, dtype=dtype)
+
+    # Get shapes by running real values and saving outputs
+    outputs = sess.run(None, input_dict)
+
+    # Last entry is 'input', which is not calculated by the run
+    nodes = list(sess.get_outputs() + sess.get_inputs())
+    outputs = outputs + [nodes[-1]]
+
     output_shapes = {}
-    for node in sess.get_outputs() + sess.get_inputs():
+    for node, output in zip(nodes, outputs):
         output_shapes[node.name] = (
-            node.shape if node.shape is not None and len(node.shape) > 0 else None
+            list(output.shape) if output is not None and len(output.shape) > 0 else None
         )
     return output_shapes
 

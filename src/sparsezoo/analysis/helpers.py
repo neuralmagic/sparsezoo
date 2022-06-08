@@ -164,6 +164,8 @@ def get_num_dense_and_sparse_ops(
         return num_dense_ops, num_sparse_ops
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
+        if input_shapes is None or len(input_shapes) == 0:
+            return (0, 0)
         input_shape = input_shapes[0]
         pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
         strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
