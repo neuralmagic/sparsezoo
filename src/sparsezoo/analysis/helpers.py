@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
@@ -92,6 +92,10 @@ def get_num_dense_and_sparse_ops(
 
     :param model: model that contains the given node
     :param node: node which performs the operations
+    :param node_shapes: Optional dictionary of node shapes. If not supplied,
+        node_shapes will be computed
+    :param is_four_block_sparse: Optional boolean indicating if this node is four
+        block sparse. If not supplied, it be will be computed
     :return: number of operations performed by node
     """
     if node_shapes is None:
@@ -200,6 +204,7 @@ def get_initializer_value(
     Helper function to find initializers by name in model graph
 
     :param model: model that contains the initializer with the given name
+    :param node: node to which the initializer belongs to
     :param initializer_name: name of initializer being returned
     :return: initalizer if found, None otherwise
     """
@@ -253,7 +258,7 @@ def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int
     return num_zeros, weight.size
 
 
-def group_four_block(array, pad_value=True):
+def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndarray:
     """
     :param array: array to group into four blocks
     :param pad_value: value to pad remainder block with
@@ -354,8 +359,13 @@ def is_four_block_sparse_layer(
     model: ModelProto, node: NodeProto, threshold: int = 0.05
 ) -> bool:
     """
+    Estimates if this node was likely pruned with four block sparsity.
+    This is determined by comparing the difference between normal sparsity and
+    four block sparsity and evaluating if the difference falls under a threshold
+
     :param model: model that contains the given node
     :param node: node whose four block sparsity is being checked
+    :param threshold: threshold for measuring sparsity differences
     :return: true if node weights have any four block sparsity, False otherwise
     """
     four_block_sparsity = get_node_four_block_sparsity(model, node)
@@ -365,8 +375,9 @@ def is_four_block_sparse_layer(
 
 def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
     """
+    :param model: model that contains the given node
     :param node: node whose quantized status is being checked
-    :return: true if node contains quantized weights, False otherwise
+    :return: True if node contains quantized weights, False otherwise
     """
     if node.op_type == "Gather":
         weight = get_node_weight(model, node)
@@ -473,11 +484,11 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     return weight
 
 
-def get_layer_and_op_counts(model: ModelProto):
+def get_layer_and_op_counts(model: ModelProto) -> Tuple[Dict[str, int], Dict[str, int]]:
     """
     Creates two dictionaries, each mapping op_type to the number of nodes of
-        that op_type. The first dictionary contains op_types which are layers,
-        the second contains op_types which are operations.
+    that op_type. The first dictionary contains op_types which are layers,
+    the second contains op_types which are operations.
 
     :param model: model whose counts are being checked
     :return: a layer dictionary and an operation dictionary which hold node counts
@@ -498,11 +509,14 @@ def get_layer_and_op_counts(model: ModelProto):
     return layer_counts, op_counts
 
 
-def _get_node_input(node: NodeProto, index: int, default: Optional[Any] = None):
+def _get_node_input(
+    node: NodeProto, index: int, default: Optional[Any] = None
+) -> Union[str, Any]:
     """
     :param node: node that contains the desired input
     :param index: index of desired input
     :param default: default value if node.input does not contain index
+    :return: the node input at the given index, default otherwise
     """
     if len(node.input) - 1 >= index:
         return node.input[index]
@@ -564,7 +578,7 @@ def _get_kernel_subview(
     :param kernel_shape: spatial dimensions of kernel
     :param pads: list of paddings around the input
     :return: the coordinates of a subview of the kernel containing only the
-    coordinates that will be multiplied with the pixel at coordinate (x, y)
+        coordinates that will be multiplied with the pixel at coordinate (x, y)
     """
     distance_from_bottom = spatial_shape[0] - y - 1
     y0 = kernel_shape[0] - pads[3] - distance_from_bottom - 1
@@ -605,6 +619,8 @@ def _get_conv_weight_dense_sparse_ops(
     spatial_shape = input_shape[2:]
     kernel_shape = weight.shape[2:]
 
+    # For each spatial coordinate in the weight's kernel, calculate how many
+    # operations are performed every time that spatial coordinate is applied
     weight_spatial_flattened = numpy.reshape(weight, (*weight.shape[:2], -1))
     kernel_dense_sparse_ops = [
         _get_gemm_dense_sparse_ops(
@@ -619,7 +635,8 @@ def _get_conv_weight_dense_sparse_ops(
 
     dense_sum, sparse_sum = 0, 0
 
-    # TODO: This can be sped up by augmenting coordinates according to padding
+    # TODO: This can be sped up by first calculating the number of operations
+    #       performed with no padding, then adding additional operations for padding
     # For each pixel in the input
     for x in range(0, spatial_shape[1], strides[1]):
         for y in range(0, spatial_shape[0], strides[0]):
@@ -652,6 +669,6 @@ def _get_bias_dense_sparse_ops(output_shapes: List[List[int]]) -> Tuple[int, int
     Calculates number of operations performed by applying a bias
 
     :param output_shapes: Shape of output of bias step
-    :return:
+    :return: number of dense and sparse operations performed
     """
     return numpy.prod(output_shapes), 0

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-NOTE: Adapted from sparseml/onnx/utils/helpers.py with minimal edits
+NOTE: Adapted from sparseml/onnx/utils/helpers.py
 """
 
 import logging
@@ -52,7 +52,7 @@ def extract_node_id(node: NodeProto) -> str:
 
 def extract_dtype(proto: Any) -> numpy.dtype:
     """
-    Extract dtype info from a proto
+    Extract data type info from a proto
     Used for reconstructing a node input for shape inference
 
     :param proto: the proto to get dtype info for

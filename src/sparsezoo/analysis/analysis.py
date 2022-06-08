@@ -91,6 +91,16 @@ class NodeAnalysis(BaseModel):
         node: NodeProto,
         node_shapes: Optional[Dict[str, NodeShape]] = None,
     ):
+        """
+        Class constructor for Node Analysis
+
+        :param cls: class being constructed
+        :param model_onnx: model onnx that node belongs to
+        :param node: node being analyzed
+        :param node_shapes: Optional dictionary of node shapes. If not supplied,
+        node_shapes will be computed
+        :return: instance of NodeAnalysis class
+        """
         num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(
             model_onnx, node, node_shapes=node_shapes
         )
