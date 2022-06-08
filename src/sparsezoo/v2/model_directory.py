@@ -197,7 +197,7 @@ class ModelDirectory(Directory):
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
             (located in the `self.path` directory).
-        :returns returns list
+        :returns list
             containing numpy arrays, representing the output
             from the inference engine
         """
