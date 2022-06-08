@@ -23,8 +23,8 @@ import numpy
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
-from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 from sparsezoo.v2.integration_validator import IntegrationValidator
+from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
@@ -232,7 +232,7 @@ class ModelDirectory(Directory):
 
         return all(downloads)
 
-    def validate(self) -> bool:
+    def validate(self, minimal_validation=False) -> bool:
         """
         Validate the ModelDirectory class object:
         1. Validate that the sample inputs and outputs work with ONNX Runtime
@@ -241,7 +241,7 @@ class ModelDirectory(Directory):
         return: a boolean flag; if True, the validation has been successful
         """
 
-        self.integration_validator.validate()
+        self.integration_validator.validate(minimal_validation)
         return True
 
     def analyze(self):
