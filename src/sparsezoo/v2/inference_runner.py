@@ -28,7 +28,7 @@ from sparsezoo.v2.model_objects import NumpyDirectory
 
 __all__ = ["InferenceRunner", "ENGINES"]
 
-ENGINES = ["onnxruntime", "deepsparse", "pytorch", "keras", "tensorflow_v1"]
+ENGINES = ["onnxruntime", "deepsparse"]
 
 
 class InferenceRunner:
@@ -42,7 +42,7 @@ class InferenceRunner:
     :params sample_outputs: File object containing sample outputs the inference engine
     :params onnx_model: File object holding the onnx model
     :params supported_engines: List of the names of supported engines
-        (e.g. pytorch, keras, deepsparse etc.)
+        (e.g. onnxruntime, deepsparse etc.)
     """
 
     def __init__(
@@ -60,7 +60,6 @@ class InferenceRunner:
         self.engine_type_to_iterator = {
             "onnxruntime": self._run_with_onnx_runtime,
             "deepsparse": self._run_with_deepsparse,
-            "pytorch": self._run_with_pytorch,
         }
 
     def generate_outputs(
@@ -106,7 +105,8 @@ class InferenceRunner:
         :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
         validation = []
-        sample_outputs = self.sample_outputs["onnxruntime"]
+
+        sample_outputs = self._check_and_fetch_outputs(engine_name="onnxruntime")
 
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
@@ -172,6 +172,12 @@ class InferenceRunner:
             output = ort_sess.run(None, model_input)
             yield output
 
-    def _run_with_pytorch(self):
-        # TODO: What is the best way to go about that
-        pass
+    def _check_and_fetch_outputs(self, engine_name: str) -> NumpyDirectory:
+        sample_outputs = self.sample_outputs.get(engine_name)
+        if sample_outputs is None:
+            raise KeyError(
+                f"Attempting to run validation with {engine_name} engine "
+                f"but the ground truth folder `sample_outputs_{engine_name}` "
+                f"has not been provided."
+            )
+        return sample_outputs
