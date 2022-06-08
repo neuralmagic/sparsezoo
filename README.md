@@ -25,8 +25,8 @@ limitations under the License.
     <a href="https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ/">
         <img src="https://img.shields.io/badge/slack-purple?style=for-the-badge&logo=slack" height=25>
     </a>
-    <a href="https://discuss.neuralmagic.com/">
-        <img src="https://img.shields.io/badge/support%20forums-navy?style=for-the-badge&logo=discourse" height=25>
+    <a href="https://github.com/neuralmagic/sparsezoo/issues">
+        <img src="https://img.shields.io/badge/support%20forums-navy?style=for-the-badge&logo=github" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/test-check.yaml">
         <img alt="Main" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Test%20Checks/main?label=build&style=for-the-badge" height=25>
@@ -72,7 +72,7 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Installation
 
-This repository is tested on Python 3.6+, and Linux/Debian systems.
+This repository is tested on Python 3.6-3.9, and Linux/Debian systems.
 It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
 Install with pip using:
