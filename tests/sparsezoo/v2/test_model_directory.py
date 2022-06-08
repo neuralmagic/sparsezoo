@@ -122,7 +122,7 @@ class TestModelDirectory:
     def test_generate_outputs(self, setup):
         directory_path, request_json, expected_content, temp_dir = setup
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-        for engine in model_directory.sample_outputs.keys():
+        for engine in ["onnxruntime", "deepsparse"]:
             self._test_generate_outputs_single_engine(engine, model_directory)
 
     def test_analysis(self, setup):

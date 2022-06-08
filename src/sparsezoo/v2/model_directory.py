@@ -441,17 +441,16 @@ class ModelDirectory(Directory):
         engine_to_numpydir_map = {}
         if not isinstance(directories, list):
             # if found a single 'sample_outputs' directory,
-            # assume it should be inferred using the native framework
+            # assume it should be mapped to its the native framework
             expected_name = "sample_outputs"
             if directories.name != expected_name:
                 raise ValueError(
                     "Found single folder (or tar.gz archive)"
-                    "with expected name `sample_outputs`. However,"
-                    f"detected a name {directories.name}"
-                    f"It's name should be {expected_name}."
+                    f"with expected name `{expected_name}`. However,"
+                    f"detected a name {directories.name}."
                 )
-            engine_name = self.model_card._validate_model_card()["framework"]
-            engine_to_numpydir_map[engine_name] = directories
+            framework_name = self.model_card._validate_model_card()["framework"]
+            engine_to_numpydir_map[framework_name] = directories
 
         else:
             # if found multiple 'sample_outputs' directories,
