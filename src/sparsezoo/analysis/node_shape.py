@@ -17,10 +17,10 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py with minimal edits
 """
 
 import logging
-import numpy
 from copy import deepcopy
 from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
+import numpy
 import onnx
 from onnx import ModelProto, NodeProto
 from onnx.helper import make_empty_tensor_value_info
@@ -128,7 +128,6 @@ def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
     for input in model_copy.graph.input:
         input_shape = extract_shape(input)
         dtype = extract_dtype(input)
-        # TODO: Double check this will not lead to errors
         input_dict[input.name] = numpy.ones(input_shape, dtype=dtype)
 
     # Get shapes by running real values and saving outputs
