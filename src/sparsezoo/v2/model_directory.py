@@ -89,8 +89,8 @@ class ModelDirectory(Directory):
             files, directory_class=Directory, display_name="sample_labels"
         )
 
-        self.onnx_folder: Directory = self._directory_from_files(
-            files, display_name="onnx", regex=False
+        self.deployment: Directory = self._directory_from_files(
+            files, display_name="deployment", regex=False
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(
@@ -132,7 +132,7 @@ class ModelDirectory(Directory):
             self.sample_inputs,
             self.sample_outputs,
             self.sample_labels,
-            self.onnx_folder,
+            self.deployment,
             self.logs,
             self.onnx_model,
             self.analysis,

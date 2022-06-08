@@ -85,11 +85,16 @@ class InferenceRunner:
             from the inference engine
         """
         if engine_type not in self.supported_engines:
-            raise ValueError(
+            raise KeyError(
                 f"The argument `engine_type` must be one of {self.supported_engines}"
             )
 
-        iterator = self.engine_type_to_iterator[engine_type]
+        iterator = self.engine_type_to_iterator.get(engine_type)
+        if iterator is None:
+            raise KeyError(
+                f"Cannot generate outputs using engine type: {engine_type}. "
+                f"Supported engines: {self.engine_type_to_iterator.keys()}."
+            )
 
         if save_to_tar:
             self._save_outputs_to_tar(iterator, engine_type)
