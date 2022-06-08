@@ -14,9 +14,10 @@
 
 import os
 from collections import OrderedDict
-from typing import List, Tuple
+from pathlib import Path
+from typing import Callable, Generator, List
 
-import numpy as np
+import numpy
 import onnx
 
 import onnxruntime as ort
@@ -25,7 +26,9 @@ from sparsezoo.v2.file import File
 from sparsezoo.v2.model_objects import NumpyDirectory
 
 
-__all__ = ["InferenceRunner"]
+__all__ = ["InferenceRunner", "ENGINES"]
+
+ENGINES = ["onnxruntime", "deepsparse", "pytorch", "keras", "tensorflow_v1"]
 
 
 class InferenceRunner:
@@ -39,7 +42,7 @@ class InferenceRunner:
     :params sample_outputs: File object containing sample outputs the inference engine
     :params onnx_model: File object holding the onnx model
     :params supported_engines: List of the names of supported engines
-        (e.g. torch, keras, deepsparse etc.)
+        (e.g. pytorch, keras, deepsparse etc.)
     """
 
     def __init__(
@@ -47,7 +50,7 @@ class InferenceRunner:
         sample_inputs: NumpyDirectory,
         sample_outputs: NumpyDirectory,
         onnx_file: File,
-        supported_engines: List[str],
+        supported_engines: List[str] = ENGINES,
     ):
         self.sample_inputs = sample_inputs
         self.sample_outputs = sample_outputs
@@ -57,11 +60,12 @@ class InferenceRunner:
         self.engine_type_to_iterator = {
             "onnxruntime": self._run_with_onnx_runtime,
             "deepsparse": self._run_with_deepsparse,
+            "pytorch": self._run_with_pytorch,
         }
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool
-    ) -> Tuple[List[np.ndarray]]:
+    ) -> Generator[List[numpy.ndarray], None, None]:
         """
         Chooses the appropriate engine type to load the onnx model
         Then, feeds the data (sample inputs)
@@ -88,37 +92,10 @@ class InferenceRunner:
 
         iterator = self.engine_type_to_iterator[engine_type]
 
-        # pre-compute the generator, to optionally to use it for
-        # saving to tar
-        outputs = (x for x in iterator())
-
         if save_to_tar:
-            output_files = []
+            self._save_outputs_to_tar(iterator, engine_type)
 
-            path = os.path.join(
-                os.path.dirname(self.sample_inputs.path),
-                f"sample_outputs_{engine_type}",
-            )
-            if not os.path.exists(path):
-                os.mkdir(path)
-
-            for input, output in zip(self.sample_inputs.files, outputs):
-                # if input's name is `inp-XXXX.npz`
-                # output's name should be `out-XXXX.npz`
-                name = input.name.replace("inp", "out")
-                # we need to remove `.npz`, this is
-                # required by save_numpy() function
-                save_numpy(
-                    array=output, export_dir=path, name="".join(name.split(".")[:-1])
-                )
-                output_files.append(File(name=name, path=os.path.join(path, name)))
-
-            output_directory = NumpyDirectory(
-                name=os.path.basename(path), path=path, files=output_files
-            )
-            output_directory.gzip()
-
-        for output in outputs:
+        for output in iterator():
             yield output
 
     def validate_with_onnx_runtime(self) -> bool:
@@ -126,20 +103,43 @@ class InferenceRunner:
         Validates that output from the onnxruntime
         engine matches the expected output.
 
-        :params engine_type: name of the inference engine
         :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
         validation = []
-        for target_output, output in zip(
-            self.sample_outputs, self._run_with_onnx_runtime()
-        ):
+        sample_outputs = self.sample_outputs["onnxruntime"]
+
+        for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
             is_valid = [
-                np.allclose(o1, o2.flatten(), atol=1e-5)
+                numpy.allclose(o1, o2.flatten(), atol=1e-5)
                 for o1, o2 in zip(target_output, output)
             ]
             validation += is_valid
         return all(validation)
+
+    def _save_outputs_to_tar(self, iterator: Callable, engine_type: str):
+        output_files = []
+
+        path = os.path.join(
+            os.path.dirname(self.sample_inputs.path),
+            f"sample_outputs_{engine_type}",
+        )
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        for input_file, output in zip(self.sample_inputs.files, iterator()):
+            # if input's name is `inp-XXXX.npz`
+            # output's name should be `out-XXXX.npz`
+            name = input_file.name.replace("inp", "out")
+            # we need to remove `.npz`, this is
+            # required by save_numpy() function
+            save_numpy(array=output, export_dir=path, name=Path(name).stem)
+            output_files.append(File(name=name, path=os.path.join(path, name)))
+
+        output_directory = NumpyDirectory(
+            name=os.path.basename(path), path=path, files=output_files
+        )
+        output_directory.gzip()
 
     def _run_with_deepsparse(self):
         try:
@@ -152,7 +152,7 @@ class InferenceRunner:
         engine = compile_model(self.onnx_file.path, batch_size=1)
 
         for index, input_data in enumerate(self.sample_inputs):
-            model_input = [np.expand_dims(x, 0) for x in input_data.values()]
+            model_input = [numpy.expand_dims(x, 0) for x in input_data.values()]
             output = engine.run(model_input)
             yield output
 
@@ -165,9 +165,13 @@ class InferenceRunner:
         for index, input_data in enumerate(self.sample_inputs):
             model_input = OrderedDict(
                 [
-                    (k, np.expand_dims(v, 0))
+                    (k, numpy.expand_dims(v, 0))
                     for k, v in zip(input_names, input_data.values())
                 ]
             )
             output = ort_sess.run(None, model_input)
             yield output
+
+    def _run_with_pytorch(self):
+        # TODO: What is the best way to go about that
+        pass

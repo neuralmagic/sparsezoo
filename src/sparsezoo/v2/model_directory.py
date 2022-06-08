@@ -16,24 +16,17 @@ import glob
 import logging
 import os
 import re
-import typing
-from typing import Any, Dict, List, Optional, Union
-from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
-import numpy as np
+import numpy
 
-import onnxruntime as ort
-from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
-from sparsezoo.v2.inference_runner import InferenceRunner
+from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
-
-ENGINES = ["onnxruntime", "deepsparse", "torch", "keras", "tensorflow_v1"]
 
 
 def file_dictionary(**kwargs):
@@ -124,6 +117,9 @@ class ModelDirectory(Directory):
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
 
+        # sorting name of `sample_inputs` and `sample_output` files,
+        # so that they have same correspondence when we jointly
+        # iterate over them
         self.sample_inputs.files.sort(key=lambda x: x.name)
         [
             sample_outputs.files.sort(key=lambda x: x.name)
@@ -190,7 +186,7 @@ class ModelDirectory(Directory):
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
-    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray], None]:
+    ) -> Generator[List[numpy.ndarray], None, None]:
         """
         Chooses the appropriate engine type to obtain inference outputs
         from the `InferenceRunner` class object. The function yields model
@@ -201,7 +197,7 @@ class ModelDirectory(Directory):
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
             (located in the `self.path` directory).
-        :returns returns a data structure
+        :returns returns list
             containing numpy arrays, representing the output
             from the inference engine
         """
@@ -276,7 +272,7 @@ class ModelDirectory(Directory):
                 for _file in file:
                     validations[_file.name] = _file.validate()
             elif isinstance(file, dict):
-                raise NotImplementedError()
+                pass
 
         return all(validations.values())
 
@@ -422,7 +418,7 @@ class ModelDirectory(Directory):
             return None
         # For now, following the logic of this class,
         # it is prohibitive for find more than
-        # one directory
+        # one directory (unless `allow-multiple_outputs`=True)
         elif len(directories_found) != 1:
             if allow_multiple_outputs:
                 return directories_found
@@ -470,20 +466,38 @@ class ModelDirectory(Directory):
         else:
             raise NotImplementedError()
 
-    @staticmethod
     def _sample_outputs_list_to_dict(
-        directories: List[NumpyDirectory],
+        self,
+        directories: Union[List[NumpyDirectory], NumpyDirectory],
     ) -> Dict[str, NumpyDirectory]:
         engine_to_numpydir_map = {}
-        for directory in directories:
-            engine_name = directory.name.split("_")[-1]
-            if engine_name not in ENGINES:
+        if not isinstance(directories, list):
+            # if found a single 'sample_outputs' directory,
+            # assume it should be inferred using the native framework
+            expected_name = "sample_outputs"
+            if directories.name != expected_name:
                 raise ValueError(
-                    f"The name of the 'sample_outputs' directory should "
-                    f"end with an engine name (one of the {ENGINES}). "
-                    f"However, the name is {directory.name}."
+                    "Found single folder (or tar.gz archive)"
+                    "with expected name `sample_outputs`. However,"
+                    f"detected a name {directories.name}"
+                    f"It's name should be {expected_name}"
                 )
-            engine_to_numpydir_map[engine_name] = directory
+            engine_name = self.model_card._validate_model_card()["framework"]
+            engine_to_numpydir_map[engine_name] = directories
+
+        else:
+            # if found multiple 'sample_outputs' directories,
+            # use directory name to relate it with the appropriate
+            # inference engine
+            for directory in directories:
+                engine_name = directory.name.split("_")[-1]
+                if engine_name not in ENGINES:
+                    raise ValueError(
+                        f"The name of the 'sample_outputs' directory should "
+                        f"end with an engine name (one of the {ENGINES}). "
+                        f"However, the name is {directory.name}."
+                    )
+                engine_to_numpydir_map[engine_name] = directory
         return engine_to_numpydir_map
 
     @staticmethod
