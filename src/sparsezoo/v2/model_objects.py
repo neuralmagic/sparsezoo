@@ -55,8 +55,6 @@ class FrameworkFiles(Directory):
 
         self.valid_nested_folder_patterns = ["checkpoint_(.*)/", "logs/"]
 
-    # TODO: Add support for model cards (pull integration from
-    #  model.md and specify which files to validate)
     def validate(self, integration: Optional[str] = None) -> bool:
         """
         Validates the structure of framework files.

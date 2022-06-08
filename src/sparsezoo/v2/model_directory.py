@@ -16,20 +16,17 @@ import glob
 import logging
 import os
 import re
-import typing
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
-import numpy as np
+import numpy
 
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
-from sparsezoo.v2.inference_runner import InferenceRunner
+from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
 from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
-
-ENGINES = ["pytorch", "keras", "tensorflow", "onnxruntime", "deepsparse"]
 
 
 def file_dictionary(**kwargs):
@@ -62,37 +59,47 @@ class ModelDirectory(Directory):
         url: Optional[str] = None,
     ):
 
-        self.framework_files: FrameworkFiles = self._directory_from_files(
+        self.training: FrameworkFiles = self._directory_from_files(
             files,
             directory_class=FrameworkFiles,
-            display_name="framework-files",
+            display_name="training",
         )
         self.sample_originals: SampleOriginals = self._directory_from_files(
             files,
             directory_class=SampleOriginals,
-            display_name="sample-originals",
+            display_name="sample_originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample-inputs",
+            display_name="sample_inputs",
         )
-        # TODO: Ignoring the dictionary type for now.
-        self.sample_outputs: Dict[str, NumpyDirectory] = self._directory_from_files(
-            files,
-            directory_class=NumpyDirectory,
-            display_name="sample-outputs",
+        self.sample_outputs: Dict[
+            str, NumpyDirectory
+        ] = self._sample_outputs_list_to_dict(
+            self._directory_from_files(
+                files,
+                directory_class=NumpyDirectory,
+                display_name="sample_outputs",
+                allow_multiple_outputs=True,
+            )
         )  # key by engine name.
+
         self.sample_labels: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="sample-labels"
+            files, directory_class=Directory, display_name="sample_labels"
         )
+
+        self.deployment: Directory = self._directory_from_files(
+            files, display_name="deployment", regex=False
+        )  # onnx folder
+
+        self.logs: Directory = self._directory_from_files(
+            files, display_name="logs", regex=False
+        )  # logs folder
+
         self.onnx_model: File = self._file_from_files(
             files, display_name="model.onnx"
         )  # model.onnx
-
-        self.onnx_models: List[File] = self._file_from_files(
-            files, display_name="model.(.*).onnx", regex=True
-        )  # model{.opset}.onnx
 
         self.analysis: File = self._file_from_files(
             files, display_name="analysis.yaml"
@@ -110,17 +117,24 @@ class ModelDirectory(Directory):
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
 
+        # sorting name of `sample_inputs` and `sample_output` files,
+        # so that they have same correspondence when we jointly
+        # iterate over them
         self.sample_inputs.files.sort(key=lambda x: x.name)
-        self.sample_outputs.files.sort(key=lambda x: x.name)
+        [
+            sample_outputs.files.sort(key=lambda x: x.name)
+            for sample_outputs in self.sample_outputs.values()
+        ]
 
         files = [
-            self.framework_files,
+            self.training,
             self.sample_originals,
             self.sample_inputs,
             self.sample_outputs,
             self.sample_labels,
+            self.deployment,
+            self.logs,
             self.onnx_model,
-            self.onnx_models,
             self.analysis,
             self.benchmarks,
             self.eval_results,
@@ -172,7 +186,7 @@ class ModelDirectory(Directory):
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
-    ) -> Union[List[np.ndarray], typing.OrderedDict[str, np.ndarray], None]:
+    ) -> Generator[List[numpy.ndarray], None, None]:
         """
         Chooses the appropriate engine type to obtain inference outputs
         from the `InferenceRunner` class object. The function yields model
@@ -183,7 +197,7 @@ class ModelDirectory(Directory):
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
             (located in the `self.path` directory).
-        :returns returns a data structure
+        :returns list
             containing numpy arrays, representing the output
             from the inference engine
         """
@@ -235,7 +249,7 @@ class ModelDirectory(Directory):
         # TODO: This is a hack for now,
         #  some files cannot be validated
         #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["framework-files"]
+        SKIP_ATTRIBUTES = ["training"]
 
         if self.path is None:
             raise ValueError(
@@ -258,7 +272,7 @@ class ModelDirectory(Directory):
                 for _file in file:
                     validations[_file.name] = _file.validate()
             elif isinstance(file, dict):
-                raise NotImplementedError()
+                pass
 
         return all(validations.values())
 
@@ -384,6 +398,7 @@ class ModelDirectory(Directory):
         ] = Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = True,
+        allow_multiple_outputs: Optional[bool] = False,
     ) -> Union[Directory, None]:
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
@@ -403,8 +418,10 @@ class ModelDirectory(Directory):
             return None
         # For now, following the logic of this class,
         # it is prohibitive for find more than
-        # one directory
+        # one directory (unless `allow-multiple_outputs`=True)
         elif len(directories_found) != 1:
+            if allow_multiple_outputs:
+                return directories_found
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
@@ -448,6 +465,39 @@ class ModelDirectory(Directory):
 
         else:
             raise NotImplementedError()
+
+    def _sample_outputs_list_to_dict(
+        self,
+        directories: Union[List[NumpyDirectory], NumpyDirectory],
+    ) -> Dict[str, NumpyDirectory]:
+        engine_to_numpydir_map = {}
+        if not isinstance(directories, list):
+            # if found a single 'sample_outputs' directory,
+            # assume it should be mapped to its the native framework
+            expected_name = "sample_outputs"
+            if directories.name != expected_name:
+                raise ValueError(
+                    "Found single folder (or tar.gz archive)"
+                    f"with expected name `{expected_name}`. However,"
+                    f"detected a name {directories.name}."
+                )
+            framework_name = self.model_card._validate_model_card()["framework"]
+            engine_to_numpydir_map[framework_name] = directories
+
+        else:
+            # if found multiple 'sample_outputs' directories,
+            # use directory name to relate it with the appropriate
+            # inference engine
+            for directory in directories:
+                engine_name = directory.name.split("_")[-1]
+                if engine_name not in ENGINES:
+                    raise ValueError(
+                        f"The name of the 'sample_outputs' directory should "
+                        f"end with an engine name (one of the {ENGINES}). "
+                        f"However, the name is {directory.name}."
+                    )
+                engine_to_numpydir_map[engine_name] = directory
+        return engine_to_numpydir_map
 
     @staticmethod
     def _is_file_tar(file):
