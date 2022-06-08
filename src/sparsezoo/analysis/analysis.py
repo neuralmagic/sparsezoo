@@ -18,7 +18,7 @@ import onnx
 from onnx import ModelProto, NodeProto
 
 from pydantic import BaseModel, Field
-from sparsezoo.analysis.helpers import (
+from sparsezoo.analysis.utils import (
     NodeShape,
     extract_node_shapes,
     get_layer_and_op_counts,
