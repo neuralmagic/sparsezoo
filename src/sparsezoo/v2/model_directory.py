@@ -473,7 +473,7 @@ class ModelDirectory(Directory):
         engine_to_numpydir_map = {}
         if not isinstance(directories, list):
             # if found a single 'sample_outputs' directory,
-            # assume it should be inferred using the native framework
+            # assume it should be related to its the native framework
             expected_name = "sample_outputs"
             if directories.name != expected_name:
                 raise ValueError(
