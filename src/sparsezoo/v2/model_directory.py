@@ -480,7 +480,7 @@ class ModelDirectory(Directory):
                     "Found single folder (or tar.gz archive)"
                     "with expected name `sample_outputs`. However,"
                     f"detected a name {directories.name}"
-                    f"It's name should be {expected_name}"
+                    f"It's name should be {expected_name}."
                 )
             engine_name = self.model_card._validate_model_card()["framework"]
             engine_to_numpydir_map[engine_name] = directories
