@@ -12,19 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import logging
 import os
 import pathlib
 import tarfile
 import time
 import traceback
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
 from sparsezoo.v2.file import File
 
 
 __all__ = ["Directory"]
+
+
+def _is_directory(file: Union[File, List[File], Dict[str, File]]) -> bool:
+    # check whether a File class object could be
+    # converted into a Directory class object
+    if not isinstance(file, File):
+        return False
+    file_stem = pathlib.Path(file.name).stem
+    # `file_stem` is `file.name` stripped from
+    # the possible file extension.
+    # if there is no extension, this means that
+    # the File represents a (non-archive) Directory.
+    return file_stem == file.name
+
+
+def _possibly_convert_files_to_dictionaries(
+    files: List[Union[File, List[File], Dict[str, File]]]
+) -> List[File]:
+    return [
+        Directory.from_file(file)
+        if (_is_directory(file) and not isinstance(file, Directory))
+        else file
+        for file in files
+    ]
 
 
 class Directory(File):
@@ -42,12 +67,14 @@ class Directory(File):
     def __init__(
         self,
         name: str,
-        files: Optional[List[File]] = None,
+        files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
 
-        self.files = files
+        self.files = (
+            files if not files else _possibly_convert_files_to_dictionaries(files)
+        )
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
@@ -55,6 +82,22 @@ class Directory(File):
 
         if self._unpack():
             self.unzip()
+
+    @classmethod
+    def from_file(cls, file: File) -> "Directory":
+        if not file.path:
+            raise ValueError(
+                f"Attempting to convert File class object {file.name} "
+                "to Directory class object, but the file.path is missing."
+            )
+        name = file.name
+        files = [
+            File(name=os.path.basename(path), path=path)
+            for path in glob.glob(os.path.join(file.path, "*"))
+        ]
+        files = _possibly_convert_files_to_dictionaries(files)
+        path = file.path
+        return cls(name=name, files=files, path=path)
 
     @property
     def is_archive(self) -> bool:
@@ -96,21 +139,24 @@ class Directory(File):
         """
 
         if self.is_archive:
-            # we are not validating tar files for now
+            # we are not validating tar files
+            # and assuming they are valid
             validations = {self.name: True}
         else:
             validations = {}
             for file in self.files:
                 validations[file.name] = file.validate(strict_mode=strict_mode)
 
-        if not all(validations.values()):
+        is_valid = all(validations.values())
+        if is_valid:
+            return True
+        else:
             logging.warning(
                 "Following files: "
                 f"{[key for key, value in validations.items() if not value]} "
                 "were not successfully validated."
             )
-
-        return all(validations.values())
+            return False
 
     def download(
         self,
@@ -156,6 +202,25 @@ class Directory(File):
         else:
             for file in self.files:
                 file.download(destination_path=destination_path)
+
+    def get_file(self, file_name: str) -> Optional[File]:
+        """
+        Fetch a file from the Directory by name.
+        If several files with the same name exist within
+        the nested structure, the first found instance is returned.
+
+        :param file_name: name of the file to be fetched
+        :return: File if found, otherwise None
+        """
+        for file in self.files:
+            if file.name == file_name:
+                return file
+            if isinstance(file, Directory):
+                file = file.get_file(file_name=file_name)
+                if file:
+                    return file
+        logging.warning(f"File with name {file_name} not found!")
+        return None
 
     def gzip(self, archive_directory: Optional[str] = None):
         """

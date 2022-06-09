@@ -44,8 +44,11 @@ class TestDirectory:
     def setup(self, files_extensions):
 
         # base temporary directory
-        _temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+        __temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         # second temporary directory (of Directory object)
+        _temp_dir = tempfile.TemporaryDirectory(dir=__temp_dir.name)
+        # third temporary directory (of Directory object)
+        # (for some tests we nest directories up to the third level)
         temp_dir = tempfile.TemporaryDirectory(dir=_temp_dir.name)
 
         name, path, list_files = _create_files_directory(files_extensions, temp_dir)
@@ -74,13 +77,31 @@ class TestDirectory:
         ) = setup
         directory = Directory(name=name, files=files, path=path)
 
-        new_files = [directory] * 3
-        new_path = os.path.dirname(directory.path)
-        new_name = os.path.basename(new_path)
-        directory = Directory(name=new_name, files=new_files, path=new_path)
-        assert directory.path == new_path
-        assert directory.files == new_files
-        assert directory.name == new_name
+        for _ in range(2):
+            directory = self._create_nested_directory(directory)
+        assert directory.path == os.path.dirname(os.path.dirname(path))
+        assert directory.name == os.path.basename(
+            os.path.dirname(os.path.dirname(path))
+        )
+        assert directory.validate()
+
+    def test_nested_directory_from_files(self, setup):
+        # tests whether File class objects, which represent directories,
+        # get automatically converted into directories
+        (
+            name,
+            path,
+            files,
+        ) = setup
+        file = File(name=name, path=path)
+
+        for _ in range(2):
+            file = self._create_nested_directory(file)
+        directory = Directory.from_file(file)
+        assert directory.path == os.path.dirname(os.path.dirname(path))
+        assert directory.name == os.path.basename(
+            os.path.dirname(os.path.dirname(path))
+        )
         assert directory.validate()
 
     def test_zipping_on_creation(self, setup):
@@ -133,3 +154,30 @@ class TestDirectory:
         assert set([file.name for file in files]) == set(directory.get_file_names())
         directory.gzip()
         assert set([file.name for file in files]) == set(directory.get_file_names())
+
+    def test_get_file(self, setup):
+        name, path, files = setup
+        directory = Directory(name=name, files=files, path=path)
+
+        file_name_exists = directory.files[0].name
+        file_name_not_exists = "dummy.onnx"
+
+        assert directory.get_file(file_name=file_name_exists)
+        assert directory.get_file(file_name=file_name_not_exists) is None
+
+        for _ in range(2):
+            directory = self._create_nested_directory(directory)
+
+        assert directory.get_file(file_name=file_name_exists)
+        assert directory.get_file(file_name=file_name_not_exists) is None
+
+    def _create_nested_directory(
+        self, file_or_directory: File, nesting_width: int = 3
+    ) -> File:
+        new_files = [file_or_directory] * nesting_width
+        new_path = os.path.dirname(file_or_directory.path)
+        new_name = os.path.basename(new_path)
+        if isinstance(file_or_directory, Directory):
+            return Directory(name=new_name, files=new_files, path=new_path)
+        else:
+            return File(name=new_name, path=new_path)

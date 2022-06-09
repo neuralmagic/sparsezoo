@@ -28,26 +28,26 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
 @pytest.mark.parametrize(
     "domain, sub_domain, model_index, expected_content",
     [
-        (
-            "cv",
-            "classification",
-            0,
-            [
-                "training",
-                "sample_originals",
-                "sample_inputs",
-                "sample_outputs",
-                "sample_labels",
-                "deployment",
-                "logs",
-                "model.onnx",
-                "analysis.yaml",
-                "benchmarks.yaml",
-                "eval.yaml",
-                "model.md",
-                ["recipe_foo.md", "recipe_bar.md"],
-            ],
-        ),
+        # (
+        #     "cv",
+        #     "classification",
+        #     0,
+        #     [
+        #         "training",
+        #         "sample_originals",
+        #         "sample_inputs",
+        #         "sample_outputs",
+        #         "sample_labels",
+        #         "deployment",
+        #         "logs",
+        #         "model.onnx",
+        #         "analysis.yaml",
+        #         "benchmarks.yaml",
+        #         "eval.yaml",
+        #         "model.md",
+        #         ["recipe_foo.md", "recipe_bar.md"],
+        #     ],
+        # ),
         (
             "nlp",
             "question_answering",
@@ -80,7 +80,8 @@ class TestModelDirectory:
             domain=domain, sub_domain=sub_domain, override_folder_name=temp_dir.name
         )[model_index]
         request_json = self._get_api_request(model)
-        directory_path = self._get_local_directory(model)
+        # directory_path = self._get_local_directory(model)
+        directory_path = "/home/damian/folder"
 
         yield directory_path, request_json, expected_content, temp_dir
 
@@ -249,7 +250,7 @@ class TestModelDirectory:
                     [_expected_file for _expected_file in expected_file]
                 )
             elif isinstance(file, dict):
-                pass
+                assert {"onnxruntime", "deepsparse"} == set(file.keys())
             else:
                 if from_zoo and file.name.endswith(".tar.gz"):
                     expected_file += ".tar.gz"

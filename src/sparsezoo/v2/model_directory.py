@@ -23,8 +23,7 @@ import numpy
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
-from sparsezoo.v2.integration_validator import IntegrationValidator
-from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
+from sparsezoo.v2.model_objects import NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
@@ -60,9 +59,9 @@ class ModelDirectory(Directory):
         url: Optional[str] = None,
     ):
 
-        self.training: FrameworkFiles = self._directory_from_files(
+        self.training: Directory = self._directory_from_files(
             files,
-            directory_class=FrameworkFiles,
+            directory_class=Directory,
             display_name="training",
         )
         self.sample_originals: SampleOriginals = self._directory_from_files(
@@ -150,6 +149,8 @@ class ModelDirectory(Directory):
         )
 
         super().__init__(files=files, name=name, path=path, url=url)
+        from sparsezoo.v2.integration_validator import IntegrationValidator
+
         self.integration_validator = IntegrationValidator(model_directory=self)
 
     @classmethod
@@ -235,8 +236,12 @@ class ModelDirectory(Directory):
         """
         Validate the ModelDirectory class object:
         1. Validate that the sample inputs and outputs work with ONNX Runtime
-        2. Validate all the folders
+        2. Validate all the folders (this is done by a separate helper class
+            IntegrationValidator)
 
+        :param minimal_validation: boolean flag; if True, only the essential files
+            in the `training` folder are validated. Else, the `training` folder is
+            expected to contain a full set of framework files.
         return: a boolean flag; if True, the validation has been successful
         """
 
@@ -247,12 +252,11 @@ class ModelDirectory(Directory):
             )
             return False
 
-        self.integration_validator.validate(minimal_validation)
-        return True
+        return self.integration_validator.validate(minimal_validation)
 
     def analyze(self):
         # TODO: This will be the onboarding task for Kyle
-        pass
+        raise NotImplementedError()
 
     def _get_directory(
         self,
@@ -367,9 +371,7 @@ class ModelDirectory(Directory):
     def _directory_from_files(
         self,
         files: List[Dict[str, Any]],
-        directory_class: Union[
-            Directory, NumpyDirectory, FrameworkFiles, SampleOriginals
-        ] = Directory,
+        directory_class: Union[Directory, NumpyDirectory, SampleOriginals] = Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = True,
         allow_multiple_outputs: Optional[bool] = False,
