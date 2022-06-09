@@ -18,15 +18,15 @@ import matplotlib.pyplot as plt
 
 from sparsezoo.analysis import ModelAnalysis
 
-def draw_param_sparsity_chart(model_analysis: ModelAnalysis, out_path: str):
-    figure, param_axes = plt.subplots()
+def draw_param_sparsity_chart(model_analysis: ModelAnalysis, out_path: str, model_name: str = "Model", text_size: float = 8.0, width: float = 0.3, figsize=(20, 12)):
+    figure, param_axes = plt.subplots(figsize=figsize)
     ops_axes = param_axes.twinx()
 
-    text_size = 8
-    width = 0.3
+    # Set title
+    figure.suptitle(f"{model_name} Parameter and Operation Sparsity")
 
+    # Ingest node data
     parameterized_prunable_nodes = [node for node in model_analysis.layers if node.parameterized_and_prunable]
-
     node_data = {
         "node_names": [],
         "parameters_pos": [],
@@ -45,23 +45,25 @@ def draw_param_sparsity_chart(model_analysis: ModelAnalysis, out_path: str):
         node_data["sparse_ops"].append(node.num_sparse_ops)
         node_data["dense_ops"].append(node.num_dense_ops)
 
+    # Draw parameters bars
     param_axes.bar(node_data["parameters_pos"], node_data["sparse_parameters"], width=width, color="deeppink", label="sparse parameters")
     param_axes.bar(node_data["parameters_pos"], node_data["dense_parameters"], bottom=node_data["sparse_parameters"], width=width, color="blue", label="dense parameters")
 
-    ops_axes.bar(node_data["ops_pos"], node_data["sparse_ops"], width=width, color="purple", label="sparse operations")
-    ops_axes.bar(node_data["ops_pos"], node_data["dense_ops"], bottom=node_data["sparse_ops"], width=width, color="darkblue", label="dense operations")
-
     param_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
-    param_axes.set_xticklabels(node_data["node_names"])
     param_axes.invert_xaxis()
     param_axes.set_ylabel('Number of parameters')
     param_axes.legend(loc="upper left")
+
+    # Draw operations bars
+    ops_axes.bar(node_data["ops_pos"], node_data["sparse_ops"], width=width, color="purple", label="sparse operations")
+    ops_axes.bar(node_data["ops_pos"], node_data["dense_ops"], bottom=node_data["sparse_ops"], width=width, color="darkblue", label="dense operations")
 
     ops_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
     ops_axes.invert_xaxis()
     ops_axes.set_ylabel('Number of floating-point/ integer operations')
     ops_axes.legend(loc="upper right")
 
+    # Draw percent sparse text
     for node_i in range(len(parameterized_prunable_nodes)):
         total_parameters = node_data["dense_parameters"][node_i] + node_data["sparse_parameters"][node_i]
         if total_parameters > 0:
@@ -73,8 +75,9 @@ def draw_param_sparsity_chart(model_analysis: ModelAnalysis, out_path: str):
             operation_sparsity = node_data["sparse_ops"][node_i] / total_ops
             ops_axes.text(node_data["ops_pos"][node_i], total_ops, f"{operation_sparsity:.0%}", color='black', fontweight='bold', size=text_size, verticalalignment="bottom", horizontalalignment="center")
 
-    param_axes.set_title('Model parameter and operation sparsity')
-
+    # Draw x-axis labels
+    param_axes.set_xticklabels(node_data["node_names"])
     plt.setp(param_axes.get_xticklabels(), rotation=30, ha="right")
 
-    plt.show()
+    # Save to file
+    plt.savefig(out_path)
