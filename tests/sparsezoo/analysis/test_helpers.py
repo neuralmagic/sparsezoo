@@ -549,7 +549,7 @@ def test_is_four_block_sparse_layer(
         ("bert_pruned_quantized", "MatMul_157_quant", (226492416, 0)),
         ("bert_pruned_quantized", "MatMul_2083_quant", (90599424, 362385408)),
         ("bert_pruned_quantized", "MatMul_80_bias_add_quant_cast", (0, 0)),
-        ("resnet50_pruned_quantized", "Conv_431_quant", (36158080, 67003776)),
+        ("resnet50_pruned_quantized", "Conv_431_quant", (15742720, 87419136)),
         ("resnet50_pruned_quantized", "DequantizeLinear_22", (0, 0)),
         ("resnet50_pruned_quantized", "Add_1168", (100352, 0)),
         ("resnet50_pruned_quantized", "QuantizeLinear_1178", (0, 0)),

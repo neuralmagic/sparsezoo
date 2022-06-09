@@ -165,7 +165,7 @@ def test_non_parameterized_operator_counts(
         ("yolact_none", 152945774384),
         ("mobilenet_v1_pruned_moderate", 260417254),
         ("bert_pruned_quantized", 18590812800),
-        ("resnet50_pruned_quantized", 3124791808),
+        ("resnet50_pruned_quantized", 1363458648),
     ],
 )
 def test_num_dense_ops(model_name, expected_value, get_model_analysis):
@@ -180,7 +180,7 @@ def test_num_dense_ops(model_name, expected_value, get_model_analysis):
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 847771932),
         ("bert_pruned_quantized", 52275962880),
-        ("resnet50_pruned_quantized", 4948878824),
+        ("resnet50_pruned_quantized", 6710211984),
     ],
 )
 def test_num_sparse_ops(model_name, expected_value, get_model_analysis):
