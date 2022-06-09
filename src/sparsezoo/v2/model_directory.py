@@ -90,8 +90,8 @@ class ModelDirectory(Directory):
             files, directory_class=Directory, display_name="sample_labels"
         )
 
-        self.onnx_folder: Directory = self._directory_from_files(
-            files, display_name="onnx", regex=False
+        self.deployment: Directory = self._directory_from_files(
+            files, display_name="deployment", regex=False
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(
@@ -133,7 +133,7 @@ class ModelDirectory(Directory):
             self.sample_inputs,
             self.sample_outputs,
             self.sample_labels,
-            self.onnx_folder,
+            self.deployment,
             self.logs,
             self.onnx_model,
             self.analysis,
@@ -199,8 +199,7 @@ class ModelDirectory(Directory):
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
             (located in the `self.path` directory).
-        :returns returns list
-            containing numpy arrays, representing the output
+        :returns list containing numpy arrays, representing the output
             from the inference engine
         """
 
@@ -240,6 +239,13 @@ class ModelDirectory(Directory):
 
         return: a boolean flag; if True, the validation has been successful
         """
+
+        if not self.inference_runner.validate_with_onnx_runtime():
+            logging.warning(
+                "Failed to validate the compatibility of "
+                "`sample_inputs` files with the `model.onnx` model."
+            )
+            return False
 
         self.integration_validator.validate(minimal_validation)
         return True
