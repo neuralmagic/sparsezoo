@@ -74,6 +74,11 @@ class ModelDirectory(Directory):
             directory_class=NumpyDirectory,
             display_name="sample_inputs",
         )
+
+        self.model_card: File = self._file_from_files(
+            files, display_name="model.md"
+        )  # model.md
+
         self.sample_outputs: Dict[
             str, NumpyDirectory
         ] = self._sample_outputs_list_to_dict(
@@ -114,9 +119,7 @@ class ModelDirectory(Directory):
         self.eval_results: File = self._file_from_files(
             files, display_name="eval.yaml"
         )  # eval.yaml
-        self.model_card: File = self._file_from_files(
-            files, display_name="model.md"
-        )  # model.md
+
         self.recipes: List[File] = self._file_from_files(
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
@@ -236,25 +239,31 @@ class ModelDirectory(Directory):
 
         return all(downloads)
 
-    def validate(self, minimal_validation=False) -> bool:
+    def validate(
+        self, validate_onnxruntime: bool = True, minimal_validation: bool = False
+    ) -> bool:
         """
         Validate the ModelDirectory class object:
         1. Validate that the sample inputs and outputs work with ONNX Runtime
+            (if `validate_onnxruntime=True`)
         2. Validate all the folders (this is done by a separate helper class
             IntegrationValidator)
 
+        :param validate_onnxruntime: boolean flag; if True, validate that the
+            sample inputs and outputs work with ONNX Runtime
         :param minimal_validation: boolean flag; if True, only the essential files
             in the `training` folder are validated. Else, the `training` folder is
             expected to contain a full set of framework files.
         return: a boolean flag; if True, the validation has been successful
         """
 
-        if not self.inference_runner.validate_with_onnx_runtime():
-            logging.warning(
-                "Failed to validate the compatibility of "
-                "`sample_inputs` files with the `model.onnx` model."
-            )
-            return False
+        if validate_onnxruntime:
+            if not self.inference_runner.validate_with_onnx_runtime():
+                logging.warning(
+                    "Failed to validate the compatibility of "
+                    "`sample_inputs` files with the `model.onnx` model."
+                )
+                return False
 
         return self.integration_validator.validate(minimal_validation)
 

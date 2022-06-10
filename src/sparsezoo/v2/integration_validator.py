@@ -140,6 +140,8 @@ class IntegrationValidator:
                 )
             else:
                 file_names = set(deployment_directory.get_file_names())
+                for optional_file in self.optional_training_files:
+                    file_names.discard(optional_file)
                 if expected_file_names != file_names:
                     raise ValueError(
                         f"Failed to find expected files "
@@ -196,8 +198,14 @@ class IntegrationValidator:
 
         return file_names
 
-    def _validate_cv_classification(self):
-        raise NotImplementedError()
+    def _validate_cv_classification(self, deployment: bool = False):
+        file_names = {
+            "model.pth",
+        }
+        if deployment:
+            file_names.update(self.additional_deployment_files)
+
+        return file_names
 
     def _validate_cv_detection(self):
         raise NotImplementedError()
