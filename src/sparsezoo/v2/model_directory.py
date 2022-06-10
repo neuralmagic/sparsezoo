@@ -91,6 +91,10 @@ class ModelDirectory(Directory):
 
         self.deployment: Directory = self._directory_from_files(
             files, display_name="deployment", regex=False
+        )  # deployment_folder
+
+        self.onnx_folder: Directory = self._directory_from_files(
+            files, display_name="onnx", regex=False
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(

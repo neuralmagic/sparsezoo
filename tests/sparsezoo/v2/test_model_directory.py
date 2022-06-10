@@ -28,26 +28,27 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
 @pytest.mark.parametrize(
     "domain, sub_domain, model_index, expected_content",
     [
-        # (
-        #     "cv",
-        #     "classification",
-        #     0,
-        #     [
-        #         "training",
-        #         "sample_originals",
-        #         "sample_inputs",
-        #         "sample_outputs",
-        #         "sample_labels",
-        #         "deployment",
-        #         "logs",
-        #         "model.onnx",
-        #         "analysis.yaml",
-        #         "benchmarks.yaml",
-        #         "eval.yaml",
-        #         "model.md",
-        #         ["recipe_foo.md", "recipe_bar.md"],
-        #     ],
-        # ),
+        (
+            "cv",
+            "classification",
+            0,
+            [
+                "training",
+                "sample_originals",
+                "sample_inputs",
+                "sample_outputs",
+                "sample_labels",
+                "deployment",
+                "onnx",
+                "logs",
+                "model.onnx",
+                "analysis.yaml",
+                "benchmarks.yaml",
+                "eval.yaml",
+                "model.md",
+                ["recipe_foo.md", "recipe_bar.md"],
+            ],
+        ),
         (
             "nlp",
             "question_answering",
@@ -59,6 +60,7 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
                 "sample_outputs",
                 "sample_labels",
                 "deployment",
+                "onnx",
                 "logs",
                 "model.onnx",
                 "analysis.yaml",
@@ -80,8 +82,7 @@ class TestModelDirectory:
             domain=domain, sub_domain=sub_domain, override_folder_name=temp_dir.name
         )[model_index]
         request_json = self._get_api_request(model)
-        # directory_path = self._get_local_directory(model)
-        directory_path = "/home/damian/folder"
+        directory_path = self._get_local_directory(model)
 
         yield directory_path, request_json, expected_content, temp_dir
 
@@ -110,6 +111,7 @@ class TestModelDirectory:
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         assert model_directory.validate()
+        assert model_directory.validate(minimal_validation=True)
 
     def test_validate_from_zoo_api(self, setup):
         _, request_json, expected_content, temp_dir = setup
