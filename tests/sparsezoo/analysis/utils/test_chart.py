@@ -64,10 +64,7 @@ def get_model_analysis():
 )
 def test_draw_sparsity_by_layer_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    out_path = f"/Users/poketopa/Desktop/analysis_tool/draw_sparsity_by_layer_chart_{model_name}.png"
-    draw_sparsity_by_layer_chart(
-        model_analysis, out_path=out_path, model_name=model_name
-    )
+    draw_sparsity_by_layer_chart(model_analysis, out_path=None, model_name=model_name)
 
 
 @pytest.mark.parametrize(
@@ -81,10 +78,7 @@ def test_draw_sparsity_by_layer_chart(model_name, get_model_analysis):
 )
 def test_draw_operation_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    out_path = (
-        f"/Users/poketopa/Desktop/analysis_tool/draw_operation_chart_{model_name}.png"
-    )
-    draw_operation_chart(model_analysis, out_path=out_path, model_name=model_name)
+    draw_operation_chart(model_analysis, out_path=None, model_name=model_name)
 
 
 @pytest.mark.parametrize(
@@ -98,10 +92,7 @@ def test_draw_operation_chart(model_name, get_model_analysis):
 )
 def test_draw_parameter_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    out_path = (
-        f"/Users/poketopa/Desktop/analysis_tool/draw_parameter_chart_{model_name}.png"
-    )
-    draw_parameter_chart(model_analysis, out_path=out_path, model_name=model_name)
+    draw_parameter_chart(model_analysis, out_path=None, model_name=model_name)
 
 
 @pytest.mark.parametrize(
@@ -115,7 +106,6 @@ def test_draw_parameter_chart(model_name, get_model_analysis):
 )
 def test_draw_parameter_operation_combined_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    out_path = f"/Users/poketopa/Desktop/analysis_tool/draw_parameter_operation_combined_chart_{model_name}.png"
     draw_parameter_operation_combined_chart(
-        model_analysis, out_path=out_path, model_name=model_name
+        model_analysis, out_path=None, model_name=model_name
     )
