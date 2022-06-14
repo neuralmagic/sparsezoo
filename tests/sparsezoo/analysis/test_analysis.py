@@ -165,7 +165,7 @@ def test_non_parameterized_operator_counts(
         ("yolact_none", 152945774384),
         ("mobilenet_v1_pruned_moderate", 260417254),
         ("bert_pruned_quantized", 18590812800),
-        ("resnet50_pruned_quantized", 3124791808),
+        ("resnet50_pruned_quantized", 1363458648),
     ],
 )
 def test_num_dense_ops(model_name, expected_value, get_model_analysis):
@@ -180,7 +180,7 @@ def test_num_dense_ops(model_name, expected_value, get_model_analysis):
         ("yolact_none", 0),
         ("mobilenet_v1_pruned_moderate", 847771932),
         ("bert_pruned_quantized", 52275962880),
-        ("resnet50_pruned_quantized", 4948878824),
+        ("resnet50_pruned_quantized", 6710211984),
     ],
 )
 def test_num_sparse_ops(model_name, expected_value, get_model_analysis):
@@ -325,6 +325,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="Conv_0",
                 op_type="Conv",
+                weight_name="799",
                 parameterized_and_prunable=True,
                 num_dense_ops=531766592,
                 num_sparse_ops=0,
@@ -345,6 +346,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="Conv_72",
                 op_type="Conv",
+                weight_name="sections.4.0.point.conv.weight",
                 parameterized_and_prunable=True,
                 num_dense_ops=5138042,
                 num_sparse_ops=46242182,
@@ -365,6 +367,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="MatMul_80_quant",
                 op_type="MatMulInteger",
+                weight_name="MatMul_80.weight_quantized",
                 parameterized_and_prunable=True,
                 num_dense_ops=90599424,
                 num_sparse_ops=362385408,
@@ -408,5 +411,8 @@ def test_model_analysis_json(model_name, get_model_analysis):
 
     model_json = model_analysis.json()
     model_from_json = ModelAnalysis.parse_raw(model_json)
+
+    with open(f"/Users/poketopa/Desktop/{model_name}.json", "w") as jsonfile:
+        jsonfile.write(model_json)
 
     assert model_analysis == model_from_json

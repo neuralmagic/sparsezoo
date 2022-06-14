@@ -24,6 +24,7 @@ __all__ = [
     "get_node_four_block_sparsity",
     "get_node_num_four_block_zeros_and_size",
     "get_node_sparsity",
+    "get_node_weight_name",
     "get_node_weight",
     "get_node_bias",
     "get_node_num_zeros_and_size",
@@ -310,6 +311,40 @@ def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     return get_node_weight(model, node) is not None
 
 
+def get_node_weight_name(model: ModelProto, node: NodeProto) -> str:
+    """
+    :param model: model that contains the given node
+    :param node: node that contains the weight
+    :return: name of the weight initializer of the node, None if not found
+    """
+    initializer_names = [init.name for init in model.graph.initializer]
+
+    if node.op_type == "Gather":
+        return _get_node_input(node, 0, default=None)
+
+    if node.op_type in ["Conv", "ConvInteger"]:
+        return _get_node_input(node, 1, default=None)
+
+    if node.op_type == "QLinearConv":
+        return _get_node_input(node, 3, default=None)
+
+    if node.op_type == "QLinearMatMul":
+        input_b_name = _get_node_input(node, 3, default=None)
+        if input_b_name in initializer_names:
+            return input_b_name
+
+        input_a_name = _get_node_input(node, 0, default=None)
+        if input_a_name in initializer_names:
+            return input_a_name
+
+    if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
+        return next(
+            input_name for input_name in node.input if input_name in initializer_names
+        )
+
+    return None
+
+
 def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     """
     Finds parameter value of node (the node weight)
@@ -319,37 +354,7 @@ def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
     :return: a numpy array of param value, None if not found
     """
 
-    def _get_node_weight_name(model: ModelProto, node: NodeProto) -> str:
-        initializer_names = [init.name for init in model.graph.initializer]
-
-        if node.op_type == "Gather":
-            return _get_node_input(node, 0, default=None)
-
-        if node.op_type in ["Conv", "ConvInteger"]:
-            return _get_node_input(node, 1, default=None)
-
-        if node.op_type == "QLinearConv":
-            return _get_node_input(node, 3, default=None)
-
-        if node.op_type == "QLinearMatMul":
-            input_b_name = _get_node_input(node, 3, default=None)
-            if input_b_name in initializer_names:
-                return input_b_name
-
-            input_a_name = _get_node_input(node, 0, default=None)
-            if input_a_name in initializer_names:
-                return input_a_name
-
-        if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
-            return next(
-                input_name
-                for input_name in node.input
-                if input_name in initializer_names
-            )
-
-        return None
-
-    initializer_name = _get_node_weight_name(model, node)
+    initializer_name = get_node_weight_name(model, node)
     if initializer_name is None:
         return None
 
