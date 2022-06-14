@@ -412,7 +412,4 @@ def test_model_analysis_json(model_name, get_model_analysis):
     model_json = model_analysis.json()
     model_from_json = ModelAnalysis.parse_raw(model_json)
 
-    with open(f"/Users/poketopa/Desktop/{model_name}.json", "w") as jsonfile:
-        jsonfile.write(model_json)
-
     assert model_analysis == model_from_json
