@@ -59,14 +59,14 @@ def draw_sparsity_by_layer_chart(
         numpy.arange(len(node_data["names"])),
         node_data["sparsities"],
         color="deeppink",
-        label="dense parameters",
+        label="sparse parameters",
     )
     axes.bar(
         numpy.arange(len(node_data["names"])),
         [100 - sparsity for sparsity in node_data["sparsities"]],
         bottom=node_data["sparsities"],
         color="blue",
-        label="sparse parameters",
+        label="dense parameters",
     )
 
     # Draw labels
