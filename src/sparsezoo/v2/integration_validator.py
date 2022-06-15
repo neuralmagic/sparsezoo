@@ -84,7 +84,7 @@ class IntegrationValidator:
             mode = "essential" if self.minimal_validation else "full"
             raise ValueError(
                 "The attempt to validate ModelDirectory's structure "
-                f"(against the {mode} expected set of files)."
+                f"(against the {mode} expected set of files) failed."
             )
 
         for file in self.model_directory.files:
