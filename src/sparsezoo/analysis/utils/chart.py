@@ -74,7 +74,7 @@ def draw_sparsity_by_layer_chart(
     axes.set_xticklabels(node_data["names"])
     plt.setp(axes.get_xticklabels(), rotation=35, ha="right")
     axes.set_ylabel("Sparsity (%)")
-    axes.legend(loc="upper right")
+    axes.legend(loc="upper left")
 
     # Reduce margins to zero
     axes.margins(0)
