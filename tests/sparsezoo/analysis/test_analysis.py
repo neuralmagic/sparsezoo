@@ -325,6 +325,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="Conv_0",
                 op_type="Conv",
+                weight_name="799",
                 parameterized_and_prunable=True,
                 num_dense_ops=531766592,
                 num_sparse_ops=0,
@@ -345,6 +346,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="Conv_72",
                 op_type="Conv",
+                weight_name="sections.4.0.point.conv.weight",
                 parameterized_and_prunable=True,
                 num_dense_ops=5138042,
                 num_sparse_ops=46242182,
@@ -365,6 +367,7 @@ def test_average_four_block_sparsity(
             NodeAnalysis(
                 name="MatMul_80_quant",
                 op_type="MatMulInteger",
+                weight_name="MatMul_80.weight_quantized",
                 parameterized_and_prunable=True,
                 num_dense_ops=90599424,
                 num_sparse_ops=362385408,

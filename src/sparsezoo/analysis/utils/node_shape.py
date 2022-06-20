@@ -30,10 +30,23 @@ from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
 _LOGGER = logging.getLogger(__name__)
 
 __all__ = [
+    "NodeShape",
     "extract_node_id",
     "extract_node_shapes",
-    "NodeShape",
 ]
+
+
+"""
+Tuple containing a node id and its input and output shapes
+"""
+NodeShape = NamedTuple(
+    "NodeShape",
+    [
+        ("id", str),
+        ("input_shapes", Union[List[List[int]], None]),
+        ("output_shapes", Union[List[List[int]], None]),
+    ],
+)
 
 
 def extract_node_id(node: NodeProto) -> str:
@@ -48,58 +61,6 @@ def extract_node_id(node: NodeProto) -> str:
     outputs = node.output
 
     return str(outputs[0])
-
-
-def extract_dtype(proto: Any) -> numpy.dtype:
-    """
-    Extract data type info from a proto
-    Used for reconstructing a node input for shape inference
-
-    :param proto: the proto to get dtype info for
-    :return: the numpy dtype of the tensor belonging to the proto
-    """
-    tensor_type = proto.type.tensor_type
-    if not tensor_type.HasField("elem_type"):
-        return None
-
-    return TENSOR_TYPE_TO_NP_TYPE[proto.type.tensor_type.elem_type]
-
-
-def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
-    """
-    Extract the shape info from a proto.
-    Convenient for inputs into a model for example to get the tensor dimension.
-
-    :param proto: the proto to get tensor shape info for
-    :return: a tuple containing shape info if found, else None
-    """
-    tensor_type = proto.type.tensor_type
-
-    if not tensor_type.HasField("shape"):
-        return None
-
-    shape = []
-
-    for dim in tensor_type.shape.dim:
-        if dim.HasField("dim_value"):
-            shape.append(dim.dim_value)
-        else:
-            shape.append(None)
-
-    return tuple(shape)
-
-
-"""
-Tuple containing a node id and its input and output shapes
-"""
-NodeShape = NamedTuple(
-    "NodeShape",
-    [
-        ("id", str),
-        ("input_shapes", Union[List[List[int]], None]),
-        ("output_shapes", Union[List[List[int]], None]),
-    ],
-)
 
 
 def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
@@ -275,3 +236,42 @@ def extract_node_shapes(model: ModelProto) -> Dict[str, NodeShape]:
         _fix_shapes(node_shape.output_shapes)
 
     return node_shapes
+
+
+def extract_dtype(proto: Any) -> numpy.dtype:
+    """
+    Extract data type info from a proto
+    Used for reconstructing a node input for shape inference
+
+    :param proto: the proto to get dtype info for
+    :return: the numpy dtype of the tensor belonging to the proto
+    """
+    tensor_type = proto.type.tensor_type
+    if not tensor_type.HasField("elem_type"):
+        return None
+
+    return TENSOR_TYPE_TO_NP_TYPE[proto.type.tensor_type.elem_type]
+
+
+def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
+    """
+    Extract the shape info from a proto.
+    Convenient for inputs into a model for example to get the tensor dimension.
+
+    :param proto: the proto to get tensor shape info for
+    :return: a tuple containing shape info if found, else None
+    """
+    tensor_type = proto.type.tensor_type
+
+    if not tensor_type.HasField("shape"):
+        return None
+
+    shape = []
+
+    for dim in tensor_type.shape.dim:
+        if dim.HasField("dim_value"):
+            shape.append(dim.dim_value)
+        else:
+            shape.append(None)
+
+    return tuple(shape)

@@ -18,7 +18,7 @@ import onnx
 from onnx import ModelProto, NodeProto
 
 from pydantic import BaseModel, Field
-from sparsezoo.analysis.helpers import (
+from sparsezoo.analysis.utils import (
     NodeShape,
     extract_node_shapes,
     get_layer_and_op_counts,
@@ -27,6 +27,7 @@ from sparsezoo.analysis.helpers import (
     get_node_num_zeros_and_size,
     get_node_sparsity,
     get_node_weight,
+    get_node_weight_name,
     get_num_dense_and_sparse_ops,
     get_zero_point,
     is_parameterized_prunable_layer,
@@ -48,6 +49,7 @@ class NodeAnalysis(BaseModel):
 
     name: str = Field(description="This node's name")
     op_type: str = Field(description="This node's op type")
+    weight_name: Optional[str] = Field(description="The name of this node's weight")
     parameterized_and_prunable: bool = Field(
         description="Does this node have a parameterized and prunable weight"
     )
@@ -116,6 +118,7 @@ class NodeAnalysis(BaseModel):
         return cls(
             name=node.name,
             op_type=node.op_type,
+            weight_name=get_node_weight_name(model_onnx, node),
             parameterized_and_prunable=is_parameterized_prunable_layer(
                 model_onnx, node
             ),

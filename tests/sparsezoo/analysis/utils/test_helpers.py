@@ -16,7 +16,7 @@ import onnx
 import pytest
 
 from sparsezoo import Zoo
-from sparsezoo.analysis.helpers import (
+from sparsezoo.analysis.utils import (
     extract_node_shapes,
     get_layer_and_op_counts,
     get_node_bias,
