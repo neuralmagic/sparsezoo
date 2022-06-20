@@ -48,9 +48,9 @@ def get_num_dense_and_sparse_ops(
 
     :param model: model that contains the given node
     :param node: node which performs the operations
-    :param node_shapes: Optional dictionary of node shapes. If not supplied,
+    :param node_shapes: optional dictionary of node shapes. If not supplied,
         node_shapes will be computed
-    :param is_four_block_sparse: Optional boolean indicating if this node is four
+    :param is_four_block_sparse: optional boolean indicating if this node is four
         block sparse. If not supplied, it be will be computed
     :return: number of operations performed by node
     """
@@ -69,7 +69,12 @@ def get_num_dense_and_sparse_ops(
 
     node_attributes = get_node_attributes(node)
 
-    if node.op_type in ["Add", "Mul", "Div", "Sub", "Clip"] or node.op_type in [
+    if node.op_type in [
+        "Add",
+        "Mul",
+        "Div",
+        "Sub",
+        "Clip",
         "Relu",
         "LeakyRelu",
         "Sigmoid",

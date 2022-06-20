@@ -99,7 +99,7 @@ class NodeAnalysis(BaseModel):
         :param cls: class being constructed
         :param model_onnx: model onnx that node belongs to
         :param node: node being analyzed
-        :param node_shapes: Optional dictionary of node shapes. If not supplied,
+        :param node_shapes: optional dictionary of node shapes. If not supplied,
         node_shapes will be computed
         :return: instance of NodeAnalysis class
         """
@@ -245,7 +245,7 @@ class ModelAnalysis(BaseModel):
     def analyze_nodes(model_onnx: ModelProto) -> List[NodeAnalysis]:
         """
         :param: model that contains the nodes to be analyzed
-        :return: List of node analyses from model graph
+        :return: list of node analyses from model graph
         """
         node_shapes = extract_node_shapes(model_onnx)
 
