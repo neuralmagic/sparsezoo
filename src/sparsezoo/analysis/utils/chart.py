@@ -20,6 +20,14 @@ import matplotlib.pyplot as plt
 from sparsezoo.analysis import ModelAnalysis, NodeAnalysis
 
 
+__all__ = [
+    "draw_sparsity_by_layer_chart",
+    "draw_parameter_chart",
+    "draw_operation_chart",
+    "draw_parameter_operation_combined_chart",
+]
+
+
 def draw_sparsity_by_layer_chart(
     model_analysis: ModelAnalysis,
     out_path: str,
