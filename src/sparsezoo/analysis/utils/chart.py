@@ -65,16 +65,16 @@ def draw_sparsity_by_layer_chart(
     # Draw chart data
     axes.bar(
         numpy.arange(len(node_data["names"])),
-        node_data["sparsities"],
-        color="deeppink",
-        label="sparse parameters",
-    )
-    axes.bar(
-        numpy.arange(len(node_data["names"])),
         [100 - sparsity for sparsity in node_data["sparsities"]],
         bottom=node_data["sparsities"],
         color="blue",
         label="dense parameters",
+    )
+    axes.bar(
+        numpy.arange(len(node_data["names"])),
+        node_data["sparsities"],
+        color="deeppink",
+        label="sparse parameters",
     )
 
     # Draw labels
@@ -131,18 +131,18 @@ def draw_parameter_chart(
     # Draw parameters bars
     param_axes.bar(
         numpy.arange(len(node_data["names"])),
-        node_data["sparse_parameters"],
-        width=bar_width,
-        color="deeppink",
-        label="sparse parameters",
-    )
-    param_axes.bar(
-        numpy.arange(len(node_data["names"])),
         node_data["dense_parameters"],
         bottom=node_data["sparse_parameters"],
         width=bar_width,
         color="blue",
         label="dense parameters",
+    )
+    param_axes.bar(
+        numpy.arange(len(node_data["names"])),
+        node_data["sparse_parameters"],
+        width=bar_width,
+        color="deeppink",
+        label="sparse parameters",
     )
 
     param_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
@@ -218,18 +218,18 @@ def draw_operation_chart(
     # Draw operations bars
     ops_axes.bar(
         range(len(node_data["names"])),
-        node_data["sparse_ops"],
-        width=bar_width,
-        color="purple",
-        label="sparse operations",
-    )
-    ops_axes.bar(
-        range(len(node_data["names"])),
         node_data["dense_ops"],
         bottom=node_data["sparse_ops"],
         width=bar_width,
         color="darkblue",
         label="dense operations",
+    )
+    ops_axes.bar(
+        range(len(node_data["names"])),
+        node_data["sparse_ops"],
+        width=bar_width,
+        color="purple",
+        label="sparse operations",
     )
 
     ops_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
@@ -313,18 +313,18 @@ def draw_parameter_operation_combined_chart(
     # Draw parameters bars
     param_axes.bar(
         node_data["parameters_pos"],
-        node_data["sparse_parameters"],
-        width=bar_width,
-        color="deeppink",
-        label="sparse parameters",
-    )
-    param_axes.bar(
-        node_data["parameters_pos"],
         node_data["dense_parameters"],
         bottom=node_data["sparse_parameters"],
         width=bar_width,
         color="blue",
         label="dense parameters",
+    )
+    param_axes.bar(
+        node_data["parameters_pos"],
+        node_data["sparse_parameters"],
+        width=bar_width,
+        color="deeppink",
+        label="sparse parameters",
     )
 
     param_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
@@ -334,18 +334,18 @@ def draw_parameter_operation_combined_chart(
     # Draw operations bars
     ops_axes.bar(
         node_data["ops_pos"],
-        node_data["sparse_ops"],
-        width=bar_width,
-        color="purple",
-        label="sparse operations",
-    )
-    ops_axes.bar(
-        node_data["ops_pos"],
         node_data["dense_ops"],
         bottom=node_data["sparse_ops"],
         width=bar_width,
         color="darkblue",
         label="dense operations",
+    )
+    ops_axes.bar(
+        node_data["ops_pos"],
+        node_data["sparse_ops"],
+        width=bar_width,
+        color="purple",
+        label="sparse operations",
     )
 
     ops_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
