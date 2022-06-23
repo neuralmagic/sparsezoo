@@ -406,10 +406,10 @@ def test_node_analyses(model_name, expected_node_analysis, get_model_analysis):
         ("resnet50_pruned_quantized"),
     ],
 )
-def test_model_analysis_json(model_name, get_model_analysis):
+def test_model_analysis_yaml(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
 
-    model_json = model_analysis.json()
-    model_from_json = ModelAnalysis.parse_raw(model_json)
+    model_yaml = model_analysis.yaml()
+    model_from_yaml = ModelAnalysis.parse_yaml(model_yaml)
 
-    assert model_analysis == model_from_json
+    assert model_analysis == model_from_yaml
