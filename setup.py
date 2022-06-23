@@ -69,6 +69,7 @@ _dev_deps = [
     "sphinx-rtd-theme",
     "wheel>=0.36.2",
     "onnxruntime>=1.0.0",
+    "matplotlib>=3.0.0",
 ]
 
 
