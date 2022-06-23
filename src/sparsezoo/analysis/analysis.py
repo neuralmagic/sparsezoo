@@ -17,8 +17,8 @@ from typing import Dict, List, Optional
 import onnx
 import yaml
 from onnx import ModelProto, NodeProto
-
 from pydantic import BaseModel, Field
+
 from sparsezoo.analysis.utils import (
     NodeShape,
     extract_node_shapes,
