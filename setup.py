@@ -42,10 +42,12 @@ _PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
 _deps = [
     "numpy>=1.0.0",
     "onnx>=1.0.0,<=1.10.1",
+    "protobuf>=3.12.2,<4",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
     "pydantic>=1.8.2",
+    "click==8.0",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
