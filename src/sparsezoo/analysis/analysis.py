@@ -15,6 +15,7 @@
 from typing import Dict, List, Optional
 
 import onnx
+import yaml
 from onnx import ModelProto, NodeProto
 
 from pydantic import BaseModel, Field
@@ -257,3 +258,18 @@ class ModelAnalysis(BaseModel):
             nodes.append(node_analysis)
 
         return nodes
+
+    def yaml(self) -> str:
+        """
+        :return: the state of this analysis model as a yaml string
+        """
+        return yaml.dump(self.dict(), allow_unicode=True, sort_keys=False)
+
+    @classmethod
+    def parse_yaml(cls, yaml_str: str):
+        """
+        :param yaml_str: the state of the analysis model as a yaml string
+        :return: instance of ModelAnalysis class
+        """
+        dict_obj = yaml.safe_load(yaml_str)  # unsafe: needs to load numpy
+        return cls.parse_obj(dict_obj)

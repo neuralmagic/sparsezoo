@@ -281,7 +281,7 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     if num_total_blocks == 0:
         return 0.0
 
-    return num_zero_blocks / num_total_blocks
+    return float(num_zero_blocks / num_total_blocks)
 
 
 def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
