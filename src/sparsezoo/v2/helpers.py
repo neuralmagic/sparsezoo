@@ -28,8 +28,8 @@ from sparsezoo.v2 import Directory, File, NumpyDirectory, SampleOriginals
 
 def setup_model_directory(
     output_dir: str,
-    training: Union[str, Directory],
-    deployment: Union[str, Directory],
+    training: Union[str, Directory, List[Union[str, Directory]]],
+    deployment: Union[str, Directory, List[Union[str, Directory]]],
     onnx_model: Union[File, str],
     sample_inputs: Union[str, NumpyDirectory],
     sample_outputs: Union[
@@ -52,10 +52,14 @@ def setup_model_directory(
     The format of the new directory adheres to the structure expected by the
     `ModelDirectory` class factory methods.
 
+    Note: Some of the   "loose" files/directories that would then be copied
+
 
     :params output_dir: path to the target directory
     :params training: pointer (path or File) to the training directory
+        (can also pass an "unstructured" list containing a mix of paths/Files)
     :params deployment: pointer (path or File) to the deployment directory
+        (can also pass an "unstructured" list containing a mix of paths/Files)
     :params onnx_model: pointer (path or File) to the model.onnx file
     :params sample_inputs: pointer (path or File) to the sample_inputs directory
     :params sample_outputs: pointer (path or File) to the sample_outputs directory
@@ -63,6 +67,7 @@ def setup_model_directory(
     :params sample_labels: pointer (path or File) to the sample_labels directory
     :params sample_originals: pointer (path or File) to the sample_originals directory
     :params logs: pointer (path or File) to the logs directory
+        (can also pass an "unstructured" list containing a mix of paths/Files)
     :params analysis: pointer (path or File) to the analysis.yaml file
     :params benchmarks: pointer (path or File) to the benchmarks.yaml file
     :params eval_results: pointer (path or File) to the eval.yaml file
@@ -77,14 +82,32 @@ def setup_model_directory(
     files_dict = copy.deepcopy(locals())
     del files_dict["output_dir"]
 
+    # iterate over the arguments (files)
     for name, file in files_dict.items():
         if file is None:
-            logging.debug(f"File {name} not provided, skipping...")
+            logging.debug(f"File {name} not provided. It will be omitted.")
         else:
             if isinstance(file, str):
+                # if file is a string, convert it to
+                # File/Directory class object
                 file = _create_file_from_path(file)
-            elif isinstance(file, list) and isinstance(file[0], str):
-                file = [_create_file_from_path(_file) for _file in file]
+            elif isinstance(file, list):
+                # if file is a list, we need to call
+                # _create_file_from_path on every object
+                # that is a path (string)
+                for idx, _file in enumerate(file):
+                    if isinstance(_file, str):
+                        file[idx] = _create_file_from_path(_file)
+                    elif isinstance(_file, File):
+                        continue
+                    else:
+                        raise ValueError(
+                            "Expected `file` to be either a string (path) "
+                            "or a File/Directory class object. "
+                            f"However, it's type is {type(file)}."
+                        )
+            # otherwise, the file is File/Directory class object
+            # and can be directly copied over
 
             _copy_file_contents(output_dir, file, name)
 
@@ -101,20 +124,32 @@ def _create_file_from_path(path: str) -> Union[File, Directory]:
 
 def _copy_file_contents(
     output_dir: str, file: Union[File, Directory], name: Optional[str] = None
-)-> None:
+) -> None:
     # optional argument `name` only used to make sure
     # that the names of the saved folders are consistent
-    if isinstance(file, list):
-        for _file in file:
-            _copy_file_contents(output_dir, _file)
-
-    elif isinstance(file, Directory):
-        copy_path = (
-            os.path.join(output_dir, name)
-            if name in ["training", "deployment", "logs"]
-            else os.path.join(output_dir, os.path.basename(file.path))
-        )
-        shutil.copytree(file.path, copy_path)
+    if name in ["training", "deployment", "logs"]:
+        # for the `unstructured` directories (can contain
+        # different files depending on the integration/circumstances
+        if isinstance(file, list):
+            # files passed as an unstructured list of files
+            for _file in file:
+                Path(os.path.join(output_dir, name)).mkdir(parents=True, exist_ok=True)
+                copy_path = os.path.join(output_dir, name, _file.name)
+                copy_func = shutil.copytree if isinstance(_file, Directory) else shutil.copyfile
+                copy_func(_file.path, copy_path)
+        else:
+            # files passed as a Directory class instance
+            copy_path = os.path.join(output_dir, name)
+            shutil.copytree(file.path, copy_path)
     else:
-        copy_path = os.path.join(output_dir, os.path.basename(file.path))
-        shutil.copyfile(file.path, copy_path)
+        # for the structured directories/files
+        if isinstance(file, list):
+            for _file in file:
+                _copy_file_contents(output_dir, _file)
+        elif isinstance(file, Directory):
+            copy_path = os.path.join(output_dir, os.path.basename(file.path))
+            shutil.copytree(file.path, copy_path)
+        else:
+            # if not Directory then File class object
+            copy_path = os.path.join(output_dir, os.path.basename(file.path))
+            shutil.copyfile(file.path, copy_path)

@@ -49,7 +49,7 @@ class TestSetupModelDirectory:
         setup_model_directory(
             output_dir=output_dir.name,
             training=model.framework_files[0].dir_path,
-            deployment=model.framework_files[0].dir_path,
+            deployment=glob.glob(os.path.join(model.framework_files[0].dir_path, "*")),
             onnx_model=model.onnx_file.path,
             sample_inputs=model.data_inputs.path,
             sample_outputs=model.data_outputs.path,
@@ -75,7 +75,7 @@ class TestSetupModelDirectory:
         training = File(
             name=os.path.basename(training_folder_path), path=training_folder_path
         )
-        training = Directory.from_file(file=training)
+        training = Directory.from_file(file=[training])
 
         deployment_folder_path = model.framework_files[0].dir_path
         deployment = File(
