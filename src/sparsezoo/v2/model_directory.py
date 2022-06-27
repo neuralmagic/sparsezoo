@@ -141,6 +141,7 @@ class ModelDirectory(Directory):
             self.sample_labels,
             self.deployment,
             self.logs,
+            self.onnx_folder,
             self.onnx_model,
             self.analysis,
             self.benchmarks,

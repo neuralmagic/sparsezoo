@@ -154,13 +154,11 @@ class IntegrationValidator:
         expected_file_names = self.integration_to_expected_training_files[
             self.integration_name
         ]()
-        for file in training_directory.files:
-            if isinstance(file, Directory):
+        if isinstance(training_directory.files[0], Directory):
+            # Training directory only contains subfolders
+            # with names 'checkpoint_{...}'
+            for file in training_directory.files:
                 expected_name_prefix = "checkpoint_"
-                # `training directory` can either contain
-                # expected training files or
-                # sub folders with names "checkpoint_{...}",
-                # that contain expected training files
                 if not file.name.startswith(expected_name_prefix):
                     raise ValueError(
                         f"Found a directory in `training` directory "
@@ -169,18 +167,20 @@ class IntegrationValidator:
                         f"start with '{expected_name_prefix}'."
                     )
                 self._validate_training_directory(training_directory=file)
-            else:
-                file_names = set(training_directory.get_file_names())
-                for optional_file in self.optional_training_files:
-                    file_names.discard(optional_file)
+        else:
+            # Training directory does not contain any subfolders,
+            # but the training files directly.
+            file_names = set(training_directory.get_file_names())
+            for optional_file in self.optional_training_files:
+                file_names.discard(optional_file)
 
-                if expected_file_names != file_names:
-                    raise ValueError(
-                        f"Failed to find expected files "
-                        f"{expected_file_names.difference(file_names)} "
-                        f"in the `training` directory {training_directory.name}."
-                    )
-                return
+            if expected_file_names != file_names:
+                raise ValueError(
+                    f"Failed to find expected files "
+                    f"{expected_file_names.difference(file_names)} "
+                    f"in the `training` directory {training_directory.name}."
+                )
+            return True
 
     def _validate_nlp(self, deployment: bool = False):
         file_names = {
