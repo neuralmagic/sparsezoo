@@ -75,7 +75,7 @@ class TestSetupModelDirectory:
         training = File(
             name=os.path.basename(training_folder_path), path=training_folder_path
         )
-        training = Directory.from_file(file=[training])
+        training = [Directory.from_file(file=training)]
 
         deployment_folder_path = model.framework_files[0].dir_path
         deployment = File(

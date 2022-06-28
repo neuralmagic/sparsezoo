@@ -19,7 +19,7 @@ import pathlib
 import tarfile
 import time
 import traceback
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 from sparsezoo.utils.downloader import download_file
 from sparsezoo.v2.file import File
@@ -28,7 +28,7 @@ from sparsezoo.v2.file import File
 __all__ = ["Directory"]
 
 
-def _is_directory(file: Union[File, List[File], Dict[str, File]]) -> bool:
+def _is_directory(file: File) -> bool:
     # check whether a File class object could be
     # converted into a Directory class object
     if not isinstance(file, File):
@@ -41,9 +41,7 @@ def _is_directory(file: Union[File, List[File], Dict[str, File]]) -> bool:
     return file_stem == file.name
 
 
-def _possibly_convert_files_to_dictionaries(
-    files: List[Union[File, List[File], Dict[str, File]]]
-) -> List[File]:
+def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
     return [
         Directory.from_file(file)
         if (_is_directory(file) and not isinstance(file, Directory))
@@ -67,13 +65,13 @@ class Directory(File):
     def __init__(
         self,
         name: str,
-        files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
+        files: Optional[List[File]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
 
         self.files = (
-            files if not files else _possibly_convert_files_to_dictionaries(files)
+            files if not files else _possibly_convert_files_to_directories(files)
         )
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
@@ -95,7 +93,7 @@ class Directory(File):
             File(name=os.path.basename(path), path=path)
             for path in glob.glob(os.path.join(file.path, "*"))
         ]
-        files = _possibly_convert_files_to_dictionaries(files)
+        files = _possibly_convert_files_to_directories(files)
         path = file.path
         return cls(name=name, files=files, path=path)
 

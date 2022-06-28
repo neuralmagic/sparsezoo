@@ -91,9 +91,9 @@ class IntegrationValidator:
             model_card=self.model_directory.model_card
         )
         (
-            training_files,
-            optional_training_files,
-            additional_deployment_files,
+            training_files_validation,
+            optional_training_files_validation,
+            additional_deployment_files_validation,
         ) = self.integration2data[integration_name]()
         for file in self.model_directory.files:
             # checker for dict-type file
@@ -109,15 +109,16 @@ class IntegrationValidator:
                 if file.name == "training":
                     self._validate_training_directory(
                         training_directory=file,
-                        files=training_files,
-                        optional_files=optional_training_files,
+                        validation_files=training_files_validation,
+                        optional_validation_files=optional_training_files_validation,
                     )
 
                 elif file.name == "deployment":
                     self._validate_deployment_directory(
                         deployment_directory=file,
-                        files=training_files | additional_deployment_files,
-                        optional_files=optional_training_files,
+                        validation_files=training_files_validation
+                        | additional_deployment_files_validation,
+                        optional_validation_files=optional_training_files_validation,
                     )
 
                 validations[file.name] = file.validate()
@@ -142,9 +143,6 @@ class IntegrationValidator:
             is valid and no errors arise
         """
         if self.minimal_validation:
-            # iterate over all files in ModelDirectory and
-            # check whether they match the expected essential
-            # set of files
             for file in self.model_directory.files:
                 if isinstance(file, list) or isinstance(file, dict):
                     continue
@@ -159,8 +157,8 @@ class IntegrationValidator:
     def _validate_deployment_directory(
         self,
         deployment_directory: File,
-        files: Set,
-        optional_files: Optional[Set] = set(),
+        validation_files: Set,
+        optional_validation_files: Optional[Set] = set(),
     ) -> None:
         if any([isinstance(file, Directory) for file in deployment_directory.files]):
             raise ValueError(
@@ -168,12 +166,12 @@ class IntegrationValidator:
                 "The directory may only contain files, not directories."
             )
         file_names = set(deployment_directory.get_file_names())
-        for optional_file in optional_files:
+        for optional_file in optional_validation_files:
             file_names.discard(optional_file)
-        if files != file_names:
+        if validation_files != file_names:
             raise ValueError(
                 f"Failed to find expected files "
-                f"{files.difference(file_names)} "
+                f"{validation_files.difference(file_names)} "
                 f"in the `deployment` directory {deployment_directory.name}."
             )
         return True
@@ -181,8 +179,8 @@ class IntegrationValidator:
     def _validate_training_directory(
         self,
         training_directory: File,
-        files: Set,
-        optional_files: Optional[Set] = set(),
+        validation_files: Set,
+        optional_validation_files: Optional[Set] = set(),
     ) -> None:
         if isinstance(training_directory.files[0], Directory):
             # Training directory only contains subfolders
@@ -197,19 +195,21 @@ class IntegrationValidator:
                         f"start with '{expected_name_prefix}'."
                     )
                 self._validate_training_directory(
-                    training_directory=file, files=files, optional_files=optional_files
+                    training_directory=file,
+                    validation_files=validation_files,
+                    optional_validation_files=optional_validation_files,
                 )
         else:
             # Training directory does not contain any subfolders,
             # but the training files directly.
             file_names = set(training_directory.get_file_names())
-            for optional_file in optional_files:
+            for optional_file in optional_validation_files:
                 file_names.discard(optional_file)
 
-            if files != file_names:
+            if validation_files != file_names:
                 raise ValueError(
                     f"Failed to find expected files "
-                    f"{files.difference(file_names)} "
+                    f"{validation_files.difference(file_names)} "
                     f"in the `training` directory {training_directory.name}."
                 )
             return True
