@@ -80,7 +80,7 @@ class IntegrationValidator:
         self.minimal_validation = minimal_validation
 
         # validate whether file names match
-        if not self._validate_structure():
+        if not self.validate_structure():
             mode = "minimal" if self.minimal_validation else "full"
             raise ValueError(
                 "The attempt to validate ModelDirectory's structure "
@@ -94,7 +94,7 @@ class IntegrationValidator:
             training_files,
             optional_training_files,
             additional_deployment_files,
-        ) = self.integration2data[integration_name]
+        ) = self.integration2data[integration_name]()
         for file in self.model_directory.files:
             # checker for dict-type file
             if isinstance(file, dict):
@@ -116,7 +116,7 @@ class IntegrationValidator:
                 elif file.name == "deployment":
                     self._validate_deployment_directory(
                         deployment_directory=file,
-                        files=training_files.update(additional_deployment_files),
+                        files=training_files | additional_deployment_files,
                         optional_files=optional_training_files,
                     )
 
@@ -196,7 +196,9 @@ class IntegrationValidator:
                         f"The name of the directory should "
                         f"start with '{expected_name_prefix}'."
                     )
-                self._validate_training_directory(training_directory=file)
+                self._validate_training_directory(
+                    training_directory=file, files=files, optional_files=optional_files
+                )
         else:
             # Training directory does not contain any subfolders,
             # but the training files directly.

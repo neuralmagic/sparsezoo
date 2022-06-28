@@ -135,7 +135,9 @@ def _copy_file_contents(
             for _file in file:
                 Path(os.path.join(output_dir, name)).mkdir(parents=True, exist_ok=True)
                 copy_path = os.path.join(output_dir, name, _file.name)
-                copy_func = shutil.copytree if isinstance(_file, Directory) else shutil.copyfile
+                copy_func = (
+                    shutil.copytree if isinstance(_file, Directory) else shutil.copyfile
+                )
                 copy_func(_file.path, copy_path)
         else:
             # files passed as a Directory class instance
