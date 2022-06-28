@@ -157,7 +157,7 @@ class ModelDirectory(Directory):
         )
 
         super().__init__(files=files, name=name, path=path, url=url)
-        from sparsezoo.v2.integration_validator import IntegrationValidator
+        from sparsezoo.v2.integration_validation.validator import IntegrationValidator
 
         self.integration_validator = IntegrationValidator(model_directory=self)
 
