@@ -24,6 +24,14 @@ from sparsezoo.analysis.utils.chart import (
 )
 
 
+_MODEL_NAMES = [
+    "yolact_none",
+    "mobilenet_v1_pruned_moderate",
+    "bert_pruned_quantized",
+    "resnet50_pruned_quantized",
+]
+
+
 @pytest.fixture(scope="session")
 def get_model_analysis():
     model_stubs = {
@@ -53,59 +61,37 @@ def get_model_analysis():
     return _get_model_analysis
 
 
-@pytest.mark.parametrize(
-    "model_name",
-    [
-        ("yolact_none"),
-        ("mobilenet_v1_pruned_moderate"),
-        ("bert_pruned_quantized"),
-        ("resnet50_pruned_quantized"),
-    ],
-)
+def pytest_generate_tests(metafunc):
+    metafunc.parametrize("model_name", _MODEL_NAMES)
+
+
 def test_draw_sparsity_by_layer_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    draw_sparsity_by_layer_chart(model_analysis, out_path=None, model_name=model_name)
+    draw_sparsity_by_layer_chart(
+        model_analysis,
+        model_name=model_name,
+    )
 
 
-@pytest.mark.parametrize(
-    "model_name",
-    [
-        ("yolact_none"),
-        ("mobilenet_v1_pruned_moderate"),
-        ("bert_pruned_quantized"),
-        ("resnet50_pruned_quantized"),
-    ],
-)
 def test_draw_operation_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    draw_operation_chart(model_analysis, out_path=None, model_name=model_name)
+    draw_operation_chart(
+        model_analysis,
+        model_name=model_name,
+    )
 
 
-@pytest.mark.parametrize(
-    "model_name",
-    [
-        ("yolact_none"),
-        ("mobilenet_v1_pruned_moderate"),
-        ("bert_pruned_quantized"),
-        ("resnet50_pruned_quantized"),
-    ],
-)
 def test_draw_parameter_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
-    draw_parameter_chart(model_analysis, out_path=None, model_name=model_name)
+    draw_parameter_chart(
+        model_analysis,
+        model_name=model_name,
+    )
 
 
-@pytest.mark.parametrize(
-    "model_name",
-    [
-        ("yolact_none"),
-        ("mobilenet_v1_pruned_moderate"),
-        ("bert_pruned_quantized"),
-        ("resnet50_pruned_quantized"),
-    ],
-)
 def test_draw_parameter_operation_combined_chart(model_name, get_model_analysis):
     model_analysis = get_model_analysis(model_name)
     draw_parameter_operation_combined_chart(
-        model_analysis, out_path=None, model_name=model_name
+        model_analysis,
+        model_name=model_name,
     )

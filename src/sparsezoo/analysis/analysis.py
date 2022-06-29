@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import IO, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import onnx
 import yaml
@@ -272,11 +272,20 @@ class ModelAnalysis(BaseModel):
                 yaml.dump(self.dict(), f, allow_unicode=True, sort_keys=False)
 
     @classmethod
-    def parse_yaml(cls, yaml_source: Union[str, IO]):
+    def parse_yaml_file(cls, file_path: str):
         """
-        :param yaml_source: the state of the analysis model as a yaml string or
-            an IO stream
+        :param file_path: path to yaml file containing model analysis data
         :return: instance of ModelAnalysis class
         """
-        dict_obj = yaml.safe_load(yaml_source)  # unsafe: needs to load numpy
+        with open(file_path, "r") as file:
+            dict_obj = yaml.safe_load(file)  # unsafe: needs to load numpy
+        return cls.parse_obj(dict_obj)
+
+    @classmethod
+    def parse_yaml_raw(cls, yaml_raw: str):
+        """
+        :param yaml_raw: string containing model analysis data
+        :return: instance of ModelAnalysis class
+        """
+        dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
         return cls.parse_obj(dict_obj)

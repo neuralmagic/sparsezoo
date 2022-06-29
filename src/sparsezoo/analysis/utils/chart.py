@@ -30,7 +30,7 @@ __all__ = [
 
 def draw_sparsity_by_layer_chart(
     model_analysis: ModelAnalysis,
-    out_path: str,
+    out_path: Optional[str] = None,
     model_name: str = "Model",
     figsize: Tuple[int, int] = (25, 15),
 ) -> None:
@@ -94,7 +94,7 @@ def draw_sparsity_by_layer_chart(
 
 def draw_parameter_chart(
     model_analysis: ModelAnalysis,
-    out_path: Optional[str],
+    out_path: Optional[str] = None,
     model_name: str = "Model",
     text_size: float = 8.0,
     bar_width: float = 0.3,
@@ -181,7 +181,7 @@ def draw_parameter_chart(
 
 def draw_operation_chart(
     model_analysis: ModelAnalysis,
-    out_path: Optional[str],
+    out_path: Optional[str] = None,
     model_name: str = "Model",
     text_size: float = 8.0,
     bar_width: float = 0.3,
@@ -263,7 +263,7 @@ def draw_operation_chart(
 
 def draw_parameter_operation_combined_chart(
     model_analysis: ModelAnalysis,
-    out_path: Optional[str],
+    out_path: Optional[str] = None,
     model_name: str = "Model",
     text_size: float = 8.0,
     bar_width: float = 0.3,
