@@ -119,6 +119,12 @@ sparse_models = Zoo.search_sparse_models(search_model)
 print(sparse_models)
 ```
 
+### Environmental Variables
+
+Users can specify the directory where models (temporarily during download) and its required credentials will be saved in your working machine. 
+`SPARSEZOO_MODELS_PATH` is the path where the downloaded models will be saved temporarily. Default `~/.cache/sparsezoo/`
+`SPARSEZOO_CREDENTIALS_PATH` is the path where `credentials.yaml` will be saved. Default `~/.cache/sparsezoo/`
+
 ### Console Scripts
 
 In addition to the Python APIs, a console script entry point is installed with the package `sparsezoo`.
