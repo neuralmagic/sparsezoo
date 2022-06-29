@@ -26,7 +26,7 @@ pipeline {
             steps {
                 sh """
                     source ${VIRTUAL_ENV}/bin/activate
-                    export SPARSEZOO_CREDENTIALS="credentials.yaml"
+                    export SPARSEZOO_CREDENTIALS_PATH="."
                     export SPARSEZOO_API_URL=${params.TEST_API}
                     git checkout ${params.BRANCH}
                     make test

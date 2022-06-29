@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
+
 import pytest
 from flaky import flaky
 
@@ -40,15 +43,16 @@ def test_mobilenet_v1(
     sparse_target,
 ):
     model_constructor(
-        mobilenet_v1,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=mobilenet_v1,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
 
 
@@ -70,13 +74,14 @@ def test_mobilenet_v2(
     sparse_target,
 ):
     model_constructor(
-        mobilenet_v2,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=mobilenet_v2,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )
