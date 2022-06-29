@@ -22,16 +22,16 @@ import pytest
 from sparsezoo import Zoo
 from sparsezoo.requests.download import download_model_get_request
 from sparsezoo.v2.model_directory import ModelDirectory
+from sparsezoo.v2.helpers import restructure_api_input
 from tests.sparsezoo.v2.test_file import _create_sample_file
 
 
 @pytest.mark.parametrize(
-    "domain, sub_domain, model_index, expected_content",
+    "stub, runtime_specific_outputs, expected_content",
     [
         (
-            "cv",
-            "classification",
-            0,
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",
+            False,
             [
                 "training",
                 "sample_originals",
@@ -50,9 +50,8 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
             ],
         ),
         (
-            "nlp",
-            "question_answering",
-            0,
+            "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",
+            True,
             [
                 "training",
                 "sample_originals",
@@ -75,14 +74,13 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
 )
 class TestModelDirectory:
     @pytest.fixture()
-    def setup(self, domain, sub_domain, model_index, expected_content):
+    def setup(self, stub, runtime_specific_outputs, expected_content):
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        model = Zoo.search_models(
-            domain=domain, sub_domain=sub_domain, override_folder_name=temp_dir.name
-        )[model_index]
-        request_json = self._get_api_request(model)
-        directory_path = self._get_local_directory(model)
+        model = Zoo.load_model_from_stub(stub)
+        request_json = self._get_api_request(model,runtime_specific_outputs)
+        #directory_path = self._get_local_directory(model)
+        directory_path = None
 
         yield directory_path, request_json, expected_content, temp_dir
 
@@ -191,57 +189,9 @@ class TestModelDirectory:
         return directory_path
 
     @staticmethod
-    def _get_api_request(model):
+    def _get_api_request(model, runtime_specific_outputs):
         request_json = download_model_get_request(args=model)["model"]["files"]
-
-        # Adding several hacks to make request_json adhere to the desired format
-
-        # Create framework-files
-        framework_files = [x for x in request_json if x["file_type"] == "framework"]
-        request_json.append(
-            {"display_name": "framework-files", "contents": framework_files}
-        )
-        [request_json.remove(file) for file in framework_files]
-
-        # Create onnx_models (opsets)
-        onnx_model_file = [
-            x for x in request_json if x["display_name"] == "model.onnx"
-        ][0]
-        for opset in range(1, 3):
-            _onnx_model_file = copy.deepcopy(onnx_model_file)
-            _onnx_model_file["display_name"] = f"model.{opset}.onnx"
-            request_json.append(_onnx_model_file)
-
-        # Create yaml and md files
-        for name in [
-            "analysis.yaml",
-            "benchmarks.yaml",
-            "eval.yaml",
-            "recipe_foo.md",
-            "recipe_bar.md",
-        ]:
-            request_json.append({"display_name": name})
-
-        # Create sample labels (if not there, e.g. for transformers)
-        if not any(
-            [x for x in request_json if x["display_name"] == "sample-labels.tar.gz"]
-        ):
-            request_json.append({"display_name": "sample-labels.tar.gz"})
-
-        # Create sample originals (if not there, e.g. for transformers)
-        if not any(
-            [x for x in request_json if x["display_name"] == "sample-originals.tar.gz"]
-        ):
-            sample_originals = copy.deepcopy(
-                [
-                    x
-                    for x in request_json
-                    if x["display_name"] == "sample-inputs.tar.gz"
-                ][0]
-            )
-            sample_originals["display_name"] = "sample-originals.tar.gz"
-            request_json.append(sample_originals)
-
+        request_json = restructure_api_input(request_json, runtime_specific_outputs)
         return request_json
 
     @staticmethod

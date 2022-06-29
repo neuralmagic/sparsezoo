@@ -401,6 +401,8 @@ class ModelDirectory(Directory):
                 regex=regex,
             )
             if directory is not None:
+                if directory.name.endswith(".tar.gz") and directory.path is None:
+                    directory.name = directory.name.replace(".tar.gz", "") #TODO: Add setter getter
                 directories_found.append(directory)
 
         if not directories_found:
