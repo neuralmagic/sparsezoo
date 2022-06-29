@@ -68,8 +68,6 @@ def get_generated_analysis(model_paths):
         analysis = ModelAnalysis.from_onnx_model(onnx_path)
         model_generated_analyses[model_name] = analysis
 
-        analysis.yaml(f"/Users/poketopa/Desktop/{model_name}.yaml")
-
     def _get_generated_analysis(model_name):
         return model_generated_analyses[model_name]
 
