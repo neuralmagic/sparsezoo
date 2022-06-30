@@ -75,8 +75,7 @@ class TestModelDirectory:
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         model = Zoo.load_model_from_stub(stub)
-        # directory_path = self._get_local_directory(model)
-        directory_path = None
+        directory_path = self._get_local_directory(model)
 
         yield directory_path, model, expected_content, temp_dir
 
@@ -89,7 +88,7 @@ class TestModelDirectory:
             model=model, clone_sample_outputs=True, tars=True
         )
         model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        self._validate_model_directory(model_directory, expected_content, from_zoo=True)
+        self._validate_model_directory(model_directory, expected_content)
 
     def test_model_directory_from_zoo_2(self, setup):
         directory_path, model, expected_content, temp_dir = setup
@@ -98,7 +97,7 @@ class TestModelDirectory:
             model=model, clone_sample_outputs=True, tars=False
         )
         model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        self._validate_model_directory(model_directory, expected_content, from_zoo=True)
+        self._validate_model_directory(model_directory, expected_content)
 
     def test_model_directory_from_zoo_3(self, setup):
         directory_path, model, expected_content, temp_dir = setup
@@ -107,7 +106,7 @@ class TestModelDirectory:
             model=model, clone_sample_outputs=False, tars=False
         )
         model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        self._validate_model_directory(model_directory, expected_content, from_zoo=True)
+        self._validate_model_directory(model_directory, expected_content)
 
     def test_model_directory_from_zoo_4(self, setup):
         directory_path, model, expected_content, temp_dir = setup
@@ -116,49 +115,49 @@ class TestModelDirectory:
             model=model, clone_sample_outputs=False, tars=True
         )
         model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        self._validate_model_directory(model_directory, expected_content, from_zoo=True)
+        self._validate_model_directory(model_directory, expected_content)
 
-    # def test_model_directory_from_directory(self, setup):
-    #     directory_path, request_json, expected_content, temp_dir = setup
-    #
-    #     model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-    #     self._validate_model_directory(model_directory, expected_content)
+    def test_model_directory_from_directory(self, setup):
+        directory_path, request_json, expected_content, temp_dir = setup
 
-    # def test_download_with_tar_dirs(self, setup):
-    #     directory_path, model, expected_content, temp_dir = setup
-    #     request_json = self._get_api_request(
-    #         model=model, clone_sample_outputs=False, tars=False
-    #     )
-    #     model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-    #     assert model_directory.download(directory_path=temp_dir.name)
-    #     assert model_directory.validate()
-    #     assert model_directory.validate(minimal_validation=True)
-    #
-    # def test_download(self, setup):
-    #     directory_path, model, expected_content, temp_dir = setup
-    #     request_json = self._get_api_request(
-    #         model=model, clone_sample_outputs=True, tars=True
-    #     )
-    #     model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-    #     assert model_directory.download(directory_path=temp_dir.name)
-    #     assert model_directory.validate()
-    #     assert model_directory.validate(minimal_validation=True)
+        model_directory = ModelDirectory.from_directory(directory_path=directory_path)
+        self._validate_model_directory(model_directory, expected_content)
 
-    # def test_validate_from_directory(self, setup):
-    #     directory_path, request_json, expected_content, temp_dir = setup
-    #
-    #     model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-    #     assert model_directory.validate()
-    #     assert model_directory.validate(minimal_validation=True)
+    def test_download_with_tar_dirs(self, setup):
+        directory_path, model, expected_content, temp_dir = setup
+        request_json = self._get_api_request(
+            model=model, clone_sample_outputs=False, tars=False
+        )
+        model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
+        assert model_directory.download(directory_path=temp_dir.name)
+        assert model_directory.validate()
+        assert model_directory.validate(minimal_validation=True)
 
-    # def test_generate_outputs(self, setup):
-    #     directory_path, model, expected_content, temp_dir = setup
-    #     model_directory = ModelDirectory.from_directory(directory_path=directory_path)
-    #     for engine in ["onnxruntime", "deepsparse"]:
-    #         self._test_generate_outputs_single_engine(engine, model_directory)
-    #
-    # def test_analysis(self, setup):
-    #     pass
+    def test_download(self, setup):
+        directory_path, model, expected_content, temp_dir = setup
+        request_json = self._get_api_request(
+            model=model, clone_sample_outputs=True, tars=True
+        )
+        model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
+        assert model_directory.download(directory_path=temp_dir.name)
+        assert model_directory.validate()
+        assert model_directory.validate(minimal_validation=True)
+
+    def test_validate_from_directory(self, setup):
+        directory_path, request_json, expected_content, temp_dir = setup
+
+        model_directory = ModelDirectory.from_directory(directory_path=directory_path)
+        assert model_directory.validate()
+        assert model_directory.validate(minimal_validation=True)
+
+    def test_generate_outputs(self, setup):
+        directory_path, model, expected_content, temp_dir = setup
+        model_directory = ModelDirectory.from_directory(directory_path=directory_path)
+        for engine in ["onnxruntime", "deepsparse"]:
+            self._test_generate_outputs_single_engine(engine, model_directory)
+
+    def test_analysis(self, setup):
+        pass
 
     def _test_generate_outputs_single_engine(self, engine, model_directory):
         directory_path = model_directory.path
@@ -225,7 +224,7 @@ class TestModelDirectory:
         return restructure_request_json(request_json, clone_sample_outputs, tars)
 
     @staticmethod
-    def _validate_model_directory(model_directory, expected_content, from_zoo=False):
+    def _validate_model_directory(model_directory, expected_content):
         for file, expected_file in zip(model_directory.files, expected_content):
             if isinstance(file, list):
                 assert set([_file.name for _file in file]) == set(

@@ -238,12 +238,12 @@ class ModelDirectory(Directory):
             for file in self.files:
                 downloads.append(self._download(file, directory_path))
         if all(downloads):
-            # If download wa successful, use the path to the
-            # downloaded files to create new `ModelDirectory`
+            # If download wa successful, use the downloaded
+            # files' root path to create the new `ModelDirectory`
             # class object that replaces the old one.
-            # This would match the proper paths to all the
-            # files and thus allow e.g. running `validate()`
-            # method
+            # This would ensure that all the files now have
+            # a matching `path` attribute thus allow
+            # e.g. running `validate()` method
             self = self.from_directory(directory_path)
         return all(downloads)
 
@@ -266,7 +266,12 @@ class ModelDirectory(Directory):
         """
 
         if self.model_card.path is None:
-            raise ValueError("")
+            raise ValueError(
+                "It seems like the `ModelDirectory` was created using "
+                "the `from_zoo_api()` method. Before running `validate()` "
+                "method, the respective files must be present locally. "
+                "The solution is to call `download()` first."
+            )
 
         if validate_onnxruntime:
             if not self.inference_runner.validate_with_onnx_runtime():
@@ -393,8 +398,6 @@ class ModelDirectory(Directory):
             # (the other one is a duplicate)
             return files_found[0]
         else:
-            if display_name == "model.onnx" and len(files_found) != 1:
-                files_found = files_found[0]
             return files_found
 
     def _directory_from_files(
@@ -412,7 +415,7 @@ class ModelDirectory(Directory):
         if all([file_dict.get("file_type") for file_dict in files]):
             # if file_dict is retrieved from the API as `request_json`
             # first check if a directory can be created from the
-            # "loose" files (instead of taking a .tar.gz file as
+            # "loose" files (alternative to parsing a .tar.gz file as
             # a directory)
             directory = self._get_directory_from_loose_api_files(
                 files=files, directory_class=directory_class, display_name=display_name
@@ -510,13 +513,13 @@ class ModelDirectory(Directory):
     @staticmethod
     def _get_directory_from_loose_api_files(files, directory_class, display_name):
         # fetch all the loose files that belong to the directory (use `file_type` key
-        # from the `request_json` for that)
+        # from the `request_json` for proper mapping)
         files = [
             file_dict for file_dict in files if file_dict["file_type"] == display_name
         ]
         if display_name == "onnx":
-            # if searching for files to put inside the `onnx` directory,
-            # explicitly remove 'model.onnx' file. While all the onnx models
+            # when searching for files to put inside the `onnx` directory,
+            # remove the 'model.onnx' file. While all the onnx models
             # share the same `file_type = "onnx"`, the 'onnx' directory should
             # only contain `model.{opset_version}.onnx` files.
             files = [
@@ -526,7 +529,7 @@ class ModelDirectory(Directory):
             ]
 
         # we want to only process "loose" files here,
-        # the archived folders get parsed using
+        # the `.tar.gz` directories get parsed using
         # a separate pathway
         files = [
             file_dict
