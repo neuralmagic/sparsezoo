@@ -61,7 +61,6 @@ class IntegrationValidator:
 
         self.model_directory = model_directory
         self.minimal_validation = None
-        self.integration_name = self._get_integration_name()
 
     def validate(self, minimal_validation: bool) -> bool:
         """
@@ -80,6 +79,8 @@ class IntegrationValidator:
         """
         validations = {}
         self.minimal_validation = minimal_validation
+        self.integration_name = self._get_integration_name()
+
         if not self._validate_structure():
             mode = "essential" if self.minimal_validation else "full"
             raise ValueError(

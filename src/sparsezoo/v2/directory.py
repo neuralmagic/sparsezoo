@@ -123,7 +123,7 @@ class Directory(File):
         """
         Get the names of the files in the Directory
 
-        return: List with names of files
+        :return: List with names of files
         """
         if self.is_archive:
             tar = tarfile.open(self.path)
@@ -176,7 +176,7 @@ class Directory(File):
         """
         # Directory can represent a tar file.
         if self.is_archive:
-            new_file_path = os.path.join(destination_path, self.name)
+            new_file_path = os.path.join(destination_path, self.name, ".tar.gz")
             for attempt in range(retries):
                 try:
                     download_file(
@@ -201,7 +201,9 @@ class Directory(File):
         # Directory can represent a folder or directory.
         else:
             for file in self.files:
-                file.download(destination_path=destination_path)
+                file.download(
+                    destination_path=os.path.join(destination_path, self.name)
+                )
 
     def get_file(self, file_name: str) -> Optional[File]:
         """

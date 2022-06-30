@@ -95,7 +95,7 @@ class ModelDirectory(Directory):
         )
 
         self.deployment: Directory = self._directory_from_files(
-            files, display_name="deployment", regex=False
+            files, display_name="deployment"
         )  # deployment_folder
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -103,7 +103,7 @@ class ModelDirectory(Directory):
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(
-            files, display_name="logs", regex=False
+            files, display_name="logs"
         )  # logs folder
 
         self.onnx_model: File = self._file_from_files(
@@ -137,15 +137,16 @@ class ModelDirectory(Directory):
             self.training,
             self.sample_originals,
             self.sample_inputs,
+            self.model_card,
             self.sample_outputs,
             self.sample_labels,
             self.deployment,
+            self.onnx_folder,
             self.logs,
             self.onnx_model,
             self.analysis,
             self.benchmarks,
             self.eval_results,
-            self.model_card,
             self.recipes,
         ]
 
@@ -236,7 +237,8 @@ class ModelDirectory(Directory):
             downloads = []
             for file in self.files:
                 downloads.append(self._download(file, directory_path))
-
+        if all(downloads):
+            self = self.from_directory(directory_path)
         return all(downloads)
 
     def validate(
@@ -291,13 +293,18 @@ class ModelDirectory(Directory):
                 match = re.search(pattern, file["display_name"])
 
             else:
-                match = display_name == file["display_name"]
+                match = (display_name == file["display_name"]) or (
+                    display_name + ".tar.gz" == file["display_name"]
+                )
 
         if not match:
             logging.warning(
                 "Could not find a directory with "
                 f"display_name / regex_pattern: {display_name}"
             )
+            return None
+
+        if display_name == "onnx" and file["display_name"] == "model.onnx":
             return None
 
         name, path, url = file.get("display_name"), file.get("path"), file.get("url")
@@ -309,23 +316,16 @@ class ModelDirectory(Directory):
 
         # directory is folder
         else:
-            # is directory using the 'contents' key.
-            # this is a placeholder for the nested files that
-            # the directory contains
-            if file.get("contents"):
-                files_within = file["contents"]
 
-            # is directory locally on the machine
-            else:
-                paths_within = glob.glob(os.path.join(path, "*"))
-                files_within = (
-                    file_dictionary(display_name=os.path.basename(path), path=path)
-                    for path in paths_within
-                )
+            paths_within = glob.glob(os.path.join(path, "*"))
+            files_within = (
+                file_dictionary(display_name=os.path.basename(path), path=path)
+                for path in paths_within
+            )
 
-            files = [self._get_file(file=file) for file in files_within]
-            directory = directory_class(files=files, name=name, path=path, url=url)
-            return directory
+        files = [self._get_file(file=file) for file in files_within]
+        directory = directory_class(files=files, name=name, path=path, url=url)
+        return directory
 
     @staticmethod
     def _get_file(
@@ -379,6 +379,8 @@ class ModelDirectory(Directory):
         if len(files_found) == 1:
             return files_found[0]
         else:
+            if display_name == "model.onnx" and len(files_found) != 1:
+                files_found = files_found[0]
             return files_found
 
     def _directory_from_files(
@@ -393,17 +395,28 @@ class ModelDirectory(Directory):
         # a Directory() object, if successful,
         # otherwise None.
         directories_found = []
-        for file in files:
-            directory = self._get_directory(
-                file=file,
-                directory_class=directory_class,
-                display_name=display_name,
-                regex=regex,
+        directory = None
+        if all([file_dict.get("file_type") for file_dict in files]):
+            directory = self._get_directory_from_loose_api_files(
+                files=files, directory_class=directory_class, display_name=display_name
             )
-            if directory is not None:
-                if directory.name.endswith(".tar.gz") and directory.path is None:
-                    directory.name = directory.name.replace(".tar.gz", "") #TODO: Add setter getter
-                directories_found.append(directory)
+        if directory:
+            directories_found = [directory]
+        else:
+            for file in files:
+                directory = self._get_directory(
+                    file=file,
+                    directory_class=directory_class,
+                    display_name=display_name,
+                    regex=regex,
+                )
+
+                if directory is not None:
+                    if directory.name.endswith(".tar.gz") and directory.path is None:
+                        directory.name = directory.name.replace(
+                            ".tar.gz", ""
+                        )  # TODO: Add setter getter
+                    directories_found.append(directory)
 
         if not directories_found:
             return None
@@ -419,29 +432,37 @@ class ModelDirectory(Directory):
         else:
             return directories_found[0]
 
+    def _get_directory_from_loose_api_files(self, files, directory_class, display_name):
+        files = [
+            file_dict for file_dict in files if file_dict["file_type"] == display_name
+        ]
+        if display_name == "onnx":
+            files = [
+                file_dict
+                for file_dict in files
+                if file_dict["display_name"] != "model.onnx"
+            ]
+
+        files = [
+            file_dict
+            for file_dict in files
+            if not file_dict["display_name"].endswith(".tar.gz")
+        ]
+        if not files:
+            return None
+        else:
+            files = [File.from_dict(file) for file in files]
+            directory = directory_class(
+                files=files, name=display_name, path=None, url=None
+            )
+            return directory
+
     def _download(
         self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
     ) -> bool:
 
-        # TODO: This is a hack for now,
-        #  some files cannot be downloaded if
-        #  ModelDirectory created .from_zoo_api()
-
-        SKIP_ATTRIBUTES = [
-            "framework-files",
-            "analysis.yaml",
-            "benchmarks.yaml",
-            "eval.yaml",
-            "recipe_foo.md",
-            "recipe_bar.md",
-            "sample-labels.tar.gz",
-        ]
         if isinstance(file, File):
-            # TODO: Continuing with the hack
-            if file.name in SKIP_ATTRIBUTES:
-                return True
-
-            if file.url:
+            if file.url or (file.url is None and isinstance(file, Directory)):
                 file.download(destination_path=directory_path)
                 return True
             else:
@@ -455,7 +476,10 @@ class ModelDirectory(Directory):
             return all(validations)
 
         else:
-            raise NotImplementedError()
+            validations = (
+                self._download(_file, directory_path) for _file in file.values()
+            )
+            return all(validations)
 
     def _sample_outputs_list_to_dict(
         self,
@@ -472,8 +496,7 @@ class ModelDirectory(Directory):
                     f"with expected name `{expected_name}`. However,"
                     f"detected a name {directories.name}."
                 )
-            framework_name = self.model_card._validate_model_card()["framework"]
-            engine_to_numpydir_map[framework_name] = directories
+            engine_to_numpydir_map["framework"] = directories
 
         else:
             # if found multiple 'sample_outputs' directories,

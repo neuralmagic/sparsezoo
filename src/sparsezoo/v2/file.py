@@ -120,26 +120,26 @@ class File:
                 f"Overwriting the current location of the File: {self.path} "
                 f"with the new location: {new_file_path}."
             )
-            for attempt in range(retries):
-                try:
-                    download_file(
-                        url_path=self.url,
-                        dest_path=new_file_path,
-                        overwrite=overwrite,
-                    )
-
-                    self.path = new_file_path
-                    return
-
-                except Exception as err:
-                    logging.error(err)
-                    logging.error(traceback.format_exc())
-                    time.sleep(retry_sleep_sec)
-                logging.error(
-                    f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
+        for attempt in range(retries):
+            try:
+                download_file(
+                    url_path=self.url,
+                    dest_path=new_file_path,
+                    overwrite=overwrite,
                 )
-            logging.error("Download retry failed...")
-            raise Exception("Exceed max retry attempts: {} failed".format(retries))
+
+                self.path = new_file_path
+                return
+
+            except Exception as err:
+                logging.error(err)
+                logging.error(traceback.format_exc())
+                time.sleep(retry_sleep_sec)
+            logging.error(
+                f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
+            )
+        logging.error("Download retry failed...")
+        raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
     def validate(self, strict_mode: bool = True) -> bool:
         """
