@@ -41,3 +41,19 @@ def validate_cv_classification():
     optional_training_files = {"recipe.yaml"}
     additional_deployment_files = {"model.onnx"}
     return training_files, optional_training_files, additional_deployment_files
+
+
+def validate_cv_detection():
+    training_files = {"model.pt", "model.ckpt.pt"}
+    optional_training_files = {"recipe.yaml"}
+    additional_deployment_files = {"model.onnx"}
+    return training_files, optional_training_files, additional_deployment_files
+
+
+def validate_cv_segmentation():
+    training_files = {
+        "model.pth",
+    }
+    optional_training_files = {"recipe.yaml"}
+    additional_deployment_files = {"model.onnx"}
+    return training_files, optional_training_files, additional_deployment_files

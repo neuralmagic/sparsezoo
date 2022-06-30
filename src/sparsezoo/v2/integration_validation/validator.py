@@ -22,7 +22,12 @@ from typing import Callable, Dict, Optional, Set, Tuple, Union
 
 from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
-from sparsezoo.v2.integration_validation import validate_cv_classification, validate_nlp
+from sparsezoo.v2.integration_validation import (
+    validate_cv_classification,
+    validate_cv_detection,
+    validate_cv_segmentation,
+    validate_nlp,
+)
 from sparsezoo.v2.model_directory import ModelDirectory
 
 
@@ -30,7 +35,12 @@ __all__ = ["IntegrationValidator"]
 
 # files/directories that are required for minimal validation
 ESSENTIAL_FILES = {"deployment", "training", "model.onnx"}
-INTEGRATION_NAME_TO_DATA = {"nlp": validate_nlp, "cv": validate_cv_classification}
+INTEGRATION_NAME_TO_DATA = {
+    "nlp": validate_nlp,
+    "cv_classification": validate_cv_classification,
+    "cv_detection": validate_cv_detection,
+    "cv_segmentation": validate_cv_segmentation,
+}
 
 
 class IntegrationValidator:
@@ -229,5 +239,8 @@ class IntegrationValidator:
         yaml_dict = model_card._validate_model_card()
         # TODO: swap this hack for parsing the proper "integration" field
         # in the future
-        integration_name = f"{yaml_dict['domain']}"
+        if yaml_dict["domain"] == "nlp":
+            integration_name = "nlp"
+        else:
+            integration_name = f"{yaml_dict['domain']}_{yaml_dict['subdomain']}"
         return integration_name
