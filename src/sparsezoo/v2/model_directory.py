@@ -60,9 +60,7 @@ class ModelDirectory(Directory):
     ):
 
         self.training: Directory = self._directory_from_files(
-            files,
-            directory_class=Directory,
-            display_name="training",
+            files, directory_class=Directory, display_name="training"
         )
         self.sample_originals: SampleOriginals = self._directory_from_files(
             files,
@@ -87,6 +85,7 @@ class ModelDirectory(Directory):
                 directory_class=NumpyDirectory,
                 display_name="sample_outputs",
                 allow_multiple_outputs=True,
+                regex=True,
             )
         )  # key by engine name.
 
@@ -99,7 +98,8 @@ class ModelDirectory(Directory):
         )  # deployment_folder
 
         self.onnx_folder: Directory = self._directory_from_files(
-            files, display_name="onnx", regex=False
+            files,
+            display_name="onnx",
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(
@@ -238,6 +238,12 @@ class ModelDirectory(Directory):
             for file in self.files:
                 downloads.append(self._download(file, directory_path))
         if all(downloads):
+            # If download wa successful, use the path to the
+            # downloaded files to create new `ModelDirectory`
+            # class object that replaces the old one.
+            # This would match the proper paths to all the
+            # files and thus allow e.g. running `validate()`
+            # method
             self = self.from_directory(directory_path)
         return all(downloads)
 
@@ -258,6 +264,9 @@ class ModelDirectory(Directory):
             expected to contain a full set of framework files.
         return: a boolean flag; if True, the validation has been successful
         """
+
+        if self.model_card.path is None:
+            raise ValueError("")
 
         if validate_onnxruntime:
             if not self.inference_runner.validate_with_onnx_runtime():
@@ -302,9 +311,6 @@ class ModelDirectory(Directory):
                 "Could not find a directory with "
                 f"display_name / regex_pattern: {display_name}"
             )
-            return None
-
-        if display_name == "onnx" and file["display_name"] == "model.onnx":
             return None
 
         name, path, url = file.get("display_name"), file.get("path"), file.get("url")
@@ -376,7 +382,15 @@ class ModelDirectory(Directory):
 
         if not files_found:
             return None
-        if len(files_found) == 1:
+        elif len(files_found) == 1:
+            return files_found[0]
+
+        elif display_name == "model.onnx" and len(files_found) == 2:
+            # `model.onnx` file may be found twice:
+            #   - directly in the root directory
+            #   - inside `deployment` directory
+            # if this is the case, return the first file
+            # (the other one is a duplicate)
             return files_found[0]
         else:
             if display_name == "model.onnx" and len(files_found) != 1:
@@ -388,21 +402,28 @@ class ModelDirectory(Directory):
         files: List[Dict[str, Any]],
         directory_class: Union[Directory, NumpyDirectory, SampleOriginals] = Directory,
         display_name: Optional[str] = None,
-        regex: Optional[bool] = True,
+        regex: Optional[bool] = False,
         allow_multiple_outputs: Optional[bool] = False,
     ) -> Union[Directory, None]:
+
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
         # otherwise None.
-        directories_found = []
-        directory = None
         if all([file_dict.get("file_type") for file_dict in files]):
+            # if file_dict is retrieved from the API as `request_json`
+            # first check if a directory can be created from the
+            # "loose" files (instead of taking a .tar.gz file as
+            # a directory)
             directory = self._get_directory_from_loose_api_files(
                 files=files, directory_class=directory_class, display_name=display_name
             )
+        else:
+            directory = None
+
         if directory:
             directories_found = [directory]
         else:
+            directories_found = []
             for file in files:
                 directory = self._get_directory(
                     file=file,
@@ -413,9 +434,7 @@ class ModelDirectory(Directory):
 
                 if directory is not None:
                     if directory.name.endswith(".tar.gz") and directory.path is None:
-                        directory.name = directory.name.replace(
-                            ".tar.gz", ""
-                        )  # TODO: Add setter getter
+                        directory.name = directory.name.replace(".tar.gz", "")
                     directories_found.append(directory)
 
         if not directories_found:
@@ -431,31 +450,6 @@ class ModelDirectory(Directory):
             )
         else:
             return directories_found[0]
-
-    def _get_directory_from_loose_api_files(self, files, directory_class, display_name):
-        files = [
-            file_dict for file_dict in files if file_dict["file_type"] == display_name
-        ]
-        if display_name == "onnx":
-            files = [
-                file_dict
-                for file_dict in files
-                if file_dict["display_name"] != "model.onnx"
-            ]
-
-        files = [
-            file_dict
-            for file_dict in files
-            if not file_dict["display_name"].endswith(".tar.gz")
-        ]
-        if not files:
-            return None
-        else:
-            files = [File.from_dict(file) for file in files]
-            directory = directory_class(
-                files=files, name=display_name, path=None, url=None
-            )
-            return directory
 
     def _download(
         self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
@@ -512,6 +506,41 @@ class ModelDirectory(Directory):
                     )
                 engine_to_numpydir_map[engine_name] = directory
         return engine_to_numpydir_map
+
+    @staticmethod
+    def _get_directory_from_loose_api_files(files, directory_class, display_name):
+        # fetch all the loose files that belong to the directory (use `file_type` key
+        # from the `request_json` for that)
+        files = [
+            file_dict for file_dict in files if file_dict["file_type"] == display_name
+        ]
+        if display_name == "onnx":
+            # if searching for files to put inside the `onnx` directory,
+            # explicitly remove 'model.onnx' file. While all the onnx models
+            # share the same `file_type = "onnx"`, the 'onnx' directory should
+            # only contain `model.{opset_version}.onnx` files.
+            files = [
+                file_dict
+                for file_dict in files
+                if file_dict["display_name"] != "model.onnx"
+            ]
+
+        # we want to only process "loose" files here,
+        # the archived folders get parsed using
+        # a separate pathway
+        files = [
+            file_dict
+            for file_dict in files
+            if not file_dict["display_name"].endswith(".tar.gz")
+        ]
+        if not files:
+            return None
+        else:
+            files = [File.from_dict(file) for file in files]
+            directory = directory_class(
+                files=files, name=display_name, path=None, url=None
+            )
+            return directory
 
     @staticmethod
     def _is_file_tar(file):

@@ -124,25 +124,25 @@ class TestModelDirectory:
     #     model_directory = ModelDirectory.from_directory(directory_path=directory_path)
     #     self._validate_model_directory(model_directory, expected_content)
 
-    def test_download_with_tar_dirs(self, setup):
-        directory_path, model, expected_content, temp_dir = setup
-        request_json = self._get_api_request(
-            model=model, clone_sample_outputs=False, tars=False
-        )
-        model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        assert model_directory.download(directory_path=temp_dir.name)
-        assert model_directory.validate()
-        assert model_directory.validate(minimal_validation=True)
-
-    def test_download(self, setup):
-        directory_path, model, expected_content, temp_dir = setup
-        request_json = self._get_api_request(
-            model=model, clone_sample_outputs=True, tars=True
-        )
-        model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
-        assert model_directory.download(directory_path=temp_dir.name)
-        assert model_directory.validate()
-        assert model_directory.validate(minimal_validation=True)
+    # def test_download_with_tar_dirs(self, setup):
+    #     directory_path, model, expected_content, temp_dir = setup
+    #     request_json = self._get_api_request(
+    #         model=model, clone_sample_outputs=False, tars=False
+    #     )
+    #     model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
+    #     assert model_directory.download(directory_path=temp_dir.name)
+    #     assert model_directory.validate()
+    #     assert model_directory.validate(minimal_validation=True)
+    #
+    # def test_download(self, setup):
+    #     directory_path, model, expected_content, temp_dir = setup
+    #     request_json = self._get_api_request(
+    #         model=model, clone_sample_outputs=True, tars=True
+    #     )
+    #     model_directory = ModelDirectory.from_zoo_api(request_json=request_json)
+    #     assert model_directory.download(directory_path=temp_dir.name)
+    #     assert model_directory.validate()
+    #     assert model_directory.validate(minimal_validation=True)
 
     # def test_validate_from_directory(self, setup):
     #     directory_path, request_json, expected_content, temp_dir = setup
