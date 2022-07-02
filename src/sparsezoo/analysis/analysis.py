@@ -278,7 +278,7 @@ class ModelAnalysis(BaseModel):
         :return: instance of ModelAnalysis class
         """
         with open(file_path, "r") as file:
-            dict_obj = yaml.safe_load(file)  # unsafe: needs to load numpy
+            dict_obj = yaml.safe_load(file)
         return cls.parse_obj(dict_obj)
 
     @classmethod

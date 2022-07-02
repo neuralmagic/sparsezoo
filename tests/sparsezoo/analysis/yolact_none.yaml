@@ -26,7 +26,7 @@ num_parameters: 53317216
 num_sparse_parameters: 0
 num_four_blocks: 13329376
 num_sparse_four_blocks: 0
-layers:
+nodes:
 - name: Conv_0
   op_type: Conv
   weight_name: '799'

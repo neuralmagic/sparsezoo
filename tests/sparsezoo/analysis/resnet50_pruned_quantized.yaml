@@ -24,7 +24,7 @@ num_parameters: 25502912
 num_sparse_parameters: 20202914
 num_four_blocks: 6376512
 num_sparse_four_blocks: 4982299
-layers:
+nodes:
 - name: QuantizeLinear_2
   op_type: QuantizeLinear
   weight_name: null

@@ -23,7 +23,7 @@ num_parameters: 4209088
 num_sparse_parameters: 2740224
 num_four_blocks: 1085824
 num_sparse_four_blocks: 487183
-layers:
+nodes:
 - name: Conv_0
   op_type: Conv
   weight_name: input.conv.weight

@@ -52,7 +52,7 @@ def draw_sparsity_by_layer_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.layers if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_and_prunable
     ]
     node_data = {
         "names": [],
@@ -118,7 +118,7 @@ def draw_parameter_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.layers if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_and_prunable
     ]
     node_data = {"names": [], "sparse_parameters": [], "dense_parameters": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
@@ -207,7 +207,7 @@ def draw_operation_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.layers if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_and_prunable
     ]
     node_data = {"names": [], "sparse_ops": [], "dense_ops": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
@@ -288,7 +288,7 @@ def draw_parameter_operation_combined_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.layers if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_and_prunable
     ]
     node_data = {
         "names": [],

@@ -89,6 +89,10 @@ def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
     for input in model_copy.graph.input:
         input_shape = extract_shape(input)
         dtype = extract_dtype(input)
+
+        input_shape = list(input_shape)
+        input_shape[input_shape is None] = 1
+
         input_dict[input.name] = numpy.ones(input_shape, dtype=dtype)
 
     # Get shapes by running real values and saving outputs

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy
 from onnx import ModelProto, NodeProto
@@ -80,7 +80,7 @@ def get_num_dense_and_sparse_ops(
         "Sigmoid",
         "Tanh",
     ]:
-        return (numpy.prod(output_shapes), 0) if output_shapes is not None else (0, 0)
+        return (_numpy_prod_none_safe(output_shapes), 0)
 
     # If BN is followed by matmul or conv, then it is folded into the following
     # layer weights. Assume this is true for all cases
@@ -88,7 +88,7 @@ def get_num_dense_and_sparse_ops(
         return (0, 0)
 
     if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
-        return (numpy.prod(input_shapes), 0) if input_shapes is not None else (0, 0)
+        return (_numpy_prod_none_safe(input_shapes), 0)
 
     if node.op_type in ["MaxPool", "AveragePool"]:
         if "kernel_shape" not in node_attributes:
@@ -97,9 +97,8 @@ def get_num_dense_and_sparse_ops(
             )
         kernel_shape = node_attributes["kernel_shape"]
         return (
-            (numpy.prod(output_shapes) * numpy.prod(kernel_shape), 0)
-            if output_shapes is not None
-            else None
+            _numpy_prod_none_safe(output_shapes) * _numpy_prod_none_safe(kernel_shape),
+            0,
         )
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
@@ -305,4 +304,18 @@ def _get_bias_dense_sparse_ops(output_shapes: List[List[int]]) -> Tuple[int, int
     :param output_shapes: Shape of output of bias step
     :return: number of dense and sparse operations performed
     """
-    return numpy.prod(output_shapes), 0
+    return (_numpy_prod_none_safe(output_shapes), 0)
+
+
+def _numpy_prod_none_safe(input: Union[None, List[Union[None, int]]]) -> int:
+    """
+    :param input: list of integers to prod or None
+    :return: result of numpy.prod ignoring Nones
+    """
+    if input is None:
+        return 0
+
+    _input = numpy.copy(input)
+    _input[_input is None] = 1
+
+    return numpy.prod(_input)

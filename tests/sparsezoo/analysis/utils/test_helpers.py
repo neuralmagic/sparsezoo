@@ -217,7 +217,7 @@ def test_is_parameterized_prunable_layer(
     model_name, get_expected_analysis, get_model_and_node
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert (
             is_parameterized_prunable_layer(model, node)
@@ -236,7 +236,7 @@ def test_get_layer_and_op_counts(model_name, get_model_onnx, get_expected_analys
 
 def test_is_quantized_layer(model_name, get_model_and_node, get_expected_analysis):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert is_quantized_layer(model, node) == node_analysis.is_quantized_layer
 
@@ -247,7 +247,7 @@ def test_get_node_num_zeros_and_size(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         num_zeros, size = get_node_num_zeros_and_size(model, node)
         assert num_zeros == node_analysis.num_sparse_parameters
@@ -260,7 +260,7 @@ def test_get_node_num_four_block_zeros_and_size(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         num_zero_blocks, num_blocks = get_node_num_four_block_zeros_and_size(
             model, node
@@ -275,7 +275,7 @@ def test_get_zero_point(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert get_zero_point(model, node) == node_analysis.zero_point
 
@@ -286,7 +286,7 @@ def test_get_node_sparsity(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert get_node_sparsity(model, node) == pytest.approx(
             node_analysis.sparsity, abs=margin_of_error
@@ -299,7 +299,7 @@ def test_is_sparse_layer(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert is_sparse_layer(model, node) == node_analysis.is_sparse_layer
 
@@ -310,7 +310,7 @@ def test_get_node_four_block_sparsity(
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert get_node_four_block_sparsity(model, node) == pytest.approx(
             node_analysis.four_block_sparsity, abs=margin_of_error
@@ -365,7 +365,7 @@ def test_get_num_dense_and_sparse_ops(
     model_analysis = get_expected_analysis(model_name)
     node_shapes = get_model_node_shapes(model_name)
 
-    for node_analysis in model_analysis.layers:
+    for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(
             model, node, node_shapes=node_shapes

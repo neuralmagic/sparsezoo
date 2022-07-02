@@ -206,18 +206,17 @@ def test_node_analyses(model_name, get_generated_analysis, get_expected_analysis
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
 
-    assert len(model_analysis.layers) == len(expected_model_analysis.layers)
-    for i in range(len(model_analysis.layers)):
-        node_analysis = model_analysis.layers[i]
-        expected_node_analysis = model_analysis.layers[i]
-        assert node_analysis.name == expected_node_analysis.name
+    assert len(model_analysis.nodes) == len(expected_model_analysis.nodes)
+    for i in range(len(model_analysis.nodes)):
+        node_analysis = model_analysis.nodes[i]
+        expected_node_analysis = expected_model_analysis.nodes[i]
+        assert node_analysis == expected_node_analysis
 
 
-def test_model_analysis_yaml(model_name, get_generated_analysis, get_expected_analysis):
+def test_model_analysis_yaml(model_name, get_generated_analysis):
     model_analysis = get_generated_analysis(model_name)
-    expected_model_analysis = get_expected_analysis(model_name)
 
     model_yaml = model_analysis.yaml()
     model_from_yaml = ModelAnalysis.parse_yaml_raw(model_yaml)
 
-    assert model_analysis == model_from_yaml == expected_model_analysis
+    assert model_analysis == model_from_yaml

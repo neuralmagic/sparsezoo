@@ -34,7 +34,7 @@ num_parameters: 108771840
 num_sparse_parameters: 68923743
 num_four_blocks: 27193728
 num_sparse_four_blocks: 16986888
-layers:
+nodes:
 - name: Unsqueeze_0
   op_type: Unsqueeze
   weight_name: null
