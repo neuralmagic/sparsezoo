@@ -178,7 +178,7 @@ class ModelAnalysis(BaseModel):
         description="Total number of all sparsified four blocks (excluding biases)"
     )
 
-    layers: List[NodeAnalysis] = Field(
+    nodes: List[NodeAnalysis] = Field(
         description="List of analyses for each layer in the model graph", default=[]
     )
 
@@ -193,44 +193,44 @@ class ModelAnalysis(BaseModel):
         """
         model_onnx = onnx.load(onnx_file_path)
 
-        layer_analyses = cls.analyze_nodes(model_onnx)
+        node_analyses = cls.analyze_nodes(model_onnx)
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
 
         num_parameters = sum(
-            [layer_analysis.num_parameters for layer_analysis in layer_analyses]
+            [node_analysis.num_parameters for node_analysis in node_analyses]
         )
         num_sparse_parameters = sum(
-            [layer_analysis.num_sparse_parameters for layer_analysis in layer_analyses]
+            [node_analysis.num_sparse_parameters for node_analysis in node_analyses]
         )
         num_four_blocks = sum(
-            [layer_analysis.num_four_blocks for layer_analysis in layer_analyses]
+            [node_analysis.num_four_blocks for node_analysis in node_analyses]
         )
         num_sparse_four_blocks = sum(
-            [layer_analysis.num_sparse_four_blocks for layer_analysis in layer_analyses]
+            [node_analysis.num_sparse_four_blocks for node_analysis in node_analyses]
         )
 
         return cls(
             layer_counts=layer_counts,
             non_parameterized_operator_counts=op_counts,
             num_dense_ops=sum(
-                [layer_analysis.num_dense_ops for layer_analysis in layer_analyses]
+                [node_analysis.num_dense_ops for node_analysis in node_analyses]
             ),
             num_sparse_ops=sum(
-                [layer_analysis.num_sparse_ops for layer_analysis in layer_analyses]
+                [node_analysis.num_sparse_ops for node_analysis in node_analyses]
             ),
             num_sparse_layers=len(
                 [
                     None
-                    for layer_analysis in layer_analyses
-                    if layer_analysis.is_sparse_layer
+                    for node_analysis in node_analyses
+                    if node_analysis.is_sparse_layer
                 ]
             ),
             num_quantized_layers=len(
                 [
                     None
-                    for layer_analysis in layer_analyses
-                    if layer_analysis.is_quantized_layer
+                    for node_analysis in node_analyses
+                    if node_analysis.is_quantized_layer
                 ]
             ),
             num_parameters=num_parameters,
@@ -239,7 +239,7 @@ class ModelAnalysis(BaseModel):
             num_sparse_four_blocks=num_sparse_four_blocks,
             average_sparsity=(num_sparse_parameters / num_parameters),
             average_four_block_sparsity=(num_sparse_four_blocks / num_four_blocks),
-            layers=layer_analyses,
+            nodes=node_analyses,
         )
 
     @staticmethod

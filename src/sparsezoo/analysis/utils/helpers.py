@@ -311,7 +311,7 @@ def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
     return get_node_weight(model, node) is not None
 
 
-def get_node_weight_name(model: ModelProto, node: NodeProto) -> str:
+def get_node_weight_name(model: ModelProto, node: NodeProto) -> Union[str, None]:
     """
     :param model: model that contains the given node
     :param node: node that contains the weight
@@ -339,7 +339,12 @@ def get_node_weight_name(model: ModelProto, node: NodeProto) -> str:
 
     if node.op_type in ["MatMul", "Gemm", "MatMulInteger"]:
         return next(
-            input_name for input_name in node.input if input_name in initializer_names
+            (
+                input_name
+                for input_name in node.input
+                if input_name in initializer_names
+            ),
+            None,
         )
 
     return None
