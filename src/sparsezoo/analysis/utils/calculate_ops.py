@@ -18,6 +18,7 @@ import numpy
 from onnx import ModelProto, NodeProto
 
 from sparsezoo.analysis.utils.helpers import (
+    extract_node_id,
     get_node_attributes,
     get_node_bias,
     get_node_weight,
@@ -25,11 +26,7 @@ from sparsezoo.analysis.utils.helpers import (
     group_four_block,
     is_four_block_sparse_layer,
 )
-from sparsezoo.analysis.utils.node_shape import (
-    NodeShape,
-    extract_node_id,
-    extract_node_shapes,
-)
+from sparsezoo.analysis.utils.node_shape import NodeShape, extract_node_shapes
 
 
 __all__ = [
@@ -54,8 +51,7 @@ def get_num_dense_and_sparse_ops(
         block sparse. If not supplied, it be will be computed
     :return: number of operations performed by node
     """
-    if node_shapes is None:
-        node_shapes = extract_node_shapes(model)
+    node_shapes = extract_node_shapes(model) if node_shapes is None else node_shapes
 
     node_shape = node_shapes.get(extract_node_id(node))
     input_shapes = node_shape.input_shapes if node_shape is not None else None
@@ -64,8 +60,11 @@ def get_num_dense_and_sparse_ops(
     weight = get_node_weight(model, node)
     bias = get_node_bias(model, node)
     zero_point = get_zero_point(model, node)
-    if is_four_block_sparse is None:
-        is_four_block_sparse = is_four_block_sparse_layer(model, node)
+    is_four_block_sparse = (
+        is_four_block_sparse_layer(model, node)
+        if is_four_block_sparse is None
+        else is_four_block_sparse
+    )
 
     node_attributes = get_node_attributes(node)
 

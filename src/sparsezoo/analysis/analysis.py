@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from sparsezoo.analysis.utils import (
     NodeShape,
+    extract_node_id,
     extract_node_shapes,
     get_layer_and_op_counts,
     get_node_four_block_sparsity,
@@ -29,6 +30,7 @@ from sparsezoo.analysis.utils import (
     get_node_sparsity,
     get_node_weight,
     get_node_weight_name,
+    get_node_weight_shape,
     get_num_dense_and_sparse_ops,
     get_zero_point,
     is_parameterized_prunable_layer,
@@ -43,14 +45,59 @@ __all__ = [
 ]
 
 
+class NodeIO(BaseModel):
+    """
+    Pydantic model for the inputs and outputs of a node in the onnx model graph
+    """
+
+    name: str = Field(description="Name of this input/output in onnx model graph")
+    shape: Optional[List[Union[None, int]]] = Field(
+        description="Shape of this input/output in onnx model graph (assuming a "
+        "batch size of 1)"
+    )
+
+
+class WeightAnalysis(BaseModel):
+    """
+    Pydantic model for the weight of a node
+    """
+
+    name: Optional[str] = Field(description="The name of this weight")
+    shape: Optional[List[int]] = Field(
+        description="This weight's shape (assuming a batch size of 1)"
+    )
+    sparsity: float = Field(description="Proportion of zeros in this weight")
+    four_block_sparsity: float = Field(
+        description="Proportion of zero blocks in this weight"
+    )
+    num_parameters: int = Field(description="Size of this node's parameter")
+    num_sparse_parameters: int = Field(
+        description="Number of zeros in this node's parameter"
+    )
+    num_four_blocks: int = Field(
+        description="Number of four blocks in this node's parameter"
+    )
+    num_sparse_four_blocks: int = Field(
+        description="Number of four blocks with all zeros in this node's parameter"
+    )
+
+
 class NodeAnalysis(BaseModel):
     """
     Pydantic model for the analysis of a node within a model
     """
 
     name: str = Field(description="This node's name")
+    node_id: str = Field(description="This node's id (the name of its first output)")
     op_type: str = Field(description="This node's op type")
-    weight_name: Optional[str] = Field(description="The name of this node's weight")
+
+    inputs: List[NodeIO] = Field(description="This node's inputs in the onnx graph")
+    outputs: List[NodeIO] = Field(description="This node's outputs in the onnx graph")
+
+    weight: Optional[WeightAnalysis] = Field(
+        description="An analysis of this node's weight"
+    )
+
     parameterized_and_prunable: bool = Field(
         description="Does this node have a parameterized and prunable weight"
     )
@@ -62,23 +109,9 @@ class NodeAnalysis(BaseModel):
         description="The number of (floating point and/or integer) operations "
         "in this node not performed because of sparsification"
     )
-    sparsity: float = Field(description="Proportion of zeros in this node's parameter")
-    four_block_sparsity: float = Field(
-        description="Proportion of zero blocks in this node's parameter"
-    )
     is_sparse_layer: bool = Field(description="Does this node have sparse weights")
     is_quantized_layer: bool = Field(
         description="Does this node have quantized weights"
-    )
-    num_parameters: int = Field(description="Size of this node's parameter")
-    num_sparse_parameters: int = Field(
-        description="Number of zeros in this node's parameter"
-    )
-    num_four_blocks: int = Field(
-        description="Number of four blocks in this node's parameter"
-    )
-    num_sparse_four_blocks: int = Field(
-        description="Number of four blocks with all zeros in this node's parameter"
     )
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
@@ -104,6 +137,27 @@ class NodeAnalysis(BaseModel):
         node_shapes will be computed
         :return: instance of NodeAnalysis class
         """
+        node_id = extract_node_id(node)
+        node_shape = node_shapes.get(node_id)
+
+        inputs = (
+            [
+                NodeIO(name=name, shape=shape)
+                for name, shape in zip(node.input, node_shape.input_shapes)
+            ]
+            if node_shape is not None and node_shape.input_shapes is not None
+            else []
+        )
+        outputs = (
+            [
+                NodeIO(name=name, shape=shape)
+                for name, shape in zip(node.output, node_shape.output_shapes)
+            ]
+            if node_shape is not None and node_shape.output_shapes is not None
+            else []
+        )
+
+        node_weight = get_node_weight(model_onnx, node)
         num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(
             model_onnx, node, node_shapes=node_shapes
         )
@@ -114,23 +168,33 @@ class NodeAnalysis(BaseModel):
             num_sparse_four_blocks,
             num_four_blocks,
         ) = get_node_num_four_block_zeros_and_size(model_onnx, node)
-        node_weight = get_node_weight(model_onnx, node)
+        weight_analysis = (
+            WeightAnalysis(
+                name=get_node_weight_name(model_onnx, node),
+                shape=get_node_weight_shape(model_onnx, node),
+                sparsity=get_node_sparsity(model_onnx, node),
+                four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
+                num_parameters=num_parameters,
+                num_sparse_parameters=num_sparse_parameters,
+                num_four_blocks=num_four_blocks,
+                num_sparse_four_blocks=num_sparse_four_blocks,
+            )
+            if node_weight is not None
+            else None
+        )
 
         return cls(
             name=node.name,
+            node_id=node_id,
             op_type=node.op_type,
-            weight_name=get_node_weight_name(model_onnx, node),
+            inputs=inputs,
+            outputs=outputs,
+            weight=weight_analysis,
             parameterized_and_prunable=is_parameterized_prunable_layer(
                 model_onnx, node
             ),
             num_dense_ops=num_dense_ops,
             num_sparse_ops=num_sparse_ops,
-            sparsity=get_node_sparsity(model_onnx, node),
-            four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
-            num_parameters=num_parameters,
-            num_sparse_parameters=num_sparse_parameters,
-            num_four_blocks=num_four_blocks,
-            num_sparse_four_blocks=num_sparse_four_blocks,
             is_sparse_layer=is_sparse_layer(model_onnx, node),
             is_quantized_layer=is_quantized_layer(model_onnx, node),
             zero_point=get_zero_point(model_onnx, node),
@@ -143,9 +207,11 @@ class ModelAnalysis(BaseModel):
     Pydantic model for analysis of a model
     """
 
-    layer_counts: Dict[str, int] = Field(description="Overview of layers", default={})
+    layer_counts: Dict[str, int] = Field(
+        description="Overview of nodes with parameterized weights", default={}
+    )
     non_parameterized_operator_counts: Dict[str, int] = Field(
-        description="Overview of operations (nodes that are not layers)", default={}
+        description="Overview of nodes without parameterized weights", default={}
     )
     num_dense_ops: int = Field(
         description="The total number of (floating point and/or integer) operations "
@@ -154,6 +220,22 @@ class ModelAnalysis(BaseModel):
     num_sparse_ops: int = Field(
         description="The total number of (floating point and/or integer) operations "
         "not performed because of sparsification"
+    )
+    num_sparse_quantized_ops: int = Field(
+        description="Number of sparse quantized operations (for nodes with "
+        "parameterized weights)"
+    )
+    num_dense_quantized_ops: int = Field(
+        description="Number of dense quantized operations (for nodes with "
+        "parameterized weights)"
+    )
+    num_sparse_floating_point_ops: int = Field(
+        description="Number of sparse floating point operations (for nodes with "
+        "parameterized weights)"
+    )
+    num_dense_floating_point_ops: int = Field(
+        description="Number of dense floating point operations (for nodes with "
+        "parameterized weights)"
     )
     average_sparsity: float = Field(
         description="Average sparsity across all trainable parameters "
@@ -183,7 +265,7 @@ class ModelAnalysis(BaseModel):
     )
 
     @classmethod
-    def from_onnx_model(cls, onnx_file_path: str):
+    def from_onnx(cls, onnx_file_path: str):
         """
         Class constructor for Model Analysis
 
@@ -198,16 +280,61 @@ class ModelAnalysis(BaseModel):
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
 
         num_parameters = sum(
-            [node_analysis.num_parameters for node_analysis in node_analyses]
+            [
+                node_analysis.weight.num_parameters
+                for node_analysis in node_analyses
+                if node_analysis.weight is not None
+            ]
         )
         num_sparse_parameters = sum(
-            [node_analysis.num_sparse_parameters for node_analysis in node_analyses]
+            [
+                node_analysis.weight.num_sparse_parameters
+                for node_analysis in node_analyses
+                if node_analysis.weight is not None
+            ]
         )
         num_four_blocks = sum(
-            [node_analysis.num_four_blocks for node_analysis in node_analyses]
+            [
+                node_analysis.weight.num_four_blocks
+                for node_analysis in node_analyses
+                if node_analysis.weight is not None
+            ]
         )
         num_sparse_four_blocks = sum(
-            [node_analysis.num_sparse_four_blocks for node_analysis in node_analyses]
+            [
+                node_analysis.weight.num_sparse_four_blocks
+                for node_analysis in node_analyses
+                if node_analysis.weight is not None
+            ]
+        )
+
+        num_dense_quantized_ops = sum(
+            [
+                node_analysis.num_sparse_ops
+                for node_analysis in node_analyses
+                if node_analysis.dtype and "int" in node_analysis.dtype
+            ]
+        )
+        num_sparse_quantized_ops = sum(
+            [
+                node_analysis.num_sparse_ops
+                for node_analysis in node_analyses
+                if node_analysis.dtype and "int" in node_analysis.dtype
+            ]
+        )
+        num_sparse_floating_point_ops = sum(
+            [
+                node_analysis.num_sparse_ops
+                for node_analysis in node_analyses
+                if node_analysis.dtype and "float" in node_analysis.dtype
+            ]
+        )
+        num_dense_floating_point_ops = sum(
+            [
+                node_analysis.num_dense_ops
+                for node_analysis in node_analyses
+                if node_analysis.dtype and "float" in node_analysis.dtype
+            ]
         )
 
         return cls(
@@ -237,6 +364,10 @@ class ModelAnalysis(BaseModel):
             num_sparse_parameters=num_sparse_parameters,
             num_four_blocks=num_four_blocks,
             num_sparse_four_blocks=num_sparse_four_blocks,
+            num_dense_quantized_ops=num_dense_quantized_ops,
+            num_sparse_quantized_ops=num_sparse_quantized_ops,
+            num_sparse_floating_point_ops=num_sparse_floating_point_ops,
+            num_dense_floating_point_ops=num_dense_floating_point_ops,
             average_sparsity=(num_sparse_parameters / num_parameters),
             average_four_block_sparsity=(num_sparse_four_blocks / num_four_blocks),
             nodes=node_analyses,

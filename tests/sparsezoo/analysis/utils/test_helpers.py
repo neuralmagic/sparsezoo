@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import onnx
+# noqa: F811
+
 import pytest
 
-from sparsezoo import Zoo
-from sparsezoo.analysis import ModelAnalysis
 from sparsezoo.analysis.utils import (
     extract_node_shapes,
     get_layer_and_op_counts,
@@ -33,14 +32,13 @@ from sparsezoo.analysis.utils import (
     is_quantized_layer,
     is_sparse_layer,
 )
-
-
-_MODEL_NAMES = [
-    "yolact_none",
-    "mobilenet_v1_pruned_moderate",
-    "bert_pruned_quantized",
-    "resnet50_pruned_quantized",
-]
+from tests.sparsezoo.analysis.helpers import (
+    get_expected_analysis,
+    get_model_and_node,
+    get_model_onnx,
+    get_test_model_names,
+    model_paths,
+)
 
 
 @pytest.fixture()
@@ -49,50 +47,7 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def model_paths():
-    return {
-        "yolact_none": {
-            "stub": "zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/"
-            "base-none",
-            "truth": "tests/sparsezoo/analysis/yolact_none.yaml",
-        },
-        "mobilenet_v1_pruned_moderate": {
-            "stub": "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
-            "imagenet/pruned-moderate",
-            "truth": "tests/sparsezoo/analysis/mobilenet_v1_pruned_moderate.yaml",
-        },
-        "bert_pruned_quantized": {
-            "stub": "zoo:nlp/question_answering/bert-base/pytorch/huggingface/"
-            "squad/12layer_pruned80_quant-none-vnni",
-            "truth": "tests/sparsezoo/analysis/bert_pruned_quantized.yaml",
-        },
-        "resnet50_pruned_quantized": {
-            "stub": "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/"
-            "imagenet/pruned85_quant-none-vnni",
-            "truth": "tests/sparsezoo/analysis/resnet50_pruned_quantized.yaml",
-        },
-    }
-
-
-@pytest.fixture(scope="session")
-def get_model_onnx(model_paths):
-    model_onnxs = {}
-    for model_name in model_paths.keys():
-        model_stub = model_paths[model_name]["stub"]
-        model = Zoo.load_model_from_stub(model_stub)
-        model.onnx_file.download()
-        onnx_path = model.onnx_file.downloaded_path()
-        model_onnx = onnx.load(onnx_path)
-        model_onnxs[model_name] = model_onnx
-
-    def _get_model_onnx(model_name):
-        return model_onnxs[model_name]
-
-    return _get_model_onnx
-
-
-@pytest.fixture(scope="session")
-def get_model_node_shapes(model_paths, get_model_onnx):
+def get_model_node_shapes(get_model_onnx, model_paths):
     model_node_shapes = {}
     for model_name in model_paths.keys():
         model = get_model_onnx(model_name)
@@ -105,39 +60,13 @@ def get_model_node_shapes(model_paths, get_model_onnx):
     return _get_model_node_shapes
 
 
-@pytest.fixture()
-def get_model_and_node(get_model_onnx):
-    def _get_model_and_node(model_name, node_name):
-        model = get_model_onnx(model_name)
-        return (
-            model,
-            [node for node in list(model.graph.node) if node.name == node_name][0],
-        )
-
-    return _get_model_and_node
-
-
-@pytest.fixture(scope="session")
-def get_expected_analysis(model_paths):
-    model_truth_analyses = {}
-    for model_name in model_paths.keys():
-        model_truth_path = model_paths[model_name]["truth"]
-        analysis = ModelAnalysis.parse_yaml_file(model_truth_path)
-        model_truth_analyses[model_name] = analysis
-
-    def _get_expected_analysis(model_name):
-        return model_truth_analyses[model_name]
-
-    return _get_expected_analysis
-
-
 def pytest_generate_tests(metafunc):
     if metafunc.function.__name__ not in [
         "test_get_node_weight",
         "test_get_node_bias",
         "test_is_four_block_sparse_layer",
     ]:
-        metafunc.parametrize("model_name", _MODEL_NAMES)
+        metafunc.parametrize("model_name", get_test_model_names())
 
 
 @pytest.mark.parametrize(
@@ -250,8 +179,12 @@ def test_get_node_num_zeros_and_size(
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         num_zeros, size = get_node_num_zeros_and_size(model, node)
-        assert num_zeros == node_analysis.num_sparse_parameters
-        assert size == node_analysis.num_parameters
+        if node_analysis.weight is not None:
+            assert num_zeros == node_analysis.weight.num_sparse_parameters
+            assert size == node_analysis.weight.num_parameters
+        else:
+            assert num_zeros == 0
+            assert size == 0
 
 
 def test_get_node_num_four_block_zeros_and_size(
@@ -265,8 +198,12 @@ def test_get_node_num_four_block_zeros_and_size(
         num_zero_blocks, num_blocks = get_node_num_four_block_zeros_and_size(
             model, node
         )
-        assert num_zero_blocks == node_analysis.num_sparse_four_blocks
-        assert num_blocks == node_analysis.num_four_blocks
+        if node_analysis.weight is not None:
+            assert num_zero_blocks == node_analysis.weight.num_sparse_four_blocks
+            assert num_blocks == node_analysis.weight.num_four_blocks
+        else:
+            assert num_zero_blocks == 0
+            assert num_blocks == 0
 
 
 def test_get_zero_point(
@@ -288,9 +225,14 @@ def test_get_node_sparsity(
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
-        assert get_node_sparsity(model, node) == pytest.approx(
-            node_analysis.sparsity, abs=margin_of_error
-        )
+        if node_analysis.weight is not None:
+            assert get_node_sparsity(model, node) == pytest.approx(
+                node_analysis.weight.sparsity, abs=margin_of_error
+            )
+        else:
+            assert get_node_sparsity(model, node) == pytest.approx(
+                0, abs=margin_of_error
+            )
 
 
 def test_is_sparse_layer(
@@ -312,9 +254,12 @@ def test_get_node_four_block_sparsity(
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
-        assert get_node_four_block_sparsity(model, node) == pytest.approx(
-            node_analysis.four_block_sparsity, abs=margin_of_error
-        )
+        if node_analysis.weight is not None:
+            assert get_node_four_block_sparsity(model, node) == pytest.approx(
+                node_analysis.weight.four_block_sparsity, abs=margin_of_error
+            )
+        else:
+            assert get_node_four_block_sparsity(model, node) == 0
 
 
 @pytest.mark.parametrize(

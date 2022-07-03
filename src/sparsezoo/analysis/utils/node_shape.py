@@ -22,16 +22,17 @@ from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
 import numpy
 import onnx
-from onnx import ModelProto, NodeProto
+from onnx import ModelProto
 from onnx.helper import make_empty_tensor_value_info
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
+
+from .helpers import extract_node_id
 
 
 _LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "NodeShape",
-    "extract_node_id",
     "extract_node_shapes",
 ]
 
@@ -47,20 +48,6 @@ NodeShape = NamedTuple(
         ("output_shapes", Union[List[List[int]], None]),
     ],
 )
-
-
-def extract_node_id(node: NodeProto) -> str:
-    """
-    Get the node id for a given node from an ONNX model.
-    Grabs the first ouput id as the node id.
-    This is because is guaranteed to be unique for this node by the ONNX spec.
-
-    :param node: the node to grab an id for
-    :return: the id for the node
-    """
-    outputs = node.output
-
-    return str(outputs[0])
 
 
 def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:

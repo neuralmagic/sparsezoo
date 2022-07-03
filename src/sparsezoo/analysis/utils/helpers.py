@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
 from onnx import ModelProto, NodeProto, numpy_helper
@@ -34,6 +34,8 @@ __all__ = [
     "is_quantized_layer",
     "is_sparse_layer",
     "group_four_block",
+    "extract_node_id",
+    "get_node_weight_shape",
 ]
 
 
@@ -206,7 +208,7 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
         if node.op_type == "QLinearMatMul":
             return _get_node_input(node, 7, default=None)
         raise Exception(
-            "Node with op type {node.op_type} does not have a zero " "point initializer"
+            "Node with op type {node.op_type} does not have a zero point initializer"
         )
 
     if node.op_type in ["Gather"]:
@@ -393,6 +395,33 @@ def get_layer_and_op_counts(model: ModelProto) -> Tuple[Dict[str, int], Dict[str
         target_dict[node.op_type] += 1
 
     return layer_counts, op_counts
+
+
+def extract_node_id(node: NodeProto) -> str:
+    """
+    Get the node id for a given node from an ONNX model.
+    Grabs the first ouput id as the node id.
+    This is because is guaranteed to be unique for this node by the ONNX spec.
+
+    :param node: the node to grab an id for
+    :return: the id for the node
+    """
+    outputs = node.output
+
+    return str(outputs[0])
+
+
+def get_node_weight_shape(model: ModelProto, node: NodeProto) -> Union[List[int], None]:
+    """
+    :param model: model that contains the given node
+    :param node: node to which parameter belongs to
+    :return: shape of weight belonging to node if weight exists, None otherwise
+    """
+    weight = get_node_weight(model, node)
+    if weight is None:
+        return None
+
+    return weight.shape
 
 
 def _get_node_input(

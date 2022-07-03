@@ -60,7 +60,7 @@ def draw_sparsity_by_layer_chart(
     }
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparsities"].append(node.sparsity * 100)
+        node_data["sparsities"].append(node.weight.sparsity * 100)
 
     # Draw chart data
     axes.bar(
@@ -123,9 +123,9 @@ def draw_parameter_chart(
     node_data = {"names": [], "sparse_parameters": [], "dense_parameters": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparse_parameters"].append(node.num_sparse_parameters)
+        node_data["sparse_parameters"].append(node.weight.num_sparse_parameters)
         node_data["dense_parameters"].append(
-            node.num_parameters - node.num_sparse_parameters
+            node.weight.num_parameters - node.weight.num_sparse_parameters
         )
 
     # Draw parameters bars
@@ -303,9 +303,9 @@ def draw_parameter_operation_combined_chart(
         node_data["names"].append(_get_node_name(node))
         node_data["parameters_pos"].append(node_i - bar_width / 2)
         node_data["ops_pos"].append(node_i + bar_width / 2)
-        node_data["sparse_parameters"].append(node.num_sparse_parameters)
+        node_data["sparse_parameters"].append(node.weight.num_sparse_parameters)
         node_data["dense_parameters"].append(
-            node.num_parameters - node.num_sparse_parameters
+            node.weight.num_parameters - node.weight.num_sparse_parameters
         )
         node_data["sparse_ops"].append(node.num_sparse_ops)
         node_data["dense_ops"].append(node.num_dense_ops)
@@ -405,15 +405,15 @@ def _get_node_name(node_analysis: NodeAnalysis) -> str:
     """
     if (
         node_analysis.op_type == "Gather"
-        and ".embeddings." in node_analysis.weight_name
+        and ".embeddings." in node_analysis.weight.name
     ):
-        name = node_analysis.weight_name
+        name = node_analysis.weight.name
         name = name.split(".embeddings.")[1]
         name = name.replace("weight", "")
         return name
     if node_analysis.is_quantized_layer:
         return node_analysis.name
-    if node_analysis.weight_name and ".weight" in node_analysis.weight_name:
-        return node_analysis.weight_name.replace(".weight", "")
+    if node_analysis.weight.name and ".weight" in node_analysis.weight.name:
+        return node_analysis.weight.name.replace(".weight", "")
     else:
         return node_analysis.name
