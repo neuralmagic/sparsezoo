@@ -27,7 +27,7 @@ non_parameterized_operator_counts:
 num_dense_ops: 18590812800
 num_sparse_ops: 52275962880
 num_sparse_quantized_ops: 52275962880
-num_dense_quantized_ops: 52275962880
+num_dense_quantized_ops: 12955032576
 num_sparse_floating_point_ops: 0
 num_dense_floating_point_ops: 0
 average_sparsity: 0.633654289566123

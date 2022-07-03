@@ -308,16 +308,16 @@ class ModelAnalysis(BaseModel):
             ]
         )
 
-        num_dense_quantized_ops = sum(
+        num_sparse_quantized_ops = sum(
             [
                 node_analysis.num_sparse_ops
                 for node_analysis in node_analyses
                 if node_analysis.dtype and "int" in node_analysis.dtype
             ]
         )
-        num_sparse_quantized_ops = sum(
+        num_dense_quantized_ops = sum(
             [
-                node_analysis.num_sparse_ops
+                node_analysis.num_dense_ops
                 for node_analysis in node_analyses
                 if node_analysis.dtype and "int" in node_analysis.dtype
             ]
