@@ -53,7 +53,7 @@ class TestSetupModelDirectory:
             onnx_model=model.onnx_file.path,
             sample_inputs=model.data_inputs.path,
             sample_outputs=model.data_outputs.path,
-            recipes=[model.recipes[0].path] * 2,
+            recipes=model.recipes[0].path,
         )
 
         folders = glob.glob(os.path.join(output_dir.name, "*"))
@@ -99,7 +99,7 @@ class TestSetupModelDirectory:
             File(
                 name=os.path.basename(model.recipes[0].path), path=model.recipes[0].path
             )
-        ] * 2
+        ]
 
         setup_model_directory(
             output_dir=output_dir.name,

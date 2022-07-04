@@ -76,7 +76,9 @@ def setup_model_directory(
             (also supports list of paths or Files)
     """
     # create new directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir)
 
     # fetch the function arguments as a dictionary
     files_dict = copy.deepcopy(locals())
@@ -112,7 +114,9 @@ def setup_model_directory(
             _copy_file_contents(output_dir, file, name)
 
 
-def _create_file_from_path(path: str) -> Union[File, Directory]:
+def _create_file_from_path(
+    path: str,
+) -> Union[File, Directory]:
     # create a File or Directory given a path
     file = File(name=os.path.basename(path), path=path)
     if os.path.isdir(path):
@@ -138,20 +142,27 @@ def _copy_file_contents(
                 copy_func = (
                     shutil.copytree if isinstance(_file, Directory) else shutil.copyfile
                 )
-                copy_func(_file.path, copy_path)
+                _copy_and_overwrite(_file.path, copy_path, copy_func)
         else:
             # files passed as a Directory class instance
             copy_path = os.path.join(output_dir, name)
-            shutil.copytree(file.path, copy_path)
+            _copy_and_overwrite(file.path, copy_path, shutil.copytree)
     else:
         # for the structured directories/files
         if isinstance(file, list):
             for _file in file:
-                _copy_file_contents(output_dir, _file)
+                copy_path = os.path.join(output_dir, os.path.basename(_file.path))
+                _copy_and_overwrite(_file.path, copy_path, shutil.copyfile)
         elif isinstance(file, Directory):
             copy_path = os.path.join(output_dir, os.path.basename(file.path))
-            shutil.copytree(file.path, copy_path)
+            _copy_and_overwrite(file.path, copy_path, shutil.copytree)
         else:
             # if not Directory then File class object
             copy_path = os.path.join(output_dir, os.path.basename(file.path))
-            shutil.copyfile(file.path, copy_path)
+            _copy_and_overwrite(file.path, copy_path, shutil.copyfile)
+
+
+def _copy_and_overwrite(from_path, to_path, func):
+    if os.path.exists(to_path):
+        shutil.rmtree(to_path)
+    func(from_path, to_path)
