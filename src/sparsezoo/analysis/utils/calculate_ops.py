@@ -256,10 +256,10 @@ def _get_conv_weight_dense_sparse_ops(
     weight_spatial_flattened = numpy.reshape(weight, (*weight.shape[:2], -1))
     kernel_dense_sparse_ops = [
         _get_gemm_dense_sparse_ops(
-            weight_spatial_flattened[:, :, i].T,
-            [1, weight.shape[1]],
-            zero_point,
-            is_four_block_sparse,
+            weight=weight_spatial_flattened[:, :, i].T,
+            input_shape=[1, weight.shape[1]],
+            zero_point=zero_point,
+            is_four_block_sparse=is_four_block_sparse,
         )
         for i in range(weight_spatial_flattened.shape[2])
     ]
