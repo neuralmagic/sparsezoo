@@ -17,8 +17,8 @@
 import pytest
 
 from sparsezoo import Zoo
-from sparsezoo.analysis import ModelAnalysis
-from sparsezoo.analysis.utils.chart import (
+from sparsezoo.analysis import (
+    ModelAnalysis,
     draw_operation_chart,
     draw_parameter_chart,
     draw_parameter_operation_combined_chart,

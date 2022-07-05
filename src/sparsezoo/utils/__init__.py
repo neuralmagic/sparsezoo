@@ -18,7 +18,10 @@ Utils for working with the sparsezoo
 
 # flake8: noqa
 
+from .calculate_ops import *
 from .data import *
 from .downloader import *
 from .helpers import *
+from .node_shape import *
 from .numpy import *
+from .onnx import *

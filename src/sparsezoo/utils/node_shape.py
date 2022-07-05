@@ -26,7 +26,7 @@ from onnx import ModelProto
 from onnx.helper import make_empty_tensor_value_info
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
 
-from .helpers import extract_node_id
+from sparsezoo.utils.onnx import extract_node_id
 
 
 _LOGGER = logging.getLogger(__name__)

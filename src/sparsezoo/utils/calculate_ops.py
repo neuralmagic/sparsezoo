@@ -17,7 +17,8 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy
 from onnx import ModelProto, NodeProto
 
-from sparsezoo.analysis.utils.helpers import (
+from sparsezoo.utils.node_shape import NodeShape, extract_node_shapes
+from sparsezoo.utils.onnx import (
     extract_node_id,
     get_node_attributes,
     get_node_bias,
@@ -26,7 +27,6 @@ from sparsezoo.analysis.utils.helpers import (
     group_four_block,
     is_four_block_sparse_layer,
 )
-from sparsezoo.analysis.utils.node_shape import NodeShape, extract_node_shapes
 
 
 __all__ = [

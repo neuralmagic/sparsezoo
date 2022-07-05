@@ -16,7 +16,7 @@
 
 import pytest
 
-from sparsezoo.analysis.utils import (
+from sparsezoo.utils import (
     extract_node_shapes,
     get_layer_and_op_counts,
     get_node_bias,

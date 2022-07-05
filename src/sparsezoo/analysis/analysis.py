@@ -19,7 +19,7 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field
 
-from sparsezoo.analysis.utils import (
+from sparsezoo.utils import (
     NodeShape,
     extract_node_id,
     extract_node_shapes,
@@ -213,13 +213,13 @@ class ModelAnalysis(BaseModel):
     non_parameterized_operator_counts: Dict[str, int] = Field(
         description="Overview of nodes without parameterized weights", default={}
     )
-    num_dense_ops: int = Field(
-        description="The total number of (floating point and/or integer) operations "
-        "performed in one forward pass of the model"
-    )
     num_sparse_ops: int = Field(
         description="The total number of (floating point and/or integer) operations "
         "not performed because of sparsification"
+    )
+    num_dense_ops: int = Field(
+        description="The total number of (floating point and/or integer) operations "
+        "performed in one forward pass of the model"
     )
     num_sparse_quantized_ops: int = Field(
         description="Number of sparse quantized operations (for nodes with "
