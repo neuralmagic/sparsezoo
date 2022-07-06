@@ -22,6 +22,6 @@ from .calculate_ops import *
 from .data import *
 from .downloader import *
 from .helpers import *
-from .node_shape import *
+from .node_inference import *
 from .numpy import *
 from .onnx import *

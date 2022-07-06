@@ -14,12 +14,12 @@ non_parameterized_operator_counts:
   Concat: 1
   Reshape: 1
   Softmax: 1
-num_dense_ops: 1368433300
 num_sparse_ops: 6709351764
+num_dense_ops: 1368433300
 num_sparse_quantized_ops: 6709351764
 num_dense_quantized_ops: 1352795820
 num_sparse_floating_point_ops: 0
-num_dense_floating_point_ops: 4097000
+num_dense_floating_point_ops: 15637480
 average_sparsity: 0.7921806733285988
 average_four_block_sparsity: 0.7813517797817991
 num_sparse_layers: 53
@@ -39,6 +39,7 @@ nodes:
     - 3
     - 224
     - 224
+    dtype: float32
   outputs:
   - name: '1436'
     shape:
@@ -46,6 +47,7 @@ nodes:
     - 3
     - 224
     - 224
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -53,7 +55,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_13_quant
   node_id: '1462'
   op_type: QLinearConv
@@ -64,6 +65,7 @@ nodes:
     - 3
     - 224
     - 224
+    dtype: uint8
   outputs:
   - name: '1462'
     shape:
@@ -71,6 +73,7 @@ nodes:
     - 64
     - 112
     - 112
+    dtype: uint8
   weight:
     name: Conv_13.weight_quantized
     shape:
@@ -84,13 +87,13 @@ nodes:
     num_sparse_parameters: 2693
     num_four_blocks: 3136
     num_sparse_four_blocks: 0
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 168529708
   num_sparse_ops: 67098324
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_22
   node_id: '1465'
   op_type: DequantizeLinear
@@ -101,6 +104,7 @@ nodes:
     - 64
     - 112
     - 112
+    dtype: uint8
   outputs:
   - name: '1465'
     shape:
@@ -108,6 +112,7 @@ nodes:
     - 64
     - 112
     - 112
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -115,7 +120,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: MaxPool_23
   node_id: '1466'
   op_type: MaxPool
@@ -126,6 +130,7 @@ nodes:
     - 64
     - 112
     - 112
+    dtype: float32
   outputs:
   - name: '1466'
     shape:
@@ -133,6 +138,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1806336
@@ -140,7 +146,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_26
   node_id: '1469'
   op_type: QuantizeLinear
@@ -151,6 +156,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1469'
     shape:
@@ -158,6 +164,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -165,7 +172,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_37_quant
   node_id: '1501'
   op_type: QLinearConv
@@ -176,6 +182,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1501'
     shape:
@@ -183,6 +190,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_37.weight_quantized
     shape:
@@ -196,13 +204,13 @@ nodes:
     num_sparse_parameters: 3518
     num_four_blocks: 1024
     num_sparse_four_blocks: 871
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 4039168
   num_sparse_ops: 21851648
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_105_quant
   node_id: '1589'
   op_type: QLinearConv
@@ -213,6 +221,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1589'
     shape:
@@ -220,6 +229,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_105.weight_quantized
     shape:
@@ -233,13 +243,13 @@ nodes:
     num_sparse_parameters: 14174
     num_four_blocks: 4096
     num_sparse_four_blocks: 3482
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 16206848
   num_sparse_ops: 87356416
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_60_quant
   node_id: '1533'
   op_type: QLinearConv
@@ -250,6 +260,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1533'
     shape:
@@ -257,6 +268,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_60.weight_quantized
     shape:
@@ -270,13 +282,13 @@ nodes:
     num_sparse_parameters: 32702
     num_four_blocks: 9216
     num_sparse_four_blocks: 7834
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34593392
   num_sparse_ops: 194074000
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_113
   node_id: '1592'
   op_type: DequantizeLinear
@@ -287,6 +299,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1592'
     shape:
@@ -294,6 +307,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -301,7 +315,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_83_quant
   node_id: '1558'
   op_type: QLinearConv
@@ -312,6 +325,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1558'
     shape:
@@ -319,6 +333,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_83.weight_quantized
     shape:
@@ -332,13 +347,13 @@ nodes:
     num_sparse_parameters: 14397
     num_four_blocks: 4096
     num_sparse_four_blocks: 3482
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 16206848
   num_sparse_ops: 87356416
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_91
   node_id: '1561'
   op_type: DequantizeLinear
@@ -349,6 +364,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1561'
     shape:
@@ -356,6 +372,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -363,7 +380,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_114
   node_id: '1593'
   op_type: Add
@@ -374,12 +390,14 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   - name: '1561'
     shape:
     - 1
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1593'
     shape:
@@ -387,6 +405,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 802816
@@ -394,7 +413,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_115
   node_id: '1594'
   op_type: Relu
@@ -405,6 +423,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1594'
     shape:
@@ -412,6 +431,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 802816
@@ -419,7 +439,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_118
   node_id: '1597'
   op_type: QuantizeLinear
@@ -430,6 +449,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1597'
     shape:
@@ -437,6 +457,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -444,7 +465,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 1594_identity_dequantized
   node_id: 1594_identity_dequantized
   op_type: DequantizeLinear
@@ -455,6 +475,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: 1594_identity_dequantized
     shape:
@@ -462,6 +483,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -469,7 +491,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_129_quant
   node_id: '1629'
   op_type: QLinearConv
@@ -480,6 +501,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1629'
     shape:
@@ -487,6 +509,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_129.weight_quantized
     shape:
@@ -500,13 +523,13 @@ nodes:
     num_sparse_parameters: 14413
     num_four_blocks: 4096
     num_sparse_four_blocks: 3482
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15604736
   num_sparse_ops: 87356416
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_152_quant
   node_id: '1661'
   op_type: QLinearConv
@@ -517,6 +540,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1661'
     shape:
@@ -524,6 +548,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_152.weight_quantized
     shape:
@@ -537,13 +562,13 @@ nodes:
     num_sparse_parameters: 31813
     num_four_blocks: 9216
     num_sparse_four_blocks: 7834
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34547848
   num_sparse_ops: 194119544
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_175_quant
   node_id: '1686'
   op_type: QLinearConv
@@ -554,6 +579,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1686'
     shape:
@@ -561,6 +587,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_175.weight_quantized
     shape:
@@ -574,13 +601,13 @@ nodes:
     num_sparse_parameters: 14429
     num_four_blocks: 4096
     num_sparse_four_blocks: 3491
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15981056
   num_sparse_ops: 87582208
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_183
   node_id: '1689'
   op_type: DequantizeLinear
@@ -591,6 +618,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1689'
     shape:
@@ -598,6 +626,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -605,7 +634,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_184
   node_id: '1690'
   op_type: Add
@@ -616,12 +644,14 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   - name: '1689'
     shape:
     - 1
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1690'
     shape:
@@ -629,6 +659,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 802816
@@ -636,7 +667,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_185
   node_id: '1691'
   op_type: Relu
@@ -647,6 +677,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1691'
     shape:
@@ -654,6 +685,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 802816
@@ -661,7 +693,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_188
   node_id: '1694'
   op_type: QuantizeLinear
@@ -672,6 +703,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1694'
     shape:
@@ -679,6 +711,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -686,7 +719,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 1691_identity_dequantized
   node_id: 1691_identity_dequantized
   op_type: DequantizeLinear
@@ -697,6 +729,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: 1691_identity_dequantized
     shape:
@@ -704,6 +737,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -711,7 +745,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_199_quant
   node_id: '1726'
   op_type: QLinearConv
@@ -722,6 +755,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1726'
     shape:
@@ -729,6 +763,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_199.weight_quantized
     shape:
@@ -742,13 +777,13 @@ nodes:
     num_sparse_parameters: 14154
     num_four_blocks: 4096
     num_sparse_four_blocks: 3482
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15604736
   num_sparse_ops: 87356416
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_222_quant
   node_id: '1758'
   op_type: QLinearConv
@@ -759,6 +794,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1758'
     shape:
@@ -766,6 +802,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_222.weight_quantized
     shape:
@@ -779,13 +816,13 @@ nodes:
     num_sparse_parameters: 31586
     num_four_blocks: 9216
     num_sparse_four_blocks: 7834
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34565280
   num_sparse_ops: 194102112
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_245_quant
   node_id: '1783'
   op_type: QLinearConv
@@ -796,6 +833,7 @@ nodes:
     - 64
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1783'
     shape:
@@ -803,6 +841,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_245.weight_quantized
     shape:
@@ -816,13 +855,13 @@ nodes:
     num_sparse_parameters: 14172
     num_four_blocks: 4096
     num_sparse_four_blocks: 3487
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 16081408
   num_sparse_ops: 87481856
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_253
   node_id: '1786'
   op_type: DequantizeLinear
@@ -833,6 +872,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1786'
     shape:
@@ -840,6 +880,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -847,7 +888,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_254
   node_id: '1787'
   op_type: Add
@@ -858,12 +898,14 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   - name: '1786'
     shape:
     - 1
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1787'
     shape:
@@ -871,6 +913,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 802816
@@ -878,7 +921,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_258
   node_id: '1791'
   op_type: QuantizeLinear
@@ -889,6 +931,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: float32
   outputs:
   - name: '1791'
     shape:
@@ -896,6 +939,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -903,7 +947,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_269_quant
   node_id: '1823'
   op_type: QLinearConv
@@ -914,6 +957,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1823'
     shape:
@@ -921,6 +965,7 @@ nodes:
     - 128
     - 56
     - 56
+    dtype: uint8
   weight:
     name: Conv_269.weight_quantized
     shape:
@@ -934,13 +979,13 @@ nodes:
     num_sparse_parameters: 28197
     num_four_blocks: 8192
     num_sparse_four_blocks: 6964
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 31209472
   num_sparse_ops: 174712832
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_337_quant
   node_id: '1911'
   op_type: QLinearConv
@@ -951,6 +996,7 @@ nodes:
     - 256
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1911'
     shape:
@@ -958,6 +1004,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_337.weight_quantized
     shape:
@@ -971,13 +1018,13 @@ nodes:
     num_sparse_parameters: 114195
     num_four_blocks: 32768
     num_sparse_four_blocks: 27859
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 31190656
   num_sparse_ops: 174731648
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_292_quant
   node_id: '1855'
   op_type: QLinearConv
@@ -988,6 +1035,7 @@ nodes:
     - 128
     - 56
     - 56
+    dtype: uint8
   outputs:
   - name: '1855'
     shape:
@@ -995,6 +1043,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_292.weight_quantized
     shape:
@@ -1008,13 +1057,13 @@ nodes:
     num_sparse_parameters: 126574
     num_four_blocks: 36864
     num_sparse_four_blocks: 31335
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34778240
   num_sparse_ops: 196533120
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_345
   node_id: '1914'
   op_type: DequantizeLinear
@@ -1025,6 +1074,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '1914'
     shape:
@@ -1032,6 +1082,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1039,7 +1090,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_315_quant
   node_id: '1880'
   op_type: QLinearConv
@@ -1050,6 +1100,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '1880'
     shape:
@@ -1057,6 +1108,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_315.weight_quantized
     shape:
@@ -1070,13 +1122,13 @@ nodes:
     num_sparse_parameters: 56309
     num_four_blocks: 16384
     num_sparse_four_blocks: 13930
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15792896
   num_sparse_ops: 87368960
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_323
   node_id: '1883'
   op_type: DequantizeLinear
@@ -1087,6 +1139,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '1883'
     shape:
@@ -1094,6 +1147,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1101,7 +1155,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_346
   node_id: '1915'
   op_type: Add
@@ -1112,12 +1165,14 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   - name: '1883'
     shape:
     - 1
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '1915'
     shape:
@@ -1125,6 +1180,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1132,7 +1188,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_347
   node_id: '1916'
   op_type: Relu
@@ -1143,6 +1198,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '1916'
     shape:
@@ -1150,6 +1206,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1157,7 +1214,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_350
   node_id: '1919'
   op_type: QuantizeLinear
@@ -1168,6 +1224,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '1919'
     shape:
@@ -1175,6 +1232,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1182,7 +1240,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 1916_identity_dequantized
   node_id: 1916_identity_dequantized
   op_type: DequantizeLinear
@@ -1193,6 +1250,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: 1916_identity_dequantized
     shape:
@@ -1200,6 +1258,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1207,7 +1266,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_361_quant
   node_id: '1951'
   op_type: QLinearConv
@@ -1218,6 +1276,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '1951'
     shape:
@@ -1225,6 +1284,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_361.weight_quantized
     shape:
@@ -1238,13 +1298,13 @@ nodes:
     num_sparse_parameters: 57911
     num_four_blocks: 16384
     num_sparse_four_blocks: 13927
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15510656
   num_sparse_ops: 87350144
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_384_quant
   node_id: '1983'
   op_type: QLinearConv
@@ -1255,6 +1315,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '1983'
     shape:
@@ -1262,6 +1323,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_384.weight_quantized
     shape:
@@ -1275,13 +1337,13 @@ nodes:
     num_sparse_parameters: 129005
     num_four_blocks: 36864
     num_sparse_four_blocks: 31335
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33982392
   num_sparse_ops: 191856712
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_407_quant
   node_id: '2008'
   op_type: QLinearConv
@@ -1292,6 +1354,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2008'
     shape:
@@ -1299,6 +1362,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_407.weight_quantized
     shape:
@@ -1312,13 +1376,13 @@ nodes:
     num_sparse_parameters: 57441
     num_four_blocks: 16384
     num_sparse_four_blocks: 13936
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15755264
   num_sparse_ops: 87406592
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_415
   node_id: '2011'
   op_type: DequantizeLinear
@@ -1329,6 +1393,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2011'
     shape:
@@ -1336,6 +1401,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1343,7 +1409,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_416
   node_id: '2012'
   op_type: Add
@@ -1354,12 +1419,14 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   - name: '2011'
     shape:
     - 1
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2012'
     shape:
@@ -1367,6 +1434,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1374,7 +1442,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_417
   node_id: '2013'
   op_type: Relu
@@ -1385,6 +1452,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2013'
     shape:
@@ -1392,6 +1460,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1399,7 +1468,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_420
   node_id: '2016'
   op_type: QuantizeLinear
@@ -1410,6 +1478,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2016'
     shape:
@@ -1417,6 +1486,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1424,7 +1494,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2013_identity_dequantized
   node_id: 2013_identity_dequantized
   op_type: DequantizeLinear
@@ -1435,6 +1504,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: 2013_identity_dequantized
     shape:
@@ -1442,6 +1512,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1449,7 +1520,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_431_quant
   node_id: '2048'
   op_type: QLinearConv
@@ -1460,6 +1530,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2048'
     shape:
@@ -1467,6 +1538,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_431.weight_quantized
     shape:
@@ -1480,13 +1552,13 @@ nodes:
     num_sparse_parameters: 56744
     num_four_blocks: 16384
     num_sparse_four_blocks: 13927
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15510656
   num_sparse_ops: 87350144
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_454_quant
   node_id: '2080'
   op_type: QLinearConv
@@ -1497,6 +1569,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2080'
     shape:
@@ -1504,6 +1577,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_454.weight_quantized
     shape:
@@ -1517,13 +1591,13 @@ nodes:
     num_sparse_parameters: 126601
     num_four_blocks: 36864
     num_sparse_four_blocks: 31335
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34049432
   num_sparse_ops: 191789672
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_477_quant
   node_id: '2105'
   op_type: QLinearConv
@@ -1534,6 +1608,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2105'
     shape:
@@ -1541,6 +1616,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_477.weight_quantized
     shape:
@@ -1554,13 +1630,13 @@ nodes:
     num_sparse_parameters: 56669
     num_four_blocks: 16384
     num_sparse_four_blocks: 13931
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15786624
   num_sparse_ops: 87375232
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_485
   node_id: '2108'
   op_type: DequantizeLinear
@@ -1571,6 +1647,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2108'
     shape:
@@ -1578,6 +1655,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1585,7 +1663,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_486
   node_id: '2109'
   op_type: Add
@@ -1596,12 +1673,14 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   - name: '2108'
     shape:
     - 1
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2109'
     shape:
@@ -1609,6 +1688,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1616,7 +1696,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_487
   node_id: '2110'
   op_type: Relu
@@ -1627,6 +1706,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2110'
     shape:
@@ -1634,6 +1714,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1641,7 +1722,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_490
   node_id: '2113'
   op_type: QuantizeLinear
@@ -1652,6 +1732,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2113'
     shape:
@@ -1659,6 +1740,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1666,7 +1748,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2110_identity_dequantized
   node_id: 2110_identity_dequantized
   op_type: DequantizeLinear
@@ -1677,6 +1758,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: 2110_identity_dequantized
     shape:
@@ -1684,6 +1766,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1691,7 +1774,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_501_quant
   node_id: '2145'
   op_type: QLinearConv
@@ -1702,6 +1784,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2145'
     shape:
@@ -1709,6 +1792,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_501.weight_quantized
     shape:
@@ -1722,13 +1806,13 @@ nodes:
     num_sparse_parameters: 56275
     num_four_blocks: 16384
     num_sparse_four_blocks: 13927
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15510656
   num_sparse_ops: 87350144
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_524_quant
   node_id: '2177'
   op_type: QLinearConv
@@ -1739,6 +1823,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2177'
     shape:
@@ -1746,6 +1831,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_524.weight_quantized
     shape:
@@ -1759,13 +1845,13 @@ nodes:
     num_sparse_parameters: 126024
     num_four_blocks: 36864
     num_sparse_four_blocks: 31335
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34082680
   num_sparse_ops: 191756424
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_547_quant
   node_id: '2202'
   op_type: QLinearConv
@@ -1776,6 +1862,7 @@ nodes:
     - 128
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2202'
     shape:
@@ -1783,6 +1870,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_547.weight_quantized
     shape:
@@ -1796,13 +1884,13 @@ nodes:
     num_sparse_parameters: 56149
     num_four_blocks: 16384
     num_sparse_four_blocks: 13928
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15805440
   num_sparse_ops: 87356416
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_555
   node_id: '2205'
   op_type: DequantizeLinear
@@ -1813,6 +1901,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2205'
     shape:
@@ -1820,6 +1909,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1827,7 +1917,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_556
   node_id: '2206'
   op_type: Add
@@ -1838,12 +1927,14 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   - name: '2205'
     shape:
     - 1
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2206'
     shape:
@@ -1851,6 +1942,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 401408
@@ -1858,7 +1950,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_560
   node_id: '2210'
   op_type: QuantizeLinear
@@ -1869,6 +1960,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: float32
   outputs:
   - name: '2210'
     shape:
@@ -1876,6 +1968,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -1883,7 +1976,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_571_quant
   node_id: '2242'
   op_type: QLinearConv
@@ -1894,6 +1986,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2242'
     shape:
@@ -1901,6 +1994,7 @@ nodes:
     - 256
     - 28
     - 28
+    dtype: uint8
   weight:
     name: Conv_571.weight_quantized
     shape:
@@ -1914,13 +2008,13 @@ nodes:
     num_sparse_parameters: 112211
     num_four_blocks: 32768
     num_sparse_four_blocks: 27853
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 31027584
   num_sparse_ops: 174694016
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_639_quant
   node_id: '2330'
   op_type: QLinearConv
@@ -1931,6 +2025,7 @@ nodes:
     - 512
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2330'
     shape:
@@ -1938,6 +2033,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_639.weight_quantized
     shape:
@@ -1951,13 +2047,13 @@ nodes:
     num_sparse_parameters: 451353
     num_four_blocks: 131072
     num_sparse_four_blocks: 111412
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 31027584
   num_sparse_ops: 174694016
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_594_quant
   node_id: '2274'
   op_type: QLinearConv
@@ -1968,6 +2064,7 @@ nodes:
     - 256
     - 28
     - 28
+    dtype: uint8
   outputs:
   - name: '2274'
     shape:
@@ -1975,6 +2072,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_594.weight_quantized
     shape:
@@ -1988,13 +2086,13 @@ nodes:
     num_sparse_parameters: 507607
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34731200
   num_sparse_ops: 196529984
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_647
   node_id: '2333'
   op_type: DequantizeLinear
@@ -2005,6 +2103,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2333'
     shape:
@@ -2012,6 +2111,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2019,7 +2119,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_617_quant
   node_id: '2299'
   op_type: QLinearConv
@@ -2030,6 +2129,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2299'
     shape:
@@ -2037,6 +2137,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_617.weight_quantized
     shape:
@@ -2050,13 +2151,13 @@ nodes:
     num_sparse_parameters: 224877
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15614144
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_625
   node_id: '2302'
   op_type: DequantizeLinear
@@ -2067,6 +2168,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2302'
     shape:
@@ -2074,6 +2176,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2081,7 +2184,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_648
   node_id: '2334'
   op_type: Add
@@ -2092,12 +2194,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2302'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2334'
     shape:
@@ -2105,6 +2209,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2112,7 +2217,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_649
   node_id: '2335'
   op_type: Relu
@@ -2123,6 +2227,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2335'
     shape:
@@ -2130,6 +2235,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2137,7 +2243,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_652
   node_id: '2338'
   op_type: QuantizeLinear
@@ -2148,6 +2253,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2338'
     shape:
@@ -2155,6 +2261,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2162,7 +2269,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2335_identity_dequantized
   node_id: 2335_identity_dequantized
   op_type: DequantizeLinear
@@ -2173,6 +2279,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: 2335_identity_dequantized
     shape:
@@ -2180,6 +2287,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2187,7 +2295,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_663_quant
   node_id: '2370'
   op_type: QLinearConv
@@ -2198,6 +2305,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2370'
     shape:
@@ -2205,6 +2313,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_663.weight_quantized
     shape:
@@ -2218,13 +2327,13 @@ nodes:
     num_sparse_parameters: 231606
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15463616
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_686_quant
   node_id: '2402'
   op_type: QLinearConv
@@ -2235,6 +2344,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2402'
     shape:
@@ -2242,6 +2352,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_686.weight_quantized
     shape:
@@ -2255,13 +2366,13 @@ nodes:
     num_sparse_parameters: 509265
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33195568
   num_sparse_ops: 187186640
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_709_quant
   node_id: '2427'
   op_type: QLinearConv
@@ -2272,6 +2383,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2427'
     shape:
@@ -2279,6 +2391,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_709.weight_quantized
     shape:
@@ -2292,13 +2405,13 @@ nodes:
     num_sparse_parameters: 227017
     num_four_blocks: 65536
     num_sparse_four_blocks: 55707
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15612576
   num_sparse_ops: 87348576
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_717
   node_id: '2430'
   op_type: DequantizeLinear
@@ -2309,6 +2422,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2430'
     shape:
@@ -2316,6 +2430,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2323,7 +2438,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_718
   node_id: '2431'
   op_type: Add
@@ -2334,12 +2448,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2430'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2431'
     shape:
@@ -2347,6 +2463,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2354,7 +2471,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_719
   node_id: '2432'
   op_type: Relu
@@ -2365,6 +2481,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2432'
     shape:
@@ -2372,6 +2489,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2379,7 +2497,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_722
   node_id: '2435'
   op_type: QuantizeLinear
@@ -2390,6 +2507,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2435'
     shape:
@@ -2397,6 +2515,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2404,7 +2523,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2432_identity_dequantized
   node_id: 2432_identity_dequantized
   op_type: DequantizeLinear
@@ -2415,6 +2533,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: 2432_identity_dequantized
     shape:
@@ -2422,6 +2541,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2429,7 +2549,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_733_quant
   node_id: '2467'
   op_type: QLinearConv
@@ -2440,6 +2559,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2467'
     shape:
@@ -2447,6 +2567,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_733.weight_quantized
     shape:
@@ -2460,13 +2581,13 @@ nodes:
     num_sparse_parameters: 228377
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15463616
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_756_quant
   node_id: '2499'
   op_type: QLinearConv
@@ -2477,6 +2598,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2499'
     shape:
@@ -2484,6 +2606,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_756.weight_quantized
     shape:
@@ -2497,13 +2620,13 @@ nodes:
     num_sparse_parameters: 507285
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33154096
   num_sparse_ops: 187228112
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_779_quant
   node_id: '2524'
   op_type: QLinearConv
@@ -2514,6 +2637,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2524'
     shape:
@@ -2521,6 +2645,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_779.weight_quantized
     shape:
@@ -2534,13 +2659,13 @@ nodes:
     num_sparse_parameters: 226337
     num_four_blocks: 65536
     num_sparse_four_blocks: 55710
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15607872
   num_sparse_ops: 87353280
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_787
   node_id: '2527'
   op_type: DequantizeLinear
@@ -2551,6 +2676,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2527'
     shape:
@@ -2558,6 +2684,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2565,7 +2692,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_788
   node_id: '2528'
   op_type: Add
@@ -2576,12 +2702,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2527'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2528'
     shape:
@@ -2589,6 +2717,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2596,7 +2725,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_789
   node_id: '2529'
   op_type: Relu
@@ -2607,6 +2735,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2529'
     shape:
@@ -2614,6 +2743,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2621,7 +2751,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_792
   node_id: '2532'
   op_type: QuantizeLinear
@@ -2632,6 +2761,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2532'
     shape:
@@ -2639,6 +2769,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2646,7 +2777,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2529_identity_dequantized
   node_id: 2529_identity_dequantized
   op_type: DequantizeLinear
@@ -2657,6 +2787,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: 2529_identity_dequantized
     shape:
@@ -2664,6 +2795,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2671,7 +2803,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_803_quant
   node_id: '2564'
   op_type: QLinearConv
@@ -2682,6 +2813,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2564'
     shape:
@@ -2689,6 +2821,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_803.weight_quantized
     shape:
@@ -2702,13 +2835,13 @@ nodes:
     num_sparse_parameters: 226308
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15463616
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_826_quant
   node_id: '2596'
   op_type: QLinearConv
@@ -2719,6 +2852,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2596'
     shape:
@@ -2726,6 +2860,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_826.weight_quantized
     shape:
@@ -2739,13 +2874,13 @@ nodes:
     num_sparse_parameters: 507444
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33185680
   num_sparse_ops: 187196528
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_849_quant
   node_id: '2621'
   op_type: QLinearConv
@@ -2756,6 +2891,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2621'
     shape:
@@ -2763,6 +2899,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_849.weight_quantized
     shape:
@@ -2776,13 +2913,13 @@ nodes:
     num_sparse_parameters: 225675
     num_four_blocks: 65536
     num_sparse_four_blocks: 55736
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15567104
   num_sparse_ops: 87394048
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_857
   node_id: '2624'
   op_type: DequantizeLinear
@@ -2793,6 +2930,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2624'
     shape:
@@ -2800,6 +2938,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2807,7 +2946,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_858
   node_id: '2625'
   op_type: Add
@@ -2818,12 +2956,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2624'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2625'
     shape:
@@ -2831,6 +2971,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2838,7 +2979,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_859
   node_id: '2626'
   op_type: Relu
@@ -2849,6 +2989,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2626'
     shape:
@@ -2856,6 +2997,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -2863,7 +3005,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_862
   node_id: '2629'
   op_type: QuantizeLinear
@@ -2874,6 +3015,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2629'
     shape:
@@ -2881,6 +3023,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2888,7 +3031,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2626_identity_dequantized
   node_id: 2626_identity_dequantized
   op_type: DequantizeLinear
@@ -2899,6 +3041,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: 2626_identity_dequantized
     shape:
@@ -2906,6 +3049,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -2913,7 +3057,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_873_quant
   node_id: '2661'
   op_type: QLinearConv
@@ -2924,6 +3067,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2661'
     shape:
@@ -2931,6 +3075,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_873.weight_quantized
     shape:
@@ -2944,13 +3089,13 @@ nodes:
     num_sparse_parameters: 225442
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15463616
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_896_quant
   node_id: '2693'
   op_type: QLinearConv
@@ -2961,6 +3106,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2693'
     shape:
@@ -2968,6 +3114,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_896.weight_quantized
     shape:
@@ -2981,13 +3128,13 @@ nodes:
     num_sparse_parameters: 506588
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33112464
   num_sparse_ops: 187269744
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_919_quant
   node_id: '2718'
   op_type: QLinearConv
@@ -2998,6 +3145,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2718'
     shape:
@@ -3005,6 +3153,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_919.weight_quantized
     shape:
@@ -3018,13 +3167,13 @@ nodes:
     num_sparse_parameters: 226274
     num_four_blocks: 65536
     num_sparse_four_blocks: 55721
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15590624
   num_sparse_ops: 87370528
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_927
   node_id: '2721'
   op_type: DequantizeLinear
@@ -3035,6 +3184,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2721'
     shape:
@@ -3042,6 +3192,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3049,7 +3200,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_928
   node_id: '2722'
   op_type: Add
@@ -3060,12 +3210,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2721'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2722'
     shape:
@@ -3073,6 +3225,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -3080,7 +3233,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_929
   node_id: '2723'
   op_type: Relu
@@ -3091,6 +3243,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2723'
     shape:
@@ -3098,6 +3251,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -3105,7 +3259,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_932
   node_id: '2726'
   op_type: QuantizeLinear
@@ -3116,6 +3269,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2726'
     shape:
@@ -3123,6 +3277,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3130,7 +3285,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2723_identity_dequantized
   node_id: 2723_identity_dequantized
   op_type: DequantizeLinear
@@ -3141,6 +3295,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: 2723_identity_dequantized
     shape:
@@ -3148,6 +3303,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3155,7 +3311,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_943_quant
   node_id: '2758'
   op_type: QLinearConv
@@ -3166,6 +3321,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2758'
     shape:
@@ -3173,6 +3329,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_943.weight_quantized
     shape:
@@ -3186,13 +3343,13 @@ nodes:
     num_sparse_parameters: 224524
     num_four_blocks: 65536
     num_sparse_four_blocks: 55706
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15463616
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_966_quant
   node_id: '2790'
   op_type: QLinearConv
@@ -3203,6 +3360,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2790'
     shape:
@@ -3210,6 +3368,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_966.weight_quantized
     shape:
@@ -3223,13 +3382,13 @@ nodes:
     num_sparse_parameters: 506240
     num_four_blocks: 147456
     num_sparse_four_blocks: 125338
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 33215584
   num_sparse_ops: 187166624
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_989_quant
   node_id: '2815'
   op_type: QLinearConv
@@ -3240,6 +3399,7 @@ nodes:
     - 256
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2815'
     shape:
@@ -3247,6 +3407,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_989.weight_quantized
     shape:
@@ -3260,13 +3421,13 @@ nodes:
     num_sparse_parameters: 225053
     num_four_blocks: 65536
     num_sparse_four_blocks: 55715
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15600032
   num_sparse_ops: 87361120
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_997
   node_id: '2818'
   op_type: DequantizeLinear
@@ -3277,6 +3438,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2818'
     shape:
@@ -3284,6 +3446,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3291,7 +3454,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_998
   node_id: '2819'
   op_type: Add
@@ -3302,12 +3464,14 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   - name: '2818'
     shape:
     - 1
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2819'
     shape:
@@ -3315,6 +3479,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 200704
@@ -3322,7 +3487,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_1002
   node_id: '2823'
   op_type: QuantizeLinear
@@ -3333,6 +3497,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: float32
   outputs:
   - name: '2823'
     shape:
@@ -3340,6 +3505,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3347,7 +3513,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_1013_quant
   node_id: '2855'
   op_type: QLinearConv
@@ -3358,6 +3523,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2855'
     shape:
@@ -3365,6 +3531,7 @@ nodes:
     - 512
     - 14
     - 14
+    dtype: uint8
   weight:
     name: Conv_1013.weight_quantized
     shape:
@@ -3378,13 +3545,13 @@ nodes:
     num_sparse_parameters: 448184
     num_four_blocks: 131072
     num_sparse_four_blocks: 111412
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 30927232
   num_sparse_ops: 174694016
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1081_quant
   node_id: '2943'
   op_type: QLinearConv
@@ -3395,6 +3562,7 @@ nodes:
     - 1024
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2943'
     shape:
@@ -3402,6 +3570,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1081.weight_quantized
     shape:
@@ -3415,13 +3584,13 @@ nodes:
     num_sparse_parameters: 1829564
     num_four_blocks: 524288
     num_sparse_four_blocks: 445649
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 30926840
   num_sparse_ops: 174694408
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1036_quant
   node_id: '2887'
   op_type: QLinearConv
@@ -3432,6 +3601,7 @@ nodes:
     - 512
     - 14
     - 14
+    dtype: uint8
   outputs:
   - name: '2887'
     shape:
@@ -3439,6 +3609,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1036.weight_quantized
     shape:
@@ -3452,13 +3623,13 @@ nodes:
     num_sparse_parameters: 2023198
     num_four_blocks: 589824
     num_sparse_four_blocks: 501351
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 34706504
   num_sparse_ops: 196529592
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_1089
   node_id: '2946'
   op_type: DequantizeLinear
@@ -3469,6 +3640,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '2946'
     shape:
@@ -3476,6 +3648,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3483,7 +3656,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_1059_quant
   node_id: '2912'
   op_type: QLinearConv
@@ -3494,6 +3666,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '2912'
     shape:
@@ -3501,6 +3674,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1059.weight_quantized
     shape:
@@ -3514,13 +3688,13 @@ nodes:
     num_sparse_parameters: 908231
     num_four_blocks: 262144
     num_sparse_four_blocks: 222823
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15514184
   num_sparse_ops: 87346616
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_1067
   node_id: '2915'
   op_type: DequantizeLinear
@@ -3531,6 +3705,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '2915'
     shape:
@@ -3538,6 +3713,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3545,7 +3721,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_1090
   node_id: '2947'
   op_type: Add
@@ -3556,12 +3731,14 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   - name: '2915'
     shape:
     - 1
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '2947'
     shape:
@@ -3569,6 +3746,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -3576,7 +3754,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_1091
   node_id: '2948'
   op_type: Relu
@@ -3587,6 +3764,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '2948'
     shape:
@@ -3594,6 +3772,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -3601,7 +3780,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_1094
   node_id: '2951'
   op_type: QuantizeLinear
@@ -3612,6 +3790,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '2951'
     shape:
@@ -3619,6 +3798,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3626,7 +3806,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 2948_identity_dequantized
   node_id: 2948_identity_dequantized
   op_type: DequantizeLinear
@@ -3637,6 +3816,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: 2948_identity_dequantized
     shape:
@@ -3644,6 +3824,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3651,7 +3832,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_1105_quant
   node_id: '2983'
   op_type: QLinearConv
@@ -3662,6 +3842,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '2983'
     shape:
@@ -3669,6 +3850,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1105.weight_quantized
     shape:
@@ -3682,13 +3864,13 @@ nodes:
     num_sparse_parameters: 907767
     num_four_blocks: 262144
     num_sparse_four_blocks: 222823
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15438920
   num_sparse_ops: 87346616
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1128_quant
   node_id: '3015'
   op_type: QLinearConv
@@ -3699,6 +3881,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3015'
     shape:
@@ -3706,6 +3889,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1128.weight_quantized
     shape:
@@ -3719,13 +3903,13 @@ nodes:
     num_sparse_parameters: 2018674
     num_four_blocks: 589824
     num_sparse_four_blocks: 501351
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 31823520
   num_sparse_ops: 177916768
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1151_quant
   node_id: '3040'
   op_type: QLinearConv
@@ -3736,6 +3920,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3040'
     shape:
@@ -3743,6 +3928,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1151.weight_quantized
     shape:
@@ -3756,13 +3942,13 @@ nodes:
     num_sparse_parameters: 908684
     num_four_blocks: 262144
     num_sparse_four_blocks: 222826
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15513008
   num_sparse_ops: 87347792
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_1159
   node_id: '3043'
   op_type: DequantizeLinear
@@ -3773,6 +3959,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3043'
     shape:
@@ -3780,6 +3967,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3787,7 +3975,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_1160
   node_id: '3044'
   op_type: Add
@@ -3798,12 +3985,14 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   - name: '3043'
     shape:
     - 1
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3044'
     shape:
@@ -3811,6 +4000,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -3818,7 +4008,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_1161
   node_id: '3045'
   op_type: Relu
@@ -3829,6 +4018,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3045'
     shape:
@@ -3836,6 +4026,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -3843,7 +4034,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: QuantizeLinear_1164
   node_id: '3048'
   op_type: QuantizeLinear
@@ -3854,6 +4044,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3048'
     shape:
@@ -3861,6 +4052,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3868,7 +4060,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: 3045_identity_dequantized
   node_id: 3045_identity_dequantized
   op_type: DequantizeLinear
@@ -3879,6 +4070,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: 3045_identity_dequantized
     shape:
@@ -3886,6 +4078,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -3893,7 +4086,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_1175_quant
   node_id: '3080'
   op_type: QLinearConv
@@ -3904,6 +4096,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3080'
     shape:
@@ -3911,6 +4104,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1175.weight_quantized
     shape:
@@ -3924,13 +4118,13 @@ nodes:
     num_sparse_parameters: 901682
     num_four_blocks: 262144
     num_sparse_four_blocks: 222823
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15438920
   num_sparse_ops: 87346616
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1198_quant
   node_id: '3112'
   op_type: QLinearConv
@@ -3941,6 +4135,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3112'
     shape:
@@ -3948,6 +4143,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1198.weight_quantized
     shape:
@@ -3961,13 +4157,13 @@ nodes:
     num_sparse_parameters: 2014501
     num_four_blocks: 589824
     num_sparse_four_blocks: 501351
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 32506616
   num_sparse_ops: 177233672
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: Conv_1221_quant
   node_id: '3137'
   op_type: QLinearConv
@@ -3978,6 +4174,7 @@ nodes:
     - 512
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3137'
     shape:
@@ -3985,6 +4182,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   weight:
     name: Conv_1221.weight_quantized
     shape:
@@ -3998,13 +4196,13 @@ nodes:
     num_sparse_parameters: 906801
     num_four_blocks: 262144
     num_sparse_four_blocks: 222824
+    dtype: uint8
   parameterized_and_prunable: true
   num_dense_ops: 15513792
   num_sparse_ops: 87347008
   is_sparse_layer: true
   is_quantized_layer: true
   zero_point: 128
-  dtype: uint8
 - name: DequantizeLinear_1229
   node_id: '3140'
   op_type: DequantizeLinear
@@ -4015,6 +4213,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: uint8
   outputs:
   - name: '3140'
     shape:
@@ -4022,6 +4221,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4029,7 +4229,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_1230
   node_id: '3141'
   op_type: Add
@@ -4040,12 +4239,14 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   - name: '3140'
     shape:
     - 1
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3141'
     shape:
@@ -4053,6 +4254,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -4060,7 +4262,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_1231
   node_id: '3142'
   op_type: Relu
@@ -4071,6 +4272,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3142'
     shape:
@@ -4078,6 +4280,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -4085,7 +4288,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: GlobalAveragePool_1232
   node_id: '3143'
   op_type: GlobalAveragePool
@@ -4096,6 +4298,7 @@ nodes:
     - 2048
     - 7
     - 7
+    dtype: float32
   outputs:
   - name: '3143'
     shape:
@@ -4103,6 +4306,7 @@ nodes:
     - 2048
     - 1
     - 1
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 100352
@@ -4110,7 +4314,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_1233
   node_id: '3144'
   op_type: Shape
@@ -4121,10 +4324,12 @@ nodes:
     - 2048
     - 1
     - 1
+    dtype: float32
   outputs:
   - name: '3144'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4132,7 +4337,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_1235
   node_id: '3146'
   op_type: Gather
@@ -4140,6 +4344,7 @@ nodes:
   - name: '3144'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -4148,7 +4353,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_1236
   node_id: '3148'
   op_type: Unsqueeze
@@ -4157,6 +4361,7 @@ nodes:
   - name: '3148'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4164,7 +4369,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_1237
   node_id: '3150'
   op_type: Concat
@@ -4172,10 +4376,12 @@ nodes:
   - name: '3148'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '3150'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4183,7 +4389,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_1238
   node_id: '3151'
   op_type: Reshape
@@ -4194,14 +4399,17 @@ nodes:
     - 2048
     - 1
     - 1
+    dtype: float32
   - name: '3150'
     shape:
     - 2
+    dtype: int64
   outputs:
   - name: '3151'
     shape:
     - 1
     - 2048
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4209,7 +4417,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gemm_1239
   node_id: output_0
   op_type: Gemm
@@ -4218,11 +4425,13 @@ nodes:
     shape:
     - 1
     - 2048
+    dtype: float32
   outputs:
   - name: output_0
     shape:
     - 1
     - 1000
+    dtype: float32
   weight:
     name: classifier.fc.weight
     shape:
@@ -4234,13 +4443,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 512000
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 4097000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Softmax_1240
   node_id: output_1
   op_type: Softmax
@@ -4249,11 +4458,13 @@ nodes:
     shape:
     - 1
     - 1000
+    dtype: float32
   outputs:
   - name: output_1
     shape:
     - 1
     - 1000
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4261,4 +4472,3 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null

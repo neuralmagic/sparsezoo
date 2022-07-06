@@ -32,6 +32,8 @@ Example:
 python3 scripts/update_analysis_tests.py
 """
 
+import tqdm
+
 from sparsezoo import Zoo
 from sparsezoo.analysis import ModelAnalysis
 
@@ -61,7 +63,7 @@ _MODEL_PATHS = {
 
 
 def update_analysis_tests(model_paths):
-    for model_path in model_paths.values():
+    for model_path in tqdm.tqdm(model_paths.values()):
         model = Zoo.load_model_from_stub(model_path["stub"])
         model.onnx_file.download()
         onnx_path = model.onnx_file.downloaded_path()

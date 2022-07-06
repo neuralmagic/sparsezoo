@@ -16,12 +16,12 @@ non_parameterized_operator_counts:
   Reshape: 15
   Tanh: 5
   Softmax: 1
-num_dense_ops: 152945774384
 num_sparse_ops: 0
+num_dense_ops: 152945774384
 num_sparse_quantized_ops: 0
 num_dense_quantized_ops: 0
 num_sparse_floating_point_ops: 0
-num_dense_floating_point_ops: 152842607184
+num_dense_floating_point_ops: 152945774384
 average_sparsity: 0.0
 average_four_block_sparsity: 0.0
 num_sparse_layers: 0
@@ -41,6 +41,7 @@ nodes:
     - 3
     - 550
     - 550
+    dtype: float32
   outputs:
   - name: '798'
     shape:
@@ -48,6 +49,7 @@ nodes:
     - 32
     - 550
     - 550
+    dtype: float32
   weight:
     name: '799'
     shape:
@@ -61,13 +63,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 288
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 531766592
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_1
   node_id: '351'
   op_type: LeakyRelu
@@ -78,6 +80,7 @@ nodes:
     - 32
     - 550
     - 550
+    dtype: float32
   outputs:
   - name: '351'
     shape:
@@ -85,6 +88,7 @@ nodes:
     - 32
     - 550
     - 550
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 9680000
@@ -92,7 +96,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_2
   node_id: '801'
   op_type: Conv
@@ -103,6 +106,7 @@ nodes:
     - 32
     - 550
     - 550
+    dtype: float32
   outputs:
   - name: '801'
     shape:
@@ -110,6 +114,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   weight:
     name: '802'
     shape:
@@ -123,13 +128,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 4608
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2792680000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_3
   node_id: '354'
   op_type: LeakyRelu
@@ -140,6 +145,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '354'
     shape:
@@ -147,6 +153,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 4840000
@@ -154,7 +161,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_4
   node_id: '804'
   op_type: Conv
@@ -165,6 +171,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '804'
     shape:
@@ -172,6 +179,7 @@ nodes:
     - 32
     - 275
     - 275
+    dtype: float32
   weight:
     name: '805'
     shape:
@@ -185,13 +193,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 512
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312180000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_5
   node_id: '357'
   op_type: LeakyRelu
@@ -202,6 +210,7 @@ nodes:
     - 32
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '357'
     shape:
@@ -209,6 +218,7 @@ nodes:
     - 32
     - 275
     - 275
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2420000
@@ -216,7 +226,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_6
   node_id: '807'
   op_type: Conv
@@ -227,6 +236,7 @@ nodes:
     - 32
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '807'
     shape:
@@ -234,6 +244,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   weight:
     name: '808'
     shape:
@@ -247,13 +258,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 4608
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2785925696
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_7
   node_id: '360'
   op_type: LeakyRelu
@@ -264,6 +275,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '360'
     shape:
@@ -271,6 +283,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 4840000
@@ -278,7 +291,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_8
   node_id: '361'
   op_type: Add
@@ -289,12 +301,14 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   - name: '354'
     shape:
     - 1
     - 64
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '361'
     shape:
@@ -302,6 +316,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 4840000
@@ -309,7 +324,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_9
   node_id: '810'
   op_type: Conv
@@ -320,6 +334,7 @@ nodes:
     - 64
     - 275
     - 275
+    dtype: float32
   outputs:
   - name: '810'
     shape:
@@ -327,6 +342,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight:
     name: '811'
     shape:
@@ -340,13 +356,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 18432
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2797040128
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_10
   node_id: '364'
   op_type: LeakyRelu
@@ -357,6 +373,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '364'
     shape:
@@ -364,6 +381,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2437632
@@ -371,7 +389,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_11
   node_id: '813'
   op_type: Conv
@@ -382,6 +399,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '813'
     shape:
@@ -389,6 +407,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   weight:
     name: '814'
     shape:
@@ -402,13 +421,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 2048
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 313235712
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_12
   node_id: '367'
   op_type: LeakyRelu
@@ -419,6 +438,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '367'
     shape:
@@ -426,6 +446,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -433,7 +454,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_13
   node_id: '816'
   op_type: Conv
@@ -444,6 +464,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '816'
     shape:
@@ -451,6 +472,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight:
     name: '817'
     shape:
@@ -464,13 +486,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 18432
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2797040128
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_14
   node_id: '370'
   op_type: LeakyRelu
@@ -481,6 +503,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '370'
     shape:
@@ -488,6 +511,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2437632
@@ -495,7 +519,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_15
   node_id: '371'
   op_type: Add
@@ -506,12 +529,14 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   - name: '364'
     shape:
     - 1
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '371'
     shape:
@@ -519,6 +544,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2437632
@@ -526,7 +552,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_16
   node_id: '819'
   op_type: Conv
@@ -537,6 +562,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '819'
     shape:
@@ -544,6 +570,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   weight:
     name: '820'
     shape:
@@ -557,13 +584,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 2048
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 313235712
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_17
   node_id: '374'
   op_type: LeakyRelu
@@ -574,6 +601,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '374'
     shape:
@@ -581,6 +609,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -588,7 +617,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_18
   node_id: '822'
   op_type: Conv
@@ -599,6 +627,7 @@ nodes:
     - 64
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '822'
     shape:
@@ -606,6 +635,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight:
     name: '823'
     shape:
@@ -619,13 +649,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 18432
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2797040128
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_19
   node_id: '377'
   op_type: LeakyRelu
@@ -636,6 +666,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '377'
     shape:
@@ -643,6 +674,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2437632
@@ -650,7 +682,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_20
   node_id: '378'
   op_type: Add
@@ -661,12 +692,14 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   - name: '371'
     shape:
     - 1
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '378'
     shape:
@@ -674,6 +707,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2437632
@@ -681,7 +715,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_21
   node_id: '825'
   op_type: Conv
@@ -692,6 +725,7 @@ nodes:
     - 128
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '825'
     shape:
@@ -699,6 +733,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '826'
     shape:
@@ -712,13 +747,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2809370880
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_22
   node_id: '381'
   op_type: LeakyRelu
@@ -729,6 +764,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '381'
     shape:
@@ -736,6 +772,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -743,7 +780,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_23
   node_id: '828'
   op_type: Conv
@@ -754,6 +790,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '828'
     shape:
@@ -761,6 +798,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '829'
     shape:
@@ -774,13 +812,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_24
   node_id: '384'
   op_type: LeakyRelu
@@ -791,6 +829,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '384'
     shape:
@@ -798,6 +837,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -805,7 +845,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_25
   node_id: '831'
   op_type: Conv
@@ -816,6 +855,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '831'
     shape:
@@ -823,6 +863,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '832'
     shape:
@@ -836,13 +877,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_26
   node_id: '387'
   op_type: LeakyRelu
@@ -853,6 +894,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '387'
     shape:
@@ -860,6 +902,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -867,7 +910,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_27
   node_id: '388'
   op_type: Add
@@ -878,12 +920,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '381'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '388'
     shape:
@@ -891,6 +935,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -898,7 +943,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_28
   node_id: '834'
   op_type: Conv
@@ -909,6 +953,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '834'
     shape:
@@ -916,6 +961,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '835'
     shape:
@@ -929,13 +975,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_29
   node_id: '391'
   op_type: LeakyRelu
@@ -946,6 +992,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '391'
     shape:
@@ -953,6 +1000,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -960,7 +1008,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_30
   node_id: '837'
   op_type: Conv
@@ -971,6 +1018,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '837'
     shape:
@@ -978,6 +1026,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '838'
     shape:
@@ -991,13 +1040,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_31
   node_id: '394'
   op_type: LeakyRelu
@@ -1008,6 +1057,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '394'
     shape:
@@ -1015,6 +1065,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1022,7 +1073,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_32
   node_id: '395'
   op_type: Add
@@ -1033,12 +1083,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '388'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '395'
     shape:
@@ -1046,6 +1098,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1053,7 +1106,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_33
   node_id: '840'
   op_type: Conv
@@ -1064,6 +1116,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '840'
     shape:
@@ -1071,6 +1124,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '841'
     shape:
@@ -1084,13 +1138,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_34
   node_id: '398'
   op_type: LeakyRelu
@@ -1101,6 +1155,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '398'
     shape:
@@ -1108,6 +1163,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1115,7 +1171,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_35
   node_id: '843'
   op_type: Conv
@@ -1126,6 +1181,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '843'
     shape:
@@ -1133,6 +1189,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '844'
     shape:
@@ -1146,13 +1203,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_36
   node_id: '401'
   op_type: LeakyRelu
@@ -1163,6 +1220,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '401'
     shape:
@@ -1170,6 +1228,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1177,7 +1236,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_37
   node_id: '402'
   op_type: Add
@@ -1188,12 +1246,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '395'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '402'
     shape:
@@ -1201,6 +1261,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1208,7 +1269,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_38
   node_id: '846'
   op_type: Conv
@@ -1219,6 +1279,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '846'
     shape:
@@ -1226,6 +1287,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '847'
     shape:
@@ -1239,13 +1301,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_39
   node_id: '405'
   op_type: LeakyRelu
@@ -1256,6 +1318,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '405'
     shape:
@@ -1263,6 +1326,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1270,7 +1334,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_40
   node_id: '849'
   op_type: Conv
@@ -1281,6 +1344,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '849'
     shape:
@@ -1288,6 +1352,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '850'
     shape:
@@ -1301,13 +1366,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_41
   node_id: '408'
   op_type: LeakyRelu
@@ -1318,6 +1383,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '408'
     shape:
@@ -1325,6 +1391,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1332,7 +1399,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_42
   node_id: '409'
   op_type: Add
@@ -1343,12 +1409,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '402'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '409'
     shape:
@@ -1356,6 +1424,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1363,7 +1432,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_43
   node_id: '852'
   op_type: Conv
@@ -1374,6 +1442,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '852'
     shape:
@@ -1381,6 +1450,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '853'
     shape:
@@ -1394,13 +1464,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_44
   node_id: '412'
   op_type: LeakyRelu
@@ -1411,6 +1481,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '412'
     shape:
@@ -1418,6 +1489,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1425,7 +1497,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_45
   node_id: '855'
   op_type: Conv
@@ -1436,6 +1507,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '855'
     shape:
@@ -1443,6 +1515,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '856'
     shape:
@@ -1456,13 +1529,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_46
   node_id: '415'
   op_type: LeakyRelu
@@ -1473,6 +1546,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '415'
     shape:
@@ -1480,6 +1554,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1487,7 +1562,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_47
   node_id: '416'
   op_type: Add
@@ -1498,12 +1572,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '409'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '416'
     shape:
@@ -1511,6 +1587,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1518,7 +1595,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_48
   node_id: '858'
   op_type: Conv
@@ -1529,6 +1605,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '858'
     shape:
@@ -1536,6 +1613,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '859'
     shape:
@@ -1549,13 +1627,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_49
   node_id: '419'
   op_type: LeakyRelu
@@ -1566,6 +1644,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '419'
     shape:
@@ -1573,6 +1652,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1580,7 +1660,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_50
   node_id: '861'
   op_type: Conv
@@ -1591,6 +1670,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '861'
     shape:
@@ -1598,6 +1678,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '862'
     shape:
@@ -1611,13 +1692,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_51
   node_id: '422'
   op_type: LeakyRelu
@@ -1628,6 +1709,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '422'
     shape:
@@ -1635,6 +1717,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1642,7 +1725,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_52
   node_id: '423'
   op_type: Add
@@ -1653,12 +1735,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '416'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '423'
     shape:
@@ -1666,6 +1750,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1673,7 +1758,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_53
   node_id: '864'
   op_type: Conv
@@ -1684,6 +1768,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '864'
     shape:
@@ -1691,6 +1776,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '865'
     shape:
@@ -1704,13 +1790,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_54
   node_id: '426'
   op_type: LeakyRelu
@@ -1721,6 +1807,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '426'
     shape:
@@ -1728,6 +1815,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1735,7 +1823,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_55
   node_id: '867'
   op_type: Conv
@@ -1746,6 +1833,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '867'
     shape:
@@ -1753,6 +1841,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '868'
     shape:
@@ -1766,13 +1855,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_56
   node_id: '429'
   op_type: LeakyRelu
@@ -1783,6 +1872,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '429'
     shape:
@@ -1790,6 +1880,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1797,7 +1888,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_57
   node_id: '430'
   op_type: Add
@@ -1808,12 +1898,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '423'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '430'
     shape:
@@ -1821,6 +1913,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1828,7 +1921,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_58
   node_id: '870'
   op_type: Conv
@@ -1839,6 +1931,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '870'
     shape:
@@ -1846,6 +1939,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight:
     name: '871'
     shape:
@@ -1859,13 +1953,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 8192
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_59
   node_id: '433'
   op_type: LeakyRelu
@@ -1876,6 +1970,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '433'
     shape:
@@ -1883,6 +1978,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -1890,7 +1986,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_60
   node_id: '873'
   op_type: Conv
@@ -1901,6 +1996,7 @@ nodes:
     - 128
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '873'
     shape:
@@ -1908,6 +2004,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: '874'
     shape:
@@ -1921,13 +2018,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 73728
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2782304512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_61
   node_id: '436'
   op_type: LeakyRelu
@@ -1938,6 +2035,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '436'
     shape:
@@ -1945,6 +2043,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1952,7 +2051,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_62
   node_id: '437'
   op_type: Add
@@ -1963,12 +2061,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '430'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '437'
     shape:
@@ -1976,6 +2076,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -1983,7 +2084,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_63
   node_id: '876'
   op_type: Conv
@@ -1994,6 +2094,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '876'
     shape:
@@ -2001,6 +2102,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '877'
     shape:
@@ -2014,13 +2116,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_64
   node_id: '440'
   op_type: LeakyRelu
@@ -2031,6 +2133,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '440'
     shape:
@@ -2038,6 +2141,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2045,7 +2149,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_65
   node_id: '879'
   op_type: Conv
@@ -2056,6 +2159,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '879'
     shape:
@@ -2063,6 +2167,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '880'
     shape:
@@ -2076,13 +2181,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_66
   node_id: '443'
   op_type: LeakyRelu
@@ -2093,6 +2198,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '443'
     shape:
@@ -2100,6 +2206,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2107,7 +2214,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_67
   node_id: '882'
   op_type: Conv
@@ -2118,6 +2224,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '882'
     shape:
@@ -2125,6 +2232,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '883'
     shape:
@@ -2138,13 +2246,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_68
   node_id: '446'
   op_type: LeakyRelu
@@ -2155,6 +2263,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '446'
     shape:
@@ -2162,6 +2271,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2169,7 +2279,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_69
   node_id: '447'
   op_type: Add
@@ -2180,12 +2289,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '440'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '447'
     shape:
@@ -2193,6 +2304,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2200,7 +2312,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_70
   node_id: '885'
   op_type: Conv
@@ -2211,6 +2322,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '885'
     shape:
@@ -2218,6 +2330,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '886'
     shape:
@@ -2231,13 +2344,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_71
   node_id: '450'
   op_type: LeakyRelu
@@ -2248,6 +2361,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '450'
     shape:
@@ -2255,6 +2369,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2262,7 +2377,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_72
   node_id: '888'
   op_type: Conv
@@ -2273,6 +2387,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '888'
     shape:
@@ -2280,6 +2395,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '889'
     shape:
@@ -2293,13 +2409,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_73
   node_id: '453'
   op_type: LeakyRelu
@@ -2310,6 +2426,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '453'
     shape:
@@ -2317,6 +2434,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2324,7 +2442,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_74
   node_id: '454'
   op_type: Add
@@ -2335,12 +2452,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '447'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '454'
     shape:
@@ -2348,6 +2467,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2355,7 +2475,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_75
   node_id: '891'
   op_type: Conv
@@ -2366,6 +2485,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '891'
     shape:
@@ -2373,6 +2493,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '892'
     shape:
@@ -2386,13 +2507,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_76
   node_id: '457'
   op_type: LeakyRelu
@@ -2403,6 +2524,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '457'
     shape:
@@ -2410,6 +2532,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2417,7 +2540,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_77
   node_id: '894'
   op_type: Conv
@@ -2428,6 +2550,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '894'
     shape:
@@ -2435,6 +2558,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '895'
     shape:
@@ -2448,13 +2572,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_78
   node_id: '460'
   op_type: LeakyRelu
@@ -2465,6 +2589,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '460'
     shape:
@@ -2472,6 +2597,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2479,7 +2605,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_79
   node_id: '461'
   op_type: Add
@@ -2490,12 +2615,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '454'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '461'
     shape:
@@ -2503,6 +2630,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2510,7 +2638,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_80
   node_id: '897'
   op_type: Conv
@@ -2521,6 +2648,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '897'
     shape:
@@ -2528,6 +2656,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '898'
     shape:
@@ -2541,13 +2670,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_81
   node_id: '464'
   op_type: LeakyRelu
@@ -2558,6 +2687,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '464'
     shape:
@@ -2565,6 +2695,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2572,7 +2703,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_82
   node_id: '900'
   op_type: Conv
@@ -2583,6 +2713,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '900'
     shape:
@@ -2590,6 +2721,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '901'
     shape:
@@ -2603,13 +2735,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_83
   node_id: '467'
   op_type: LeakyRelu
@@ -2620,6 +2752,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '467'
     shape:
@@ -2627,6 +2760,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2634,7 +2768,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_84
   node_id: '468'
   op_type: Add
@@ -2645,12 +2778,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '461'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '468'
     shape:
@@ -2658,6 +2793,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2665,7 +2801,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_85
   node_id: '903'
   op_type: Conv
@@ -2676,6 +2811,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '903'
     shape:
@@ -2683,6 +2819,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '904'
     shape:
@@ -2696,13 +2833,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_86
   node_id: '471'
   op_type: LeakyRelu
@@ -2713,6 +2850,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '471'
     shape:
@@ -2720,6 +2858,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2727,7 +2866,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_87
   node_id: '906'
   op_type: Conv
@@ -2738,6 +2876,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '906'
     shape:
@@ -2745,6 +2884,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '907'
     shape:
@@ -2758,13 +2898,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_88
   node_id: '474'
   op_type: LeakyRelu
@@ -2775,6 +2915,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '474'
     shape:
@@ -2782,6 +2923,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2789,7 +2931,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_89
   node_id: '475'
   op_type: Add
@@ -2800,12 +2941,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '468'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '475'
     shape:
@@ -2813,6 +2956,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2820,7 +2964,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_90
   node_id: '909'
   op_type: Conv
@@ -2831,6 +2974,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '909'
     shape:
@@ -2838,6 +2982,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '910'
     shape:
@@ -2851,13 +2996,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_91
   node_id: '478'
   op_type: LeakyRelu
@@ -2868,6 +3013,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '478'
     shape:
@@ -2875,6 +3021,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -2882,7 +3029,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_92
   node_id: '912'
   op_type: Conv
@@ -2893,6 +3039,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '912'
     shape:
@@ -2900,6 +3047,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '913'
     shape:
@@ -2913,13 +3061,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_93
   node_id: '481'
   op_type: LeakyRelu
@@ -2930,6 +3078,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '481'
     shape:
@@ -2937,6 +3086,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2944,7 +3094,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_94
   node_id: '482'
   op_type: Add
@@ -2955,12 +3104,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '475'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '482'
     shape:
@@ -2968,6 +3119,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -2975,7 +3127,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_95
   node_id: '915'
   op_type: Conv
@@ -2986,6 +3137,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '915'
     shape:
@@ -2993,6 +3145,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '916'
     shape:
@@ -3006,13 +3159,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_96
   node_id: '485'
   op_type: LeakyRelu
@@ -3023,6 +3176,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '485'
     shape:
@@ -3030,6 +3184,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -3037,7 +3192,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_97
   node_id: '918'
   op_type: Conv
@@ -3048,6 +3202,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '918'
     shape:
@@ -3055,6 +3210,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '919'
     shape:
@@ -3068,13 +3224,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_98
   node_id: '488'
   op_type: LeakyRelu
@@ -3085,6 +3241,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '488'
     shape:
@@ -3092,6 +3249,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -3099,7 +3257,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_99
   node_id: '489'
   op_type: Add
@@ -3110,12 +3267,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '482'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '489'
     shape:
@@ -3123,6 +3282,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -3130,7 +3290,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_100
   node_id: '921'
   op_type: Conv
@@ -3141,6 +3300,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '921'
     shape:
@@ -3148,6 +3308,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: '922'
     shape:
@@ -3161,13 +3322,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_101
   node_id: '492'
   op_type: LeakyRelu
@@ -3178,6 +3339,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '492'
     shape:
@@ -3185,6 +3347,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -3192,7 +3355,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_102
   node_id: '924'
   op_type: Conv
@@ -3203,6 +3365,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '924'
     shape:
@@ -3210,6 +3373,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight:
     name: '925'
     shape:
@@ -3223,13 +3387,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 294912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2835976704
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_103
   node_id: '495'
   op_type: LeakyRelu
@@ -3240,6 +3404,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '495'
     shape:
@@ -3247,6 +3412,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -3254,7 +3420,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_104
   node_id: '496'
   op_type: Add
@@ -3265,12 +3430,14 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   - name: '489'
     shape:
     - 1
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '496'
     shape:
@@ -3278,6 +3445,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 627200
@@ -3285,7 +3453,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_105
   node_id: '927'
   op_type: Conv
@@ -3296,6 +3463,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '927'
     shape:
@@ -3303,6 +3471,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight:
     name: '928'
     shape:
@@ -3316,13 +3485,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 1179648
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2945781760
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_106
   node_id: '499'
   op_type: LeakyRelu
@@ -3333,6 +3502,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '499'
     shape:
@@ -3340,6 +3510,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3347,7 +3518,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_107
   node_id: '930'
   op_type: Conv
@@ -3358,6 +3528,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '930'
     shape:
@@ -3365,6 +3536,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight:
     name: '931'
     shape:
@@ -3378,13 +3550,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 131072
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 339904512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_108
   node_id: '502'
   op_type: LeakyRelu
@@ -3395,6 +3567,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '502'
     shape:
@@ -3402,6 +3575,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 165888
@@ -3409,7 +3583,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_109
   node_id: '933'
   op_type: Conv
@@ -3420,6 +3593,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '933'
     shape:
@@ -3427,6 +3601,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight:
     name: '934'
     shape:
@@ -3440,13 +3615,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 1179648
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2945781760
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_110
   node_id: '505'
   op_type: LeakyRelu
@@ -3457,6 +3632,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '505'
     shape:
@@ -3464,6 +3640,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3471,7 +3648,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_111
   node_id: '506'
   op_type: Add
@@ -3482,12 +3658,14 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   - name: '499'
     shape:
     - 1
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '506'
     shape:
@@ -3495,6 +3673,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3502,7 +3681,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_112
   node_id: '936'
   op_type: Conv
@@ -3513,6 +3691,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '936'
     shape:
@@ -3520,6 +3699,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight:
     name: '937'
     shape:
@@ -3533,13 +3713,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 131072
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 339904512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_113
   node_id: '509'
   op_type: LeakyRelu
@@ -3550,6 +3730,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '509'
     shape:
@@ -3557,6 +3738,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 165888
@@ -3564,7 +3746,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_114
   node_id: '939'
   op_type: Conv
@@ -3575,6 +3756,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '939'
     shape:
@@ -3582,6 +3764,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight:
     name: '940'
     shape:
@@ -3595,13 +3778,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 1179648
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2945781760
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_115
   node_id: '512'
   op_type: LeakyRelu
@@ -3612,6 +3795,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '512'
     shape:
@@ -3619,6 +3803,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3626,7 +3811,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_116
   node_id: '513'
   op_type: Add
@@ -3637,12 +3821,14 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   - name: '506'
     shape:
     - 1
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '513'
     shape:
@@ -3650,6 +3836,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3657,7 +3844,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_117
   node_id: '942'
   op_type: Conv
@@ -3668,6 +3854,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '942'
     shape:
@@ -3675,6 +3862,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight:
     name: '943'
     shape:
@@ -3688,13 +3876,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 131072
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 339904512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_118
   node_id: '516'
   op_type: LeakyRelu
@@ -3705,6 +3893,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '516'
     shape:
@@ -3712,6 +3901,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 165888
@@ -3719,7 +3909,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_119
   node_id: '945'
   op_type: Conv
@@ -3730,6 +3919,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '945'
     shape:
@@ -3737,6 +3927,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight:
     name: '946'
     shape:
@@ -3750,13 +3941,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 1179648
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2945781760
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_120
   node_id: '519'
   op_type: LeakyRelu
@@ -3767,6 +3958,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '519'
     shape:
@@ -3774,6 +3966,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3781,7 +3974,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_121
   node_id: '520'
   op_type: Add
@@ -3792,12 +3984,14 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   - name: '513'
     shape:
     - 1
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '520'
     shape:
@@ -3805,6 +3999,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3812,7 +4007,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_122
   node_id: '948'
   op_type: Conv
@@ -3823,6 +4017,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '948'
     shape:
@@ -3830,6 +4025,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight:
     name: '949'
     shape:
@@ -3843,13 +4039,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 131072
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 339904512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_123
   node_id: '523'
   op_type: LeakyRelu
@@ -3860,6 +4056,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '523'
     shape:
@@ -3867,6 +4064,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 165888
@@ -3874,7 +4072,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_124
   node_id: '951'
   op_type: Conv
@@ -3885,6 +4082,7 @@ nodes:
     - 512
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '951'
     shape:
@@ -3892,6 +4090,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight:
     name: '952'
     shape:
@@ -3905,13 +4104,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 1179648
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2945781760
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: LeakyRelu_125
   node_id: '526'
   op_type: LeakyRelu
@@ -3922,6 +4121,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '526'
     shape:
@@ -3929,6 +4129,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3936,7 +4137,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_126
   node_id: '527'
   op_type: Add
@@ -3947,12 +4147,14 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   - name: '520'
     shape:
     - 1
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '527'
     shape:
@@ -3960,6 +4162,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 331776
@@ -3967,7 +4170,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_127
   node_id: '528'
   op_type: Conv
@@ -3978,6 +4180,7 @@ nodes:
     - 1024
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '528'
     shape:
@@ -3985,6 +4188,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight:
     name: fpn.lat_layers.0.weight
     shape:
@@ -3998,13 +4202,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 65536
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 169952256
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Constant_128
   node_id: '529'
   op_type: Constant
@@ -4013,6 +4217,7 @@ nodes:
   - name: '529'
     shape:
     - 1
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4020,7 +4225,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Add_129
   node_id: '530'
   op_type: Add
@@ -4028,12 +4232,14 @@ nodes:
   - name: '529'
     shape:
     - 1
+    dtype: float32
   - name: '528'
     shape:
     - 1
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '530'
     shape:
@@ -4041,6 +4247,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 82944
@@ -4048,7 +4255,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_130
   node_id: '531'
   op_type: Shape
@@ -4059,10 +4265,12 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '531'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4070,7 +4278,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_131
   node_id: '532'
   op_type: Constant
@@ -4083,7 +4290,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_132
   node_id: '533'
   op_type: Gather
@@ -4091,6 +4297,7 @@ nodes:
   - name: '531'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -4099,7 +4306,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_133
   node_id: '534'
   op_type: Shape
@@ -4110,10 +4316,12 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '534'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4121,7 +4329,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_134
   node_id: '535'
   op_type: Constant
@@ -4134,7 +4341,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_135
   node_id: '536'
   op_type: Gather
@@ -4142,6 +4348,7 @@ nodes:
   - name: '534'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -4150,7 +4357,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_136
   node_id: '537'
   op_type: Unsqueeze
@@ -4159,6 +4365,7 @@ nodes:
   - name: '537'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4166,7 +4373,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_137
   node_id: '538'
   op_type: Unsqueeze
@@ -4175,6 +4381,7 @@ nodes:
   - name: '538'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4182,7 +4389,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_138
   node_id: '539'
   op_type: Concat
@@ -4190,13 +4396,16 @@ nodes:
   - name: '537'
     shape:
     - 1
+    dtype: int64
   - name: '538'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '539'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4204,7 +4413,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_139
   node_id: '540'
   op_type: Shape
@@ -4215,10 +4423,12 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '540'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4226,7 +4436,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_140
   node_id: '541'
   op_type: Constant
@@ -4235,6 +4444,7 @@ nodes:
   - name: '541'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4242,7 +4452,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_141
   node_id: '542'
   op_type: Constant
@@ -4251,6 +4460,7 @@ nodes:
   - name: '542'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4258,7 +4468,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_142
   node_id: '543'
   op_type: Constant
@@ -4267,6 +4476,7 @@ nodes:
   - name: '543'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4274,7 +4484,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Slice_143
   node_id: '544'
   op_type: Slice
@@ -4282,19 +4491,24 @@ nodes:
   - name: '540'
     shape:
     - 4
+    dtype: int64
   - name: '542'
     shape:
     - 1
+    dtype: int64
   - name: '543'
     shape:
     - 1
+    dtype: int64
   - name: '541'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '544'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4302,7 +4516,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Cast_144
   node_id: '545'
   op_type: Cast
@@ -4310,10 +4523,12 @@ nodes:
   - name: '539'
     shape:
     - 2
+    dtype: int64
   outputs:
   - name: '545'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4321,7 +4536,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_145
   node_id: '546'
   op_type: Concat
@@ -4329,13 +4543,16 @@ nodes:
   - name: '544'
     shape:
     - 2
+    dtype: int64
   - name: '545'
     shape:
     - 2
+    dtype: int64
   outputs:
   - name: '546'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4343,7 +4560,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_146
   node_id: '547'
   op_type: Constant
@@ -4352,6 +4568,7 @@ nodes:
   - name: '547'
     shape:
     - 0
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4359,7 +4576,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_147
   node_id: '548'
   op_type: Constant
@@ -4368,6 +4584,7 @@ nodes:
   - name: '548'
     shape:
     - 0
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4375,7 +4592,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Resize_148
   node_id: '549'
   op_type: Resize
@@ -4386,15 +4602,19 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   - name: '547'
     shape:
     - 0
+    dtype: float32
   - name: '548'
     shape:
     - 0
+    dtype: float32
   - name: '546'
     shape:
     - 4
+    dtype: int64
   outputs:
   - name: '549'
     shape:
@@ -4402,6 +4622,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4409,7 +4630,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_149
   node_id: '550'
   op_type: Conv
@@ -4420,6 +4640,7 @@ nodes:
     - 512
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '550'
     shape:
@@ -4427,6 +4648,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: fpn.lat_layers.1.weight
     shape:
@@ -4440,13 +4662,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 32768
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 321440000
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Add_150
   node_id: '551'
   op_type: Add
@@ -4457,12 +4679,14 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   - name: '550'
     shape:
     - 1
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '551'
     shape:
@@ -4470,6 +4694,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -4477,7 +4702,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_151
   node_id: '552'
   op_type: Shape
@@ -4488,10 +4712,12 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '552'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4499,7 +4725,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_152
   node_id: '553'
   op_type: Constant
@@ -4512,7 +4737,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_153
   node_id: '554'
   op_type: Gather
@@ -4520,6 +4744,7 @@ nodes:
   - name: '552'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -4528,7 +4753,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_154
   node_id: '555'
   op_type: Shape
@@ -4539,10 +4763,12 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '555'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4550,7 +4776,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_155
   node_id: '556'
   op_type: Constant
@@ -4563,7 +4788,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_156
   node_id: '557'
   op_type: Gather
@@ -4571,6 +4795,7 @@ nodes:
   - name: '555'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -4579,7 +4804,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_157
   node_id: '558'
   op_type: Unsqueeze
@@ -4588,6 +4812,7 @@ nodes:
   - name: '558'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4595,7 +4820,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_158
   node_id: '559'
   op_type: Unsqueeze
@@ -4604,6 +4828,7 @@ nodes:
   - name: '559'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4611,7 +4836,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_159
   node_id: '560'
   op_type: Concat
@@ -4619,13 +4843,16 @@ nodes:
   - name: '558'
     shape:
     - 1
+    dtype: int64
   - name: '559'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '560'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4633,7 +4860,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_160
   node_id: '561'
   op_type: Shape
@@ -4644,10 +4870,12 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '561'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4655,7 +4883,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_161
   node_id: '562'
   op_type: Constant
@@ -4664,6 +4891,7 @@ nodes:
   - name: '562'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4671,7 +4899,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_162
   node_id: '563'
   op_type: Constant
@@ -4680,6 +4907,7 @@ nodes:
   - name: '563'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4687,7 +4915,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_163
   node_id: '564'
   op_type: Constant
@@ -4696,6 +4923,7 @@ nodes:
   - name: '564'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4703,7 +4931,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Slice_164
   node_id: '565'
   op_type: Slice
@@ -4711,19 +4938,24 @@ nodes:
   - name: '561'
     shape:
     - 4
+    dtype: int64
   - name: '563'
     shape:
     - 1
+    dtype: int64
   - name: '564'
     shape:
     - 1
+    dtype: int64
   - name: '562'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '565'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4731,7 +4963,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Cast_165
   node_id: '566'
   op_type: Cast
@@ -4739,10 +4970,12 @@ nodes:
   - name: '560'
     shape:
     - 2
+    dtype: int64
   outputs:
   - name: '566'
     shape:
     - 2
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4750,7 +4983,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_166
   node_id: '567'
   op_type: Concat
@@ -4758,13 +4990,16 @@ nodes:
   - name: '565'
     shape:
     - 2
+    dtype: int64
   - name: '566'
     shape:
     - 2
+    dtype: int64
   outputs:
   - name: '567'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4772,7 +5007,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_167
   node_id: '568'
   op_type: Constant
@@ -4781,6 +5015,7 @@ nodes:
   - name: '568'
     shape:
     - 0
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4788,7 +5023,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_168
   node_id: '569'
   op_type: Constant
@@ -4797,6 +5031,7 @@ nodes:
   - name: '569'
     shape:
     - 0
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4804,7 +5039,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Resize_169
   node_id: '570'
   op_type: Resize
@@ -4815,15 +5049,19 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   - name: '568'
     shape:
     - 0
+    dtype: float32
   - name: '569'
     shape:
     - 0
+    dtype: float32
   - name: '567'
     shape:
     - 4
+    dtype: int64
   outputs:
   - name: '570'
     shape:
@@ -4831,6 +5069,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -4838,7 +5077,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_170
   node_id: '571'
   op_type: Conv
@@ -4849,6 +5087,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '571'
     shape:
@@ -4856,6 +5095,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: fpn.lat_layers.2.weight
     shape:
@@ -4869,13 +5109,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 16384
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 625252608
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Add_171
   node_id: '572'
   op_type: Add
@@ -4886,12 +5126,14 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '571'
     shape:
     - 1
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '572'
     shape:
@@ -4899,6 +5141,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -4906,7 +5149,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_172
   node_id: '573'
   op_type: Conv
@@ -4917,6 +5159,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '573'
     shape:
@@ -4924,6 +5167,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight:
     name: fpn.pred_layers.0.weight
     shape:
@@ -4937,13 +5181,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 368264192
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_173
   node_id: '574'
   op_type: Relu
@@ -4954,6 +5198,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '574'
     shape:
@@ -4961,6 +5206,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 82944
@@ -4968,7 +5214,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_174
   node_id: '575'
   op_type: Conv
@@ -4979,6 +5224,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '575'
     shape:
@@ -4986,6 +5232,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: fpn.pred_layers.1.weight
     shape:
@@ -4999,13 +5246,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 1417988352
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_175
   node_id: '576'
   op_type: Relu
@@ -5016,6 +5263,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '576'
     shape:
@@ -5023,6 +5271,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -5030,7 +5279,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_176
   node_id: '577'
   op_type: Conv
@@ -5041,6 +5289,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '577'
     shape:
@@ -5048,6 +5297,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: fpn.pred_layers.2.weight
     shape:
@@ -5061,13 +5311,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5563390208
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_177
   node_id: '578'
   op_type: Relu
@@ -5078,6 +5328,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '578'
     shape:
@@ -5085,6 +5336,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -5092,7 +5344,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_178
   node_id: '579'
   op_type: Conv
@@ -5103,6 +5354,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '579'
     shape:
@@ -5110,6 +5362,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   weight:
     name: fpn.downsample_layers.0.weight
     shape:
@@ -5123,13 +5376,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 95572224
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Conv_179
   node_id: '580'
   op_type: Conv
@@ -5140,6 +5393,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '580'
     shape:
@@ -5147,6 +5401,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   weight:
     name: fpn.downsample_layers.1.weight
     shape:
@@ -5160,13 +5415,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 25696512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Conv_180
   node_id: '581'
   op_type: Conv
@@ -5177,6 +5432,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '581'
     shape:
@@ -5184,6 +5440,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: proto_net.0.weight
     shape:
@@ -5197,13 +5454,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5563390208
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_181
   node_id: '582'
   op_type: Relu
@@ -5214,6 +5471,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '582'
     shape:
@@ -5221,6 +5479,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -5228,7 +5487,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_182
   node_id: '583'
   op_type: Conv
@@ -5239,6 +5497,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '583'
     shape:
@@ -5246,6 +5505,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: proto_net.2.weight
     shape:
@@ -5259,13 +5519,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5563390208
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_183
   node_id: '584'
   op_type: Relu
@@ -5276,6 +5536,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '584'
     shape:
@@ -5283,6 +5544,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -5290,7 +5552,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_184
   node_id: '585'
   op_type: Conv
@@ -5301,6 +5562,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '585'
     shape:
@@ -5308,6 +5570,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: proto_net.4.weight
     shape:
@@ -5321,13 +5584,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5563390208
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_185
   node_id: '586'
   op_type: Relu
@@ -5338,6 +5601,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '586'
     shape:
@@ -5345,6 +5609,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -5352,7 +5617,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_186
   node_id: '590'
   op_type: Constant
@@ -5361,6 +5625,7 @@ nodes:
   - name: '590'
     shape:
     - 0
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5368,7 +5633,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Resize_187
   node_id: '591'
   op_type: Resize
@@ -5379,9 +5643,11 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   - name: '590'
     shape:
     - 0
+    dtype: float32
   outputs:
   - name: '591'
     shape:
@@ -5389,6 +5655,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5396,7 +5663,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Relu_188
   node_id: '592'
   op_type: Relu
@@ -5407,6 +5673,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '592'
     shape:
@@ -5414,6 +5681,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 4875264
@@ -5421,7 +5689,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_189
   node_id: '593'
   op_type: Conv
@@ -5432,6 +5699,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '593'
     shape:
@@ -5439,6 +5707,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   weight:
     name: proto_net.8.weight
     shape:
@@ -5452,13 +5721,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 22361695232
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_190
   node_id: '594'
   op_type: Relu
@@ -5469,6 +5738,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '594'
     shape:
@@ -5476,6 +5746,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 4875264
@@ -5483,7 +5754,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_191
   node_id: '595'
   op_type: Conv
@@ -5494,6 +5764,7 @@ nodes:
     - 256
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '595'
     shape:
@@ -5501,6 +5772,7 @@ nodes:
     - 32
     - 138
     - 138
+    dtype: float32
   weight:
     name: proto_net.10.weight
     shape:
@@ -5514,13 +5786,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 2048
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 312626304
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_192
   node_id: '596'
   op_type: Relu
@@ -5531,6 +5803,7 @@ nodes:
     - 32
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '596'
     shape:
@@ -5538,6 +5811,7 @@ nodes:
     - 32
     - 138
     - 138
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 609408
@@ -5545,7 +5819,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Transpose_193
   node_id: '597'
   op_type: Transpose
@@ -5556,6 +5829,7 @@ nodes:
     - 32
     - 138
     - 138
+    dtype: float32
   outputs:
   - name: '597'
     shape:
@@ -5563,6 +5837,7 @@ nodes:
     - 138
     - 138
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5570,7 +5845,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_194
   node_id: '598'
   op_type: Conv
@@ -5581,6 +5855,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '598'
     shape:
@@ -5588,6 +5863,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight:
     name: prediction_layers.0.upfeature.0.weight
     shape:
@@ -5601,13 +5877,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5563390208
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_195
   node_id: '599'
   op_type: Relu
@@ -5618,6 +5894,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '599'
     shape:
@@ -5625,6 +5902,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 1218816
@@ -5632,7 +5910,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_196
   node_id: '600'
   op_type: Conv
@@ -5643,6 +5920,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '600'
     shape:
@@ -5650,6 +5928,7 @@ nodes:
     - 12
     - 69
     - 69
+    dtype: float32
   weight:
     name: prediction_layers.0.bbox_layer.weight
     shape:
@@ -5663,13 +5942,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 6912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 260783916
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_197
   node_id: '601'
   op_type: Transpose
@@ -5680,6 +5959,7 @@ nodes:
     - 12
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '601'
     shape:
@@ -5687,6 +5967,7 @@ nodes:
     - 69
     - 69
     - 12
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5694,7 +5975,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_198
   node_id: '602'
   op_type: Shape
@@ -5705,10 +5985,12 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '602'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5716,7 +5998,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_199
   node_id: '603'
   op_type: Constant
@@ -5729,7 +6010,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_200
   node_id: '604'
   op_type: Gather
@@ -5737,6 +6017,7 @@ nodes:
   - name: '602'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -5745,7 +6026,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_201
   node_id: '607'
   op_type: Unsqueeze
@@ -5754,6 +6034,7 @@ nodes:
   - name: '607'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5761,7 +6042,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_202
   node_id: '610'
   op_type: Concat
@@ -5769,10 +6049,12 @@ nodes:
   - name: '607'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '610'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5780,7 +6062,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_203
   node_id: '611'
   op_type: Reshape
@@ -5791,15 +6072,18 @@ nodes:
     - 69
     - 69
     - 12
+    dtype: float32
   - name: '610'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '611'
     shape:
     - 1
     - 14283
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5807,7 +6091,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_204
   node_id: '612'
   op_type: Conv
@@ -5818,6 +6101,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '612'
     shape:
@@ -5825,6 +6109,7 @@ nodes:
     - 243
     - 69
     - 69
+    dtype: float32
   weight:
     name: prediction_layers.0.conf_layer.weight
     shape:
@@ -5838,13 +6123,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 139968
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 5280874299
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_205
   node_id: '613'
   op_type: Transpose
@@ -5855,6 +6140,7 @@ nodes:
     - 243
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '613'
     shape:
@@ -5862,6 +6148,7 @@ nodes:
     - 69
     - 69
     - 243
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5869,7 +6156,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_206
   node_id: '614'
   op_type: Shape
@@ -5880,10 +6166,12 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '614'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5891,7 +6179,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_207
   node_id: '615'
   op_type: Constant
@@ -5904,7 +6191,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_208
   node_id: '616'
   op_type: Gather
@@ -5912,6 +6198,7 @@ nodes:
   - name: '614'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -5920,7 +6207,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_209
   node_id: '619'
   op_type: Unsqueeze
@@ -5929,6 +6215,7 @@ nodes:
   - name: '619'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5936,7 +6223,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_210
   node_id: '622'
   op_type: Concat
@@ -5944,10 +6230,12 @@ nodes:
   - name: '619'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '622'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5955,7 +6243,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_211
   node_id: '623'
   op_type: Reshape
@@ -5966,15 +6253,18 @@ nodes:
     - 69
     - 69
     - 243
+    dtype: float32
   - name: '622'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '623'
     shape:
     - 1
     - 14283
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -5982,7 +6272,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_212
   node_id: '624'
   op_type: Conv
@@ -5993,6 +6282,7 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '624'
     shape:
@@ -6000,6 +6290,7 @@ nodes:
     - 96
     - 69
     - 69
+    dtype: float32
   weight:
     name: prediction_layers.0.mask_layer.weight
     shape:
@@ -6013,13 +6304,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 55296
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 2086271328
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_213
   node_id: '625'
   op_type: Transpose
@@ -6030,6 +6321,7 @@ nodes:
     - 96
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '625'
     shape:
@@ -6037,6 +6329,7 @@ nodes:
     - 69
     - 69
     - 96
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6044,7 +6337,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_214
   node_id: '626'
   op_type: Shape
@@ -6055,10 +6347,12 @@ nodes:
     - 256
     - 69
     - 69
+    dtype: float32
   outputs:
   - name: '626'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6066,7 +6360,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_215
   node_id: '627'
   op_type: Constant
@@ -6079,7 +6372,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_216
   node_id: '628'
   op_type: Gather
@@ -6087,6 +6379,7 @@ nodes:
   - name: '626'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -6095,7 +6388,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_217
   node_id: '631'
   op_type: Unsqueeze
@@ -6104,6 +6396,7 @@ nodes:
   - name: '631'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6111,7 +6404,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_218
   node_id: '634'
   op_type: Concat
@@ -6119,10 +6411,12 @@ nodes:
   - name: '631'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '634'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6130,7 +6424,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_219
   node_id: '635'
   op_type: Reshape
@@ -6141,15 +6434,18 @@ nodes:
     - 69
     - 69
     - 96
+    dtype: float32
   - name: '634'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '635'
     shape:
     - 1
     - 14283
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6157,7 +6453,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Tanh_220
   node_id: '636'
   op_type: Tanh
@@ -6167,12 +6462,14 @@ nodes:
     - 1
     - 14283
     - 32
+    dtype: float32
   outputs:
   - name: '636'
     shape:
     - 1
     - 14283
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 457056
@@ -6180,7 +6477,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_221
   node_id: '637'
   op_type: Conv
@@ -6191,6 +6487,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '637'
     shape:
@@ -6198,6 +6495,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight:
     name: prediction_layers.0.upfeature.0.weight
     shape:
@@ -6211,13 +6509,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 1417988352
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_222
   node_id: '638'
   op_type: Relu
@@ -6228,6 +6526,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '638'
     shape:
@@ -6235,6 +6534,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 313600
@@ -6242,7 +6542,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_223
   node_id: '639'
   op_type: Conv
@@ -6253,6 +6552,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '639'
     shape:
@@ -6260,6 +6560,7 @@ nodes:
     - 12
     - 35
     - 35
+    dtype: float32
   weight:
     name: prediction_layers.0.bbox_layer.weight
     shape:
@@ -6273,13 +6574,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 6912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 66468204
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_224
   node_id: '640'
   op_type: Transpose
@@ -6290,6 +6591,7 @@ nodes:
     - 12
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '640'
     shape:
@@ -6297,6 +6599,7 @@ nodes:
     - 35
     - 35
     - 12
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6304,7 +6607,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_225
   node_id: '641'
   op_type: Shape
@@ -6315,10 +6617,12 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '641'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6326,7 +6630,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_226
   node_id: '642'
   op_type: Constant
@@ -6339,7 +6642,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_227
   node_id: '643'
   op_type: Gather
@@ -6347,6 +6649,7 @@ nodes:
   - name: '641'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -6355,7 +6658,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_228
   node_id: '646'
   op_type: Unsqueeze
@@ -6364,6 +6666,7 @@ nodes:
   - name: '646'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6371,7 +6674,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_229
   node_id: '649'
   op_type: Concat
@@ -6379,10 +6681,12 @@ nodes:
   - name: '646'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '649'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6390,7 +6694,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_230
   node_id: '650'
   op_type: Reshape
@@ -6401,15 +6704,18 @@ nodes:
     - 35
     - 35
     - 12
+    dtype: float32
   - name: '649'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '650'
     shape:
     - 1
     - 3675
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6417,7 +6723,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_231
   node_id: '651'
   op_type: Conv
@@ -6428,6 +6733,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '651'
     shape:
@@ -6435,6 +6741,7 @@ nodes:
     - 243
     - 35
     - 35
+    dtype: float32
   weight:
     name: prediction_layers.0.conf_layer.weight
     shape:
@@ -6448,13 +6755,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 139968
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 1345981131
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_232
   node_id: '652'
   op_type: Transpose
@@ -6465,6 +6772,7 @@ nodes:
     - 243
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '652'
     shape:
@@ -6472,6 +6780,7 @@ nodes:
     - 35
     - 35
     - 243
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6479,7 +6788,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_233
   node_id: '653'
   op_type: Shape
@@ -6490,10 +6798,12 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '653'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6501,7 +6811,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_234
   node_id: '654'
   op_type: Constant
@@ -6514,7 +6823,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_235
   node_id: '655'
   op_type: Gather
@@ -6522,6 +6830,7 @@ nodes:
   - name: '653'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -6530,7 +6839,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_236
   node_id: '658'
   op_type: Unsqueeze
@@ -6539,6 +6847,7 @@ nodes:
   - name: '658'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6546,7 +6855,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_237
   node_id: '661'
   op_type: Concat
@@ -6554,10 +6862,12 @@ nodes:
   - name: '658'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '661'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6565,7 +6875,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_238
   node_id: '662'
   op_type: Reshape
@@ -6576,15 +6885,18 @@ nodes:
     - 35
     - 35
     - 243
+    dtype: float32
   - name: '661'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '662'
     shape:
     - 1
     - 3675
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6592,7 +6904,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_239
   node_id: '663'
   op_type: Conv
@@ -6603,6 +6914,7 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '663'
     shape:
@@ -6610,6 +6922,7 @@ nodes:
     - 96
     - 35
     - 35
+    dtype: float32
   weight:
     name: prediction_layers.0.mask_layer.weight
     shape:
@@ -6623,13 +6936,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 55296
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 531745632
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_240
   node_id: '664'
   op_type: Transpose
@@ -6640,6 +6953,7 @@ nodes:
     - 96
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '664'
     shape:
@@ -6647,6 +6961,7 @@ nodes:
     - 35
     - 35
     - 96
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6654,7 +6969,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_241
   node_id: '665'
   op_type: Shape
@@ -6665,10 +6979,12 @@ nodes:
     - 256
     - 35
     - 35
+    dtype: float32
   outputs:
   - name: '665'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6676,7 +6992,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_242
   node_id: '666'
   op_type: Constant
@@ -6689,7 +7004,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_243
   node_id: '667'
   op_type: Gather
@@ -6697,6 +7011,7 @@ nodes:
   - name: '665'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -6705,7 +7020,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_244
   node_id: '670'
   op_type: Unsqueeze
@@ -6714,6 +7028,7 @@ nodes:
   - name: '670'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6721,7 +7036,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_245
   node_id: '673'
   op_type: Concat
@@ -6729,10 +7043,12 @@ nodes:
   - name: '670'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '673'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6740,7 +7056,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_246
   node_id: '674'
   op_type: Reshape
@@ -6751,15 +7066,18 @@ nodes:
     - 35
     - 35
     - 96
+    dtype: float32
   - name: '673'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '674'
     shape:
     - 1
     - 3675
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6767,7 +7085,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Tanh_247
   node_id: '675'
   op_type: Tanh
@@ -6777,12 +7094,14 @@ nodes:
     - 1
     - 3675
     - 32
+    dtype: float32
   outputs:
   - name: '675'
     shape:
     - 1
     - 3675
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 117600
@@ -6790,7 +7109,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_248
   node_id: '676'
   op_type: Conv
@@ -6801,6 +7119,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '676'
     shape:
@@ -6808,6 +7127,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight:
     name: prediction_layers.0.upfeature.0.weight
     shape:
@@ -6821,13 +7141,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 368264192
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_249
   node_id: '677'
   op_type: Relu
@@ -6838,6 +7158,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '677'
     shape:
@@ -6845,6 +7166,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 82944
@@ -6852,7 +7174,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_250
   node_id: '678'
   op_type: Conv
@@ -6863,6 +7184,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '678'
     shape:
@@ -6870,6 +7192,7 @@ nodes:
     - 12
     - 18
     - 18
+    dtype: float32
   weight:
     name: prediction_layers.0.bbox_layer.weight
     shape:
@@ -6883,13 +7206,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 6912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 17262384
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_251
   node_id: '679'
   op_type: Transpose
@@ -6900,6 +7223,7 @@ nodes:
     - 12
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '679'
     shape:
@@ -6907,6 +7231,7 @@ nodes:
     - 18
     - 18
     - 12
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6914,7 +7239,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_252
   node_id: '680'
   op_type: Shape
@@ -6925,10 +7249,12 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '680'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6936,7 +7262,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_253
   node_id: '681'
   op_type: Constant
@@ -6949,7 +7274,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_254
   node_id: '682'
   op_type: Gather
@@ -6957,6 +7281,7 @@ nodes:
   - name: '680'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -6965,7 +7290,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_255
   node_id: '685'
   op_type: Unsqueeze
@@ -6974,6 +7298,7 @@ nodes:
   - name: '685'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -6981,7 +7306,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_256
   node_id: '688'
   op_type: Concat
@@ -6989,10 +7313,12 @@ nodes:
   - name: '685'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '688'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7000,7 +7326,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_257
   node_id: '689'
   op_type: Reshape
@@ -7011,15 +7336,18 @@ nodes:
     - 18
     - 18
     - 12
+    dtype: float32
   - name: '688'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '689'
     shape:
     - 1
     - 972
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7027,7 +7355,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_258
   node_id: '690'
   op_type: Conv
@@ -7038,6 +7365,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '690'
     shape:
@@ -7045,6 +7373,7 @@ nodes:
     - 243
     - 18
     - 18
+    dtype: float32
   weight:
     name: prediction_layers.0.conf_layer.weight
     shape:
@@ -7058,13 +7387,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 139968
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 349563276
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_259
   node_id: '691'
   op_type: Transpose
@@ -7075,6 +7404,7 @@ nodes:
     - 243
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '691'
     shape:
@@ -7082,6 +7412,7 @@ nodes:
     - 18
     - 18
     - 243
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7089,7 +7420,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_260
   node_id: '692'
   op_type: Shape
@@ -7100,10 +7430,12 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '692'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7111,7 +7443,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_261
   node_id: '693'
   op_type: Constant
@@ -7124,7 +7455,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_262
   node_id: '694'
   op_type: Gather
@@ -7132,6 +7462,7 @@ nodes:
   - name: '692'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -7140,7 +7471,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_263
   node_id: '697'
   op_type: Unsqueeze
@@ -7149,6 +7479,7 @@ nodes:
   - name: '697'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7156,7 +7487,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_264
   node_id: '700'
   op_type: Concat
@@ -7164,10 +7494,12 @@ nodes:
   - name: '697'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '700'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7175,7 +7507,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_265
   node_id: '701'
   op_type: Reshape
@@ -7186,15 +7517,18 @@ nodes:
     - 18
     - 18
     - 243
+    dtype: float32
   - name: '700'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '701'
     shape:
     - 1
     - 972
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7202,7 +7536,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_266
   node_id: '702'
   op_type: Conv
@@ -7213,6 +7546,7 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '702'
     shape:
@@ -7220,6 +7554,7 @@ nodes:
     - 96
     - 18
     - 18
+    dtype: float32
   weight:
     name: prediction_layers.0.mask_layer.weight
     shape:
@@ -7233,13 +7568,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 55296
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 138099072
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_267
   node_id: '703'
   op_type: Transpose
@@ -7250,6 +7585,7 @@ nodes:
     - 96
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '703'
     shape:
@@ -7257,6 +7593,7 @@ nodes:
     - 18
     - 18
     - 96
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7264,7 +7601,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_268
   node_id: '704'
   op_type: Shape
@@ -7275,10 +7611,12 @@ nodes:
     - 256
     - 18
     - 18
+    dtype: float32
   outputs:
   - name: '704'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7286,7 +7624,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_269
   node_id: '705'
   op_type: Constant
@@ -7299,7 +7636,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_270
   node_id: '706'
   op_type: Gather
@@ -7307,6 +7643,7 @@ nodes:
   - name: '704'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -7315,7 +7652,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_271
   node_id: '709'
   op_type: Unsqueeze
@@ -7324,6 +7660,7 @@ nodes:
   - name: '709'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7331,7 +7668,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_272
   node_id: '712'
   op_type: Concat
@@ -7339,10 +7675,12 @@ nodes:
   - name: '709'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '712'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7350,7 +7688,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_273
   node_id: '713'
   op_type: Reshape
@@ -7361,15 +7698,18 @@ nodes:
     - 18
     - 18
     - 96
+    dtype: float32
   - name: '712'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '713'
     shape:
     - 1
     - 972
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7377,7 +7717,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Tanh_274
   node_id: '714'
   op_type: Tanh
@@ -7387,12 +7726,14 @@ nodes:
     - 1
     - 972
     - 32
+    dtype: float32
   outputs:
   - name: '714'
     shape:
     - 1
     - 972
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 31104
@@ -7400,7 +7741,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_275
   node_id: '715'
   op_type: Conv
@@ -7411,6 +7751,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '715'
     shape:
@@ -7418,6 +7759,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   weight:
     name: prediction_layers.0.upfeature.0.weight
     shape:
@@ -7431,13 +7773,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 88625408
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_276
   node_id: '716'
   op_type: Relu
@@ -7448,6 +7790,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '716'
     shape:
@@ -7455,6 +7798,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 20736
@@ -7462,7 +7806,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_277
   node_id: '717'
   op_type: Conv
@@ -7473,6 +7816,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '717'
     shape:
@@ -7480,6 +7824,7 @@ nodes:
     - 12
     - 9
     - 9
+    dtype: float32
   weight:
     name: prediction_layers.0.bbox_layer.weight
     shape:
@@ -7493,13 +7838,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 6912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 4154316
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_278
   node_id: '718'
   op_type: Transpose
@@ -7510,6 +7855,7 @@ nodes:
     - 12
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '718'
     shape:
@@ -7517,6 +7863,7 @@ nodes:
     - 9
     - 9
     - 12
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7524,7 +7871,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_279
   node_id: '719'
   op_type: Shape
@@ -7535,10 +7881,12 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '719'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7546,7 +7894,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_280
   node_id: '720'
   op_type: Constant
@@ -7559,7 +7906,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_281
   node_id: '721'
   op_type: Gather
@@ -7567,6 +7913,7 @@ nodes:
   - name: '719'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -7575,7 +7922,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_282
   node_id: '724'
   op_type: Unsqueeze
@@ -7584,6 +7930,7 @@ nodes:
   - name: '724'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7591,7 +7938,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_283
   node_id: '727'
   op_type: Concat
@@ -7599,10 +7945,12 @@ nodes:
   - name: '724'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '727'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7610,7 +7958,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_284
   node_id: '728'
   op_type: Reshape
@@ -7621,15 +7968,18 @@ nodes:
     - 9
     - 9
     - 12
+    dtype: float32
   - name: '727'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '728'
     shape:
     - 1
     - 243
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7637,7 +7987,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_285
   node_id: '729'
   op_type: Conv
@@ -7648,6 +7997,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '729'
     shape:
@@ -7655,6 +8005,7 @@ nodes:
     - 243
     - 9
     - 9
+    dtype: float32
   weight:
     name: prediction_layers.0.conf_layer.weight
     shape:
@@ -7668,13 +8019,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 139968
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 84124899
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_286
   node_id: '730'
   op_type: Transpose
@@ -7685,6 +8036,7 @@ nodes:
     - 243
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '730'
     shape:
@@ -7692,6 +8044,7 @@ nodes:
     - 9
     - 9
     - 243
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7699,7 +8052,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_287
   node_id: '731'
   op_type: Shape
@@ -7710,10 +8062,12 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '731'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7721,7 +8075,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_288
   node_id: '732'
   op_type: Constant
@@ -7734,7 +8087,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_289
   node_id: '733'
   op_type: Gather
@@ -7742,6 +8094,7 @@ nodes:
   - name: '731'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -7750,7 +8103,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_290
   node_id: '736'
   op_type: Unsqueeze
@@ -7759,6 +8111,7 @@ nodes:
   - name: '736'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7766,7 +8119,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_291
   node_id: '739'
   op_type: Concat
@@ -7774,10 +8126,12 @@ nodes:
   - name: '736'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '739'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7785,7 +8139,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_292
   node_id: '740'
   op_type: Reshape
@@ -7796,15 +8149,18 @@ nodes:
     - 9
     - 9
     - 243
+    dtype: float32
   - name: '739'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '740'
     shape:
     - 1
     - 243
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7812,7 +8168,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_293
   node_id: '741'
   op_type: Conv
@@ -7823,6 +8178,7 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '741'
     shape:
@@ -7830,6 +8186,7 @@ nodes:
     - 96
     - 9
     - 9
+    dtype: float32
   weight:
     name: prediction_layers.0.mask_layer.weight
     shape:
@@ -7843,13 +8200,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 55296
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 33234528
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_294
   node_id: '742'
   op_type: Transpose
@@ -7860,6 +8217,7 @@ nodes:
     - 96
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '742'
     shape:
@@ -7867,6 +8225,7 @@ nodes:
     - 9
     - 9
     - 96
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7874,7 +8233,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_295
   node_id: '743'
   op_type: Shape
@@ -7885,10 +8243,12 @@ nodes:
     - 256
     - 9
     - 9
+    dtype: float32
   outputs:
   - name: '743'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7896,7 +8256,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_296
   node_id: '744'
   op_type: Constant
@@ -7909,7 +8268,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_297
   node_id: '745'
   op_type: Gather
@@ -7917,6 +8275,7 @@ nodes:
   - name: '743'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -7925,7 +8284,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_298
   node_id: '748'
   op_type: Unsqueeze
@@ -7934,6 +8292,7 @@ nodes:
   - name: '748'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7941,7 +8300,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_299
   node_id: '751'
   op_type: Concat
@@ -7949,10 +8307,12 @@ nodes:
   - name: '748'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '751'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7960,7 +8320,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_300
   node_id: '752'
   op_type: Reshape
@@ -7971,15 +8330,18 @@ nodes:
     - 9
     - 9
     - 96
+    dtype: float32
   - name: '751'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '752'
     shape:
     - 1
     - 243
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -7987,7 +8349,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Tanh_301
   node_id: '753'
   op_type: Tanh
@@ -7997,12 +8358,14 @@ nodes:
     - 1
     - 243
     - 32
+    dtype: float32
   outputs:
   - name: '753'
     shape:
     - 1
     - 243
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 7776
@@ -8010,7 +8373,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_302
   node_id: '754'
   op_type: Conv
@@ -8021,6 +8383,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '754'
     shape:
@@ -8028,6 +8391,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   weight:
     name: prediction_layers.0.upfeature.0.weight
     shape:
@@ -8041,13 +8405,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 147456
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 25696512
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Relu_303
   node_id: '755'
   op_type: Relu
@@ -8058,6 +8422,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '755'
     shape:
@@ -8065,6 +8430,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 6400
@@ -8072,7 +8438,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_304
   node_id: '756'
   op_type: Conv
@@ -8083,6 +8448,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '756'
     shape:
@@ -8090,6 +8456,7 @@ nodes:
     - 12
     - 5
     - 5
+    dtype: float32
   weight:
     name: prediction_layers.0.bbox_layer.weight
     shape:
@@ -8103,13 +8470,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 6912
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 1204524
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_305
   node_id: '757'
   op_type: Transpose
@@ -8120,6 +8487,7 @@ nodes:
     - 12
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '757'
     shape:
@@ -8127,6 +8495,7 @@ nodes:
     - 5
     - 5
     - 12
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8134,7 +8503,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_306
   node_id: '758'
   op_type: Shape
@@ -8145,10 +8513,12 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '758'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8156,7 +8526,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_307
   node_id: '759'
   op_type: Constant
@@ -8169,7 +8538,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_308
   node_id: '760'
   op_type: Gather
@@ -8177,6 +8545,7 @@ nodes:
   - name: '758'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -8185,7 +8554,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_309
   node_id: '763'
   op_type: Unsqueeze
@@ -8194,6 +8562,7 @@ nodes:
   - name: '763'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8201,7 +8570,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_310
   node_id: '766'
   op_type: Concat
@@ -8209,10 +8577,12 @@ nodes:
   - name: '763'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '766'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8220,7 +8590,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_311
   node_id: '767'
   op_type: Reshape
@@ -8231,15 +8600,18 @@ nodes:
     - 5
     - 5
     - 12
+    dtype: float32
   - name: '766'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '767'
     shape:
     - 1
     - 75
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8247,7 +8619,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_312
   node_id: '768'
   op_type: Conv
@@ -8258,6 +8629,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '768'
     shape:
@@ -8265,6 +8637,7 @@ nodes:
     - 243
     - 5
     - 5
+    dtype: float32
   weight:
     name: prediction_layers.0.conf_layer.weight
     shape:
@@ -8278,13 +8651,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 139968
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 24391611
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_313
   node_id: '769'
   op_type: Transpose
@@ -8295,6 +8668,7 @@ nodes:
     - 243
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '769'
     shape:
@@ -8302,6 +8676,7 @@ nodes:
     - 5
     - 5
     - 243
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8309,7 +8684,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_314
   node_id: '770'
   op_type: Shape
@@ -8320,10 +8694,12 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '770'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8331,7 +8707,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_315
   node_id: '771'
   op_type: Constant
@@ -8344,7 +8719,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_316
   node_id: '772'
   op_type: Gather
@@ -8352,6 +8726,7 @@ nodes:
   - name: '770'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -8360,7 +8735,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_317
   node_id: '775'
   op_type: Unsqueeze
@@ -8369,6 +8743,7 @@ nodes:
   - name: '775'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8376,7 +8751,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_318
   node_id: '778'
   op_type: Concat
@@ -8384,10 +8758,12 @@ nodes:
   - name: '775'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '778'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8395,7 +8771,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_319
   node_id: '779'
   op_type: Reshape
@@ -8406,15 +8781,18 @@ nodes:
     - 5
     - 5
     - 243
+    dtype: float32
   - name: '778'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '779'
     shape:
     - 1
     - 75
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8422,7 +8800,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Conv_320
   node_id: '780'
   op_type: Conv
@@ -8433,6 +8810,7 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '780'
     shape:
@@ -8440,6 +8818,7 @@ nodes:
     - 96
     - 5
     - 5
+    dtype: float32
   weight:
     name: prediction_layers.0.mask_layer.weight
     shape:
@@ -8453,13 +8832,13 @@ nodes:
     num_sparse_parameters: 0
     num_four_blocks: 55296
     num_sparse_four_blocks: 0
+    dtype: float32
   parameterized_and_prunable: true
   num_dense_ops: 9636192
   num_sparse_ops: 0
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: float32
 - name: Transpose_321
   node_id: '781'
   op_type: Transpose
@@ -8470,6 +8849,7 @@ nodes:
     - 96
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '781'
     shape:
@@ -8477,6 +8857,7 @@ nodes:
     - 5
     - 5
     - 96
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8484,7 +8865,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Shape_322
   node_id: '782'
   op_type: Shape
@@ -8495,10 +8875,12 @@ nodes:
     - 256
     - 5
     - 5
+    dtype: float32
   outputs:
   - name: '782'
     shape:
     - 4
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8506,7 +8888,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_323
   node_id: '783'
   op_type: Constant
@@ -8519,7 +8900,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Gather_324
   node_id: '784'
   op_type: Gather
@@ -8527,6 +8907,7 @@ nodes:
   - name: '782'
     shape:
     - 4
+    dtype: int64
   outputs: []
   weight: null
   parameterized_and_prunable: false
@@ -8535,7 +8916,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Unsqueeze_325
   node_id: '787'
   op_type: Unsqueeze
@@ -8544,6 +8924,7 @@ nodes:
   - name: '787'
     shape:
     - 1
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8551,7 +8932,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_326
   node_id: '790'
   op_type: Concat
@@ -8559,10 +8939,12 @@ nodes:
   - name: '787'
     shape:
     - 1
+    dtype: int64
   outputs:
   - name: '790'
     shape:
     - 3
+    dtype: int64
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8570,7 +8952,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Reshape_327
   node_id: '791'
   op_type: Reshape
@@ -8581,15 +8962,18 @@ nodes:
     - 5
     - 5
     - 96
+    dtype: float32
   - name: '790'
     shape:
     - 3
+    dtype: int64
   outputs:
   - name: '791'
     shape:
     - 1
     - 75
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8597,7 +8981,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Tanh_328
   node_id: '792'
   op_type: Tanh
@@ -8607,12 +8990,14 @@ nodes:
     - 1
     - 75
     - 32
+    dtype: float32
   outputs:
   - name: '792'
     shape:
     - 1
     - 75
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 2400
@@ -8620,7 +9005,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_329
   node_id: '793'
   op_type: Concat
@@ -8630,32 +9014,38 @@ nodes:
     - 1
     - 14283
     - 4
+    dtype: float32
   - name: '650'
     shape:
     - 1
     - 3675
     - 4
+    dtype: float32
   - name: '689'
     shape:
     - 1
     - 972
     - 4
+    dtype: float32
   - name: '728'
     shape:
     - 1
     - 243
     - 4
+    dtype: float32
   - name: '767'
     shape:
     - 1
     - 75
     - 4
+    dtype: float32
   outputs:
   - name: '793'
     shape:
     - 1
     - 19248
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8663,7 +9053,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_330
   node_id: '794'
   op_type: Concat
@@ -8673,32 +9062,38 @@ nodes:
     - 1
     - 14283
     - 81
+    dtype: float32
   - name: '662'
     shape:
     - 1
     - 3675
     - 81
+    dtype: float32
   - name: '701'
     shape:
     - 1
     - 972
     - 81
+    dtype: float32
   - name: '740'
     shape:
     - 1
     - 243
     - 81
+    dtype: float32
   - name: '779'
     shape:
     - 1
     - 75
     - 81
+    dtype: float32
   outputs:
   - name: '794'
     shape:
     - 1
     - 19248
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8706,7 +9101,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Concat_331
   node_id: '795'
   op_type: Concat
@@ -8716,32 +9110,38 @@ nodes:
     - 1
     - 14283
     - 32
+    dtype: float32
   - name: '675'
     shape:
     - 1
     - 3675
     - 32
+    dtype: float32
   - name: '714'
     shape:
     - 1
     - 972
     - 32
+    dtype: float32
   - name: '753'
     shape:
     - 1
     - 243
     - 32
+    dtype: float32
   - name: '792'
     shape:
     - 1
     - 75
     - 32
+    dtype: float32
   outputs:
   - name: '795'
     shape:
     - 1
     - 19248
     - 32
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8749,7 +9149,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Constant_332
   node_id: '796'
   op_type: Constant
@@ -8759,6 +9158,7 @@ nodes:
     shape:
     - 19248
     - 4
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8766,7 +9166,6 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null
 - name: Softmax_333
   node_id: '797'
   op_type: Softmax
@@ -8776,12 +9175,14 @@ nodes:
     - 1
     - 19248
     - 81
+    dtype: float32
   outputs:
   - name: '797'
     shape:
     - 1
     - 19248
     - 81
+    dtype: float32
   weight: null
   parameterized_and_prunable: false
   num_dense_ops: 0
@@ -8789,4 +9190,3 @@ nodes:
   is_sparse_layer: false
   is_quantized_layer: false
   zero_point: 0
-  dtype: null

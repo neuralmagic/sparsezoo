@@ -20,9 +20,10 @@ from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field
 
 from sparsezoo.utils import (
+    NodeDataType,
     NodeShape,
     extract_node_id,
-    extract_node_shapes,
+    extract_node_shapes_and_dtypes,
     get_layer_and_op_counts,
     get_node_four_block_sparsity,
     get_node_num_four_block_zeros_and_size,
@@ -55,6 +56,9 @@ class NodeIO(BaseModel):
         description="Shape of this input/output in onnx model graph (assuming a "
         "batch size of 1)"
     )
+    dtype: Optional[str] = Field(
+        description="Data type of the values from this input/output"
+    )
 
 
 class WeightAnalysis(BaseModel):
@@ -80,6 +84,7 @@ class WeightAnalysis(BaseModel):
     num_sparse_four_blocks: int = Field(
         description="Number of four blocks with all zeros in this node's parameter"
     )
+    dtype: str = Field(description="This weight's data type")
 
 
 class NodeAnalysis(BaseModel):
@@ -116,9 +121,6 @@ class NodeAnalysis(BaseModel):
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
-    dtype: Optional[str] = Field(
-        description="This node's parameter's data type", default=None
-    )
 
     @classmethod
     def from_node(
@@ -126,6 +128,7 @@ class NodeAnalysis(BaseModel):
         model_onnx: ModelProto,
         node: NodeProto,
         node_shapes: Optional[Dict[str, NodeShape]] = None,
+        node_dtypes: Optional[Dict[str, NodeDataType]] = None,
     ):
         """
         Class constructor for Node Analysis
@@ -139,21 +142,39 @@ class NodeAnalysis(BaseModel):
         """
         node_id = extract_node_id(node)
         node_shape = node_shapes.get(node_id)
+        node_dtype = node_dtypes.get(node_id)
+
+        has_input_shapes = (
+            node_shape is not None and node_shape.input_shapes is not None
+        )
+        has_input_dtypes = (
+            node_dtype is not None and node_dtype.input_dtypes is not None
+        )
+        has_output_shapes = (
+            node_shape is not None and node_shape.output_shapes is not None
+        )
+        has_output_dtypes = (
+            node_dtype is not None and node_dtype.output_dtypes is not None
+        )
 
         inputs = (
             [
-                NodeIO(name=name, shape=shape)
-                for name, shape in zip(node.input, node_shape.input_shapes)
+                NodeIO(name=name, shape=shape, dtype=str(dtype))
+                for name, shape, dtype in zip(
+                    node.input, node_shape.input_shapes, node_dtype.input_dtypes
+                )
             ]
-            if node_shape is not None and node_shape.input_shapes is not None
+            if has_input_shapes and has_input_dtypes
             else []
         )
         outputs = (
             [
-                NodeIO(name=name, shape=shape)
-                for name, shape in zip(node.output, node_shape.output_shapes)
+                NodeIO(name=name, shape=shape, dtype=str(dtype))
+                for name, shape, dtype in zip(
+                    node.output, node_shape.output_shapes, node_dtype.output_dtypes
+                )
             ]
-            if node_shape is not None and node_shape.output_shapes is not None
+            if has_output_shapes and has_output_dtypes
             else []
         )
 
@@ -178,6 +199,7 @@ class NodeAnalysis(BaseModel):
                 num_sparse_parameters=num_sparse_parameters,
                 num_four_blocks=num_four_blocks,
                 num_sparse_four_blocks=num_sparse_four_blocks,
+                dtype=str(node_weight.dtype),
             )
             if node_weight is not None
             else None
@@ -198,7 +220,6 @@ class NodeAnalysis(BaseModel):
             is_sparse_layer=is_sparse_layer(model_onnx, node),
             is_quantized_layer=is_quantized_layer(model_onnx, node),
             zero_point=get_zero_point(model_onnx, node),
-            dtype=str(node_weight.dtype) if node_weight is not None else None,
         )
 
 
@@ -222,20 +243,16 @@ class ModelAnalysis(BaseModel):
         "performed in one forward pass of the model"
     )
     num_sparse_quantized_ops: int = Field(
-        description="Number of sparse quantized operations (for nodes with "
-        "parameterized weights)"
+        description="Number of sparse quantized operations"
     )
     num_dense_quantized_ops: int = Field(
-        description="Number of dense quantized operations (for nodes with "
-        "parameterized weights)"
+        description="Number of dense quantized operations"
     )
     num_sparse_floating_point_ops: int = Field(
-        description="Number of sparse floating point operations (for nodes with "
-        "parameterized weights)"
+        description="Number of sparse floating point operations"
     )
     num_dense_floating_point_ops: int = Field(
-        description="Number of dense floating point operations (for nodes with "
-        "parameterized weights)"
+        description="Number of dense floating point operations"
     )
     average_sparsity: float = Field(
         description="Average sparsity across all trainable parameters "
@@ -312,28 +329,28 @@ class ModelAnalysis(BaseModel):
             [
                 node_analysis.num_sparse_ops
                 for node_analysis in node_analyses
-                if node_analysis.dtype and "int" in node_analysis.dtype
+                if node_analysis.outputs and "int" in node_analysis.outputs[0].dtype
             ]
         )
         num_dense_quantized_ops = sum(
             [
                 node_analysis.num_dense_ops
                 for node_analysis in node_analyses
-                if node_analysis.dtype and "int" in node_analysis.dtype
+                if node_analysis.outputs and "int" in node_analysis.outputs[0].dtype
             ]
         )
         num_sparse_floating_point_ops = sum(
             [
                 node_analysis.num_sparse_ops
                 for node_analysis in node_analyses
-                if node_analysis.dtype and "float" in node_analysis.dtype
+                if node_analysis.outputs and "float" in node_analysis.outputs[0].dtype
             ]
         )
         num_dense_floating_point_ops = sum(
             [
                 node_analysis.num_dense_ops
                 for node_analysis in node_analyses
-                if node_analysis.dtype and "float" in node_analysis.dtype
+                if node_analysis.outputs and "float" in node_analysis.outputs[0].dtype
             ]
         )
 
@@ -379,12 +396,12 @@ class ModelAnalysis(BaseModel):
         :param: model that contains the nodes to be analyzed
         :return: list of node analyses from model graph
         """
-        node_shapes = extract_node_shapes(model_onnx)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_onnx)
 
         nodes = []
         for node in model_onnx.graph.node:
             node_analysis = NodeAnalysis.from_node(
-                model_onnx, node, node_shapes=node_shapes
+                model_onnx, node, node_shapes=node_shapes, node_dtypes=node_dtypes
             )
             nodes.append(node_analysis)
 

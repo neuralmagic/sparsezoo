@@ -123,7 +123,9 @@ def test_num_sparse_four_blocks(
     )
 
 
-def test_average_sparsity(model_name, get_generated_analysis, get_expected_analysis):
+def test_average_sparsity(
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
+):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
 
@@ -133,7 +135,7 @@ def test_average_sparsity(model_name, get_generated_analysis, get_expected_analy
 
 
 def test_average_four_block_sparsity(
-    model_name, get_generated_analysis, get_expected_analysis
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
 ):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
@@ -144,7 +146,7 @@ def test_average_four_block_sparsity(
 
 
 def test_num_dense_quantized_ops(
-    model_name, get_generated_analysis, get_expected_analysis
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
 ):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
@@ -155,7 +157,7 @@ def test_num_dense_quantized_ops(
 
 
 def test_num_sparse_quantized_ops(
-    model_name, get_generated_analysis, get_expected_analysis
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
 ):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
@@ -166,7 +168,7 @@ def test_num_sparse_quantized_ops(
 
 
 def test_num_sparse_floating_point_ops(
-    model_name, get_generated_analysis, get_expected_analysis
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
 ):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
@@ -177,7 +179,7 @@ def test_num_sparse_floating_point_ops(
 
 
 def test_num_dense_floating_point_ops(
-    model_name, get_generated_analysis, get_expected_analysis
+    model_name, get_generated_analysis, get_expected_analysis, margin_of_error
 ):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)

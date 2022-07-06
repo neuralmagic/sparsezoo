@@ -33,7 +33,8 @@ _LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "NodeShape",
-    "extract_node_shapes",
+    "NodeDataType",
+    "extract_node_shapes_and_dtypes",
 ]
 
 
@@ -48,9 +49,19 @@ NodeShape = NamedTuple(
         ("output_shapes", Union[List[List[int]], None]),
     ],
 )
+NodeDataType = NamedTuple(
+    "NodeDataType",
+    [
+        ("id", str),
+        ("input_dtypes", Union[List[numpy.dtype], None]),
+        ("output_dtypes", Union[List[numpy.dtype], None]),
+    ],
+)
 
 
-def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
+def extract_nodes_shapes_and_dtypes_ort(
+    model: ModelProto,
+) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
     Creates a modified model to expose intermediate outputs and runs an ONNX Runtime
     InferenceSession to obtain the output shape of each node.
@@ -72,34 +83,39 @@ def extract_nodes_shapes_ort(model: ModelProto) -> Dict[str, List[List[int]]]:
     sess_options.log_severity_level = 3
     sess = onnxruntime.InferenceSession(model_copy.SerializeToString(), sess_options)
 
-    input_dict = {}
+    input_value_dict = {}
     for input in model_copy.graph.input:
         input_shape = extract_shape(input)
-        dtype = extract_dtype(input)
+        input_dtype = extract_dtype(input)
 
         input_shape = list(input_shape)
         input_shape[input_shape is None] = 1
 
-        input_dict[input.name] = numpy.ones(input_shape, dtype=dtype)
+        input_value_dict[input.name] = numpy.ones(input_shape, dtype=input_dtype)
 
     # Get shapes by running real values and saving outputs
-    outputs = sess.run(None, input_dict)
+    outputs = sess.run(None, input_value_dict)
 
-    # Last entry is 'input', which is not calculated by the run
-    nodes = list(sess.get_outputs() + sess.get_inputs())
-    outputs = outputs + [nodes[-1]]
+    # Append inputs to list of nodes and outputs
+    nodes = list(sess.get_outputs())
+    for input in model_copy.graph.input:
+        nodes.append(input)
+        outputs.append(input_value_dict[input.name])
 
     output_shapes = {}
+    output_dtypes = {}
     for node, output in zip(nodes, outputs):
         output_shapes[node.name] = (
             list(output.shape) if output is not None and len(output.shape) > 0 else None
         )
-    return output_shapes
+        output_dtypes[node.name] = output.dtype if output is not None else None
+
+    return output_shapes, output_dtypes
 
 
-def extract_nodes_shapes_shape_inference(
+def extract_nodes_shapes_and_dtypes_shape_inference(
     model: ModelProto,
-) -> Dict[str, List[Union[None, List[int]]]]:
+) -> Tuple[Dict[str, List[Union[None, List[int]]]], Dict[str, numpy.dtype]]:
     """
     Creates a modified model to expose intermediate outputs and runs an ONNX shape
     inference to obtain the output shape of each node.
@@ -135,70 +151,87 @@ def extract_nodes_shapes_shape_inference(
         )
 
     output_shapes = {}
+    output_dtypes = {}
     for node in model_copy.graph.output:
         node_shape = extract_shape(node)
+        dtype = extract_dtype(node)
         output_shapes[node.name] = (
             list(node_shape) if node_shape is not None and len(node_shape) > 0 else None
         )
+        output_dtypes[node.name] = dtype
 
-    return output_shapes
+    return output_shapes, output_dtypes
 
 
-def extract_node_shapes(model: ModelProto) -> Dict[str, NodeShape]:
+def extract_nodes_shapes_and_dtypes(
+    model: ModelProto,
+) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
-    Extracts the shape information for each node as a NodeShape object.
+    Uses ONNX Runtime or shape inference to infer output shapes and dtypes from model
 
-    :param model: the loaded onnx.ModelProto to extract node shape information from
-    :return: a mapping of node id to a NodeShape object
+    :param model: model to extract output values from
+    :return: output shapes and output data types
     """
+    output_shapes = None
+    output_dtypes = None
+
+    try:
+        output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes_ort(model)
+    except Exception as err:
+        _LOGGER.warning(
+            "Extracting shapes using ONNX Runtime session failed: {}".format(err)
+        )
+
+    if output_shapes is None or output_dtypes is None:
+        try:
+            (
+                output_shapes,
+                output_dtypes,
+            ) = extract_nodes_shapes_and_dtypes_shape_inference(model)
+        except Exception as err:
+            _LOGGER.warning(
+                "Extracting shapes using ONNX shape_inference failed: {}".format(err)
+            )
+
+    return output_shapes, output_dtypes
+
+
+def collate_output_shapes(
+    model: ModelProto, output_shapes: Union[Dict[str, List[List[int]]], None]
+) -> Dict[str, NodeShape]:
+    """
+    :param model: model whose shapes are being analyzed
+    :param output_shapes: output shapes used to generate NodeShapes
+    :return: a dictionary mapping node ids to NodeShapes
+    """
+    output_shapes = output_shapes if output_shapes is not None else {}
 
     # Maps NodeArg to its inputs
     node_to_inputs = {}
     for node in model.graph.node:
         node_to_inputs[extract_node_id(node)] = node.input
 
-    # Obtains output shapes for each model's node
-    output_shapes = None
-
-    try:
-        output_shapes = extract_nodes_shapes_ort(model)
-    except Exception as err:
-        _LOGGER.warning(
-            "Extracting shapes using ONNX Runtime session failed: {}".format(err)
+    input_shapes = {}
+    for node_id in output_shapes.keys():
+        if node_id not in node_to_inputs:
+            continue
+        input_shapes[node_id] = [
+            output_shapes[input_node_id]
+            for input_node_id in node_to_inputs[node_id]
+            if input_node_id in output_shapes
+            and output_shapes[input_node_id] is not None
+        ]
+        input_shapes[node_id] = (
+            input_shapes[node_id] if len(input_shapes[node_id]) > 0 else None
         )
 
-    if output_shapes is None:
-        try:
-            output_shapes = extract_nodes_shapes_shape_inference(model)
-        except Exception as err:
-            _LOGGER.warning(
-                "Extracting shapes using ONNX shape_inference failed: {}".format(err)
-            )
-
-    # Obtains the input shapes for each node
-    if output_shapes is None:
-        output_shapes = {}
-
-    input_shapes = {}
-
-    for node in output_shapes.keys():
-        if node not in node_to_inputs:
-            continue
-        input_shapes[node] = [
-            output_shapes[input_node]
-            for input_node in node_to_inputs[node]
-            if input_node in output_shapes and output_shapes[input_node] is not None
-        ]
-        input_shapes[node] = input_shapes[node] if len(input_shapes[node]) > 0 else None
-
-    # Combines shape information into mapping of node id to a NodeShape object
     node_shapes = {}
-    for node in output_shapes.keys():
-        node_shapes[node] = NodeShape(
-            node,
-            input_shapes[node] if node in input_shapes else None,
-            [output_shapes[node]]
-            if node in output_shapes and output_shapes[node] is not None
+    for node_id in output_shapes.keys():
+        node_shapes[node_id] = NodeShape(
+            node_id,
+            input_shapes[node_id] if node_id in input_shapes else None,
+            [output_shapes[node_id]]
+            if node_id in output_shapes and output_shapes[node_id] is not None
             else None,
         )
 
@@ -227,6 +260,69 @@ def extract_node_shapes(model: ModelProto) -> Dict[str, NodeShape]:
         _fix_shapes(node_shape.output_shapes)
 
     return node_shapes
+
+
+def collate_output_dtypes(
+    model: ModelProto, output_dtypes: Union[Dict[str, numpy.dtype], None]
+) -> Dict[str, NodeDataType]:
+    """
+    :param model: model whose data types are being analyzed
+    :param output_shapes: output data types used to generate NodeDataTypes
+    :return: a dictionary mapping node ids to NodeDataTypes
+    """
+    output_dtypes = output_dtypes if output_dtypes is not None else {}
+
+    # Maps NodeArg to its inputs
+    node_to_inputs = {}
+    for node in model.graph.node:
+        node_to_inputs[extract_node_id(node)] = node.input
+
+    input_dtypes = {}
+    for node_id in output_dtypes.keys():
+        if node_id not in node_to_inputs:
+            continue
+        input_dtypes[node_id] = [
+            output_dtypes[input_node_id]
+            for input_node_id in node_to_inputs[node_id]
+            if input_node_id in output_dtypes
+            and output_dtypes[input_node_id] is not None
+        ]
+        input_dtypes[node_id] = (
+            input_dtypes[node_id] if len(input_dtypes[node_id]) > 0 else None
+        )
+
+    node_dtypes = {}
+    for node_id in output_dtypes.keys():
+        node_dtypes[node_id] = NodeDataType(
+            node_id,
+            input_dtypes[node_id] if node_id in input_dtypes else None,
+            [output_dtypes[node_id]]
+            if node_id in output_dtypes and output_dtypes[node_id] is not None
+            else None,
+        )
+
+    return node_dtypes
+
+
+def extract_node_shapes_and_dtypes(
+    model: ModelProto,
+) -> Tuple[Dict[str, NodeShape], Dict[str, NodeDataType]]:
+    """
+    Extracts the shape and dtype information for each node as NodeShape objects
+    and numpy dtypes.
+
+    :param model: the loaded onnx.ModelProto to extract node shape information from
+    :return: a mapping of node id to a NodeShape object
+    """
+
+    # Obtains output shapes for each model's node
+    output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes(model)
+
+    # Package output shapes into each node's inputs and outputs
+    node_shapes = collate_output_shapes(model, output_shapes)
+    node_dtypes = collate_output_dtypes(model, output_dtypes)
+
+    return node_shapes, node_dtypes
 
 
 def extract_dtype(proto: Any) -> numpy.dtype:

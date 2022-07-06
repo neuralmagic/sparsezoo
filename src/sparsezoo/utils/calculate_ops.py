@@ -17,7 +17,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy
 from onnx import ModelProto, NodeProto
 
-from sparsezoo.utils.node_shape import NodeShape, extract_node_shapes
+from sparsezoo.utils.node_inference import NodeShape, extract_node_shapes_and_dtypes
 from sparsezoo.utils.onnx import (
     extract_node_id,
     get_node_attributes,
@@ -51,7 +51,8 @@ def get_num_dense_and_sparse_ops(
         block sparse. If not supplied, it be will be computed
     :return: number of operations performed by node
     """
-    node_shapes = extract_node_shapes(model) if node_shapes is None else node_shapes
+    if node_shapes is None:
+        node_shapes = extract_node_shapes_and_dtypes(model)[0]
 
     node_shape = node_shapes.get(extract_node_id(node))
     input_shapes = node_shape.input_shapes if node_shape is not None else None
@@ -315,6 +316,6 @@ def _numpy_prod_none_safe(input: Union[None, List[Union[None, int]]]) -> int:
         return 0
 
     _input = numpy.copy(input)
-    _input[_input is None] = 1
+    _input[_input == None] = 1  # noqa: E711
 
     return numpy.prod(_input)

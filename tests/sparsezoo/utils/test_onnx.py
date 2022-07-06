@@ -17,7 +17,7 @@
 import pytest
 
 from sparsezoo.utils import (
-    extract_node_shapes,
+    extract_node_shapes_and_dtypes,
     get_layer_and_op_counts,
     get_node_bias,
     get_node_four_block_sparsity,
@@ -47,17 +47,19 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def get_model_node_shapes(get_model_onnx, model_paths):
+def get_model_node_shapes_and_dtypes(get_model_onnx, model_paths):
     model_node_shapes = {}
+    model_node_dtypes = {}
     for model_name in model_paths.keys():
         model = get_model_onnx(model_name)
-        node_shapes = extract_node_shapes(model)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model)
         model_node_shapes[model_name] = node_shapes
+        model_node_dtypes[model_name] = node_dtypes
 
-    def _get_model_node_shapes(model_name):
-        return model_node_shapes[model_name]
+    def _get_model_node_shapes_and_dtypes(model_name):
+        return model_node_shapes[model_name], model_node_dtypes[model_name]
 
-    return _get_model_node_shapes
+    return _get_model_node_shapes_and_dtypes
 
 
 def pytest_generate_tests(metafunc):
@@ -67,6 +69,7 @@ def pytest_generate_tests(metafunc):
         "test_is_four_block_sparse_layer",
     ]:
         metafunc.parametrize("model_name", get_test_model_names())
+        # metafunc.parametrize("model_name", ["mobilenet_v1_pruned_moderate"])
 
 
 @pytest.mark.parametrize(
@@ -221,6 +224,7 @@ def test_get_node_sparsity(
     model_name,
     get_model_and_node,
     get_expected_analysis,
+    margin_of_error,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
@@ -250,6 +254,7 @@ def test_get_node_four_block_sparsity(
     model_name,
     get_model_and_node,
     get_expected_analysis,
+    margin_of_error,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
@@ -305,10 +310,11 @@ def test_get_num_dense_and_sparse_ops(
     model_name,
     get_expected_analysis,
     get_model_and_node,
-    get_model_node_shapes,
+    get_model_node_shapes_and_dtypes,
+    margin_of_error,
 ):
     model_analysis = get_expected_analysis(model_name)
-    node_shapes = get_model_node_shapes(model_name)
+    node_shapes, node_dtypes = get_model_node_shapes_and_dtypes(model_name)
 
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
