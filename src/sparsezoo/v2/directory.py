@@ -217,7 +217,7 @@ class Directory(File):
                 file = file.get_file(file_name=file_name)
                 if file:
                     return file
-        logging.warning(f"File with name {file_name} not found!")
+        logging.warning(f"File with name {file_name} not found")
         return None
 
     def gzip(self, archive_directory: Optional[str] = None):
