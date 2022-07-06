@@ -36,7 +36,7 @@ endif
 # run checks on all files for the repo
 quality:
 	@echo "Running copyright checks";
-	python3 utils/copyright.py quality $(PYCHECKGLOBS) $(JSCHECKGLOBS) $(MDCHECKGLOBS) $(MDCHECKFILES)
+	python utils/copyright.py quality $(PYCHECKGLOBS) $(JSCHECKGLOBS) $(MDCHECKGLOBS) $(MDCHECKFILES)
 	@echo "Running python quality checks";
 	black --check $(PYCHECKDIRS);
 	isort --check-only $(PYCHECKDIRS);
@@ -45,7 +45,7 @@ quality:
 # style the code according to accepted standards for the repo
 style:
 	@echo "Running copyrighting";
-	python3 utils/copyright.py style $(PYCHECKGLOBS) $(JSCHECKGLOBS) $(MDCHECKGLOBS) $(MDCHECKFILES)
+	python utils/copyright.py style $(PYCHECKGLOBS) $(JSCHECKGLOBS) $(MDCHECKGLOBS) $(MDCHECKFILES)
 	@echo "Running python styling";
 	black $(PYCHECKDIRS);
 	isort $(PYCHECKDIRS);
@@ -58,7 +58,7 @@ test:
 # create docs
 docs:
 	@echo "Running docs creation";
-	python3 utils/docs_builder.py --src $(DOCDIR) --dest $(DOCDIR)/build/html;
+	python utils/docs_builder.py --src $(DOCDIR) --dest $(DOCDIR)/build/html;
 
 docsupdate:
 	@echo "Runnning update to api docs";
