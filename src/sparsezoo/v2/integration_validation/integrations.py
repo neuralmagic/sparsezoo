@@ -28,10 +28,11 @@ def validate_nlp():
         "trainer_state.json",
         "training_args.bin",
         "vocab.txt",
+        "recipe.yaml",
     }
-    optional_training_files = {"recipe.yaml"}
-    additional_deployment_files = {"model.onnx"}
-    return training_files, optional_training_files, additional_deployment_files
+    optional_training_files = {}
+    deployment_files = {"model.onnx", "config.json", "tokenizer.json"}
+    return training_files, optional_training_files, deployment_files
 
 
 def validate_cv_classification():
@@ -39,15 +40,15 @@ def validate_cv_classification():
         "model.pth",
     }
     optional_training_files = {"recipe.yaml"}
-    additional_deployment_files = {"model.onnx"}
-    return training_files, optional_training_files, additional_deployment_files
+    deployment_files = {"model.onnx"}
+    return training_files, optional_training_files, deployment_files
 
 
 def validate_cv_detection():
-    training_files = {"model.pt", "model.ckpt.pt"}
-    optional_training_files = {"recipe.yaml"}
-    additional_deployment_files = {"model.onnx"}
-    return training_files, optional_training_files, additional_deployment_files
+    training_files = {"model.pt"}
+    optional_training_files = {"recipe.yaml", "model.ckpt.pt"}
+    deployment_files = {"model.onnx"}
+    return training_files, optional_training_files, deployment_files
 
 
 def validate_cv_segmentation():
@@ -55,5 +56,5 @@ def validate_cv_segmentation():
         "model.pth",
     }
     optional_training_files = {"recipe.yaml"}
-    additional_deployment_files = {"model.onnx"}
-    return training_files, optional_training_files, additional_deployment_files
+    deployment_files = {"model.onnx"}
+    return training_files, optional_training_files, deployment_files

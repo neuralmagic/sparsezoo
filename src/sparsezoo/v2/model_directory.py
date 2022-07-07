@@ -20,7 +20,7 @@ from typing import Any, Dict, Generator, List, Optional, Union
 
 import numpy
 
-from sparsezoo.v2.directory import Directory
+from sparsezoo.v2.directory import Directory, is_directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
 from sparsezoo.v2.model_objects import NumpyDirectory, SampleOriginals
@@ -157,6 +157,9 @@ class ModelDirectory(Directory):
         )
 
         super().__init__(files=files, name=name, path=path, url=url)
+
+        # importing the class here, otherwise a circular import error is being raised
+        # (IntegrationValidator script also imports ModelDirectory class object)
         from sparsezoo.v2.integration_validation.validator import IntegrationValidator
 
         self.integration_validator = IntegrationValidator(model_directory=self)
@@ -310,22 +313,19 @@ class ModelDirectory(Directory):
 
         # directory is folder
         else:
-            # is directory using the 'contents' key.
-            # this is a placeholder for the nested files that
-            # the directory contains
-            if file.get("contents"):
-                files_within = file["contents"]
 
-            # is directory locally on the machine
-            else:
-                paths_within = glob.glob(os.path.join(path, "*"))
-                files_within = (
-                    file_dictionary(display_name=os.path.basename(path), path=path)
-                    for path in paths_within
-                )
+            # directory is locally on the machine
+            files_in_directory = []
+            for file_name in os.listdir(path):
+                file = File(name=file_name, path=os.path.join(path, file_name))
+                if is_directory(file):
+                    file = Directory.from_file(file)
 
-            files = [self._get_file(file=file) for file in files_within]
-            directory = directory_class(files=files, name=name, path=path, url=url)
+                files_in_directory.append(file)
+
+            directory = directory_class(
+                files=files_in_directory, name=name, path=path, url=url
+            )
             return directory
 
     @staticmethod

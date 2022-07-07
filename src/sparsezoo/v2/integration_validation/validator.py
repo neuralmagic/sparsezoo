@@ -34,7 +34,7 @@ from sparsezoo.v2.model_directory import ModelDirectory
 __all__ = ["IntegrationValidator"]
 
 # files/directories that are required for minimal validation
-ESSENTIAL_FILES = {"deployment", "training", "model.onnx"}
+REQUIRED_FILES = {"deployment", "training", "model.onnx"}
 INTEGRATION_NAME_TO_DATA = {
     "nlp": validate_nlp,
     "cv_classification": validate_cv_classification,
@@ -50,22 +50,22 @@ class IntegrationValidator:
 
     :param model_directory: ModelDirectory class object to be
         validated
-    :param essential_files: a minimal set of file names in ModelDirectory,
+    :param required_files: a minimal set of file names in ModelDirectory,
         that need to be present, so that the validation is
         successful
-    :param integration2data: mapping from the integration tag (string) from
+    :param integration_to_data: mapping from the integration tag (string) from
         ModelDirectory's model card to validation function
     """
 
     def __init__(
         self,
         model_directory: ModelDirectory,
-        essential_files: Set[str] = ESSENTIAL_FILES,
-        integration2data: Dict[str, Callable] = INTEGRATION_NAME_TO_DATA,
+        required_files: Set[str] = REQUIRED_FILES,
+        integration_to_data: Dict[str, Callable] = INTEGRATION_NAME_TO_DATA,
     ):
         self.model_directory = model_directory
-        self.essential_files = essential_files
-        self.integration2data = integration2data
+        self.required_files = required_files
+        self.integration_to_data = integration_to_data
         self.minimal_validation = None
 
     def validate(self, minimal_validation: bool) -> bool:
@@ -80,7 +80,7 @@ class IntegrationValidator:
             have additional validation methods implemented (e.g `training`
             directory).
 
-        :param minimal_validation: boolean flag; if True, only the essential files
+        :param minimal_validation: boolean flag; if True, only the required files
             in the ModelDirectory should be validated. Else, the ModelDirectory is
             expected to contain a full set of Directory/File class objects.
         :return: boolean flag; True if files are valid and no errors arise
@@ -103,8 +103,8 @@ class IntegrationValidator:
         (
             training_files_validation,
             optional_training_files_validation,
-            additional_deployment_files_validation,
-        ) = self.integration2data[integration_name]()
+            deployment_files_validation,
+        ) = self.integration_to_data[integration_name]()
         for file in self.model_directory.files:
             # checker for dict-type file
             if isinstance(file, dict):
@@ -117,18 +117,15 @@ class IntegrationValidator:
             else:
                 # checker for File/Directory class objects
                 if file.name == "training":
-                    self._validate_training_directory(
-                        training_directory=file,
+                    self.validate_directory(
+                        directory=file,
                         validation_files=training_files_validation,
                         optional_validation_files=optional_training_files_validation,
                     )
 
                 elif file.name == "deployment":
-                    self._validate_deployment_directory(
-                        deployment_directory=file,
-                        validation_files=training_files_validation
-                        | additional_deployment_files_validation,
-                        optional_validation_files=optional_training_files_validation,
+                    self.validate_directory(
+                        directory=file, validation_files=deployment_files_validation
                     )
 
                 validations[file.name] = file.validate()
@@ -157,78 +154,69 @@ class IntegrationValidator:
                 if isinstance(file, list) or isinstance(file, dict):
                     continue
                 else:
-                    self.essential_files.discard(file.name)
-            return not self.essential_files
+                    self.required_files.discard(file.name)
+            return not self.required_files
 
         else:
             # make sure that all default files in ModelDirectory are present
             return all([file is not None for file in self.model_directory.files])
 
-    def _validate_deployment_directory(
+    def validate_directory(
         self,
-        deployment_directory: File,
+        directory: Directory,
         validation_files: Set,
         optional_validation_files: Optional[Set] = set(),
-    ) -> None:
-        if any([isinstance(file, Directory) for file in deployment_directory.files]):
-            raise ValueError(
-                "Found nested directories within `deployment` directory. "
-                "The directory may only contain files, not directories."
-            )
-        file_names = set(deployment_directory.get_file_names())
+    ) -> bool:
+        """
+        Validate the structure of the directory against a set of the
+        expected files
+
+        :param directory: The directory to be validated
+        :validation_files: A set of file names expected to be
+            found in the directory
+        :optional_validation_files: Additional set of file names
+            that may be optionally found in the directory
+        :return True if the directory is valid
+        """
+
+        # partition contents of the `directory`
+        # into loose files and subdirectories
+        loose_files, subdirectories = [], []
+        for file in directory.files:
+            (loose_files, subdirectories)[isinstance(file, Directory)].append(file)
+
+        # parse subdirectories in the
+        # recursive manner
+        for subdirectory in subdirectories:
+            if isinstance(file, Directory):
+                self.validate_directory(
+                    directory=subdirectory,
+                    validation_files=validation_files,
+                    optional_validation_files=optional_validation_files,
+                )
+
+        # parse loose files
+        if subdirectories and not loose_files:
+            # directory contains only subdirectories and no files
+            # this is fine
+            return True
+        file_names = {file.name for file in loose_files}
         for optional_file in optional_validation_files:
             file_names.discard(optional_file)
         if validation_files != file_names:
             raise ValueError(
                 f"Failed to find expected files "
                 f"{validation_files.difference(file_names)} "
-                f"in the `deployment` directory {deployment_directory.name}."
+                f"in the `deployment` directory {directory.name}."
             )
+
         return True
-
-    def _validate_training_directory(
-        self,
-        training_directory: File,
-        validation_files: Set,
-        optional_validation_files: Optional[Set] = set(),
-    ) -> None:
-        if isinstance(training_directory.files[0], Directory):
-            # Training directory only contains subfolders
-            # with names 'checkpoint_{...}'
-            for file in training_directory.files:
-                expected_name_prefix = "checkpoint_"
-                if not file.name.startswith(expected_name_prefix):
-                    raise ValueError(
-                        f"Found a directory in `training` directory "
-                        f"with the name: {file.name}. "
-                        f"The name of the directory should "
-                        f"start with '{expected_name_prefix}'."
-                    )
-                self._validate_training_directory(
-                    training_directory=file,
-                    validation_files=validation_files,
-                    optional_validation_files=optional_validation_files,
-                )
-        else:
-            # Training directory does not contain any subfolders,
-            # but the training files directly.
-            file_names = set(training_directory.get_file_names())
-            for optional_file in optional_validation_files:
-                file_names.discard(optional_file)
-
-            if validation_files != file_names:
-                raise ValueError(
-                    f"Failed to find expected files "
-                    f"{validation_files.difference(file_names)} "
-                    f"in the `training` directory {training_directory.name}."
-                )
-            return True
 
     def _get_integration_data(
         self, model_card: Union[str, File]
     ) -> Tuple[Set, Set, Set]:
         integration_name = self._get_integration_name(model_card)
-        return self.integration2data[integration_name]
+        return self.integration_to_data[integration_name]
 
     @staticmethod
     def _get_integration_name(model_card: Union[str, File]):

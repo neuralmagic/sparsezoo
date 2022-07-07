@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import glob
 import logging
 import os
 import pathlib
@@ -25,29 +24,7 @@ from sparsezoo.utils.downloader import download_file
 from sparsezoo.v2.file import File
 
 
-__all__ = ["Directory"]
-
-
-def _is_directory(file: File) -> bool:
-    # check whether a File class object could be
-    # converted into a Directory class object
-    if not isinstance(file, File):
-        return False
-    file_stem = pathlib.Path(file.name).stem
-    # `file_stem` is `file.name` stripped from
-    # the possible file extension.
-    # if there is no extension, this means that
-    # the File represents a (non-archive) Directory.
-    return file_stem == file.name
-
-
-def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
-    return [
-        Directory.from_file(file)
-        if (_is_directory(file) and not isinstance(file, Directory))
-        else file
-        for file in files
-    ]
+__all__ = ["Directory", "is_directory"]
 
 
 class Directory(File):
@@ -90,8 +67,8 @@ class Directory(File):
             )
         name = file.name
         files = [
-            File(name=os.path.basename(path), path=path)
-            for path in glob.glob(os.path.join(file.path, "*"))
+            File(name=os.path.basename(path), path=os.path.join(file.path, path))
+            for path in os.listdir(file.path)
         ]
         files = _possibly_convert_files_to_directories(files)
         path = file.path
@@ -302,3 +279,26 @@ class Directory(File):
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
         return self.is_archive and self.path
+
+
+def is_directory(file: File) -> bool:
+    # check whether a File class object could be
+    # converted into a Directory class object
+    if not isinstance(file, File):
+        return False
+    if file.path is None:
+        raise ValueError(
+            "Cannot call the method. "
+            "The File/Directory class object's `path` "
+            "attribute is None."
+        )
+    return os.path.isdir(file.path)
+
+
+def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
+    return [
+        Directory.from_file(file)
+        if (is_directory(file) and not isinstance(file, Directory))
+        else file
+        for file in files
+    ]
