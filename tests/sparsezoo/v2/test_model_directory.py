@@ -40,6 +40,7 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
                 "sample_labels",
                 "deployment",
                 "logs",
+                "onnx",
                 "model.onnx",
                 "analysis.yaml",
                 "benchmarks.yaml",
@@ -60,6 +61,7 @@ from tests.sparsezoo.v2.test_file import _create_sample_file
                 "sample_labels",
                 "deployment",
                 "logs",
+                "onnx",
                 "model.onnx",
                 "analysis.yaml",
                 "benchmarks.yaml",
@@ -109,6 +111,7 @@ class TestModelDirectory:
 
         model_directory = ModelDirectory.from_directory(directory_path=directory_path)
         assert model_directory.validate()
+        assert model_directory.validate(minimal_validation=True)
 
     def test_validate_from_zoo_api(self, setup):
         _, request_json, expected_content, temp_dir = setup
@@ -249,7 +252,7 @@ class TestModelDirectory:
                     [_expected_file for _expected_file in expected_file]
                 )
             elif isinstance(file, dict):
-                pass
+                assert {"onnxruntime", "deepsparse"} == set(file.keys())
             else:
                 if from_zoo and file.name.endswith(".tar.gz"):
                     expected_file += ".tar.gz"

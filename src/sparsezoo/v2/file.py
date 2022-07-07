@@ -141,10 +141,7 @@ class File:
             logging.error("Download retry failed...")
             raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
-    # TODO: Add support for various integrations
-    def validate(
-        self, strict_mode: bool = True, integration: Optional[str] = None
-    ) -> bool:
+    def validate(self, strict_mode: bool = True) -> bool:
         """
         Validate whether the File object is loadable or not.
 
@@ -152,8 +149,6 @@ class File:
             - if strict_mode: method will raise ValueError on error
             - if not strict_mode: method will raise warning on
                 error
-        :param integration: name of the specific integration
-            (e.g. transformers, YOLOv5 etc.)
         :return: boolean flag; True if File instance is loadable, otherwise False
         """
         if not self.name or (not self.path and not self.url):
@@ -169,9 +164,9 @@ class File:
             if extension in self.loadable_extensions.keys():
                 validation_function = self.loadable_extensions[extension]
                 validation_function(strict_mode=strict_mode)
-                return True
-            else:
-                return False
+            # for files which do not have loadable_extensions,
+            # by default we assume they are valid
+            return True
 
     def _validate_numpy(self, strict_mode):
         if not load_numpy_list(self.path):

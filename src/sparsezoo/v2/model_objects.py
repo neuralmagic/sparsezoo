@@ -18,7 +18,6 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
-import re
 from collections import OrderedDict
 from typing import List, Optional
 
@@ -29,109 +28,9 @@ from sparsezoo.v2.directory import Directory
 from sparsezoo.v2.file import File
 
 
-__all__ = ["FrameworkFiles", "NumpyDirectory", "SampleOriginals"]
+__all__ = ["NumpyDirectory", "SampleOriginals"]
 
 NUMPY_DIRECTORY_NAMES = ["sample-inputs", "sample-outputs"]
-
-
-class FrameworkFiles(Directory):
-    """
-    Object that represents a directory with framework files.
-
-    :param files: list of files contained within the FrameworkFiles
-    :param name: name of the FrameworkFiles
-    :param path: path of the FrameworkFiles
-    :param url: url of the FrameworkFiles
-    """
-
-    def __init__(
-        self,
-        files: List[File],
-        name: str,
-        path: Optional[str] = None,
-        url: Optional[str] = None,
-    ):
-        super().__init__(files=files, name=name, path=path, url=url)
-
-        self.valid_nested_folder_patterns = ["checkpoint_(.*)/", "logs/"]
-
-    def validate(self, integration: Optional[str] = None) -> bool:
-        """
-        Validates the structure of framework files.
-
-        :param integration: integration: name of the specific integration
-            (e.g. transformers, YOLOv5 etc.)
-        :return: boolean flag; True if files are valid and no errors arise
-        """
-        validations = {}
-        for file in self.files:
-            if isinstance(file, Directory):
-                # check for Directory files
-                validations[file.name] = self._check_directory(directory=file)
-            else:
-                # check for File files
-                validations[file.name] = self._check_file(file=file)
-
-        if not all(validations.values()):
-            logging.warning(
-                f"Following files: "
-                f"{[key for key, value in validations.items() if not value]} "
-                "were not successfully validated."
-            )
-
-        return all(validations.values())
-
-    def get_file(self, file_name: str) -> Optional[File]:
-        """
-        Fetch a file from the FrameworkFiles by name.
-
-        :param file_name: name of the file to be fetched
-        :return: File if found, otherwise None
-        """
-        for file in self.files:
-            if file.name == file_name:
-                return file
-            if isinstance(file, Directory):
-                file = file.get_file(file_name=file_name)
-                if file:
-                    return file
-        logging.warning(f"File with name {file_name} not found!")
-        return None
-
-    def _check_valid_folder_name(self, file: File) -> bool:
-        # checks that any nested folders’ names
-        # either follow `checkpoint_id/` or `logs/`
-        checks = [False for _ in self.valid_nested_folder_patterns]
-        for i, pattern in enumerate(self.valid_nested_folder_patterns):
-            pattern = re.compile(pattern)
-            match = re.search(pattern, file.path)
-            if match:
-                checks[i] = True
-        if not any(checks):
-            raise ValueError(
-                f"File: {file.name} has path {file.path}, which does "
-                "not include any of the following "
-                f"directories: {self.valid_nested_folder_patterns}."
-            )
-        return True
-
-    def _check_file(self, file: File) -> bool:
-        # TODO: Assuming for now that all files are loadable,
-        # this may not be the case when we include integrations
-        self._check_valid_folder_name(file)
-        return file.validate()
-
-    def _check_directory(self, directory: Directory) -> bool:
-        if not directory.files and not directory._is_tar():
-            raise ValueError(f"Detected empty directory: {directory.name}!")
-        validations = []
-        for file in directory.files:
-            if isinstance(file, Directory):
-                # nested directory
-                validations.append(self._check_directory(file))
-            else:
-                validations.append(self._check_file(file=file))
-        return all(validations)
 
 
 class SampleOriginals(Directory):

@@ -125,8 +125,8 @@ def _create_sample_file(file_path):
         (".jpg", True),
         (".png", True),
         (".jpeg", True),
-        ("", False),
-        (".bin", False),
+        ("", True),
+        (".bin", True),
     ],
     scope="function",
 )

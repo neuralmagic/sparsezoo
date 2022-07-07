@@ -24,7 +24,7 @@ from sparsezoo.utils.downloader import download_file
 from sparsezoo.v2.file import File
 
 
-__all__ = ["Directory"]
+__all__ = ["Directory", "is_directory"]
 
 
 class Directory(File):
@@ -47,7 +47,9 @@ class Directory(File):
         url: Optional[str] = None,
     ):
 
-        self.files = files
+        self.files = (
+            files if not files else _possibly_convert_files_to_directories(files)
+        )
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
@@ -55,6 +57,22 @@ class Directory(File):
 
         if self._unpack():
             self.unzip()
+
+    @classmethod
+    def from_file(cls, file: File) -> "Directory":
+        if not file.path:
+            raise ValueError(
+                f"Attempting to convert File class object {file.name} "
+                "to Directory class object, but the file.path is missing."
+            )
+        name = file.name
+        files = [
+            File(name=os.path.basename(path), path=os.path.join(file.path, path))
+            for path in os.listdir(file.path)
+        ]
+        files = _possibly_convert_files_to_directories(files)
+        path = file.path
+        return cls(name=name, files=files, path=path)
 
     @property
     def is_archive(self) -> bool:
@@ -96,21 +114,24 @@ class Directory(File):
         """
 
         if self.is_archive:
-            # we are not validating tar files for now
+            # we are not validating tar files
+            # and assuming they are valid
             validations = {self.name: True}
         else:
             validations = {}
             for file in self.files:
                 validations[file.name] = file.validate(strict_mode=strict_mode)
 
-        if not all(validations.values()):
+        is_valid = all(validations.values())
+        if is_valid:
+            return True
+        else:
             logging.warning(
                 "Following files: "
                 f"{[key for key, value in validations.items() if not value]} "
                 "were not successfully validated."
             )
-
-        return all(validations.values())
+            return False
 
     def download(
         self,
@@ -156,6 +177,25 @@ class Directory(File):
         else:
             for file in self.files:
                 file.download(destination_path=destination_path)
+
+    def get_file(self, file_name: str) -> Optional[File]:
+        """
+        Fetch a file from the Directory by name.
+        If several files with the same name exist within
+        the nested structure, the first found instance is returned.
+
+        :param file_name: name of the file to be fetched
+        :return: File if found, otherwise None
+        """
+        for file in self.files:
+            if file.name == file_name:
+                return file
+            if isinstance(file, Directory):
+                file = file.get_file(file_name=file_name)
+                if file:
+                    return file
+        logging.warning(f"File with name {file_name} not found")
+        return None
 
     def gzip(self, archive_directory: Optional[str] = None):
         """
@@ -239,3 +279,26 @@ class Directory(File):
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
         return self.is_archive and self.path
+
+
+def is_directory(file: File) -> bool:
+    # check whether a File class object could be
+    # converted into a Directory class object
+    if not isinstance(file, File):
+        return False
+    if file.path is None:
+        raise ValueError(
+            "Cannot call the method. "
+            "The File/Directory class object's `path` "
+            "attribute is None."
+        )
+    return os.path.isdir(file.path)
+
+
+def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
+    return [
+        Directory.from_file(file)
+        if (is_directory(file) and not isinstance(file, Directory))
+        else file
+        for file in files
+    ]

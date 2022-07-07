@@ -20,10 +20,10 @@ from typing import Any, Dict, Generator, List, Optional, Union
 
 import numpy
 
-from sparsezoo.v2.directory import Directory
+from sparsezoo.v2.directory import Directory, is_directory
 from sparsezoo.v2.file import File
 from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
-from sparsezoo.v2.model_objects import FrameworkFiles, NumpyDirectory, SampleOriginals
+from sparsezoo.v2.model_objects import NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
@@ -59,9 +59,9 @@ class ModelDirectory(Directory):
         url: Optional[str] = None,
     ):
 
-        self.training: FrameworkFiles = self._directory_from_files(
+        self.training: Directory = self._directory_from_files(
             files,
-            directory_class=FrameworkFiles,
+            directory_class=Directory,
             display_name="training",
         )
         self.sample_originals: SampleOriginals = self._directory_from_files(
@@ -74,6 +74,11 @@ class ModelDirectory(Directory):
             directory_class=NumpyDirectory,
             display_name="sample_inputs",
         )
+
+        self.model_card: File = self._file_from_files(
+            files, display_name="model.md"
+        )  # model.md
+
         self.sample_outputs: Dict[
             str, NumpyDirectory
         ] = self._sample_outputs_list_to_dict(
@@ -91,6 +96,10 @@ class ModelDirectory(Directory):
 
         self.deployment: Directory = self._directory_from_files(
             files, display_name="deployment", regex=False
+        )  # deployment_folder
+
+        self.onnx_folder: Directory = self._directory_from_files(
+            files, display_name="onnx", regex=False
         )  # onnx folder
 
         self.logs: Directory = self._directory_from_files(
@@ -110,9 +119,7 @@ class ModelDirectory(Directory):
         self.eval_results: File = self._file_from_files(
             files, display_name="eval.yaml"
         )  # eval.yaml
-        self.model_card: File = self._file_from_files(
-            files, display_name="model.md"
-        )  # model.md
+
         self.recipes: List[File] = self._file_from_files(
             files, display_name="recipe(.*).md", regex=True
         )  # recipe{_tag}.md
@@ -134,6 +141,7 @@ class ModelDirectory(Directory):
             self.sample_labels,
             self.deployment,
             self.logs,
+            self.onnx_folder,
             self.onnx_model,
             self.analysis,
             self.benchmarks,
@@ -149,6 +157,12 @@ class ModelDirectory(Directory):
         )
 
         super().__init__(files=files, name=name, path=path, url=url)
+
+        # importing the class here, otherwise a circular import error is being raised
+        # (IntegrationValidator script also imports ModelDirectory class object)
+        from sparsezoo.v2.integration_validation.validator import IntegrationValidator
+
+        self.integration_validator = IntegrationValidator(model_directory=self)
 
     @classmethod
     def from_zoo_api(cls, request_json: List[Dict]) -> "ModelDirectory":
@@ -197,8 +211,7 @@ class ModelDirectory(Directory):
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
             (located in the `self.path` directory).
-        :returns list
-            containing numpy arrays, representing the output
+        :returns list containing numpy arrays, representing the output
             from the inference engine
         """
 
@@ -230,55 +243,37 @@ class ModelDirectory(Directory):
 
         return all(downloads)
 
-    def validate(self) -> bool:
+    def validate(
+        self, validate_onnxruntime: bool = True, minimal_validation: bool = False
+    ) -> bool:
         """
         Validate the ModelDirectory class object:
         1. Validate that the sample inputs and outputs work with ONNX Runtime
-        2. Validate all the folders
+            (if `validate_onnxruntime=True`)
+        2. Validate all the folders (this is done by a separate helper class
+            IntegrationValidator)
 
+        :param validate_onnxruntime: boolean flag; if True, validate that the
+            sample inputs and outputs work with ONNX Runtime
+        :param minimal_validation: boolean flag; if True, only the essential files
+            in the `training` folder are validated. Else, the `training` folder is
+            expected to contain a full set of framework files.
         return: a boolean flag; if True, the validation has been successful
         """
 
-        if not self.inference_runner.validate_with_onnx_runtime():
-            logging.warning(
-                "Failed to validate the compatibility of "
-                "`sample_inputs` files with the `model.onnx` model."
-            )
-            return False
+        if validate_onnxruntime:
+            if not self.inference_runner.validate_with_onnx_runtime():
+                logging.warning(
+                    "Failed to validate the compatibility of "
+                    "`sample_inputs` files with the `model.onnx` model."
+                )
+                return False
 
-        # TODO: This is a hack for now,
-        #  some files cannot be validated
-        #  using dummy inputs (see respective tests)
-        SKIP_ATTRIBUTES = ["training"]
-
-        if self.path is None:
-            raise ValueError(
-                "Cannot validate the ModelDirectory. "
-                "If created using method `from_directory`, "
-                "please make sure that the `directory_path` is correct. "
-                "If created using method `from_zoo_api`, "
-                "call `download()` method prior to `validate()`"
-            )
-
-        validations = {}
-        for file in self.files:
-            if isinstance(file, File):
-                # TODO: Continuing with the hack
-                if file.name in SKIP_ATTRIBUTES:
-                    validations[file.name] = True
-                else:
-                    validations[file.name] = file.validate()
-            elif isinstance(file, list):
-                for _file in file:
-                    validations[_file.name] = _file.validate()
-            elif isinstance(file, dict):
-                pass
-
-        return all(validations.values())
+        return self.integration_validator.validate(minimal_validation)
 
     def analyze(self):
         # TODO: This will be the onboarding task for Kyle
-        pass
+        raise NotImplementedError()
 
     def _get_directory(
         self,
@@ -318,22 +313,19 @@ class ModelDirectory(Directory):
 
         # directory is folder
         else:
-            # is directory using the 'contents' key.
-            # this is a placeholder for the nested files that
-            # the directory contains
-            if file.get("contents"):
-                files_within = file["contents"]
 
-            # is directory locally on the machine
-            else:
-                paths_within = glob.glob(os.path.join(path, "*"))
-                files_within = (
-                    file_dictionary(display_name=os.path.basename(path), path=path)
-                    for path in paths_within
-                )
+            # directory is locally on the machine
+            files_in_directory = []
+            for file_name in os.listdir(path):
+                file = File(name=file_name, path=os.path.join(path, file_name))
+                if is_directory(file):
+                    file = Directory.from_file(file)
 
-            files = [self._get_file(file=file) for file in files_within]
-            directory = directory_class(files=files, name=name, path=path, url=url)
+                files_in_directory.append(file)
+
+            directory = directory_class(
+                files=files_in_directory, name=name, path=path, url=url
+            )
             return directory
 
     @staticmethod
@@ -393,9 +385,7 @@ class ModelDirectory(Directory):
     def _directory_from_files(
         self,
         files: List[Dict[str, Any]],
-        directory_class: Union[
-            Directory, NumpyDirectory, FrameworkFiles, SampleOriginals
-        ] = Directory,
+        directory_class: Union[Directory, NumpyDirectory, SampleOriginals] = Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = True,
         allow_multiple_outputs: Optional[bool] = False,
