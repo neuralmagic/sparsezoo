@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy
@@ -30,16 +31,22 @@ from sparsezoo.utils.onnx import (
 
 
 __all__ = [
-    "get_num_dense_and_sparse_ops",
+    "get_ops_dict",
 ]
 
+EMPTY_OPS_DICT = {
+    "weight": {"num_sparse_ops": 0, "num_dense_ops": 0},
+    "bias": {"num_sparse_ops": 0, "num_dense_ops": 0},
+    "other": {"num_sparse_ops": 0, "num_dense_ops": 0},
+}
 
-def get_num_dense_and_sparse_ops(
+
+def get_ops_dict(
     model: ModelProto,
     node: NodeProto,
     node_shapes: Optional[Dict[str, NodeShape]] = None,
     is_four_block_sparse: Optional[bool] = None,
-) -> Tuple[int, int]:
+) -> Dict[str, Dict[str, int]]:
     """
     Gets an approximation of the number of floating point or integer operations
 
@@ -49,7 +56,16 @@ def get_num_dense_and_sparse_ops(
         node_shapes will be computed
     :param is_four_block_sparse: optional boolean indicating if this node is four
         block sparse. If not supplied, it be will be computed
-    :return: number of operations performed by node
+    :return: dictionary of counts with the following structure
+        - weight:
+            - num_sparse_ops
+            - num_dense_ops
+        - bias:
+            - num_sparse_ops
+            - num_dense_ops
+        - other:
+            - num_sparse_ops
+            - num_dense_ops
     """
     if node_shapes is None:
         node_shapes = extract_node_shapes_and_dtypes(model)[0]
@@ -66,8 +82,9 @@ def get_num_dense_and_sparse_ops(
         if is_four_block_sparse is None
         else is_four_block_sparse
     )
-
     node_attributes = get_node_attributes(node)
+
+    ops_dict = copy.deepcopy(EMPTY_OPS_DICT)
 
     if node.op_type in [
         "Add",
@@ -80,30 +97,23 @@ def get_num_dense_and_sparse_ops(
         "Sigmoid",
         "Tanh",
     ]:
-        return (_numpy_prod_none_safe(output_shapes), 0)
+        ops_dict["other"]["num_dense_ops"] = _numpy_prod_none_safe(output_shapes)
 
     # If BN is followed by matmul or conv, then it is folded into the following
-    # layer weights. Assume this is true for all cases
+    # layer weights. Assume this is true for all BN cases
     if node.op_type == "BatchNormalization":
-        return (0, 0)
+        pass
 
     if node.op_type in ["GlobalAveragePool", "GlobalMaxPool"]:
-        return (_numpy_prod_none_safe(input_shapes), 0)
+        ops_dict["other"]["num_dense_ops"] = _numpy_prod_none_safe(input_shapes)
 
     if node.op_type in ["MaxPool", "AveragePool"]:
-        if "kernel_shape" not in node_attributes:
-            raise Exception(
-                f"No kernel_shape found in node attributes of {node.op_type}"
-            )
         kernel_shape = node_attributes["kernel_shape"]
-        return (
-            _numpy_prod_none_safe(output_shapes) * _numpy_prod_none_safe(kernel_shape),
-            0,
-        )
+        ops_dict["other"]["num_dense_ops"] = _numpy_prod_none_safe(
+            output_shapes
+        ) * _numpy_prod_none_safe(kernel_shape)
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
-        if input_shapes is None or len(input_shapes) == 0:
-            return (0, 0)
         input_shape = input_shapes[0]
 
         # If no weight supplied, treat other input as dense weight
@@ -112,31 +122,29 @@ def get_num_dense_and_sparse_ops(
             weight = numpy.full(weight_shape, zero_point - 1)
 
         # Weight operations
-        num_dense_ops, num_sparse_ops = _get_gemm_dense_sparse_ops(
+        num_dense_weight_ops, num_sparse_weight_ops = _get_gemm_dense_sparse_ops(
             weight,
             input_shape,
             zero_point=zero_point,
             is_four_block_sparse=is_four_block_sparse,
         )
+        ops_dict["weight"]["num_dense_ops"] = num_dense_weight_ops
+        ops_dict["weight"]["num_sparse_ops"] = num_sparse_weight_ops
 
         # Bias operations
         if bias is not None:
             bias_dense_ops, bias_sparse_ops = _get_bias_dense_sparse_ops(output_shapes)
-            num_dense_ops += bias_dense_ops
-            num_sparse_ops += bias_sparse_ops
-
-        return num_dense_ops, num_sparse_ops
+            ops_dict["bias"]["num_dense_ops"] = bias_dense_ops
+            ops_dict["bias"]["num_sparse_ops"] = bias_sparse_ops
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
-        if input_shapes is None or len(input_shapes) == 0:
-            return (0, 0)
         input_shape = input_shapes[0]
         pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
         strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
         group = node_attributes["group"] if "group" in node_attributes else 1
 
         # Weight operations
-        num_dense_ops, num_sparse_ops = _get_conv_weight_dense_sparse_ops(
+        num_dense_weight_ops, num_sparse_weight_ops = _get_conv_weight_dense_sparse_ops(
             weight,
             input_shape,
             pads,
@@ -145,16 +153,16 @@ def get_num_dense_and_sparse_ops(
             zero_point=zero_point,
             is_four_block_sparse=is_four_block_sparse,
         )
+        ops_dict["weight"]["num_dense_ops"] = num_dense_weight_ops
+        ops_dict["weight"]["num_sparse_ops"] = num_sparse_weight_ops
 
         # Bias operations
         if bias is not None:
             bias_dense_ops, bias_sparse_ops = _get_bias_dense_sparse_ops(output_shapes)
-            num_dense_ops += bias_dense_ops
-            num_sparse_ops += bias_sparse_ops
+            ops_dict["bias"]["num_dense_ops"] = bias_dense_ops
+            ops_dict["bias"]["num_sparse_ops"] = bias_sparse_ops
 
-        return num_dense_ops, num_sparse_ops
-
-    return 0, 0
+    return ops_dict
 
 
 def _get_gemm_dense_sparse_ops(

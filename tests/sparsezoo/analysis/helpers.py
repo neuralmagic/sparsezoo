@@ -34,22 +34,28 @@ __all__ = [
 
 _MODEL_PATHS = {
     "yolact_none": {
-        "stub": "zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/" "base-none",
+        "stub": "zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/base-none",
         "truth": "tests/sparsezoo/analysis/yolact_none.yaml",
     },
     "mobilenet_v1_pruned_moderate": {
-        "stub": "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
-        "imagenet/pruned-moderate",
+        "stub": (
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+            "imagenet/pruned-moderate"
+        ),
         "truth": "tests/sparsezoo/analysis/mobilenet_v1_pruned_moderate.yaml",
     },
     "bert_pruned_quantized": {
-        "stub": "zoo:nlp/question_answering/bert-base/pytorch/huggingface/"
-        "squad/12layer_pruned80_quant-none-vnni",
+        "stub": (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
+            "12layer_pruned80_quant-none-vnni"
+        ),
         "truth": "tests/sparsezoo/analysis/bert_pruned_quantized.yaml",
     },
     "resnet50_pruned_quantized": {
-        "stub": "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/"
-        "imagenet/pruned85_quant-none-vnni",
+        "stub": (
+            "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
+            "pruned85_quant-none-vnni"
+        ),
         "truth": "tests/sparsezoo/analysis/resnet50_pruned_quantized.yaml",
     },
 }

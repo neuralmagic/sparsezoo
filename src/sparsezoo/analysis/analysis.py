@@ -32,7 +32,7 @@ from sparsezoo.utils import (
     get_node_weight,
     get_node_weight_name,
     get_node_weight_shape,
-    get_num_dense_and_sparse_ops,
+    get_ops_dict,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
@@ -51,13 +51,13 @@ class NodeIO(BaseModel):
     Pydantic model for the inputs and outputs of a node in the onnx model graph
     """
 
-    name: str = Field(description="Name of this input/output in onnx model graph")
+    name: str = Field(description="Name of the input/output in onnx model graph")
     shape: Optional[List[Union[None, int]]] = Field(
-        description="Shape of this input/output in onnx model graph (assuming a "
+        description="Shape of the input/output in onnx model graph (assuming a "
         "batch size of 1)"
     )
     dtype: Optional[str] = Field(
-        description="Data type of the values from this input/output"
+        description="Data type of the values from the input/output"
     )
 
 
@@ -66,25 +66,25 @@ class WeightAnalysis(BaseModel):
     Pydantic model for the weight of a node
     """
 
-    name: Optional[str] = Field(description="The name of this weight")
-    shape: Optional[List[int]] = Field(
-        description="This weight's shape (assuming a batch size of 1)"
+    name: Optional[str] = Field(description="The name of the weight")
+    shape: Optional[List[Union[None, int]]] = Field(
+        description="The weight's shape (assuming a batch size of 1)"
     )
-    sparsity: float = Field(description="Proportion of zeros in this weight")
+    sparsity: float = Field(description="Proportion of zeros in the weight")
     four_block_sparsity: float = Field(
-        description="Proportion of zero blocks in this weight"
+        description="Proportion of zero blocks in the weight"
     )
-    num_parameters: int = Field(description="Size of this node's parameter")
+    num_parameters: int = Field(description="Size of the node's parameter")
     num_sparse_parameters: int = Field(
-        description="Number of zeros in this node's parameter"
+        description="Number of zeros in the node's parameter"
     )
     num_four_blocks: int = Field(
-        description="Number of four blocks in this node's parameter"
+        description="Number of four blocks in the node's parameter"
     )
     num_sparse_four_blocks: int = Field(
-        description="Number of four blocks with all zeros in this node's parameter"
+        description="Number of four blocks with all zeros in the node's parameter"
     )
-    dtype: str = Field(description="This weight's data type")
+    dtype: str = Field(description="The weight's data type")
 
 
 class NodeAnalysis(BaseModel):
@@ -92,32 +92,30 @@ class NodeAnalysis(BaseModel):
     Pydantic model for the analysis of a node within a model
     """
 
-    name: str = Field(description="This node's name")
-    node_id: str = Field(description="This node's id (the name of its first output)")
-    op_type: str = Field(description="This node's op type")
+    name: str = Field(description="The node's name")
+    node_id: str = Field(description="The node's id (the name of its first output)")
+    op_type: str = Field(description="The node's op type")
 
-    inputs: List[NodeIO] = Field(description="This node's inputs in the onnx graph")
-    outputs: List[NodeIO] = Field(description="This node's outputs in the onnx graph")
+    inputs: List[NodeIO] = Field(description="The node's inputs in the onnx graph")
+    outputs: List[NodeIO] = Field(description="The node's outputs in the onnx graph")
 
     weight: Optional[WeightAnalysis] = Field(
-        description="An analysis of this node's weight"
+        description="An analysis of the node's weight"
     )
 
     parameterized_and_prunable: bool = Field(
-        description="Does this node have a parameterized and prunable weight"
+        description="Does the node have a parameterized and prunable weight"
     )
     num_dense_ops: int = Field(
         description="The number of (floating point and/or integer) operations "
-        "performed in this node"
+        "performed in the node"
     )
     num_sparse_ops: int = Field(
         description="The number of (floating point and/or integer) operations "
-        "in this node not performed because of sparsification"
+        "in the node not performed because of sparsification"
     )
-    is_sparse_layer: bool = Field(description="Does this node have sparse weights")
-    is_quantized_layer: bool = Field(
-        description="Does this node have quantized weights"
-    )
+    is_sparse_layer: bool = Field(description="Does the node have sparse weights")
+    is_quantized_layer: bool = Field(description="Does the node have quantized weights")
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
@@ -131,14 +129,14 @@ class NodeAnalysis(BaseModel):
         node_dtypes: Optional[Dict[str, NodeDataType]] = None,
     ):
         """
-        Class constructor for Node Analysis
+        Node Analysis
 
         :param cls: class being constructed
         :param model_onnx: model onnx that node belongs to
         :param node: node being analyzed
         :param node_shapes: optional dictionary of node shapes. If not supplied,
         node_shapes will be computed
-        :return: instance of NodeAnalysis class
+        :return: instance of cls
         """
         node_id = extract_node_id(node)
         node_shape = node_shapes.get(node_id)
@@ -179,9 +177,6 @@ class NodeAnalysis(BaseModel):
         )
 
         node_weight = get_node_weight(model_onnx, node)
-        num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(
-            model_onnx, node, node_shapes=node_shapes
-        )
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_onnx, node
         )
@@ -204,6 +199,10 @@ class NodeAnalysis(BaseModel):
             if node_weight is not None
             else None
         )
+
+        ops_dict = get_ops_dict(model_onnx, node, node_shapes=node_shapes)
+        num_dense_ops = sum([ops_dict[k]["num_dense_ops"] for k in ops_dict.keys()])
+        num_sparse_ops = sum([ops_dict[k]["num_sparse_ops"] for k in ops_dict.keys()])
 
         return cls(
             name=node.name,
@@ -284,11 +283,11 @@ class ModelAnalysis(BaseModel):
     @classmethod
     def from_onnx(cls, onnx_file_path: str):
         """
-        Class constructor for Model Analysis
+        Model Analysis
 
         :param cls: class being constructed
         :param onnx_file_path: path to onnx file being analyzed
-        :return: instance of ModelAnalysis class
+        :return: instance of cls
         """
         model_onnx = onnx.load(onnx_file_path)
 
@@ -390,6 +389,25 @@ class ModelAnalysis(BaseModel):
             nodes=node_analyses,
         )
 
+    @classmethod
+    def parse_yaml_file(cls, file_path: str):
+        """
+        :param file_path: path to yaml file containing model analysis data
+        :return: instance of ModelAnalysis class
+        """
+        with open(file_path, "r") as file:
+            dict_obj = yaml.safe_load(file)
+        return cls.parse_obj(dict_obj)
+
+    @classmethod
+    def parse_yaml_raw(cls, yaml_raw: str):
+        """
+        :param yaml_raw: string containing model analysis data
+        :return: instance of ModelAnalysis class
+        """
+        dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
+        return cls.parse_obj(dict_obj)
+
     @staticmethod
     def analyze_nodes(model_onnx: ModelProto) -> List[NodeAnalysis]:
         """
@@ -410,30 +428,15 @@ class ModelAnalysis(BaseModel):
     def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
         """
         :param file_path: optional file path to save yaml to
-        :return: if file_path is not given, the state of this analysis model
+        :return: if file_path is not given, the state of the analysis model
             as a yaml string, otherwise None
         """
-        if file_path is None:
-            return yaml.dump(self.dict(), allow_unicode=True, sort_keys=False)
-        else:
-            with open(file_path, "w") as f:
-                yaml.dump(self.dict(), f, allow_unicode=True, sort_keys=False)
+        file_stream = None if file_path is None else open(file_path, "w")
+        ret = yaml.dump(
+            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+        )
 
-    @classmethod
-    def parse_yaml_file(cls, file_path: str):
-        """
-        :param file_path: path to yaml file containing model analysis data
-        :return: instance of ModelAnalysis class
-        """
-        with open(file_path, "r") as file:
-            dict_obj = yaml.safe_load(file)
-        return cls.parse_obj(dict_obj)
+        if file_stream is not None:
+            file_stream.close()
 
-    @classmethod
-    def parse_yaml_raw(cls, yaml_raw: str):
-        """
-        :param yaml_raw: string containing model analysis data
-        :return: instance of ModelAnalysis class
-        """
-        dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
-        return cls.parse_obj(dict_obj)
+        return ret

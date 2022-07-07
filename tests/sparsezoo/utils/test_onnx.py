@@ -25,7 +25,7 @@ from sparsezoo.utils import (
     get_node_num_zeros_and_size,
     get_node_sparsity,
     get_node_weight,
-    get_num_dense_and_sparse_ops,
+    get_ops_dict,
     get_zero_point,
     is_four_block_sparse_layer,
     is_parameterized_prunable_layer,
@@ -306,7 +306,7 @@ def test_is_four_block_sparse_layer(
     )
 
 
-def test_get_num_dense_and_sparse_ops(
+def test_get_ops_dict(
     model_name,
     get_expected_analysis,
     get_model_and_node,
@@ -318,9 +318,9 @@ def test_get_num_dense_and_sparse_ops(
 
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
-        num_dense_ops, num_sparse_ops = get_num_dense_and_sparse_ops(
-            model, node, node_shapes=node_shapes
-        )
+        ops_dict = get_ops_dict(model, node, node_shapes=node_shapes)
+        num_dense_ops = sum([ops_dict[k]["num_dense_ops"] for k in ops_dict.keys()])
+        num_sparse_ops = sum([ops_dict[k]["num_sparse_ops"] for k in ops_dict.keys()])
         assert num_dense_ops == pytest.approx(
             node_analysis.num_dense_ops, abs=margin_of_error
         )
