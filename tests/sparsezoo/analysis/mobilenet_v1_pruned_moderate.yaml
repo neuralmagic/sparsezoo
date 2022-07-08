@@ -61,6 +61,24 @@ nodes:
     - 112
     - 112
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 864
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 21676032
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 10838016
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: input.conv.weight
     shape:
@@ -88,24 +106,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 864
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 288
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 21676032
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 10838016
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -129,8 +129,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -141,6 +139,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -164,8 +164,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -176,6 +174,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -199,6 +199,24 @@ nodes:
     - 112
     - 112
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 224450
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 112225
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.0.0.depth.conv.weight
     shape:
@@ -226,24 +244,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 288
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 288
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 224450
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 112225
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -267,8 +267,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -279,6 +277,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -302,8 +302,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -314,6 +312,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -337,6 +337,24 @@ nodes:
     - 112
     - 112
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 2048
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 512
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 51380224
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 25690112
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.0.0.point.conv.weight
     shape:
@@ -364,24 +382,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 2048
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 512
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 51380224
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 25690112
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -405,8 +405,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -417,6 +415,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -440,8 +440,6 @@ nodes:
     - 112
     - 112
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -452,6 +450,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -475,6 +475,24 @@ nodes:
     - 56
     - 56
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 576
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 576
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 56448
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 28224
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.1.0.depth.conv.weight
     shape:
@@ -502,24 +520,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 576
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 576
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 56448
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 28224
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -543,8 +543,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -555,6 +553,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -578,8 +578,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -590,6 +588,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -613,6 +613,24 @@ nodes:
     - 56
     - 56
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 2458
+      num_zero: 5734
+      sparsity: 0.699951171875
+    four_block:
+      num_non_zero: 1379
+      num_zero: 669
+      sparsity: 0.32666015625
+  operations:
+    num_operations:
+      dense: 15416576
+      sparse: 35963648
+      sparsity: 0.699951171875
+    multiply_accumulates:
+      dense: 7708288
+      sparse: 17981824
+      sparsity: 0.699951171875
   weight:
     name: sections.1.0.point.conv.weight
     shape:
@@ -640,24 +658,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 2458
-      num_zero: 5734
-      sparsity: 0.699951171875
-    four_block:
-      num_non_zero: 1379
-      num_zero: 669
-      sparsity: 0.32666015625
-  operations:
-    num_operations:
-      dense: 15416576
-      sparse: 35963648
-      sparsity: 0.699951171875
-    multiply_accumulates:
-      dense: 7708288
-      sparse: 17981824
-      sparsity: 0.699951171875
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -681,8 +681,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -693,6 +691,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -716,8 +716,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -728,6 +726,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -751,6 +751,24 @@ nodes:
     - 56
     - 56
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 55778
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 27889
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.1.1.depth.conv.weight
     shape:
@@ -778,24 +796,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 1152
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 1152
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 55778
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 27889
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -819,8 +819,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -831,6 +829,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -854,8 +854,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -866,6 +864,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -889,6 +889,24 @@ nodes:
     - 56
     - 56
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4915
+      num_zero: 11469
+      sparsity: 0.70001220703125
+    four_block:
+      num_non_zero: 2884
+      num_zero: 1212
+      sparsity: 0.2958984375
+  operations:
+    num_operations:
+      dense: 30826880
+      sparse: 71933568
+      sparsity: 0.70001220703125
+    multiply_accumulates:
+      dense: 15413440
+      sparse: 35966784
+      sparsity: 0.70001220703125
   weight:
     name: sections.1.1.point.conv.weight
     shape:
@@ -916,24 +934,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4915
-      num_zero: 11469
-      sparsity: 0.70001220703125
-    four_block:
-      num_non_zero: 2884
-      num_zero: 1212
-      sparsity: 0.2958984375
-  operations:
-    num_operations:
-      dense: 30826880
-      sparse: 71933568
-      sparsity: 0.70001220703125
-    multiply_accumulates:
-      dense: 15413440
-      sparse: 35966784
-      sparsity: 0.70001220703125
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -957,8 +957,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -969,6 +967,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -992,8 +992,6 @@ nodes:
     - 56
     - 56
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1004,6 +1002,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1027,6 +1027,24 @@ nodes:
     - 28
     - 28
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 14112
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 7056
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.2.0.depth.conv.weight
     shape:
@@ -1054,24 +1072,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 1152
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 1152
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 14112
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 7056
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -1095,8 +1095,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1107,6 +1105,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1130,8 +1130,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1142,6 +1140,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1165,6 +1165,24 @@ nodes:
     - 28
     - 28
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 9830
+      num_zero: 22938
+      sparsity: 0.70001220703125
+    four_block:
+      num_non_zero: 5714
+      num_zero: 2478
+      sparsity: 0.302490234375
+  operations:
+    num_operations:
+      dense: 15413440
+      sparse: 35966784
+      sparsity: 0.70001220703125
+    multiply_accumulates:
+      dense: 7706720
+      sparse: 17983392
+      sparsity: 0.70001220703125
   weight:
     name: sections.2.0.point.conv.weight
     shape:
@@ -1192,24 +1210,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 9830
-      num_zero: 22938
-      sparsity: 0.70001220703125
-    four_block:
-      num_non_zero: 5714
-      num_zero: 2478
-      sparsity: 0.302490234375
-  operations:
-    num_operations:
-      dense: 15413440
-      sparse: 35966784
-      sparsity: 0.70001220703125
-    multiply_accumulates:
-      dense: 7706720
-      sparse: 17983392
-      sparsity: 0.70001220703125
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -1233,8 +1233,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1245,6 +1243,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1268,8 +1268,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1280,6 +1278,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1303,6 +1303,24 @@ nodes:
     - 28
     - 28
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 13778
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 6889
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.2.1.depth.conv.weight
     shape:
@@ -1330,24 +1348,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 2304
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 2304
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 13778
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 6889
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -1371,8 +1371,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1383,6 +1381,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1406,8 +1406,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1418,6 +1416,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1441,6 +1441,24 @@ nodes:
     - 28
     - 28
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 13108
+      num_zero: 52428
+      sparsity: 0.79998779296875
+    four_block:
+      num_non_zero: 8556
+      num_zero: 7828
+      sparsity: 0.477783203125
+  operations:
+    num_operations:
+      dense: 20553344
+      sparse: 82207104
+      sparsity: 0.79998779296875
+    multiply_accumulates:
+      dense: 10276672
+      sparse: 41103552
+      sparsity: 0.79998779296875
   weight:
     name: sections.2.1.point.conv.weight
     shape:
@@ -1468,24 +1486,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 13108
-      num_zero: 52428
-      sparsity: 0.79998779296875
-    four_block:
-      num_non_zero: 8556
-      num_zero: 7828
-      sparsity: 0.477783203125
-  operations:
-    num_operations:
-      dense: 20553344
-      sparse: 82207104
-      sparsity: 0.79998779296875
-    multiply_accumulates:
-      dense: 10276672
-      sparse: 41103552
-      sparsity: 0.79998779296875
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -1509,8 +1509,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1521,6 +1519,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1544,8 +1544,6 @@ nodes:
     - 28
     - 28
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1556,6 +1554,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1579,6 +1579,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3528
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1764
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.0.depth.conv.weight
     shape:
@@ -1606,24 +1624,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 2304
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 2304
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3528
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1764
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -1647,8 +1647,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1659,6 +1657,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1682,8 +1682,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1694,6 +1692,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1717,6 +1717,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 26215
+      num_zero: 104857
+      sparsity: 0.7999954223632812
+    four_block:
+      num_non_zero: 17740
+      num_zero: 15028
+      sparsity: 0.4586181640625
+  operations:
+    num_operations:
+      dense: 10276280
+      sparse: 41103944
+      sparsity: 0.7999954223632812
+    multiply_accumulates:
+      dense: 5138140
+      sparse: 20551972
+      sparsity: 0.7999954223632812
   weight:
     name: sections.3.0.point.conv.weight
     shape:
@@ -1744,24 +1762,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 26215
-      num_zero: 104857
-      sparsity: 0.7999954223632812
-    four_block:
-      num_non_zero: 17740
-      num_zero: 15028
-      sparsity: 0.4586181640625
-  operations:
-    num_operations:
-      dense: 10276280
-      sparse: 41103944
-      sparsity: 0.7999954223632812
-    multiply_accumulates:
-      dense: 5138140
-      sparse: 20551972
-      sparsity: 0.7999954223632812
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -1785,8 +1785,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1797,6 +1795,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1820,8 +1820,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1832,6 +1830,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1855,6 +1855,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.1.depth.conv.weight
     shape:
@@ -1882,24 +1900,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3362
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1681
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -1923,8 +1923,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1935,6 +1933,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1958,8 +1958,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -1970,6 +1968,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -1993,6 +1993,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 209715
+      sparsity: 0.7999992370605469
+    four_block:
+      num_non_zero: 35226
+      num_zero: 30310
+      sparsity: 0.462493896484375
+  operations:
+    num_operations:
+      dense: 20552168
+      sparse: 82208280
+      sparsity: 0.7999992370605469
+    multiply_accumulates:
+      dense: 10276084
+      sparse: 41104140
+      sparsity: 0.7999992370605469
   weight:
     name: sections.3.1.point.conv.weight
     shape:
@@ -2020,24 +2038,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 52429
-      num_zero: 209715
-      sparsity: 0.7999992370605469
-    four_block:
-      num_non_zero: 35226
-      num_zero: 30310
-      sparsity: 0.462493896484375
-  operations:
-    num_operations:
-      dense: 20552168
-      sparse: 82208280
-      sparsity: 0.7999992370605469
-    multiply_accumulates:
-      dense: 10276084
-      sparse: 41104140
-      sparsity: 0.7999992370605469
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -2061,8 +2061,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2073,6 +2071,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2096,8 +2096,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2108,6 +2106,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2131,6 +2131,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.2.depth.conv.weight
     shape:
@@ -2158,24 +2176,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3362
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1681
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -2199,8 +2199,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2211,6 +2209,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2234,8 +2234,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2246,6 +2244,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2269,6 +2269,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 21077
+      num_zero: 44459
+      sparsity: 0.6783905029296875
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
   weight:
     name: sections.3.2.point.conv.weight
     shape:
@@ -2296,24 +2314,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 26214
-      num_zero: 235930
-      sparsity: 0.9000015258789062
-    four_block:
-      num_non_zero: 21077
-      num_zero: 44459
-      sparsity: 0.6783905029296875
-  operations:
-    num_operations:
-      dense: 10275888
-      sparse: 92484560
-      sparsity: 0.9000015258789062
-    multiply_accumulates:
-      dense: 5137944
-      sparse: 46242280
-      sparsity: 0.9000015258789062
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -2337,8 +2337,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2349,6 +2347,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2372,8 +2372,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2384,6 +2382,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2407,6 +2407,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.3.depth.conv.weight
     shape:
@@ -2434,24 +2452,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3362
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1681
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -2475,8 +2475,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2487,6 +2485,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2510,8 +2510,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2522,6 +2520,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2545,6 +2545,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 20906
+      num_zero: 44630
+      sparsity: 0.680999755859375
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
   weight:
     name: sections.3.3.point.conv.weight
     shape:
@@ -2572,24 +2590,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 26214
-      num_zero: 235930
-      sparsity: 0.9000015258789062
-    four_block:
-      num_non_zero: 20906
-      num_zero: 44630
-      sparsity: 0.680999755859375
-  operations:
-    num_operations:
-      dense: 10275888
-      sparse: 92484560
-      sparsity: 0.9000015258789062
-    multiply_accumulates:
-      dense: 5137944
-      sparse: 46242280
-      sparsity: 0.9000015258789062
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -2613,8 +2613,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2625,6 +2623,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2648,8 +2648,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2660,6 +2658,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2683,6 +2683,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.4.depth.conv.weight
     shape:
@@ -2710,24 +2728,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3362
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1681
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -2751,8 +2751,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2763,6 +2761,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2786,8 +2786,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2798,6 +2796,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2821,6 +2821,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 21206
+      num_zero: 44330
+      sparsity: 0.676422119140625
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
   weight:
     name: sections.3.4.point.conv.weight
     shape:
@@ -2848,24 +2866,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 26214
-      num_zero: 235930
-      sparsity: 0.9000015258789062
-    four_block:
-      num_non_zero: 21206
-      num_zero: 44330
-      sparsity: 0.676422119140625
-  operations:
-    num_operations:
-      dense: 10275888
-      sparse: 92484560
-      sparsity: 0.9000015258789062
-    multiply_accumulates:
-      dense: 5137944
-      sparse: 46242280
-      sparsity: 0.9000015258789062
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -2889,8 +2889,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2901,6 +2899,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2924,8 +2924,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -2936,6 +2934,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -2959,6 +2959,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.3.5.depth.conv.weight
     shape:
@@ -2986,24 +3004,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 3362
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1681
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -3027,8 +3027,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3039,6 +3037,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3062,8 +3062,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3074,6 +3072,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3097,6 +3097,24 @@ nodes:
     - 14
     - 14
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 209715
+      sparsity: 0.7999992370605469
+    four_block:
+      num_non_zero: 35986
+      num_zero: 29550
+      sparsity: 0.450897216796875
+  operations:
+    num_operations:
+      dense: 20552168
+      sparse: 82208280
+      sparsity: 0.7999992370605469
+    multiply_accumulates:
+      dense: 10276084
+      sparse: 41104140
+      sparsity: 0.7999992370605469
   weight:
     name: sections.3.5.point.conv.weight
     shape:
@@ -3124,24 +3142,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 52429
-      num_zero: 209715
-      sparsity: 0.7999992370605469
-    four_block:
-      num_non_zero: 35986
-      num_zero: 29550
-      sparsity: 0.450897216796875
-  operations:
-    num_operations:
-      dense: 20552168
-      sparse: 82208280
-      sparsity: 0.7999992370605469
-    multiply_accumulates:
-      dense: 10276084
-      sparse: 41104140
-      sparsity: 0.7999992370605469
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -3165,8 +3165,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3177,6 +3175,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3200,8 +3200,6 @@ nodes:
     - 14
     - 14
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3212,6 +3210,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3235,6 +3235,24 @@ nodes:
     - 7
     - 7
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 882
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 441
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.4.0.depth.conv.weight
     shape:
@@ -3262,24 +3280,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 4608
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 882
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 441
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -3303,8 +3303,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3315,6 +3313,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3338,8 +3338,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3350,6 +3348,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3373,6 +3373,24 @@ nodes:
     - 7
     - 7
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 471859
+      sparsity: 0.8999996185302734
+    four_block:
+      num_non_zero: 37743
+      num_zero: 93329
+      sparsity: 0.7120437622070312
+  operations:
+    num_operations:
+      dense: 5138042
+      sparse: 46242182
+      sparsity: 0.8999996185302734
+    multiply_accumulates:
+      dense: 2569021
+      sparse: 23121091
+      sparsity: 0.8999996185302734
   weight:
     name: sections.4.0.point.conv.weight
     shape:
@@ -3400,24 +3418,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 52429
-      num_zero: 471859
-      sparsity: 0.8999996185302734
-    four_block:
-      num_non_zero: 37743
-      num_zero: 93329
-      sparsity: 0.7120437622070312
-  operations:
-    num_operations:
-      dense: 5138042
-      sparse: 46242182
-      sparsity: 0.8999996185302734
-    multiply_accumulates:
-      dense: 2569021
-      sparse: 23121091
-      sparsity: 0.8999996185302734
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -3441,8 +3441,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3453,6 +3451,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3476,8 +3476,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3488,6 +3486,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3511,6 +3511,24 @@ nodes:
     - 7
     - 7
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 9216
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 9216
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 800
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 400
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: sections.4.1.depth.conv.weight
     shape:
@@ -3538,24 +3556,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 9216
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 9216
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 800
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 400
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -3579,8 +3579,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3591,6 +3589,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3614,8 +3614,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3626,6 +3624,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3649,6 +3649,24 @@ nodes:
     - 7
     - 7
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 104857
+      num_zero: 943719
+      sparsity: 0.9000005722045898
+    four_block:
+      num_non_zero: 88784
+      num_zero: 173360
+      sparsity: 0.66131591796875
+  operations:
+    num_operations:
+      dense: 10275986
+      sparse: 92484462
+      sparsity: 0.9000005722045898
+    multiply_accumulates:
+      dense: 5137993
+      sparse: 46242231
+      sparsity: 0.9000005722045898
   weight:
     name: sections.4.1.point.conv.weight
     shape:
@@ -3676,24 +3694,6 @@ nodes:
         sparsity: 0
     dtype: float32
   bias: null
-  parameters:
-    single:
-      num_non_zero: 104857
-      num_zero: 943719
-      sparsity: 0.9000005722045898
-    four_block:
-      num_non_zero: 88784
-      num_zero: 173360
-      sparsity: 0.66131591796875
-  operations:
-    num_operations:
-      dense: 10275986
-      sparse: 92484462
-      sparsity: 0.9000005722045898
-    multiply_accumulates:
-      dense: 5137993
-      sparse: 46242231
-      sparsity: 0.9000005722045898
   parameterized_prunable: true
   sparse_layer: true
   quantized_layer: false
@@ -3717,8 +3717,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3729,6 +3727,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3752,8 +3752,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3764,6 +3762,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3777,8 +3777,6 @@ nodes:
     shape:
     - 8
     dtype: int64
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3789,6 +3787,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3816,8 +3816,6 @@ nodes:
     - 7
     - 7
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3828,6 +3826,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3851,8 +3851,6 @@ nodes:
     - 1
     - 1
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3863,6 +3861,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3883,8 +3883,6 @@ nodes:
     shape:
     - 4
     dtype: int64
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3895,6 +3893,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3904,8 +3904,6 @@ nodes:
   op_type: Constant
   inputs: []
   outputs: []
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3916,6 +3914,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3929,8 +3929,6 @@ nodes:
     - 4
     dtype: int64
   outputs: []
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3941,6 +3939,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3954,8 +3954,6 @@ nodes:
     shape:
     - 1
     dtype: int64
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3966,6 +3964,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -3983,8 +3983,6 @@ nodes:
     shape:
     - 2
     dtype: int64
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -3995,6 +3993,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -4020,8 +4020,6 @@ nodes:
     - 1
     - 1024
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -4032,6 +4030,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false
@@ -4051,6 +4051,24 @@ nodes:
     - 1
     - 1000
     dtype: float32
+  parameters:
+    single:
+      num_non_zero: 1024000
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 256000
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 2049000
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1024000
+      sparse: 0
+      sparsity: 0.0
   weight:
     name: classifier.fc.weight
     shape:
@@ -4088,24 +4106,6 @@ nodes:
         sparse: 0
         sparsity: 0
     dtype: float32
-  parameters:
-    single:
-      num_non_zero: 1024000
-      num_zero: 0
-      sparsity: 0.0
-    four_block:
-      num_non_zero: 256000
-      num_zero: 0
-      sparsity: 0.0
-  operations:
-    num_operations:
-      dense: 2049000
-      sparse: 0
-      sparsity: 0.0
-    multiply_accumulates:
-      dense: 1024000
-      sparse: 0
-      sparsity: 0.0
   parameterized_prunable: true
   sparse_layer: false
   quantized_layer: false
@@ -4125,8 +4125,6 @@ nodes:
     - 1
     - 1000
     dtype: float32
-  weight: null
-  bias: null
   parameters: null
   operations:
     num_operations:
@@ -4137,6 +4135,8 @@ nodes:
       dense: 0
       sparse: 0
       sparsity: 0
+  weight: null
+  bias: null
   parameterized_prunable: false
   sparse_layer: false
   quantized_layer: false

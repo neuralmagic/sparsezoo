@@ -39,7 +39,16 @@ from sparsezoo.utils import (
     is_quantized_layer,
     is_sparse_layer,
 )
-from sparsezoo.analysis.utils.models import *
+from sparsezoo.analysis.utils.models import (
+    NodeIO,
+    Parameters,
+    DenseSparseValues,
+    Operations,
+    DenseSparseOps,
+    WeightAnalysis,
+    BiasAnalysis,
+    ModelOperations,
+)
 
 
 __all__ = [
