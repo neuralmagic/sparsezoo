@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import glob
 import logging
 import os
 import pathlib
@@ -25,31 +24,7 @@ from sparsezoo.utils.downloader import download_file
 from sparsezoo.v2.file import File
 
 
-__all__ = ["Directory"]
-
-
-def _is_directory(file: Union[File, List[File], Dict[str, File]]) -> bool:
-    # check whether a File class object could be
-    # converted into a Directory class object
-    if not isinstance(file, File):
-        return False
-    file_stem = pathlib.Path(file.name).stem
-    # `file_stem` is `file.name` stripped from
-    # the possible file extension.
-    # if there is no extension, this means that
-    # the File represents a (non-archive) Directory.
-    return file_stem == file.name
-
-
-def _possibly_convert_files_to_dictionaries(
-    files: List[Union[File, List[File], Dict[str, File]]]
-) -> List[File]:
-    return [
-        Directory.from_file(file)
-        if (_is_directory(file) and not isinstance(file, Directory))
-        else file
-        for file in files
-    ]
+__all__ = ["Directory", "is_directory"]
 
 
 class Directory(File):
@@ -73,7 +48,7 @@ class Directory(File):
     ):
 
         self.files = (
-            files if not files else _possibly_convert_files_to_dictionaries(files)
+            files if not files else _possibly_convert_files_to_directories(files)
         )
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
@@ -92,10 +67,10 @@ class Directory(File):
             )
         name = file.name
         files = [
-            File(name=os.path.basename(path), path=path)
-            for path in glob.glob(os.path.join(file.path, "*"))
+            File(name=os.path.basename(path), path=os.path.join(file.path, path))
+            for path in os.listdir(file.path)
         ]
-        files = _possibly_convert_files_to_dictionaries(files)
+        files = _possibly_convert_files_to_directories(files)
         path = file.path
         return cls(name=name, files=files, path=path)
 
@@ -201,9 +176,7 @@ class Directory(File):
         # Directory can represent a folder or directory.
         else:
             for file in self.files:
-                file.download(
-                    destination_path=os.path.join(destination_path, self.name)
-                )
+                file.download(destination_path=destination_path)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -221,7 +194,7 @@ class Directory(File):
                 file = file.get_file(file_name=file_name)
                 if file:
                     return file
-        logging.warning(f"File with name {file_name} not found!")
+        logging.warning(f"File with name {file_name} not found")
         return None
 
     def gzip(self, archive_directory: Optional[str] = None):
@@ -306,3 +279,26 @@ class Directory(File):
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
         return self.is_archive and self.path
+
+
+def is_directory(file: File) -> bool:
+    # check whether a File class object could be
+    # converted into a Directory class object
+    if not isinstance(file, File):
+        return False
+    if file.path is None:
+        raise ValueError(
+            "Cannot call the method. "
+            "The File/Directory class object's `path` "
+            "attribute is None."
+        )
+    return os.path.isdir(file.path)
+
+
+def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
+    return [
+        Directory.from_file(file)
+        if (is_directory(file) and not isinstance(file, Directory))
+        else file
+        for file in files
+    ]
