@@ -13,20 +13,34 @@ non_parameterized_operator_counts:
   Concat: 1
   Reshape: 1
   Softmax: 1
-num_sparse_ops: 847771932
-num_dense_ops: 260417254
-num_sparse_quantized_ops: 0
-num_dense_quantized_ops: 0
-num_sparse_floating_point_ops: 847771932
-num_dense_floating_point_ops: 260417254
-average_sparsity: 0.6510255903416607
-average_four_block_sparsity: 0.44867584433573027
-num_sparse_layers: 12
-num_quantized_layers: 0
-num_parameters: 4209088
-num_sparse_parameters: 2740224
-num_four_blocks: 1085824
-num_sparse_four_blocks: 487183
+total_prunable_parameters:
+  single:
+    num_non_zero: 1468864
+    num_zero: 2740224
+    sparsity: 0.6510255903416607
+  four_block:
+    num_non_zero: 598641
+    num_zero: 487183
+    sparsity: 0.44867584433573027
+total_operations:
+  floating_or_quantized_ops:
+    dense: 260417254
+    sparse: 847771932
+    sparsity: 0.7650065013357746
+  floating_point_ops:
+    dense: 260417254
+    sparse: 847771932
+    sparsity: 0.7650065013357746
+  quantized_ops:
+    dense: 0
+    sparse: 0
+    sparsity: 0
+  multiply_accumulates:
+    dense: 127661695
+    sparse: 423885966
+    sparsity: 0.7685391417152615
+num_sparse_nodes: 12
+num_quantized_nodes: 0
 nodes:
 - name: Conv_0
   node_id: '165'
@@ -54,18 +68,47 @@ nodes:
     - 3
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 864
-    num_sparse_parameters: 0
-    num_four_blocks: 288
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 864
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 288
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 21676032
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 21676032
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 864
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 21676032
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 10838016
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_1
   node_id: '166'
@@ -87,11 +130,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_2
   node_id: '167'
@@ -113,11 +165,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 401408
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 401408
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_3
   node_id: '168'
@@ -145,18 +206,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 288
-    num_sparse_parameters: 0
-    num_four_blocks: 288
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 288
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 288
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 224450
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 224450
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 288
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 224450
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 112225
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_4
   node_id: '169'
@@ -178,11 +268,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_5
   node_id: '170'
@@ -204,11 +303,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 401408
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 401408
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_6
   node_id: '171'
@@ -236,18 +344,47 @@ nodes:
     - 32
     - 1
     - 1
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 2048
-    num_sparse_parameters: 0
-    num_four_blocks: 512
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 2048
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 512
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 51380224
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 51380224
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 2048
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 512
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 51380224
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 25690112
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_7
   node_id: '172'
@@ -269,11 +406,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_8
   node_id: '173'
@@ -295,11 +441,20 @@ nodes:
     - 112
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 802816
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 802816
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_9
   node_id: '174'
@@ -327,18 +482,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 576
-    num_sparse_parameters: 0
-    num_four_blocks: 576
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 576
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 576
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 56448
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 56448
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 576
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 576
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 56448
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 28224
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_10
   node_id: '175'
@@ -360,11 +544,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_11
   node_id: '176'
@@ -386,11 +579,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 200704
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 200704
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_12
   node_id: '177'
@@ -418,18 +620,47 @@ nodes:
     - 64
     - 1
     - 1
-    sparsity: 0.699951171875
-    four_block_sparsity: 0.32666015625
-    num_parameters: 8192
-    num_sparse_parameters: 5734
-    num_four_blocks: 2048
-    num_sparse_four_blocks: 669
+    parameters:
+      single:
+        num_non_zero: 2458
+        num_zero: 5734
+        sparsity: 0.699951171875
+      four_block:
+        num_non_zero: 1379
+        num_zero: 669
+        sparsity: 0.32666015625
+    operations:
+      num_operations:
+        dense: 15416576
+        sparse: 35963648
+        sparsity: 0.699951171875
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 15416576
-  num_sparse_ops: 35963648
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 2458
+      num_zero: 5734
+      sparsity: 0.699951171875
+    four_block:
+      num_non_zero: 1379
+      num_zero: 669
+      sparsity: 0.32666015625
+  operations:
+    num_operations:
+      dense: 15416576
+      sparse: 35963648
+      sparsity: 0.699951171875
+    multiply_accumulates:
+      dense: 7708288
+      sparse: 17981824
+      sparsity: 0.699951171875
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_13
   node_id: '178'
@@ -451,11 +682,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_14
   node_id: '179'
@@ -477,11 +717,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 401408
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 401408
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_15
   node_id: '180'
@@ -509,18 +758,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 1152
-    num_sparse_parameters: 0
-    num_four_blocks: 1152
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 1152
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 1152
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 55778
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 55778
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 55778
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 27889
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_16
   node_id: '181'
@@ -542,11 +820,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_17
   node_id: '182'
@@ -568,11 +855,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 401408
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 401408
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_18
   node_id: '183'
@@ -600,18 +896,47 @@ nodes:
     - 128
     - 1
     - 1
-    sparsity: 0.70001220703125
-    four_block_sparsity: 0.2958984375
-    num_parameters: 16384
-    num_sparse_parameters: 11469
-    num_four_blocks: 4096
-    num_sparse_four_blocks: 1212
+    parameters:
+      single:
+        num_non_zero: 4915
+        num_zero: 11469
+        sparsity: 0.70001220703125
+      four_block:
+        num_non_zero: 2884
+        num_zero: 1212
+        sparsity: 0.2958984375
+    operations:
+      num_operations:
+        dense: 30826880
+        sparse: 71933568
+        sparsity: 0.70001220703125
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 30826880
-  num_sparse_ops: 71933568
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4915
+      num_zero: 11469
+      sparsity: 0.70001220703125
+    four_block:
+      num_non_zero: 2884
+      num_zero: 1212
+      sparsity: 0.2958984375
+  operations:
+    num_operations:
+      dense: 30826880
+      sparse: 71933568
+      sparsity: 0.70001220703125
+    multiply_accumulates:
+      dense: 15413440
+      sparse: 35966784
+      sparsity: 0.70001220703125
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_19
   node_id: '184'
@@ -633,11 +958,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_20
   node_id: '185'
@@ -659,11 +993,20 @@ nodes:
     - 56
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 401408
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 401408
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_21
   node_id: '186'
@@ -691,18 +1034,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 1152
-    num_sparse_parameters: 0
-    num_four_blocks: 1152
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 1152
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 1152
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 14112
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 14112
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 1152
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 14112
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 7056
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_22
   node_id: '187'
@@ -724,11 +1096,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_23
   node_id: '188'
@@ -750,11 +1131,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_24
   node_id: '189'
@@ -782,18 +1172,47 @@ nodes:
     - 128
     - 1
     - 1
-    sparsity: 0.70001220703125
-    four_block_sparsity: 0.302490234375
-    num_parameters: 32768
-    num_sparse_parameters: 22938
-    num_four_blocks: 8192
-    num_sparse_four_blocks: 2478
+    parameters:
+      single:
+        num_non_zero: 9830
+        num_zero: 22938
+        sparsity: 0.70001220703125
+      four_block:
+        num_non_zero: 5714
+        num_zero: 2478
+        sparsity: 0.302490234375
+    operations:
+      num_operations:
+        dense: 15413440
+        sparse: 35966784
+        sparsity: 0.70001220703125
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 15413440
-  num_sparse_ops: 35966784
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 9830
+      num_zero: 22938
+      sparsity: 0.70001220703125
+    four_block:
+      num_non_zero: 5714
+      num_zero: 2478
+      sparsity: 0.302490234375
+  operations:
+    num_operations:
+      dense: 15413440
+      sparse: 35966784
+      sparsity: 0.70001220703125
+    multiply_accumulates:
+      dense: 7706720
+      sparse: 17983392
+      sparsity: 0.70001220703125
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_25
   node_id: '190'
@@ -815,11 +1234,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_26
   node_id: '191'
@@ -841,11 +1269,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 200704
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 200704
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_27
   node_id: '192'
@@ -873,18 +1310,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 2304
-    num_sparse_parameters: 0
-    num_four_blocks: 2304
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 2304
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 2304
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 13778
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 13778
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 13778
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 6889
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_28
   node_id: '193'
@@ -906,11 +1372,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_29
   node_id: '194'
@@ -932,11 +1407,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 200704
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 200704
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_30
   node_id: '195'
@@ -964,18 +1448,47 @@ nodes:
     - 256
     - 1
     - 1
-    sparsity: 0.79998779296875
-    four_block_sparsity: 0.477783203125
-    num_parameters: 65536
-    num_sparse_parameters: 52428
-    num_four_blocks: 16384
-    num_sparse_four_blocks: 7828
+    parameters:
+      single:
+        num_non_zero: 13108
+        num_zero: 52428
+        sparsity: 0.79998779296875
+      four_block:
+        num_non_zero: 8556
+        num_zero: 7828
+        sparsity: 0.477783203125
+    operations:
+      num_operations:
+        dense: 20553344
+        sparse: 82207104
+        sparsity: 0.79998779296875
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 20553344
-  num_sparse_ops: 82207104
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 13108
+      num_zero: 52428
+      sparsity: 0.79998779296875
+    four_block:
+      num_non_zero: 8556
+      num_zero: 7828
+      sparsity: 0.477783203125
+  operations:
+    num_operations:
+      dense: 20553344
+      sparse: 82207104
+      sparsity: 0.79998779296875
+    multiply_accumulates:
+      dense: 10276672
+      sparse: 41103552
+      sparsity: 0.79998779296875
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_31
   node_id: '196'
@@ -997,11 +1510,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_32
   node_id: '197'
@@ -1023,11 +1545,20 @@ nodes:
     - 28
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 200704
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 200704
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_33
   node_id: '198'
@@ -1055,18 +1586,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 2304
-    num_sparse_parameters: 0
-    num_four_blocks: 2304
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 2304
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 2304
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3528
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3528
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 2304
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3528
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1764
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_34
   node_id: '199'
@@ -1088,11 +1648,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_35
   node_id: '200'
@@ -1114,11 +1683,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 50176
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 50176
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_36
   node_id: '201'
@@ -1146,18 +1724,47 @@ nodes:
     - 256
     - 1
     - 1
-    sparsity: 0.7999954223632812
-    four_block_sparsity: 0.4586181640625
-    num_parameters: 131072
-    num_sparse_parameters: 104857
-    num_four_blocks: 32768
-    num_sparse_four_blocks: 15028
+    parameters:
+      single:
+        num_non_zero: 26215
+        num_zero: 104857
+        sparsity: 0.7999954223632812
+      four_block:
+        num_non_zero: 17740
+        num_zero: 15028
+        sparsity: 0.4586181640625
+    operations:
+      num_operations:
+        dense: 10276280
+        sparse: 41103944
+        sparsity: 0.7999954223632812
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 10276280
-  num_sparse_ops: 41103944
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 26215
+      num_zero: 104857
+      sparsity: 0.7999954223632812
+    four_block:
+      num_non_zero: 17740
+      num_zero: 15028
+      sparsity: 0.4586181640625
+  operations:
+    num_operations:
+      dense: 10276280
+      sparse: 41103944
+      sparsity: 0.7999954223632812
+    multiply_accumulates:
+      dense: 5138140
+      sparse: 20551972
+      sparsity: 0.7999954223632812
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_37
   node_id: '202'
@@ -1179,11 +1786,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_38
   node_id: '203'
@@ -1205,11 +1821,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_39
   node_id: '204'
@@ -1237,18 +1862,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3362
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3362
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_40
   node_id: '205'
@@ -1270,11 +1924,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_41
   node_id: '206'
@@ -1296,11 +1959,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_42
   node_id: '207'
@@ -1328,18 +2000,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.7999992370605469
-    four_block_sparsity: 0.462493896484375
-    num_parameters: 262144
-    num_sparse_parameters: 209715
-    num_four_blocks: 65536
-    num_sparse_four_blocks: 30310
+    parameters:
+      single:
+        num_non_zero: 52429
+        num_zero: 209715
+        sparsity: 0.7999992370605469
+      four_block:
+        num_non_zero: 35226
+        num_zero: 30310
+        sparsity: 0.462493896484375
+    operations:
+      num_operations:
+        dense: 20552168
+        sparse: 82208280
+        sparsity: 0.7999992370605469
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 20552168
-  num_sparse_ops: 82208280
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 209715
+      sparsity: 0.7999992370605469
+    four_block:
+      num_non_zero: 35226
+      num_zero: 30310
+      sparsity: 0.462493896484375
+  operations:
+    num_operations:
+      dense: 20552168
+      sparse: 82208280
+      sparsity: 0.7999992370605469
+    multiply_accumulates:
+      dense: 10276084
+      sparse: 41104140
+      sparsity: 0.7999992370605469
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_43
   node_id: '208'
@@ -1361,11 +2062,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_44
   node_id: '209'
@@ -1387,11 +2097,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_45
   node_id: '210'
@@ -1419,18 +2138,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3362
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3362
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_46
   node_id: '211'
@@ -1452,11 +2200,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_47
   node_id: '212'
@@ -1478,11 +2235,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_48
   node_id: '213'
@@ -1510,18 +2276,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.9000015258789062
-    four_block_sparsity: 0.6783905029296875
-    num_parameters: 262144
-    num_sparse_parameters: 235930
-    num_four_blocks: 65536
-    num_sparse_four_blocks: 44459
+    parameters:
+      single:
+        num_non_zero: 26214
+        num_zero: 235930
+        sparsity: 0.9000015258789062
+      four_block:
+        num_non_zero: 21077
+        num_zero: 44459
+        sparsity: 0.6783905029296875
+    operations:
+      num_operations:
+        dense: 10275888
+        sparse: 92484560
+        sparsity: 0.9000015258789062
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 10275888
-  num_sparse_ops: 92484560
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 21077
+      num_zero: 44459
+      sparsity: 0.6783905029296875
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_49
   node_id: '214'
@@ -1543,11 +2338,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_50
   node_id: '215'
@@ -1569,11 +2373,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_51
   node_id: '216'
@@ -1601,18 +2414,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3362
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3362
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_52
   node_id: '217'
@@ -1634,11 +2476,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_53
   node_id: '218'
@@ -1660,11 +2511,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_54
   node_id: '219'
@@ -1692,18 +2552,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.9000015258789062
-    four_block_sparsity: 0.680999755859375
-    num_parameters: 262144
-    num_sparse_parameters: 235930
-    num_four_blocks: 65536
-    num_sparse_four_blocks: 44630
+    parameters:
+      single:
+        num_non_zero: 26214
+        num_zero: 235930
+        sparsity: 0.9000015258789062
+      four_block:
+        num_non_zero: 20906
+        num_zero: 44630
+        sparsity: 0.680999755859375
+    operations:
+      num_operations:
+        dense: 10275888
+        sparse: 92484560
+        sparsity: 0.9000015258789062
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 10275888
-  num_sparse_ops: 92484560
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 20906
+      num_zero: 44630
+      sparsity: 0.680999755859375
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_55
   node_id: '220'
@@ -1725,11 +2614,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_56
   node_id: '221'
@@ -1751,11 +2649,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_57
   node_id: '222'
@@ -1783,18 +2690,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3362
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3362
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_58
   node_id: '223'
@@ -1816,11 +2752,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_59
   node_id: '224'
@@ -1842,11 +2787,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_60
   node_id: '225'
@@ -1874,18 +2828,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.9000015258789062
-    four_block_sparsity: 0.676422119140625
-    num_parameters: 262144
-    num_sparse_parameters: 235930
-    num_four_blocks: 65536
-    num_sparse_four_blocks: 44330
+    parameters:
+      single:
+        num_non_zero: 26214
+        num_zero: 235930
+        sparsity: 0.9000015258789062
+      four_block:
+        num_non_zero: 21206
+        num_zero: 44330
+        sparsity: 0.676422119140625
+    operations:
+      num_operations:
+        dense: 10275888
+        sparse: 92484560
+        sparsity: 0.9000015258789062
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 10275888
-  num_sparse_ops: 92484560
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 26214
+      num_zero: 235930
+      sparsity: 0.9000015258789062
+    four_block:
+      num_non_zero: 21206
+      num_zero: 44330
+      sparsity: 0.676422119140625
+  operations:
+    num_operations:
+      dense: 10275888
+      sparse: 92484560
+      sparsity: 0.9000015258789062
+    multiply_accumulates:
+      dense: 5137944
+      sparse: 46242280
+      sparsity: 0.9000015258789062
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_61
   node_id: '226'
@@ -1907,11 +2890,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_62
   node_id: '227'
@@ -1933,11 +2925,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_63
   node_id: '228'
@@ -1965,18 +2966,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 3362
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 3362
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 3362
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1681
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_64
   node_id: '229'
@@ -1998,11 +3028,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_65
   node_id: '230'
@@ -2024,11 +3063,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_66
   node_id: '231'
@@ -2056,18 +3104,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.7999992370605469
-    four_block_sparsity: 0.450897216796875
-    num_parameters: 262144
-    num_sparse_parameters: 209715
-    num_four_blocks: 65536
-    num_sparse_four_blocks: 29550
+    parameters:
+      single:
+        num_non_zero: 52429
+        num_zero: 209715
+        sparsity: 0.7999992370605469
+      four_block:
+        num_non_zero: 35986
+        num_zero: 29550
+        sparsity: 0.450897216796875
+    operations:
+      num_operations:
+        dense: 20552168
+        sparse: 82208280
+        sparsity: 0.7999992370605469
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 20552168
-  num_sparse_ops: 82208280
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 209715
+      sparsity: 0.7999992370605469
+    four_block:
+      num_non_zero: 35986
+      num_zero: 29550
+      sparsity: 0.450897216796875
+  operations:
+    num_operations:
+      dense: 20552168
+      sparse: 82208280
+      sparsity: 0.7999992370605469
+    multiply_accumulates:
+      dense: 10276084
+      sparse: 41104140
+      sparsity: 0.7999992370605469
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_67
   node_id: '232'
@@ -2089,11 +3166,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_68
   node_id: '233'
@@ -2115,11 +3201,20 @@ nodes:
     - 14
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 100352
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 100352
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_69
   node_id: '234'
@@ -2147,18 +3242,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 4608
-    num_sparse_parameters: 0
-    num_four_blocks: 4608
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 4608
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 882
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 882
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 4608
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 882
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 441
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_70
   node_id: '235'
@@ -2180,11 +3304,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_71
   node_id: '236'
@@ -2206,11 +3339,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 25088
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 25088
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_72
   node_id: '237'
@@ -2238,18 +3380,47 @@ nodes:
     - 512
     - 1
     - 1
-    sparsity: 0.8999996185302734
-    four_block_sparsity: 0.7120437622070312
-    num_parameters: 524288
-    num_sparse_parameters: 471859
-    num_four_blocks: 131072
-    num_sparse_four_blocks: 93329
+    parameters:
+      single:
+        num_non_zero: 52429
+        num_zero: 471859
+        sparsity: 0.8999996185302734
+      four_block:
+        num_non_zero: 37743
+        num_zero: 93329
+        sparsity: 0.7120437622070312
+    operations:
+      num_operations:
+        dense: 5138042
+        sparse: 46242182
+        sparsity: 0.8999996185302734
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 5138042
-  num_sparse_ops: 46242182
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 52429
+      num_zero: 471859
+      sparsity: 0.8999996185302734
+    four_block:
+      num_non_zero: 37743
+      num_zero: 93329
+      sparsity: 0.7120437622070312
+  operations:
+    num_operations:
+      dense: 5138042
+      sparse: 46242182
+      sparsity: 0.8999996185302734
+    multiply_accumulates:
+      dense: 2569021
+      sparse: 23121091
+      sparsity: 0.8999996185302734
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_73
   node_id: '238'
@@ -2271,11 +3442,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_74
   node_id: '239'
@@ -2297,11 +3477,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 50176
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 50176
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_75
   node_id: '240'
@@ -2329,18 +3518,47 @@ nodes:
     - 1
     - 3
     - 3
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 9216
-    num_sparse_parameters: 0
-    num_four_blocks: 9216
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 9216
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 9216
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 800
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 800
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 9216
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 9216
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 800
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 400
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_76
   node_id: '241'
@@ -2362,11 +3580,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_77
   node_id: '242'
@@ -2388,11 +3615,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 50176
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 50176
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Conv_78
   node_id: '243'
@@ -2420,18 +3656,47 @@ nodes:
     - 1024
     - 1
     - 1
-    sparsity: 0.9000005722045898
-    four_block_sparsity: 0.66131591796875
-    num_parameters: 1048576
-    num_sparse_parameters: 943719
-    num_four_blocks: 262144
-    num_sparse_four_blocks: 173360
+    parameters:
+      single:
+        num_non_zero: 104857
+        num_zero: 943719
+        sparsity: 0.9000005722045898
+      four_block:
+        num_non_zero: 88784
+        num_zero: 173360
+        sparsity: 0.66131591796875
+    operations:
+      num_operations:
+        dense: 10275986
+        sparse: 92484462
+        sparsity: 0.9000005722045898
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 10275986
-  num_sparse_ops: 92484462
-  is_sparse_layer: true
-  is_quantized_layer: false
+  bias: null
+  parameters:
+    single:
+      num_non_zero: 104857
+      num_zero: 943719
+      sparsity: 0.9000005722045898
+    four_block:
+      num_non_zero: 88784
+      num_zero: 173360
+      sparsity: 0.66131591796875
+  operations:
+    num_operations:
+      dense: 10275986
+      sparse: 92484462
+      sparsity: 0.9000005722045898
+    multiply_accumulates:
+      dense: 5137993
+      sparse: 46242231
+      sparsity: 0.9000005722045898
+  parameterized_prunable: true
+  sparse_layer: true
+  quantized_layer: false
   zero_point: 0
 - name: BatchNormalization_79
   node_id: '244'
@@ -2453,11 +3718,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Relu_80
   node_id: '245'
@@ -2479,11 +3753,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 50176
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 50176
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Constant_81
   node_id: '246'
@@ -2495,11 +3778,20 @@ nodes:
     - 8
     dtype: int64
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Pad_82
   node_id: '247'
@@ -2525,11 +3817,20 @@ nodes:
     - 7
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: AveragePool_83
   node_id: '248'
@@ -2551,11 +3852,20 @@ nodes:
     - 1
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 50176
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 50176
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Shape_84
   node_id: '249'
@@ -2574,11 +3884,20 @@ nodes:
     - 4
     dtype: int64
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Constant_85
   node_id: '250'
@@ -2586,11 +3905,20 @@ nodes:
   inputs: []
   outputs: []
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Gather_86
   node_id: '251'
@@ -2602,11 +3930,20 @@ nodes:
     dtype: int64
   outputs: []
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Unsqueeze_87
   node_id: '253'
@@ -2618,11 +3955,20 @@ nodes:
     - 1
     dtype: int64
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Concat_88
   node_id: '255'
@@ -2638,11 +3984,20 @@ nodes:
     - 2
     dtype: int64
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Reshape_89
   node_id: '256'
@@ -2666,11 +4021,20 @@ nodes:
     - 1024
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Gemm_90
   node_id: output_0
@@ -2692,18 +4056,59 @@ nodes:
     shape:
     - 1024
     - 1000
-    sparsity: 0.0
-    four_block_sparsity: 0.0
-    num_parameters: 1024000
-    num_sparse_parameters: 0
-    num_four_blocks: 256000
-    num_sparse_four_blocks: 0
+    parameters:
+      single:
+        num_non_zero: 1024000
+        num_zero: 0
+        sparsity: 0.0
+      four_block:
+        num_non_zero: 256000
+        num_zero: 0
+        sparsity: 0.0
+    operations:
+      num_operations:
+        dense: 2048000
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
     dtype: float32
-  parameterized_and_prunable: true
-  num_dense_ops: 2049000
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias:
+    shape:
+    - 1000
+    operations:
+      num_operations:
+        dense: 1000
+        sparse: 0
+        sparsity: 0.0
+      multiply_accumulates:
+        dense: 0
+        sparse: 0
+        sparsity: 0
+    dtype: float32
+  parameters:
+    single:
+      num_non_zero: 1024000
+      num_zero: 0
+      sparsity: 0.0
+    four_block:
+      num_non_zero: 256000
+      num_zero: 0
+      sparsity: 0.0
+  operations:
+    num_operations:
+      dense: 2049000
+      sparse: 0
+      sparsity: 0.0
+    multiply_accumulates:
+      dense: 1024000
+      sparse: 0
+      sparsity: 0.0
+  parameterized_prunable: true
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0
 - name: Softmax_91
   node_id: output_1
@@ -2721,9 +4126,18 @@ nodes:
     - 1000
     dtype: float32
   weight: null
-  parameterized_and_prunable: false
-  num_dense_ops: 0
-  num_sparse_ops: 0
-  is_sparse_layer: false
-  is_quantized_layer: false
+  bias: null
+  parameters: null
+  operations:
+    num_operations:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+    multiply_accumulates:
+      dense: 0
+      sparse: 0
+      sparsity: 0
+  parameterized_prunable: false
+  sparse_layer: false
+  quantized_layer: false
   zero_point: 0

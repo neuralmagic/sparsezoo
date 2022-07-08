@@ -32,59 +32,20 @@ from sparsezoo.utils import (
     get_node_weight,
     get_node_weight_name,
     get_node_weight_shape,
+    get_node_bias,
     get_ops_dict,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
 )
+from sparsezoo.analysis.utils.models import *
 
 
 __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
-
-
-class NodeIO(BaseModel):
-    """
-    Pydantic model for the inputs and outputs of a node in the onnx model graph
-    """
-
-    name: str = Field(description="Name of the input/output in onnx model graph")
-    shape: Optional[List[Union[None, int]]] = Field(
-        description="Shape of the input/output in onnx model graph (assuming a "
-        "batch size of 1)"
-    )
-    dtype: Optional[str] = Field(
-        description="Data type of the values from the input/output"
-    )
-
-
-class WeightAnalysis(BaseModel):
-    """
-    Pydantic model for the weight of a node
-    """
-
-    name: Optional[str] = Field(description="The name of the weight")
-    shape: Optional[List[Union[None, int]]] = Field(
-        description="The weight's shape (assuming a batch size of 1)"
-    )
-    sparsity: float = Field(description="Proportion of zeros in the weight")
-    four_block_sparsity: float = Field(
-        description="Proportion of zero blocks in the weight"
-    )
-    num_parameters: int = Field(description="Size of the node's parameter")
-    num_sparse_parameters: int = Field(
-        description="Number of zeros in the node's parameter"
-    )
-    num_four_blocks: int = Field(
-        description="Number of four blocks in the node's parameter"
-    )
-    num_sparse_four_blocks: int = Field(
-        description="Number of four blocks with all zeros in the node's parameter"
-    )
-    dtype: str = Field(description="The weight's data type")
 
 
 class NodeAnalysis(BaseModel):
@@ -99,23 +60,25 @@ class NodeAnalysis(BaseModel):
     inputs: List[NodeIO] = Field(description="The node's inputs in the onnx graph")
     outputs: List[NodeIO] = Field(description="The node's outputs in the onnx graph")
 
+    parameters: Optional[Parameters] = Field(
+        description="TODO"
+    )
+    operations: Operations = Field(
+        description="TODO"
+    )
+
     weight: Optional[WeightAnalysis] = Field(
         description="An analysis of the node's weight"
     )
+    bias: Optional[BiasAnalysis] = Field(
+        description="TODO"
+    )
 
-    parameterized_and_prunable: bool = Field(
+    parameterized_prunable: bool = Field(
         description="Does the node have a parameterized and prunable weight"
     )
-    num_dense_ops: int = Field(
-        description="The number of (floating point and/or integer) operations "
-        "performed in the node"
-    )
-    num_sparse_ops: int = Field(
-        description="The number of (floating point and/or integer) operations "
-        "in the node not performed because of sparsification"
-    )
-    is_sparse_layer: bool = Field(description="Does the node have sparse weights")
-    is_quantized_layer: bool = Field(description="Does the node have quantized weights")
+    sparse_layer: bool = Field(description="Does the node have sparse weights")
+    quantized_layer: bool = Field(description="Does the node have quantized weights")
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
@@ -176,6 +139,9 @@ class NodeAnalysis(BaseModel):
             else []
         )
 
+        quantized_layer = is_quantized_layer(model_onnx, node)
+        ops_dict = get_ops_dict(model_onnx, node, node_shapes=node_shapes)
+
         node_weight = get_node_weight(model_onnx, node)
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_onnx, node
@@ -188,39 +154,84 @@ class NodeAnalysis(BaseModel):
             WeightAnalysis(
                 name=get_node_weight_name(model_onnx, node),
                 shape=get_node_weight_shape(model_onnx, node),
-                sparsity=get_node_sparsity(model_onnx, node),
-                four_block_sparsity=get_node_four_block_sparsity(model_onnx, node),
-                num_parameters=num_parameters,
-                num_sparse_parameters=num_sparse_parameters,
-                num_four_blocks=num_four_blocks,
-                num_sparse_four_blocks=num_sparse_four_blocks,
+                parameters=Parameters(
+                    single=DenseSparseValues(
+                        num_non_zero=num_parameters - num_sparse_parameters,
+                        num_zero=num_sparse_parameters,
+                    ),
+                    four_block=DenseSparseValues(
+                        num_non_zero=num_four_blocks - num_sparse_four_blocks,
+                        num_zero=num_sparse_four_blocks,
+                    ),
+                ),
+                operations=Operations(
+                    num_operations=DenseSparseOps(
+                        dense=ops_dict["weight"]["num_dense_ops"],
+                        sparse=ops_dict["weight"]["num_sparse_ops"],
+                    ),
+                    multiply_accumulates=DenseSparseOps(
+                        dense=0,
+                        sparse=0,
+                    ),
+                ),
                 dtype=str(node_weight.dtype),
             )
             if node_weight is not None
             else None
         )
 
-        ops_dict = get_ops_dict(model_onnx, node, node_shapes=node_shapes)
-        num_dense_ops = sum([ops_dict[k]["num_dense_ops"] for k in ops_dict.keys()])
-        num_sparse_ops = sum([ops_dict[k]["num_sparse_ops"] for k in ops_dict.keys()])
+        node_bias = get_node_bias(model_onnx, node)
+        bias_analysis = (
+            BiasAnalysis(
+                shape=list(node_bias.shape),
+                operations=Operations(
+                    num_operations=DenseSparseOps(
+                        dense=ops_dict["bias"]["num_dense_ops"],
+                        sparse=ops_dict["bias"]["num_sparse_ops"],
+                    ),
+                    multiply_accumulates=DenseSparseOps(
+                        dense=0,
+                        sparse=0,
+                    ),
+                ),
+                dtype=str(node_bias.dtype),
+            )
+            if node_bias is not None
+            else None
+        )
+
+        operations = Operations(
+            num_operations=DenseSparseOps(
+                dense=sum([ops_dict[k]["num_dense_ops"] for k in ops_dict.keys()]),
+                sparse=sum([ops_dict[k]["num_sparse_ops"] for k in ops_dict.keys()]),
+            ),
+            multiply_accumulates=DenseSparseOps(
+                dense=ops_dict["weight"]["num_dense_ops"] // 2,
+                sparse=ops_dict["weight"]["num_sparse_ops"] // 2,
+            ),
+        )
 
         return cls(
             name=node.name,
             node_id=node_id,
             op_type=node.op_type,
+
             inputs=inputs,
             outputs=outputs,
+
+            parameters=weight_analysis.parameters if weight_analysis else None,
+            operations=operations,
+
             weight=weight_analysis,
-            parameterized_and_prunable=is_parameterized_prunable_layer(
+            bias=bias_analysis,
+
+            parameterized_prunable=is_parameterized_prunable_layer(
                 model_onnx, node
             ),
-            num_dense_ops=num_dense_ops,
-            num_sparse_ops=num_sparse_ops,
-            is_sparse_layer=is_sparse_layer(model_onnx, node),
-            is_quantized_layer=is_quantized_layer(model_onnx, node),
+            sparse_layer=is_sparse_layer(model_onnx, node),
+            quantized_layer=quantized_layer,
             zero_point=get_zero_point(model_onnx, node),
         )
-
 
 class ModelAnalysis(BaseModel):
     """
@@ -233,48 +244,16 @@ class ModelAnalysis(BaseModel):
     non_parameterized_operator_counts: Dict[str, int] = Field(
         description="Overview of nodes without parameterized weights", default={}
     )
-    num_sparse_ops: int = Field(
-        description="The total number of (floating point and/or integer) operations "
-        "not performed because of sparsification"
+
+    total_prunable_parameters: Parameters = Field(
+        description="TODO"
     )
-    num_dense_ops: int = Field(
-        description="The total number of (floating point and/or integer) operations "
-        "performed in one forward pass of the model"
+    total_operations: ModelOperations = Field(
+        description="TODO"
     )
-    num_sparse_quantized_ops: int = Field(
-        description="Number of sparse quantized operations"
-    )
-    num_dense_quantized_ops: int = Field(
-        description="Number of dense quantized operations"
-    )
-    num_sparse_floating_point_ops: int = Field(
-        description="Number of sparse floating point operations"
-    )
-    num_dense_floating_point_ops: int = Field(
-        description="Number of dense floating point operations"
-    )
-    average_sparsity: float = Field(
-        description="Average sparsity across all trainable parameters "
-        "(excluding biases)"
-    )
-    average_four_block_sparsity: float = Field(
-        description="Average sparsity four block sparsity across all "
-        "trainable parameters (excluding biases)"
-    )
-    num_sparse_layers: int = Field(description="Number of layers with any sparsity")
-    num_quantized_layers: int = Field(description="Number of quantized layers")
-    num_parameters: int = Field(
-        description="Total number of all parameters (excluding biases)"
-    )
-    num_sparse_parameters: int = Field(
-        description="Total number of all sparsified parameters (excluding biases)"
-    )
-    num_four_blocks: int = Field(
-        description="Total number of all four blocks (excluding biases)"
-    )
-    num_sparse_four_blocks: int = Field(
-        description="Total number of all sparsified four blocks (excluding biases)"
-    )
+
+    num_sparse_nodes: int = Field(description="Number of nodes with any sparsity")
+    num_quantized_nodes: int = Field(description="Number of quantized nodes")
 
     nodes: List[NodeAnalysis] = Field(
         description="List of analyses for each layer in the model graph", default=[]
@@ -295,97 +274,60 @@ class ModelAnalysis(BaseModel):
 
         layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
 
-        num_parameters = sum(
-            [
-                node_analysis.weight.num_parameters
-                for node_analysis in node_analyses
-                if node_analysis.weight is not None
-            ]
+        total_prunable_parameters = Parameters(
+            single=DenseSparseValues(
+                num_non_zero=sum([node_analysis.weight.parameters.single.num_non_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+                num_zero=sum([node_analysis.weight.parameters.single.num_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+            ),
+            four_block=DenseSparseValues(
+                num_non_zero=sum([node_analysis.weight.parameters.four_block.num_non_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+                num_zero=sum([node_analysis.weight.parameters.four_block.num_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+            ),
         )
-        num_sparse_parameters = sum(
-            [
-                node_analysis.weight.num_sparse_parameters
-                for node_analysis in node_analyses
-                if node_analysis.weight is not None
-            ]
-        )
-        num_four_blocks = sum(
-            [
-                node_analysis.weight.num_four_blocks
-                for node_analysis in node_analyses
-                if node_analysis.weight is not None
-            ]
-        )
-        num_sparse_four_blocks = sum(
-            [
-                node_analysis.weight.num_sparse_four_blocks
-                for node_analysis in node_analyses
-                if node_analysis.weight is not None
-            ]
+        total_operations = ModelOperations(
+            floating_or_quantized_ops=DenseSparseOps(
+                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses]),
+                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses]),
+            ),
+            floating_point_ops=DenseSparseOps(
+                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses if not node_analysis.quantized_layer]),
+                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses if not node_analysis.quantized_layer]),
+            ),
+            quantized_ops=DenseSparseOps(
+                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses if node_analysis.quantized_layer]),
+                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses if node_analysis.quantized_layer]),
+            ),
+            multiply_accumulates=DenseSparseOps(
+                dense=sum([node_analysis.operations.multiply_accumulates.dense for node_analysis in node_analyses]),
+                sparse=sum([node_analysis.operations.multiply_accumulates.sparse for node_analysis in node_analyses]),
+            ),
         )
 
-        num_sparse_quantized_ops = sum(
+        num_sparse_nodes = len(
             [
-                node_analysis.num_sparse_ops
+                None
                 for node_analysis in node_analyses
-                if node_analysis.outputs and "int" in node_analysis.outputs[0].dtype
+                if node_analysis.sparse_layer
             ]
         )
-        num_dense_quantized_ops = sum(
+        num_quantized_nodes = len(
             [
-                node_analysis.num_dense_ops
+                None
                 for node_analysis in node_analyses
-                if node_analysis.outputs and "int" in node_analysis.outputs[0].dtype
-            ]
-        )
-        num_sparse_floating_point_ops = sum(
-            [
-                node_analysis.num_sparse_ops
-                for node_analysis in node_analyses
-                if node_analysis.outputs and "float" in node_analysis.outputs[0].dtype
-            ]
-        )
-        num_dense_floating_point_ops = sum(
-            [
-                node_analysis.num_dense_ops
-                for node_analysis in node_analyses
-                if node_analysis.outputs and "float" in node_analysis.outputs[0].dtype
+                if node_analysis.quantized_layer
             ]
         )
 
         return cls(
             layer_counts=layer_counts,
             non_parameterized_operator_counts=op_counts,
-            num_dense_ops=sum(
-                [node_analysis.num_dense_ops for node_analysis in node_analyses]
-            ),
-            num_sparse_ops=sum(
-                [node_analysis.num_sparse_ops for node_analysis in node_analyses]
-            ),
-            num_sparse_layers=len(
-                [
-                    None
-                    for node_analysis in node_analyses
-                    if node_analysis.is_sparse_layer
-                ]
-            ),
-            num_quantized_layers=len(
-                [
-                    None
-                    for node_analysis in node_analyses
-                    if node_analysis.is_quantized_layer
-                ]
-            ),
-            num_parameters=num_parameters,
-            num_sparse_parameters=num_sparse_parameters,
-            num_four_blocks=num_four_blocks,
-            num_sparse_four_blocks=num_sparse_four_blocks,
-            num_dense_quantized_ops=num_dense_quantized_ops,
-            num_sparse_quantized_ops=num_sparse_quantized_ops,
-            num_sparse_floating_point_ops=num_sparse_floating_point_ops,
-            num_dense_floating_point_ops=num_dense_floating_point_ops,
-            average_sparsity=(num_sparse_parameters / num_parameters),
-            average_four_block_sparsity=(num_sparse_four_blocks / num_four_blocks),
+
+            total_prunable_parameters=total_prunable_parameters,
+            total_operations=total_operations,
+
+            num_sparse_nodes=num_sparse_nodes,
+            num_quantized_nodes=num_quantized_nodes,
+
             nodes=node_analyses,
         )
 
