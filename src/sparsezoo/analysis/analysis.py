@@ -19,35 +19,33 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field
 
+from sparsezoo.analysis.utils.models import (
+    BiasAnalysis,
+    DenseSparseOps,
+    DenseSparseValues,
+    ModelOperations,
+    NodeIO,
+    Operations,
+    Parameters,
+    WeightAnalysis,
+)
 from sparsezoo.utils import (
     NodeDataType,
     NodeShape,
     extract_node_id,
     extract_node_shapes_and_dtypes,
     get_layer_and_op_counts,
-    get_node_four_block_sparsity,
+    get_node_bias,
     get_node_num_four_block_zeros_and_size,
     get_node_num_zeros_and_size,
-    get_node_sparsity,
     get_node_weight,
     get_node_weight_name,
     get_node_weight_shape,
-    get_node_bias,
     get_ops_dict,
     get_zero_point,
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
-)
-from sparsezoo.analysis.utils.models import (
-    NodeIO,
-    Parameters,
-    DenseSparseValues,
-    Operations,
-    DenseSparseOps,
-    WeightAnalysis,
-    BiasAnalysis,
-    ModelOperations,
 )
 
 
@@ -69,19 +67,13 @@ class NodeAnalysis(BaseModel):
     inputs: List[NodeIO] = Field(description="The node's inputs in the onnx graph")
     outputs: List[NodeIO] = Field(description="The node's outputs in the onnx graph")
 
-    parameters: Optional[Parameters] = Field(
-        description="TODO"
-    )
-    operations: Operations = Field(
-        description="TODO"
-    )
+    parameters: Optional[Parameters] = Field(description="TODO")
+    operations: Operations = Field(description="TODO")
 
     weight: Optional[WeightAnalysis] = Field(
         description="An analysis of the node's weight"
     )
-    bias: Optional[BiasAnalysis] = Field(
-        description="TODO"
-    )
+    bias: Optional[BiasAnalysis] = Field(description="TODO")
 
     parameterized_prunable: bool = Field(
         description="Does the node have a parameterized and prunable weight"
@@ -224,23 +216,18 @@ class NodeAnalysis(BaseModel):
             name=node.name,
             node_id=node_id,
             op_type=node.op_type,
-
             inputs=inputs,
             outputs=outputs,
-
             parameters=weight_analysis.parameters if weight_analysis else None,
             operations=operations,
-
             weight=weight_analysis,
             bias=bias_analysis,
-
-            parameterized_prunable=is_parameterized_prunable_layer(
-                model_onnx, node
-            ),
+            parameterized_prunable=is_parameterized_prunable_layer(model_onnx, node),
             sparse_layer=is_sparse_layer(model_onnx, node),
             quantized_layer=quantized_layer,
             zero_point=get_zero_point(model_onnx, node),
         )
+
 
 class ModelAnalysis(BaseModel):
     """
@@ -254,12 +241,8 @@ class ModelAnalysis(BaseModel):
         description="Overview of nodes without parameterized weights", default={}
     )
 
-    total_prunable_parameters: Parameters = Field(
-        description="TODO"
-    )
-    total_operations: ModelOperations = Field(
-        description="TODO"
-    )
+    total_prunable_parameters: Parameters = Field(description="TODO")
+    total_operations: ModelOperations = Field(description="TODO")
 
     num_sparse_nodes: int = Field(description="Number of nodes with any sparsity")
     num_quantized_nodes: int = Field(description="Number of quantized nodes")
@@ -285,58 +268,115 @@ class ModelAnalysis(BaseModel):
 
         total_prunable_parameters = Parameters(
             single=DenseSparseValues(
-                num_non_zero=sum([node_analysis.weight.parameters.single.num_non_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
-                num_zero=sum([node_analysis.weight.parameters.single.num_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+                num_non_zero=sum(
+                    [
+                        node_analysis.weight.parameters.single.num_non_zero
+                        for node_analysis in node_analyses
+                        if node_analysis.parameterized_prunable
+                    ]
+                ),
+                num_zero=sum(
+                    [
+                        node_analysis.weight.parameters.single.num_zero
+                        for node_analysis in node_analyses
+                        if node_analysis.parameterized_prunable
+                    ]
+                ),
             ),
             four_block=DenseSparseValues(
-                num_non_zero=sum([node_analysis.weight.parameters.four_block.num_non_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
-                num_zero=sum([node_analysis.weight.parameters.four_block.num_zero for node_analysis in node_analyses if node_analysis.parameterized_prunable]),
+                num_non_zero=sum(
+                    [
+                        node_analysis.weight.parameters.four_block.num_non_zero
+                        for node_analysis in node_analyses
+                        if node_analysis.parameterized_prunable
+                    ]
+                ),
+                num_zero=sum(
+                    [
+                        node_analysis.weight.parameters.four_block.num_zero
+                        for node_analysis in node_analyses
+                        if node_analysis.parameterized_prunable
+                    ]
+                ),
             ),
         )
         total_operations = ModelOperations(
             floating_or_quantized_ops=DenseSparseOps(
-                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses]),
-                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses]),
+                dense=sum(
+                    [
+                        node_analysis.operations.num_operations.dense
+                        for node_analysis in node_analyses
+                    ]
+                ),
+                sparse=sum(
+                    [
+                        node_analysis.operations.num_operations.sparse
+                        for node_analysis in node_analyses
+                    ]
+                ),
             ),
             floating_point_ops=DenseSparseOps(
-                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses if not node_analysis.quantized_layer]),
-                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses if not node_analysis.quantized_layer]),
+                dense=sum(
+                    [
+                        node_analysis.operations.num_operations.dense
+                        for node_analysis in node_analyses
+                        if not node_analysis.quantized_layer
+                    ]
+                ),
+                sparse=sum(
+                    [
+                        node_analysis.operations.num_operations.sparse
+                        for node_analysis in node_analyses
+                        if not node_analysis.quantized_layer
+                    ]
+                ),
             ),
             quantized_ops=DenseSparseOps(
-                dense=sum([node_analysis.operations.num_operations.dense for node_analysis in node_analyses if node_analysis.quantized_layer]),
-                sparse=sum([node_analysis.operations.num_operations.sparse for node_analysis in node_analyses if node_analysis.quantized_layer]),
+                dense=sum(
+                    [
+                        node_analysis.operations.num_operations.dense
+                        for node_analysis in node_analyses
+                        if node_analysis.quantized_layer
+                    ]
+                ),
+                sparse=sum(
+                    [
+                        node_analysis.operations.num_operations.sparse
+                        for node_analysis in node_analyses
+                        if node_analysis.quantized_layer
+                    ]
+                ),
             ),
             multiply_accumulates=DenseSparseOps(
-                dense=sum([node_analysis.operations.multiply_accumulates.dense for node_analysis in node_analyses]),
-                sparse=sum([node_analysis.operations.multiply_accumulates.sparse for node_analysis in node_analyses]),
+                dense=sum(
+                    [
+                        node_analysis.operations.multiply_accumulates.dense
+                        for node_analysis in node_analyses
+                    ]
+                ),
+                sparse=sum(
+                    [
+                        node_analysis.operations.multiply_accumulates.sparse
+                        for node_analysis in node_analyses
+                    ]
+                ),
             ),
         )
 
         num_sparse_nodes = len(
-            [
-                None
-                for node_analysis in node_analyses
-                if node_analysis.sparse_layer
-            ]
+            [None for node_analysis in node_analyses if node_analysis.sparse_layer]
         )
         num_quantized_nodes = len(
-            [
-                None
-                for node_analysis in node_analyses
-                if node_analysis.quantized_layer
-            ]
+            [None for node_analysis in node_analyses if node_analysis.quantized_layer]
         )
 
         return cls(
             layer_counts=layer_counts,
             non_parameterized_operator_counts=op_counts,
-
             total_prunable_parameters=total_prunable_parameters,
             total_operations=total_operations,
-
             num_sparse_nodes=num_sparse_nodes,
             num_quantized_nodes=num_quantized_nodes,
-
             nodes=node_analyses,
         )
 

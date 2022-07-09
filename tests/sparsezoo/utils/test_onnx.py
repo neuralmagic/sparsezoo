@@ -75,6 +75,7 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("model_name", get_test_model_names())
         # metafunc.parametrize("model_name", ["mobilenet_v1_pruned_moderate"])
 
+
 @pytest.mark.parametrize(
     "model_name,node_name,expected_shape",
     [
@@ -101,7 +102,9 @@ def pytest_generate_tests(metafunc):
         ("resnet50_pruned_quantized", "Gemm_1239", (2048, 1000)),
     ],
 )
-def test_get_node_weight_and_shape(model_name, node_name, expected_shape, get_model_and_node):
+def test_get_node_weight_and_shape(
+    model_name, node_name, expected_shape, get_model_and_node
+):
     model, node = get_model_and_node(model_name, node_name)
     weight = get_node_weight(model, node)
     weight_shape = get_node_weight_shape(model, node)
@@ -211,8 +214,13 @@ def test_get_node_num_four_block_zeros_and_size(
         )
         num_non_zero_blocks = num_blocks - num_zero_blocks
         if node_analysis.weight is not None:
-            assert num_non_zero_blocks == node_analysis.weight.parameters.four_block.num_non_zero
-            assert num_zero_blocks == node_analysis.weight.parameters.four_block.num_zero
+            assert (
+                num_non_zero_blocks
+                == node_analysis.weight.parameters.four_block.num_non_zero
+            )
+            assert (
+                num_zero_blocks == node_analysis.weight.parameters.four_block.num_zero
+            )
         else:
             assert num_non_zero_blocks == 0
             assert num_zero_blocks == 0
@@ -227,6 +235,7 @@ def test_get_zero_point(
     for node_analysis in model_analysis.nodes:
         model, node = get_model_and_node(model_name, node_analysis.name)
         assert get_zero_point(model, node) == node_analysis.zero_point
+
 
 def test_get_node_sparsity(
     model_name,
@@ -326,7 +335,11 @@ def test_is_four_block_sparse_layer(
         ("mobilenet_v1_pruned_moderate", "BatchNormalization_79", None),
         ("mobilenet_v1_pruned_moderate", "Unsqueeze_87", None),
         ("mobilenet_v1_pruned_moderate", "Gemm_90", "classifier.fc.weight"),
-        ("bert_pruned_quantized", "Gather_34", "bert.embeddings.token_type_embeddings.weight_quant"),
+        (
+            "bert_pruned_quantized",
+            "Gather_34",
+            "bert.embeddings.token_type_embeddings.weight_quant",
+        ),
         ("bert_pruned_quantized", "DequantizeLinear_27", None),
         ("bert_pruned_quantized", "MatMul_238_quant", "MatMul_238.weight_quantized"),
         ("bert_pruned_quantized", "MatMul_157_quant", None),
@@ -352,6 +365,7 @@ def test_get_node_weight_name(
         assert weight_name is None
     else:
         assert weight_name == expected_name
+
 
 def test_extract_node_id(
     model_name,
@@ -381,14 +395,13 @@ def test_get_ops_dict(
         # weight
         if node_analysis.weight is not None:
             assert ops_dict["weight"]["num_dense_ops"] == pytest.approx(
-                node_analysis.weight.operations.num_operations.dense, abs=margin_of_error
+                node_analysis.weight.operations.num_operations.dense,
+                abs=margin_of_error,
             )
             assert ops_dict["weight"]["num_sparse_ops"] == pytest.approx(
-                node_analysis.weight.operations.num_operations.sparse, abs=margin_of_error
+                node_analysis.weight.operations.num_operations.sparse,
+                abs=margin_of_error,
             )
-        else:
-            assert ops_dict["weight"]["num_dense_ops"] == 0
-            assert ops_dict["weight"]["num_sparse_ops"] == 0
 
         # bias
         if node_analysis.bias is not None:
@@ -398,9 +411,6 @@ def test_get_ops_dict(
             assert ops_dict["bias"]["num_sparse_ops"] == pytest.approx(
                 node_analysis.bias.operations.num_operations.sparse, abs=margin_of_error
             )
-        else:
-            assert ops_dict["bias"]["num_dense_ops"] == 0
-            assert ops_dict["bias"]["num_sparse_ops"] == 0
 
         # other
         total_dense_ops = sum([ops_dict[k]["num_dense_ops"] for k in ops_dict.keys()])

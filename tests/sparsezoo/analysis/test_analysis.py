@@ -32,6 +32,7 @@ def margin_of_error():
 def pytest_generate_tests(metafunc):
     metafunc.parametrize("model_name", get_test_model_names())
 
+
 def test_analysis(model_name, get_generated_analysis, get_expected_analysis):
     model_analysis = get_generated_analysis(model_name)
     expected_model_analysis = get_expected_analysis(model_name)
@@ -49,5 +50,7 @@ def test_analysis(model_name, get_generated_analysis, get_expected_analysis):
     analysis_dict = model_analysis.dict()
     analysis_dict_values = _extract_nested_dict_values(analysis_dict)
 
-    for analysis_dict_value, expected_dict_value in zip(analysis_dict_values, expected_dict_values):
+    for analysis_dict_value, expected_dict_value in zip(
+        analysis_dict_values, expected_dict_values
+    ):
         assert analysis_dict_value == expected_dict_value
