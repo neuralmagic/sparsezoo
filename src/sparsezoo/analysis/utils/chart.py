@@ -154,9 +154,7 @@ def draw_parameter_chart(
             + node_data["zero_parameters"][node_i]
         )
         if total_parameters > 0:
-            parameter_sparsity = (
-                node_data["zero_parameters"][node_i] / total_parameters
-            )
+            parameter_sparsity = node_data["zero_parameters"][node_i] / total_parameters
             param_axes.text(
                 node_i,
                 total_parameters,
@@ -355,9 +353,7 @@ def draw_parameter_operation_combined_chart(
             + node_data["zero_parameters"][node_i]
         )
         if total_parameters > 0:
-            parameter_sparsity = (
-                node_data["zero_parameters"][node_i] / total_parameters
-            )
+            parameter_sparsity = node_data["zero_parameters"][node_i] / total_parameters
             param_axes.text(
                 node_data["parameters_pos"][node_i],
                 total_parameters,
