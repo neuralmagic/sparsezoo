@@ -52,7 +52,7 @@ def draw_sparsity_by_layer_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.nodes if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_prunable
     ]
     node_data = {
         "names": [],
@@ -60,7 +60,7 @@ def draw_sparsity_by_layer_chart(
     }
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparsities"].append(node.weight.sparsity * 100)
+        node_data["sparsities"].append(node.parameters.single.sparsity * 100)
 
     # Draw chart data
     axes.bar(
@@ -68,13 +68,13 @@ def draw_sparsity_by_layer_chart(
         [100 - sparsity for sparsity in node_data["sparsities"]],
         bottom=node_data["sparsities"],
         color="blue",
-        label="dense parameters",
+        label="non-zero parameters",
     )
     axes.bar(
         numpy.arange(len(node_data["names"])),
         node_data["sparsities"],
         color="deeppink",
-        label="sparse parameters",
+        label="zero parameters",
     )
 
     # Draw labels
@@ -118,31 +118,29 @@ def draw_parameter_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.nodes if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_prunable
     ]
-    node_data = {"names": [], "sparse_parameters": [], "dense_parameters": []}
+    node_data = {"names": [], "zero_parameters": [], "non_zero_parameters": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparse_parameters"].append(node.weight.num_sparse_parameters)
-        node_data["dense_parameters"].append(
-            node.weight.num_parameters - node.weight.num_sparse_parameters
-        )
+        node_data["zero_parameters"].append(node.parameters.single.num_zero)
+        node_data["non_zero_parameters"].append(node.parameters.single.num_non_zero)
 
     # Draw parameters bars
     param_axes.bar(
         numpy.arange(len(node_data["names"])),
-        node_data["dense_parameters"],
-        bottom=node_data["sparse_parameters"],
+        node_data["non_zero_parameters"],
+        bottom=node_data["zero_parameters"],
         width=bar_width,
         color="blue",
-        label="dense parameters",
+        label="non-zero parameters",
     )
     param_axes.bar(
         numpy.arange(len(node_data["names"])),
-        node_data["sparse_parameters"],
+        node_data["zero_parameters"],
         width=bar_width,
         color="deeppink",
-        label="sparse parameters",
+        label="zero parameters",
     )
 
     param_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
@@ -152,12 +150,12 @@ def draw_parameter_chart(
     # Draw percent sparse text
     for node_i in range(len(parameterized_prunable_nodes)):
         total_parameters = (
-            node_data["dense_parameters"][node_i]
-            + node_data["sparse_parameters"][node_i]
+            node_data["non_zero_parameters"][node_i]
+            + node_data["zero_parameters"][node_i]
         )
         if total_parameters > 0:
             parameter_sparsity = (
-                node_data["sparse_parameters"][node_i] / total_parameters
+                node_data["zero_parameters"][node_i] / total_parameters
             )
             param_axes.text(
                 node_i,
@@ -207,13 +205,13 @@ def draw_operation_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.nodes if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_prunable
     ]
     node_data = {"names": [], "sparse_ops": [], "dense_ops": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparse_ops"].append(node.num_sparse_ops)
-        node_data["dense_ops"].append(node.num_dense_ops)
+        node_data["sparse_ops"].append(node.operations.num_operations.sparse)
+        node_data["dense_ops"].append(node.operations.num_operations.dense)
 
     # Draw operations bars
     ops_axes.bar(
@@ -288,14 +286,14 @@ def draw_parameter_operation_combined_chart(
 
     # Ingest node data
     parameterized_prunable_nodes = [
-        node for node in model_analysis.nodes if node.parameterized_and_prunable
+        node for node in model_analysis.nodes if node.parameterized_prunable
     ]
     node_data = {
         "names": [],
         "parameters_pos": [],
         "ops_pos": [],
-        "sparse_parameters": [],
-        "dense_parameters": [],
+        "zero_parameters": [],
+        "non_zero_parameters": [],
         "sparse_ops": [],
         "dense_ops": [],
     }
@@ -303,28 +301,26 @@ def draw_parameter_operation_combined_chart(
         node_data["names"].append(_get_node_name(node))
         node_data["parameters_pos"].append(node_i - bar_width / 2)
         node_data["ops_pos"].append(node_i + bar_width / 2)
-        node_data["sparse_parameters"].append(node.weight.num_sparse_parameters)
-        node_data["dense_parameters"].append(
-            node.weight.num_parameters - node.weight.num_sparse_parameters
-        )
-        node_data["sparse_ops"].append(node.num_sparse_ops)
-        node_data["dense_ops"].append(node.num_dense_ops)
+        node_data["zero_parameters"].append(node.parameters.single.num_zero)
+        node_data["non_zero_parameters"].append(node.parameters.single.num_non_zero)
+        node_data["sparse_ops"].append(node.operations.num_operations.sparse)
+        node_data["dense_ops"].append(node.operations.num_operations.dense)
 
     # Draw parameters bars
     param_axes.bar(
         node_data["parameters_pos"],
-        node_data["dense_parameters"],
-        bottom=node_data["sparse_parameters"],
+        node_data["non_zero_parameters"],
+        bottom=node_data["zero_parameters"],
         width=bar_width,
         color="blue",
-        label="dense parameters",
+        label="non-zero parameters",
     )
     param_axes.bar(
         node_data["parameters_pos"],
-        node_data["sparse_parameters"],
+        node_data["zero_parameters"],
         width=bar_width,
         color="deeppink",
-        label="sparse parameters",
+        label="zero parameters",
     )
 
     param_axes.set_xticks(numpy.arange(len(parameterized_prunable_nodes)))
@@ -355,12 +351,12 @@ def draw_parameter_operation_combined_chart(
     # Draw percent sparse text
     for node_i in range(len(parameterized_prunable_nodes)):
         total_parameters = (
-            node_data["dense_parameters"][node_i]
-            + node_data["sparse_parameters"][node_i]
+            node_data["non_zero_parameters"][node_i]
+            + node_data["zero_parameters"][node_i]
         )
         if total_parameters > 0:
             parameter_sparsity = (
-                node_data["sparse_parameters"][node_i] / total_parameters
+                node_data["zero_parameters"][node_i] / total_parameters
             )
             param_axes.text(
                 node_data["parameters_pos"][node_i],
@@ -411,7 +407,7 @@ def _get_node_name(node_analysis: NodeAnalysis) -> str:
         name = name.split(".embeddings.")[1]
         name = name.replace("weight", "")
         return name
-    if node_analysis.is_quantized_layer:
+    if node_analysis.quantized_layer:
         return node_analysis.name
     if node_analysis.weight.name and ".weight" in node_analysis.weight.name:
         return node_analysis.weight.name.replace(".weight", "")
