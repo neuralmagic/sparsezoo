@@ -276,9 +276,6 @@ def _get_conv_weight_dense_sparse_ops(
 
     dense_sum, sparse_sum = 0, 0
 
-    # TODO: This can be sped up by first calculating the number of operations
-    #       performed with no padding, then adding additional operations for padding
-    # For each pixel in the input
     for x in range(0, spatial_shape[1], strides[1]):
         for y in range(0, spatial_shape[0], strides[0]):
 

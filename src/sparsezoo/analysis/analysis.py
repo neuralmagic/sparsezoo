@@ -67,13 +67,17 @@ class NodeAnalysis(BaseModel):
     inputs: List[NodeIO] = Field(description="The node's inputs in the onnx graph")
     outputs: List[NodeIO] = Field(description="The node's outputs in the onnx graph")
 
-    parameters: Optional[Parameters] = Field(description="TODO")
-    operations: Operations = Field(description="TODO")
+    parameters: Optional[Parameters] = Field(
+        description="The node's total number of parameters (excluding bias)"
+    )
+    operations: Operations = Field(
+        description="The node's total number of operations (including bias ops)"
+    )
 
     weight: Optional[WeightAnalysis] = Field(
         description="An analysis of the node's weight"
     )
-    bias: Optional[BiasAnalysis] = Field(description="TODO")
+    bias: Optional[BiasAnalysis] = Field(description="An analysis of the node's bias")
 
     parameterized_prunable: bool = Field(
         description="Does the node have a parameterized and prunable weight"
@@ -241,8 +245,12 @@ class ModelAnalysis(BaseModel):
         description="Overview of nodes without parameterized weights", default={}
     )
 
-    total_prunable_parameters: Parameters = Field(description="TODO")
-    total_operations: ModelOperations = Field(description="TODO")
+    total_prunable_parameters: Parameters = Field(
+        description="The model's total number of parameters which are prunable"
+    )
+    total_operations: ModelOperations = Field(
+        description="The model's total number of operations"
+    )
 
     num_sparse_nodes: int = Field(description="Number of nodes with any sparsity")
     num_quantized_nodes: int = Field(description="Number of quantized nodes")
