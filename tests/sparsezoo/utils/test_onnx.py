@@ -37,6 +37,7 @@ from sparsezoo.utils import (
 )
 from tests.sparsezoo.analysis.helpers import (
     get_expected_analysis,
+    get_generated_analysis,
     get_model_and_node,
     get_model_onnx,
     get_test_model_names,
