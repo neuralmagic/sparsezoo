@@ -16,6 +16,9 @@
 Helper fixtures and functions for testing sparsezoo.analysis
 """
 
+import logging
+import os
+
 import onnx
 import pytest
 
@@ -35,28 +38,28 @@ __all__ = [
 _MODEL_PATHS = {
     "yolact_none": {
         "stub": "zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/base-none",
-        "truth": "tests/sparsezoo/analysis/yolact_none.yaml",
+        "truth": f"{os.path.dirname(__file__)}/yolact_none.json",
     },
     "mobilenet_v1_pruned_moderate": {
         "stub": (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
             "imagenet/pruned-moderate"
         ),
-        "truth": "tests/sparsezoo/analysis/mobilenet_v1_pruned_moderate.yaml",
+        "truth": f"{os.path.dirname(__file__)}/mobilenet_v1_pruned_moderate.json",
     },
     "bert_pruned_quantized": {
         "stub": (
             "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
             "12layer_pruned80_quant-none-vnni"
         ),
-        "truth": "tests/sparsezoo/analysis/bert_pruned_quantized.yaml",
+        "truth": f"{os.path.dirname(__file__)}/bert_pruned_quantized.json",
     },
     "resnet50_pruned_quantized": {
         "stub": (
             "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/"
             "pruned85_quant-none-vnni"
         ),
-        "truth": "tests/sparsezoo/analysis/resnet50_pruned_quantized.yaml",
+        "truth": f"{os.path.dirname(__file__)}/resnet50_pruned_quantized.json",
     },
 }
 
@@ -71,11 +74,20 @@ def get_test_model_names():
 
 
 @pytest.fixture(scope="session")
-def get_expected_analysis():
+def get_expected_analysis(get_generated_analysis):
     model_truth_analyses = {}
     for model_name in _MODEL_PATHS.keys():
         model_truth_path = _MODEL_PATHS[model_name]["truth"]
-        analysis = ModelAnalysis.parse_yaml_file(model_truth_path)
+
+        # if env variable set, automatically update truth files
+        if os.getenv("NM_GENERATE_ANALYSIS_TEST_FILES", False):
+            model_analysis = get_generated_analysis(model_name)
+            with open(model_truth_path, "w") as truth_file:
+                truth_file.write(model_analysis.json())
+
+        # read truth file
+        with open(model_truth_path, "r") as truth_file:
+            analysis = ModelAnalysis.parse_raw(truth_file.read())
         model_truth_analyses[model_name] = analysis
 
     def _get_expected_analysis(model_name):
