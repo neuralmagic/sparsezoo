@@ -16,7 +16,6 @@
 Helper fixtures and functions for testing sparsezoo.analysis
 """
 
-import logging
 import os
 
 import onnx
