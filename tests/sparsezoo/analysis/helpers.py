@@ -73,6 +73,23 @@ def get_test_model_names():
 
 
 @pytest.fixture(scope="session")
+def get_generated_analysis():
+    model_generated_analyses = {}
+    for model_name in _MODEL_PATHS.keys():
+        model_stub = _MODEL_PATHS[model_name]["stub"]
+        model = Zoo.load_model_from_stub(model_stub)
+        model.onnx_file.download()
+        onnx_path = model.onnx_file.downloaded_path()
+        analysis = ModelAnalysis.from_onnx(onnx_path)
+        model_generated_analyses[model_name] = analysis
+
+    def _get_generated_analysis(model_name):
+        return model_generated_analyses[model_name]
+
+    return _get_generated_analysis
+
+
+@pytest.fixture(scope="session")
 def get_expected_analysis(get_generated_analysis):
     model_truth_analyses = {}
     for model_name in _MODEL_PATHS.keys():
@@ -93,23 +110,6 @@ def get_expected_analysis(get_generated_analysis):
         return model_truth_analyses[model_name]
 
     return _get_expected_analysis
-
-
-@pytest.fixture(scope="session")
-def get_generated_analysis():
-    model_generated_analyses = {}
-    for model_name in _MODEL_PATHS.keys():
-        model_stub = _MODEL_PATHS[model_name]["stub"]
-        model = Zoo.load_model_from_stub(model_stub)
-        model.onnx_file.download()
-        onnx_path = model.onnx_file.downloaded_path()
-        analysis = ModelAnalysis.from_onnx(onnx_path)
-        model_generated_analyses[model_name] = analysis
-
-    def _get_generated_analysis(model_name):
-        return model_generated_analyses[model_name]
-
-    return _get_generated_analysis
 
 
 @pytest.fixture(scope="session")
