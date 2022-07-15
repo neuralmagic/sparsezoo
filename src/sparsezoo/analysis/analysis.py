@@ -175,8 +175,8 @@ class NodeAnalysis(BaseModel):
                         sparse=ops_dict["weight"]["num_sparse_ops"],
                     ),
                     multiply_accumulates=DenseSparseOps(
-                        dense=0,
-                        sparse=0,
+                        dense=ops_dict["weight"]["num_dense_ops"] // 2,
+                        sparse=ops_dict["weight"]["num_sparse_ops"] // 2,
                     ),
                 ),
                 dtype=str(node_weight.dtype),
