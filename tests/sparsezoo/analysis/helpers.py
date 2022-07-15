@@ -23,6 +23,7 @@ import pytest
 
 from sparsezoo import Zoo
 from sparsezoo.analysis import ModelAnalysis
+from sparsezoo.utils.graph_editor import ONNXGraph
 
 
 __all__ = [
@@ -30,8 +31,8 @@ __all__ = [
     "get_test_model_names",
     "get_expected_analysis",
     "get_generated_analysis",
-    "get_model_onnx",
-    "get_model_and_node",
+    "get_model_graph",
+    "get_model_graph_and_node",
 ]
 
 _MODEL_PATHS = {
@@ -113,29 +114,30 @@ def get_expected_analysis(get_generated_analysis):
 
 
 @pytest.fixture(scope="session")
-def get_model_onnx():
-    model_onnxs = {}
+def get_model_graph():
+    model_graphs = {}
     for model_name in _MODEL_PATHS.keys():
         model_stub = _MODEL_PATHS[model_name]["stub"]
         model = Zoo.load_model_from_stub(model_stub)
         model.onnx_file.download()
         onnx_path = model.onnx_file.downloaded_path()
         model_onnx = onnx.load(onnx_path)
-        model_onnxs[model_name] = model_onnx
+        model_graph = ONNXGraph(model_onnx)
+        model_graphs[model_name] = model_graph
 
-    def _get_model_onnx(model_name):
-        return model_onnxs[model_name]
+    def _get_model_graph(model_name):
+        return model_graphs[model_name]
 
-    return _get_model_onnx
+    return _get_model_graph
 
 
-@pytest.fixture()
-def get_model_and_node(get_model_onnx):
-    def _get_model_and_node(model_name, node_name):
-        model = get_model_onnx(model_name)
+@pytest.fixture(scope="session")
+def get_model_graph_and_node(get_model_graph):
+    def _get_model_graph_and_node(model_name, node_name):
+        model_graph = get_model_graph(model_name)
         return (
-            model,
-            [node for node in list(model.graph.node) if node.name == node_name][0],
+            model_graph,
+            [node for node in list(model_graph.nodes) if node.name == node_name][0],
         )
 
-    return _get_model_and_node
+    return _get_model_graph_and_node

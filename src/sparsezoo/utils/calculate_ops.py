@@ -16,11 +16,10 @@ import copy
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy
-from onnx import ModelProto, NodeProto
+from onnx import NodeProto
 
-from sparsezoo.utils.node_inference import NodeShape, extract_node_shapes_and_dtypes
-from sparsezoo.utils.onnx import (
-    extract_node_id,
+from sparsezoo.utils import (
+    ONNXGraph,
     get_node_attributes,
     get_node_bias,
     get_node_weight,
@@ -28,6 +27,7 @@ from sparsezoo.utils.onnx import (
     group_four_block,
     is_four_block_sparse_layer,
 )
+from sparsezoo.utils.node_inference import NodeShape
 
 
 __all__ = [
@@ -42,18 +42,17 @@ EMPTY_OPS_DICT = {
 
 
 def get_ops_dict(
-    model: ModelProto,
+    model_graph: ONNXGraph,
     node: NodeProto,
-    node_shapes: Optional[Dict[str, NodeShape]] = None,
+    node_shape: NodeShape,
     is_four_block_sparse: Optional[bool] = None,
 ) -> Dict[str, Dict[str, int]]:
     """
     Gets an approximation of the number of floating point or integer operations
 
-    :param model: model that contains the given node
+    :param model_graph: model graph that contains the given node
     :param node: node which performs the operations
-    :param node_shapes: optional dictionary of node shapes. If not supplied,
-        node_shapes will be computed
+    :param node_shape: the shapes associated with this node
     :param is_four_block_sparse: optional boolean indicating if this node is four
         block sparse. If not supplied, it be will be computed
     :return: dictionary of counts with the following structure
@@ -67,18 +66,14 @@ def get_ops_dict(
             - num_sparse_ops
             - num_dense_ops
     """
-    if node_shapes is None:
-        node_shapes = extract_node_shapes_and_dtypes(model)[0]
-
-    node_shape = node_shapes.get(extract_node_id(node))
     input_shapes = node_shape.input_shapes if node_shape is not None else None
     output_shapes = node_shape.output_shapes if node_shape is not None else None
 
-    weight = get_node_weight(model, node)
-    bias = get_node_bias(model, node)
-    zero_point = get_zero_point(model, node)
+    weight = get_node_weight(model_graph, node)
+    bias = get_node_bias(model_graph, node)
+    zero_point = get_zero_point(model_graph, node)
     is_four_block_sparse = (
-        is_four_block_sparse_layer(model, node)
+        is_four_block_sparse_layer(model_graph, node)
         if is_four_block_sparse is None
         else is_four_block_sparse
     )

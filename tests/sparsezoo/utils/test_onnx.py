@@ -38,8 +38,8 @@ from sparsezoo.utils import (
 from tests.sparsezoo.analysis.helpers import (
     get_expected_analysis,
     get_generated_analysis,
-    get_model_and_node,
-    get_model_onnx,
+    get_model_graph,
+    get_model_graph_and_node,
     get_test_model_names,
     model_paths,
 )
@@ -51,12 +51,12 @@ def margin_of_error():
 
 
 @pytest.fixture(scope="session")
-def get_model_node_shapes_and_dtypes(get_model_onnx, model_paths):
+def get_model_node_shapes_and_dtypes(get_model_graph, model_paths):
     model_node_shapes = {}
     model_node_dtypes = {}
     for model_name in model_paths.keys():
-        model = get_model_onnx(model_name)
-        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model)
+        model_graph = get_model_graph(model_name)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
         model_node_shapes[model_name] = node_shapes
         model_node_dtypes[model_name] = node_dtypes
 
@@ -104,11 +104,11 @@ def pytest_generate_tests(metafunc):
     ],
 )
 def test_get_node_weight_and_shape(
-    model_name, node_name, expected_shape, get_model_and_node
+    model_name, node_name, expected_shape, get_model_graph_and_node
 ):
-    model, node = get_model_and_node(model_name, node_name)
-    weight = get_node_weight(model, node)
-    weight_shape = get_node_weight_shape(model, node)
+    model_graph, node = get_model_graph_and_node(model_name, node_name)
+    weight = get_node_weight(model_graph, node)
+    weight_shape = get_node_weight_shape(model_graph, node)
     if expected_shape is None:
         assert weight is None
         assert weight_shape is None
@@ -145,10 +145,10 @@ def test_get_node_weight_and_shape(
         ("resnet50_pruned_quantized", "Gemm_1239", (1000,)),
     ],
 )
-def test_get_node_bias(model_name, node_name, expected_shape, get_model_and_node):
-    model, node = get_model_and_node(model_name, node_name)
+def test_get_node_bias(model_name, node_name, expected_shape, get_model_graph_and_node):
+    model_graph, node = get_model_graph_and_node(model_name, node_name)
 
-    bias = get_node_bias(model, node)
+    bias = get_node_bias(model_graph, node)
     if expected_shape is None:
         assert bias is None
     else:
@@ -157,42 +157,44 @@ def test_get_node_bias(model_name, node_name, expected_shape, get_model_and_node
 
 
 def test_is_parameterized_prunable_layer(
-    model_name, get_expected_analysis, get_model_and_node
+    model_name, get_expected_analysis, get_model_graph_and_node
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
         assert (
-            is_parameterized_prunable_layer(model, node)
+            is_parameterized_prunable_layer(model_graph, node)
             == node_analysis.parameterized_prunable
         )
 
 
-def test_get_layer_and_op_counts(model_name, get_model_onnx, get_expected_analysis):
-    model = get_model_onnx(model_name)
+def test_get_layer_and_op_counts(model_name, get_model_graph, get_expected_analysis):
+    model_graph = get_model_graph(model_name)
     model_analysis = get_expected_analysis(model_name)
 
-    layer_counts, op_counts = get_layer_and_op_counts(model)
+    layer_counts, op_counts = get_layer_and_op_counts(model_graph)
     assert layer_counts == model_analysis.layer_counts
     assert op_counts == model_analysis.non_parameterized_operator_counts
 
 
-def test_is_quantized_layer(model_name, get_model_and_node, get_expected_analysis):
+def test_is_quantized_layer(
+    model_name, get_model_graph_and_node, get_expected_analysis
+):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
-        assert is_quantized_layer(model, node) == node_analysis.quantized_layer
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
+        assert is_quantized_layer(model_graph, node) == node_analysis.quantized_layer
 
 
 def test_get_node_num_zeros_and_size(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
-        num_zeros, size = get_node_num_zeros_and_size(model, node)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
+        num_zeros, size = get_node_num_zeros_and_size(model_graph, node)
         num_non_zero = size - num_zeros
         if node_analysis.weight is not None:
             assert num_non_zero == node_analysis.weight.parameters.single.num_non_zero
@@ -204,14 +206,14 @@ def test_get_node_num_zeros_and_size(
 
 def test_get_node_num_four_block_zeros_and_size(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
         num_zero_blocks, num_blocks = get_node_num_four_block_zeros_and_size(
-            model, node
+            model_graph, node
         )
         num_non_zero_blocks = num_blocks - num_zero_blocks
         if node_analysis.weight is not None:
@@ -229,60 +231,60 @@ def test_get_node_num_four_block_zeros_and_size(
 
 def test_get_zero_point(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
-        assert get_zero_point(model, node) == node_analysis.zero_point
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
+        assert get_zero_point(model_graph, node) == node_analysis.zero_point
 
 
 def test_get_node_sparsity(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
     margin_of_error,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
         if node_analysis.weight is not None:
-            assert get_node_sparsity(model, node) == pytest.approx(
+            assert get_node_sparsity(model_graph, node) == pytest.approx(
                 node_analysis.weight.parameters.single.sparsity, abs=margin_of_error
             )
         else:
-            assert get_node_sparsity(model, node) == pytest.approx(
+            assert get_node_sparsity(model_graph, node) == pytest.approx(
                 0, abs=margin_of_error
             )
 
 
 def test_is_sparse_layer(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
-        assert is_sparse_layer(model, node) == node_analysis.sparse_layer
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
+        assert is_sparse_layer(model_graph, node) == node_analysis.sparse_layer
 
 
 def test_get_node_four_block_sparsity(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
     margin_of_error,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
         if node_analysis.weight is not None:
-            assert get_node_four_block_sparsity(model, node) == pytest.approx(
+            assert get_node_four_block_sparsity(model_graph, node) == pytest.approx(
                 node_analysis.weight.parameters.four_block.sparsity, abs=margin_of_error
             )
         else:
-            assert get_node_four_block_sparsity(model, node) == 0
+            assert get_node_four_block_sparsity(model_graph, node) == 0
 
 
 @pytest.mark.parametrize(
@@ -313,13 +315,13 @@ def test_is_four_block_sparse_layer(
     model_name,
     node_name,
     expected_bool,
-    get_model_and_node,
+    get_model_graph_and_node,
     margin_of_error,
 ):
-    model, node = get_model_and_node(model_name, node_name)
+    model_graph, node = get_model_graph_and_node(model_name, node_name)
 
     assert (
-        is_four_block_sparse_layer(model, node, threshold=margin_of_error)
+        is_four_block_sparse_layer(model_graph, node, threshold=margin_of_error)
         == expected_bool
     )
 
@@ -356,12 +358,12 @@ def test_get_node_weight_name(
     model_name,
     node_name,
     expected_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     margin_of_error,
 ):
-    model, node = get_model_and_node(model_name, node_name)
+    model_graph, node = get_model_graph_and_node(model_name, node_name)
 
-    weight_name = get_node_weight_name(model, node)
+    weight_name = get_node_weight_name(model_graph, node)
     if expected_name is None:
         assert weight_name is None
     else:
@@ -370,19 +372,19 @@ def test_get_node_weight_name(
 
 def test_extract_node_id(
     model_name,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_expected_analysis,
 ):
     model_analysis = get_expected_analysis(model_name)
     for node_analysis in model_analysis.nodes:
-        _, node = get_model_and_node(model_name, node_analysis.name)
+        _, node = get_model_graph_and_node(model_name, node_analysis.name)
         assert extract_node_id(node) == node_analysis.node_id
 
 
 def test_get_ops_dict(
     model_name,
     get_expected_analysis,
-    get_model_and_node,
+    get_model_graph_and_node,
     get_model_node_shapes_and_dtypes,
     margin_of_error,
 ):
@@ -390,8 +392,9 @@ def test_get_ops_dict(
     node_shapes, node_dtypes = get_model_node_shapes_and_dtypes(model_name)
 
     for node_analysis in model_analysis.nodes:
-        model, node = get_model_and_node(model_name, node_analysis.name)
-        ops_dict = get_ops_dict(model, node, node_shapes=node_shapes)
+        model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
+        node_shape = node_shapes.get(node_analysis.node_id)
+        ops_dict = get_ops_dict(model_graph, node, node_shape=node_shape)
 
         # weight
         if node_analysis.weight is not None:

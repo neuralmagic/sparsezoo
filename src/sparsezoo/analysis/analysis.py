@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Union
 
 import onnx
 import yaml
-from onnx import ModelProto, NodeProto
+from onnx import NodeProto
 from pydantic import BaseModel, Field
 
 from sparsezoo.analysis.utils.models import (
@@ -32,6 +32,7 @@ from sparsezoo.analysis.utils.models import (
 from sparsezoo.utils import (
     NodeDataType,
     NodeShape,
+    ONNXGraph,
     extract_node_id,
     extract_node_shapes_and_dtypes,
     get_layer_and_op_counts,
@@ -91,24 +92,22 @@ class NodeAnalysis(BaseModel):
     @classmethod
     def from_node(
         cls,
-        model_onnx: ModelProto,
+        model_graph: ONNXGraph,
         node: NodeProto,
-        node_shapes: Optional[Dict[str, NodeShape]] = None,
-        node_dtypes: Optional[Dict[str, NodeDataType]] = None,
+        node_shape: Union[NodeShape, None],
+        node_dtype: Union[NodeDataType, None],
     ):
         """
         Node Analysis
 
         :param cls: class being constructed
-        :param model_onnx: model onnx that node belongs to
+        :param model_graph: instance of ONNXGraph containing node
         :param node: node being analyzed
-        :param node_shapes: optional dictionary of node shapes. If not supplied,
-        node_shapes will be computed
+        :param node_shape: the shape of the node
+        :param node_dtype: the datatype of the node
         :return: instance of cls
         """
         node_id = extract_node_id(node)
-        node_shape = node_shapes.get(node_id)
-        node_dtype = node_dtypes.get(node_id)
 
         has_input_shapes = (
             node_shape is not None and node_shape.input_shapes is not None
@@ -144,21 +143,21 @@ class NodeAnalysis(BaseModel):
             else []
         )
 
-        quantized_layer = is_quantized_layer(model_onnx, node)
-        ops_dict = get_ops_dict(model_onnx, node, node_shapes=node_shapes)
+        quantized_layer = is_quantized_layer(model_graph, node)
+        ops_dict = get_ops_dict(model_graph, node, node_shape=node_shape)
 
-        node_weight = get_node_weight(model_onnx, node)
+        node_weight = get_node_weight(model_graph, node)
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
-            model_onnx, node
+            model_graph, node
         )
         (
             num_sparse_four_blocks,
             num_four_blocks,
-        ) = get_node_num_four_block_zeros_and_size(model_onnx, node)
+        ) = get_node_num_four_block_zeros_and_size(model_graph, node)
         weight_analysis = (
             WeightAnalysis(
-                name=get_node_weight_name(model_onnx, node),
-                shape=get_node_weight_shape(model_onnx, node),
+                name=get_node_weight_name(model_graph, node),
+                shape=get_node_weight_shape(model_graph, node),
                 parameters=Parameters(
                     single=DenseSparseValues(
                         num_non_zero=num_parameters - num_sparse_parameters,
@@ -185,7 +184,7 @@ class NodeAnalysis(BaseModel):
             else None
         )
 
-        node_bias = get_node_bias(model_onnx, node)
+        node_bias = get_node_bias(model_graph, node)
         bias_analysis = (
             BiasAnalysis(
                 shape=list(node_bias.shape),
@@ -226,10 +225,10 @@ class NodeAnalysis(BaseModel):
             operations=operations,
             weight=weight_analysis,
             bias=bias_analysis,
-            parameterized_prunable=is_parameterized_prunable_layer(model_onnx, node),
-            sparse_layer=is_sparse_layer(model_onnx, node),
+            parameterized_prunable=is_parameterized_prunable_layer(model_graph, node),
+            sparse_layer=is_sparse_layer(model_graph, node),
             quantized_layer=quantized_layer,
-            zero_point=get_zero_point(model_onnx, node),
+            zero_point=get_zero_point(model_graph, node),
         )
 
 
@@ -269,10 +268,11 @@ class ModelAnalysis(BaseModel):
         :return: instance of cls
         """
         model_onnx = onnx.load(onnx_file_path)
+        model_graph = ONNXGraph(model_onnx)
 
-        node_analyses = cls.analyze_nodes(model_onnx)
+        node_analyses = cls.analyze_nodes(model_graph)
 
-        layer_counts, op_counts = get_layer_and_op_counts(model_onnx)
+        layer_counts, op_counts = get_layer_and_op_counts(model_graph)
 
         total_prunable_parameters = Parameters(
             single=DenseSparseValues(
@@ -408,17 +408,20 @@ class ModelAnalysis(BaseModel):
         return cls.parse_obj(dict_obj)
 
     @staticmethod
-    def analyze_nodes(model_onnx: ModelProto) -> List[NodeAnalysis]:
+    def analyze_nodes(model_graph: ONNXGraph) -> List[NodeAnalysis]:
         """
         :param: model that contains the nodes to be analyzed
         :return: list of node analyses from model graph
         """
-        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_onnx)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
 
         nodes = []
-        for node in model_onnx.graph.node:
+        for node in model_graph.nodes:
+            node_id = extract_node_id(node)
+            node_shape = node_shapes.get(node_id)
+            node_dtype = node_dtypes.get(node_id)
             node_analysis = NodeAnalysis.from_node(
-                model_onnx, node, node_shapes=node_shapes, node_dtypes=node_dtypes
+                model_graph, node, node_shape=node_shape, node_dtype=node_dtype
             )
             nodes.append(node_analysis)
 

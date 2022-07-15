@@ -15,8 +15,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
-from onnx import ModelProto, NodeProto, numpy_helper
+from onnx import NodeProto, numpy_helper
 from onnx.helper import get_attribute_value
+
+from sparsezoo.utils import ONNXGraph
 
 
 __all__ = [
@@ -36,6 +38,7 @@ __all__ = [
     "group_four_block",
     "extract_node_id",
     "get_node_weight_shape",
+    "get_node_attributes",
 ]
 
 
@@ -51,16 +54,16 @@ def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     return attributes
 
 
-def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
+def get_node_bias(model_graph: ONNXGraph, node: NodeProto) -> numpy.ndarray:
     """
     Finds parameter value of node (the node weight)
 
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
 
-    def _get_node_bias_name(model: ModelProto, node: NodeProto) -> str:
+    def _get_node_bias_name(node: NodeProto) -> str:
         if node.op_type in ["Conv", "Gemm"]:
             return _get_node_input(node, 2, default=None)
 
@@ -69,24 +72,22 @@ def get_node_bias(model: ModelProto, node: NodeProto) -> numpy.ndarray:
 
         return None
 
-    initializer_name = _get_node_bias_name(model, node)
-    if initializer_name is None:
-        return None
-
-    return get_initializer_value(model, node, initializer_name)
+    initializer_name = _get_node_bias_name(node)
+    return get_initializer_value(model_graph, node, initializer_name)
 
 
 def get_initializer_value(
-    model: ModelProto, node: NodeProto, initializer_name: str
-) -> numpy.ndarray:
+    model_graph: ONNXGraph, node: NodeProto, initializer_name: Union[str, None]
+) -> Union[numpy.ndarray, None]:
     """
     Helper function to find initializers by name in model graph
-
-    :param model: model that contains the initializer with the given name
+    :param model_graph: model graph that contains the initializer with the given name
     :param node: node to which the initializer belongs to
     :param initializer_name: name of initializer being returned
     :return: initalizer if found, None otherwise
     """
+    if initializer_name is None:
+        return None
 
     def _is_transposed_initializer(node: NodeProto, initailizer_name: str) -> bool:
         if node.op_type in ["Gemm"]:
@@ -108,10 +109,8 @@ def get_initializer_value(
 
         return False
 
-    for initializer in model.graph.initializer:
-        if initializer.name == initializer_name:
-            break
-    else:
+    initializer = model_graph.get_init_by_name(initializer_name)
+    if initializer is None:
         return None
 
     value = numpy_helper.to_array(initializer)
@@ -121,14 +120,16 @@ def get_initializer_value(
     return value
 
 
-def get_node_num_zeros_and_size(model: ModelProto, node: NodeProto) -> Tuple[int, int]:
+def get_node_num_zeros_and_size(
+    model_graph: ONNXGraph, node: NodeProto
+) -> Tuple[int, int]:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose number of zeros and parameter size is being calculated
     :return: number of zeros and number of total values in node parameter
     """
-    zero_point = get_zero_point(model, node)
-    weight = get_node_weight(model, node)
+    zero_point = get_zero_point(model_graph, node)
+    weight = get_node_weight(model_graph, node)
     if weight is None:
         return 0, 0
 
@@ -170,16 +171,16 @@ def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndar
 
 
 def get_node_num_four_block_zeros_and_size(
-    model: ModelProto, node: NodeProto
+    model_graph: ONNXGraph, node: NodeProto
 ) -> Tuple[int, int]:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose four block sparsity sizes are being calculated
     :return: number of zero blocks and number of total blocks
     """
     # Get param and zero point
-    zero_point = get_zero_point(model, node)
-    weight = get_node_weight(model, node)
+    zero_point = get_zero_point(model_graph, node)
+    weight = get_node_weight(model_graph, node)
     if weight is None:
         return 0, 0
 
@@ -193,9 +194,9 @@ def get_node_num_four_block_zeros_and_size(
     return num_zero_blocks, weight_blocks.shape[0]
 
 
-def get_zero_point(model: ModelProto, node: NodeProto) -> int:
+def get_zero_point(model_graph: ONNXGraph, node: NodeProto) -> int:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to find zero point of
     :return: zero point of given node
     """
@@ -214,9 +215,11 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
     if node.op_type in ["Gather"]:
         return 0
 
-    if is_quantized_layer(model, node):
+    if is_quantized_layer(model_graph, node):
         zero_point_initializer_name = _get_node_zero_point_init_name(node)
-        zero_point = get_initializer_value(model, node, zero_point_initializer_name)
+        zero_point = get_initializer_value(
+            model_graph, node, zero_point_initializer_name
+        )
         if zero_point.ndim != 0:
             raise NotImplementedError("Channel-wise zero points are not supported")
 
@@ -225,41 +228,41 @@ def get_zero_point(model: ModelProto, node: NodeProto) -> int:
         return 0
 
 
-def is_sparse_layer(model: ModelProto, node: NodeProto) -> bool:
+def is_sparse_layer(model_graph: ONNXGraph, node: NodeProto) -> bool:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose sparsity is being checked
     :return: true if node weights have any sparsity, False otherwise
     """
-    return get_node_sparsity(model, node) > 0
+    return get_node_sparsity(model_graph, node) > 0
 
 
 def is_four_block_sparse_layer(
-    model: ModelProto, node: NodeProto, threshold: int = 0.05
+    model_graph: ONNXGraph, node: NodeProto, threshold: int = 0.05
 ) -> bool:
     """
     Estimates if this node was likely pruned with four block sparsity.
     This is determined by comparing the difference between normal sparsity and
     four block sparsity and evaluating if the difference falls under a threshold
 
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose four block sparsity is being checked
     :param threshold: threshold for measuring sparsity differences
     :return: true if node weights have any four block sparsity, False otherwise
     """
-    four_block_sparsity = get_node_four_block_sparsity(model, node)
-    sparsity = get_node_sparsity(model, node)
+    four_block_sparsity = get_node_four_block_sparsity(model_graph, node)
+    sparsity = get_node_sparsity(model_graph, node)
     return four_block_sparsity > 0 and abs(four_block_sparsity - sparsity) <= threshold
 
 
-def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
+def is_quantized_layer(model_graph: ONNXGraph, node: NodeProto) -> bool:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose quantized status is being checked
     :return: True if node contains quantized weights, False otherwise
     """
     if node.op_type == "Gather":
-        weight = get_node_weight(model, node)
+        weight = get_node_weight(model_graph, node)
         return weight is not None and weight.dtype in [numpy.uint8, numpy.int8]
 
     return node.op_type in [
@@ -270,15 +273,15 @@ def is_quantized_layer(model: ModelProto, node: NodeProto) -> bool:
     ]
 
 
-def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
+def get_node_four_block_sparsity(model_graph: ONNXGraph, node: NodeProto) -> float:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose four block sparsity is being calculated
     :return: four block sparsity of node
     """
 
     num_zero_blocks, num_total_blocks = get_node_num_four_block_zeros_and_size(
-        model, node
+        model_graph, node
     )
     if num_total_blocks == 0:
         return 0.0
@@ -286,13 +289,13 @@ def get_node_four_block_sparsity(model: ModelProto, node: NodeProto) -> float:
     return float(num_zero_blocks / num_total_blocks)
 
 
-def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
+def get_node_sparsity(model_graph: ONNXGraph, node: NodeProto) -> float:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node whose sparsity is being calculated
     :return: proportion of zeros in given node
     """
-    num_zeros, weight_size = get_node_num_zeros_and_size(model, node)
+    num_zeros, weight_size = get_node_num_zeros_and_size(model_graph, node)
     if weight_size == 0:
         return 0.0
 
@@ -303,23 +306,23 @@ def get_node_sparsity(model: ModelProto, node: NodeProto) -> float:
     return num_zeros / weight_size
 
 
-def is_parameterized_prunable_layer(model: ModelProto, node: NodeProto) -> bool:
+def is_parameterized_prunable_layer(model_graph: ONNXGraph, node: NodeProto) -> bool:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node being checked
     :return: True if this node performs a operation that is parameterized and
         prunable, False otherwise
     """
-    return get_node_weight(model, node) is not None
+    return get_node_weight(model_graph, node) is not None
 
 
-def get_node_weight_name(model: ModelProto, node: NodeProto) -> Union[str, None]:
+def get_node_weight_name(model_graph: ONNXGraph, node: NodeProto) -> Union[str, None]:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node that contains the weight
     :return: name of the weight initializer of the node, None if not found
     """
-    initializer_names = [init.name for init in model.graph.initializer]
+    initializer_names = model_graph.get_init_names()
 
     if node.op_type == "Gather":
         return _get_node_input(node, 0, default=None)
@@ -352,41 +355,44 @@ def get_node_weight_name(model: ModelProto, node: NodeProto) -> Union[str, None]
     return None
 
 
-def get_node_weight(model: ModelProto, node: NodeProto) -> numpy.ndarray:
+def get_node_weight(
+    model_graph: ONNXGraph, node: NodeProto
+) -> Union[numpy.ndarray, None]:
     """
     Finds parameter value of node (the node weight)
 
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
 
-    initializer_name = get_node_weight_name(model, node)
-    if initializer_name is None:
-        return None
-
-    weight = get_initializer_value(model, node, initializer_name)
-    if weight is None and node.op_type != "Gather":
+    initializer_name = get_node_weight_name(model_graph, node)
+    weight = get_initializer_value(model_graph, node, initializer_name)
+    if initializer_name is not None and weight is None and node.op_type != "Gather":
         raise Exception(f"Parameter for {node.name} not found")
 
     return weight
 
 
-def get_layer_and_op_counts(model: ModelProto) -> Tuple[Dict[str, int], Dict[str, int]]:
+def get_layer_and_op_counts(
+    model_graph: ONNXGraph,
+) -> Tuple[Dict[str, int], Dict[str, int]]:
     """
     Creates two dictionaries, each mapping op_type to the number of nodes of
     that op_type. The first dictionary contains op_types which are layers,
     the second contains op_types which are operations.
 
-    :param model: model whose counts are being checked
+    :param model_graph: model graph whose counts are being checked
     :return: a layer dictionary and an operation dictionary which hold node counts
     """
     layer_counts = {}
     op_counts = {}
 
-    for node in model.graph.node:
+    for node in model_graph.nodes:
         target_dict = (
-            layer_counts if is_parameterized_prunable_layer(model, node) else op_counts
+            layer_counts
+            if is_parameterized_prunable_layer(model_graph, node)
+            else op_counts
         )
 
         if node.op_type not in target_dict:
@@ -411,13 +417,15 @@ def extract_node_id(node: NodeProto) -> str:
     return str(outputs[0])
 
 
-def get_node_weight_shape(model: ModelProto, node: NodeProto) -> Union[List[int], None]:
+def get_node_weight_shape(
+    model_graph: ONNXGraph, node: NodeProto
+) -> Union[List[int], None]:
     """
-    :param model: model that contains the given node
+    :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to which parameter belongs to
     :return: shape of weight belonging to node if weight exists, None otherwise
     """
-    weight = get_node_weight(model, node)
+    weight = get_node_weight(model_graph, node)
     if weight is None:
         return None
 
