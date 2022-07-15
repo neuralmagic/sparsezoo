@@ -24,7 +24,11 @@ from sparsezoo.analysis import (
     draw_parameter_operation_combined_chart,
     draw_sparsity_by_layer_chart,
 )
-from tests.sparsezoo.analysis.helpers import get_expected_analysis, get_test_model_names
+from tests.sparsezoo.analysis.helpers import (
+    get_expected_analysis,
+    get_generated_analysis,
+    get_test_model_names,
+)
 
 
 def pytest_generate_tests(metafunc):
