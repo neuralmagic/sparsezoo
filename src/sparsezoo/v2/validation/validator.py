@@ -126,7 +126,8 @@ class IntegrationValidator:
 
                 elif file.name == "deployment":
                     self.validate_directory(
-                        directory=file, validation_files=deployment_files_validation
+                        directory=file,
+                        validation_files=deployment_files_validation,
                     )
 
                 validations[file.name] = file.validate()
@@ -206,9 +207,9 @@ class IntegrationValidator:
             file_names.discard(optional_file)
         if validation_files != file_names:
             raise ValueError(
-                f"Failed to find expected files "
+                "Failed to find expected files "
                 f"{validation_files.difference(file_names)} "
-                f"in the `deployment` directory {directory.name}."
+                f"in the `{directory.name}` directory."
             )
 
         return True

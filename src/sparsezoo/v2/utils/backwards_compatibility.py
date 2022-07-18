@@ -99,32 +99,9 @@ def restructure_request_json(
             file_dict["display_name"] = display_name
             request_json[idx] = file_dict
 
-    # create benchmarking yaml files (use `model.md` to simulate them)
-    files_to_create = ["analysis.yaml", "benchmarks.yaml", "eval.yaml"]
-    if nlp_folder:
-        # if nlp folder, add `recipe.yaml` to
-        # `training` folder
-        files_to_create.append("recipe.yaml")
-    model_card_dict_list = fetch_from_request_json(
-        request_json, "display_name", "model.md"
-    )
-    assert len(model_card_dict_list) == 1
-    for file_name in files_to_create:
-        file_dict = copy.copy(model_card_dict_list[0][1])
-        file_dict["display_name"] = file_name
-        if file_name == "recipe.yaml":
-            file_dict["file_type"] = "training"
-        else:
-            file_dict["file_type"] = "benchmarking"
-
-        request_json.append(file_dict)
-
     # restructure inputs/labels/originals/outputs directories
     # use `sample-inputs.tar.gz` to simulate non-existent directories
-    sample_inputs_dict_list = fetch_from_request_json(
-        request_json, "display_name", "sample-inputs.tar.gz"
-    )
-    assert len(sample_inputs_dict_list) == 1
+
     files_to_create = [
         "sample_inputs.tar.gz",
         "sample_labels.tar.gz",
@@ -136,13 +113,7 @@ def restructure_request_json(
         data = fetch_from_request_json(
             request_json, "display_name", file_name.replace("_", "-")
         )
-        if len(data) == 0:
-            # file missing
-            file_dict = copy.copy(sample_inputs_dict_list[0][1])
-            file_dict["display_name"] = file_name
-            file_dict["file_type"] = type
-            request_json.append(file_dict)
-        elif len(data) == 1:
+        if len(data) == 1:
             # file present but needs
             # restructuring
             file_dict = data[0][1]

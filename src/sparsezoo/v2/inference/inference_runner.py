@@ -116,13 +116,10 @@ class InferenceRunner:
         sample_outputs = self._check_and_fetch_outputs(engine_name="onnxruntime")
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
-            is_valid = True
             for o1, o2 in zip(target_output, output):
                 if o2.ndim != o1.ndim:
                     o2 = o2.squeeze(0)
-                if not numpy.allclose(o1, o2, atol=1e-5):
-                    is_valid = False
-                validation.append(is_valid)
+                validation.append(numpy.allclose(o1, o2, atol=1e-5))
         return all(validation)
 
     def _save_outputs_to_tar(self, iterator: Callable, engine_type: str):

@@ -29,13 +29,10 @@ EXPECTED_IC_FILES = {
     "card": {"model.md"},
     "inputs": {"sample_inputs.tar.gz"},
     "deployment": {"model.onnx"},
-    "benchmarking": {"analysis.yaml", "benchmarks.yaml", "eval.yaml"},
 }
 EXPECTED_NLP_FILES = {
-    "originals": {"sample_originals.tar.gz"},
     "outputs": {"sample_outputs.tar.gz"},
     "recipe": {"recipe_original.md"},
-    "labels": {"sample_labels.tar.gz"},
     "onnx": {"model.onnx"},
     "training": {
         "pytorch_model.bin",
@@ -49,19 +46,16 @@ EXPECTED_NLP_FILES = {
     "card": {"model.md"},
     "inputs": {"sample_inputs.tar.gz"},
     "deployment": {"model.onnx", "tokenizer.json", "config.json"},
-    "benchmarking": {"analysis.yaml", "benchmarks.yaml", "eval.yaml"},
 }
 EXPECTED_YOLO_FILES = {
     "originals": {"sample_originals.tar.gz"},
     "outputs": {"sample_outputs.tar.gz"},
     "recipe": {"recipe_original.md", "recipe_transfer_learn.md"},
-    "labels": {"sample_labels.tar.gz"},
     "onnx": {"model.onnx"},
     "training": {"model.ckpt.pt", "model.pt"},
     "card": {"model.md"},
     "inputs": {"sample_inputs.tar.gz"},
     "deployment": {"model.onnx"},
-    "benchmarking": {"analysis.yaml", "benchmarks.yaml", "eval.yaml"},
 }
 
 

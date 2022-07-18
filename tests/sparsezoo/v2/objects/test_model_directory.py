@@ -67,7 +67,6 @@ class TestModelDirectory:
 
     def test_validate(self, setup):
         model_directory, clone_sample_outputs = setup
-        # TODO: Resolve this problem here
         assert model_directory.validate(validate_onnxruntime=clone_sample_outputs)
         assert model_directory.validate(
             validate_onnxruntime=clone_sample_outputs, minimal_validation=True
@@ -76,7 +75,7 @@ class TestModelDirectory:
     def test_generate_outputs(self, setup):
         model_directory, clone_sample_outputs = setup
         if clone_sample_outputs:
-            for engine in ["onnxruntime"]:
+            for engine in ["onnxruntime", "deepsparse"]:
                 self._test_generate_outputs_single_engine(engine, model_directory)
 
     def test_analysis(self, setup):
@@ -101,20 +100,25 @@ class TestModelDirectory:
         logs_folder_dir = os.path.join(directory_path, "logs")
         os.makedirs(logs_folder_dir)
 
-        # fix yaml files
-        # (they are originally constructed from .md files
-        # and thus fail when being validated)
-        for file_name in os.listdir(directory_path):
-            if file_name.endswith(".yaml"):
-                file_dir = os.path.join(directory_path, file_name)
-                os.remove(file_dir)
-                Path(file_dir).touch()
+        # add yaml files
+        for file_name in ["analysis.yaml", "benchmarks.yaml", "eval.yaml"]:
+            file_dir = os.path.join(directory_path, file_name)
+            Path(file_dir).touch()
 
         # special case for `recipe.yaml` in transformers' tests
-        optional_recipe_yaml = os.path.join(directory_path, "training", "recipe.yaml")
-        if os.path.isfile(optional_recipe_yaml):
-            os.remove(optional_recipe_yaml)
+        if "tokenizer.json" in os.listdir(os.path.join(directory_path, "training")):
+            optional_recipe_yaml = os.path.join(
+                directory_path, "training", "recipe.yaml"
+            )
             Path(optional_recipe_yaml).touch()
+
+        # add remaining `sample_{...}` files, that may be potentially
+        # missing
+        mock_sample_file = os.path.join(directory_path, "sample_inputs.tar.gz")
+        for file_name in ["sample_originals.tar.gz", "sample_labels.tar.gz"]:
+            expected_file_dir = os.path.join(directory_path, file_name)
+            if not os.path.isfile(expected_file_dir):
+                shutil.copyfile(mock_sample_file, expected_file_dir)
 
     def _test_generate_outputs_single_engine(self, engine, model_directory):
         directory_path = model_directory.path
