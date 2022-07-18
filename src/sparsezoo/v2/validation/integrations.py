@@ -17,6 +17,13 @@ Helper functions that provide the validation data for the
 validation procedure described in IntegrationValidator
 """
 
+__all__ = [
+    "validate_nlp",
+    "validate_cv_detection",
+    "validate_cv_segmentation",
+    "validate_cv_classification",
+]
+
 
 def validate_nlp():
     training_files = {

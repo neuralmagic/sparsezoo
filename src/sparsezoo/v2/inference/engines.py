@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+__all__ = ["ENGINES"]
 
-from .inference import *
-from .objects import *
-from .utils import *
-from .validation import *
+ENGINES = ["onnxruntime", "deepsparse"]

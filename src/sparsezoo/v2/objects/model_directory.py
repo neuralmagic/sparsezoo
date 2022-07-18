@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import glob
 import logging
 import os
 import re
@@ -20,10 +19,10 @@ from typing import Any, Dict, Generator, List, Optional, Union
 
 import numpy
 
-from sparsezoo.v2.directory import Directory, is_directory
-from sparsezoo.v2.file import File
-from sparsezoo.v2.inference_runner import ENGINES, InferenceRunner
-from sparsezoo.v2.model_objects import NumpyDirectory, SampleOriginals
+from sparsezoo.v2.inference.engines import ENGINES
+from sparsezoo.v2.inference.inference_runner import InferenceRunner
+from sparsezoo.v2.objects import Directory, File, is_directory
+from sparsezoo.v2.objects.model_objects import NumpyDirectory, SampleOriginals
 
 
 __all__ = ["ModelDirectory"]
@@ -73,9 +72,7 @@ class ModelDirectory(Directory):
             display_name="sample_inputs",
         )
 
-        self.model_card: File = self._file_from_files(
-            files, display_name="model.md"
-        )  # model.md
+        self.model_card: File = self._file_from_files(files, display_name="model.md")
 
         self.sample_outputs: Dict[
             str, NumpyDirectory
@@ -87,7 +84,7 @@ class ModelDirectory(Directory):
                 allow_multiple_outputs=True,
                 regex=True,
             )
-        )  # key by engine name.
+        )
 
         self.sample_labels: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="sample_labels"
@@ -95,37 +92,29 @@ class ModelDirectory(Directory):
 
         self.deployment: Directory = self._directory_from_files(
             files, display_name="deployment"
-        )  # deployment_folder
+        )
 
         self.onnx_folder: Directory = self._directory_from_files(
             files,
             display_name="onnx",
-        )  # onnx folder
+        )
 
-        self.logs: Directory = self._directory_from_files(
-            files, display_name="logs"
-        )  # logs folder
+        self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.onnx_model: File = self._file_from_files(
-            files, display_name="model.onnx"
-        )  # model.onnx
+        self.onnx_model: File = self._file_from_files(files, display_name="model.onnx")
 
-        self.analysis: File = self._file_from_files(
-            files, display_name="analysis.yaml"
-        )  # analysis.yaml
+        self.analysis: File = self._file_from_files(files, display_name="analysis.yaml")
         self.benchmarks: File = self._file_from_files(
             files, display_name="benchmarks.yaml"
-        )  # benchmarks.yaml
-        self.eval_results: File = self._file_from_files(
-            files, display_name="eval.yaml"
-        )  # eval.yaml
+        )
+        self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
 
         self.recipes: List[File] = self._file_from_files(
             files, display_name="recipe(.*).md", regex=True
-        )  # recipe{_tag}.md
+        )
 
         # sorting name of `sample_inputs` and `sample_output` files,
-        # so that they have same correspondence when we jointly
+        # so that they have same one-to-one correspondence when we jointly
         # iterate over them
         self.sample_inputs.files.sort(key=lambda x: x.name)
         [
@@ -133,22 +122,22 @@ class ModelDirectory(Directory):
             for sample_outputs in self.sample_outputs.values()
         ]
 
-        files = [
-            self.training,
-            self.sample_originals,
-            self.sample_inputs,
-            self.model_card,
-            self.sample_outputs,
-            self.sample_labels,
-            self.deployment,
-            self.onnx_folder,
-            self.logs,
-            self.onnx_model,
-            self.analysis,
-            self.benchmarks,
-            self.eval_results,
-            self.recipes,
-        ]
+        self._files_dictionary = {
+            "training": self.training,
+            "deployment": self.deployment,
+            "onnx_folder": self.onnx_folder,
+            "logs": self.logs,
+            "sample_originals": self.sample_originals,
+            "sample_inputs": self.sample_inputs,
+            "sample_outputs": self.sample_outputs,
+            "sample_labels": self.sample_labels,
+            "model_card": self.model_card,
+            "recipes": self.recipes,
+            "onnx_model": self.onnx_model,
+            "analysis": self.analysis,
+            "benchmarks": self.benchmarks,
+            "eval_results": self.eval_results,
+        }
 
         self.inference_runner = InferenceRunner(
             sample_inputs=self.sample_inputs,
@@ -156,11 +145,13 @@ class ModelDirectory(Directory):
             onnx_file=self.onnx_model,
         )
 
-        super().__init__(files=files, name=name, path=path, url=url)
+        super().__init__(
+            files=self._files_dictionary.values(), name=name, path=path, url=url
+        )
 
         # importing the class here, otherwise a circular import error is being raised
         # (IntegrationValidator script also imports ModelDirectory class object)
-        from sparsezoo.v2.integration_validation.validator import IntegrationValidator
+        from sparsezoo.v2.validation import IntegrationValidator
 
         self.integration_validator = IntegrationValidator(model_directory=self)
 
@@ -186,15 +177,19 @@ class ModelDirectory(Directory):
         :return: ModelDirectory class object
         """
         files = []
-        paths = glob.glob(os.path.join(directory_path, "*"))
-        if not paths:
+        display_names = os.listdir(directory_path)
+        if not display_names:
             raise ValueError(
                 "The directory path is empty. "
                 "Check whether the indicated directory exists."
             )
-        for path in paths:
-            display_name = os.path.basename(path)
-            files.append(file_dictionary(display_name=display_name, path=path))
+        for display_name in display_names:
+            files.append(
+                file_dictionary(
+                    display_name=display_name,
+                    path=os.path.join(directory_path, display_name),
+                )
+            )
 
         return ModelDirectory(files=files, name="model_directory", path=directory_path)
 
@@ -220,13 +215,18 @@ class ModelDirectory(Directory):
         ):
             yield output
 
-    def download(self, directory_path: str, override: bool = False) -> bool:
+    def download(
+        self, directory_path: str, override: bool = False, strict_mode: bool = False
+    ) -> bool:
         """
         Attempt to download the files given the `url` attribute
         of the files inside the ModelDirectory.
 
         :param directory_path: directory to download files to
         :param override: if True, the method can override old `directory_path`
+        :param strict_mode: if True, will throw error if any file, that is
+            attempted to be downloaded, turns out to be `None`.
+            By default, False.
         :return: boolean flag; was download successful or not.
         """
         if self.path is not None and not override:
@@ -238,16 +238,20 @@ class ModelDirectory(Directory):
             )
         else:
             downloads = []
-            for file in self.files:
-                downloads.append(self._download(file, directory_path))
-        if all(downloads):
-            # If download wa successful, use the downloaded
-            # files' root path to create the new `ModelDirectory`
-            # class object that replaces the old one.
-            # This would ensure that all the files now have
-            # a matching `path` attribute thus allow
-            # e.g. running `validate()` method
-            self = self.from_directory(directory_path)
+            for key, file in self._files_dictionary.items():
+                if file is not None:
+                    downloads.append(self._download(file, directory_path))
+                else:
+                    if strict_mode:
+                        raise ValueError(
+                            f"Attempted to download file {key}, " f"but it is `None`!"
+                        )
+
+                    else:
+                        logging.warning(
+                            f"Attempted to download file {key}, "
+                            f"but it is `None`. The file is being skipped..."
+                        )
         return all(downloads)
 
     def validate(
@@ -275,6 +279,7 @@ class ModelDirectory(Directory):
                     "`sample_inputs` files with the `model.onnx` model."
                 )
                 return False
+
         if self.model_card.path is None:
             raise ValueError(
                 "It seems like the `ModelDirectory` was created using "
@@ -283,18 +288,9 @@ class ModelDirectory(Directory):
                 "The solution is to call `download()` first."
             )
 
-        if validate_onnxruntime:
-            if not self.inference_runner.validate_with_onnx_runtime():
-                logging.warning(
-                    "Failed to validate the compatibility of "
-                    "`sample_inputs` files with the `model.onnx` model."
-                )
-                return False
-
         return self.integration_validator.validate(minimal_validation)
 
     def analyze(self):
-        # TODO: This will be the onboarding task for Kyle
         raise NotImplementedError()
 
     def _get_directory(
@@ -337,7 +333,6 @@ class ModelDirectory(Directory):
 
         # directory is folder
         else:
-
             # directory is locally on the machine
             files_in_directory = []
             for file_name in os.listdir(path):
@@ -450,8 +445,6 @@ class ModelDirectory(Directory):
                 )
 
                 if directory is not None:
-                    if directory.name.endswith(".tar.gz") and directory.path is None:
-                        directory.name = directory.name.replace(".tar.gz", "")
                     directories_found.append(directory)
 
         if not directories_found:
@@ -473,7 +466,12 @@ class ModelDirectory(Directory):
     ) -> bool:
 
         if isinstance(file, File):
-            if file.url or (file.url is None and isinstance(file, Directory)):
+            if file.url or (
+                file.url is None
+                and any(
+                    [isinstance(file, _class) for _class in [Directory, NumpyDirectory]]
+                )
+            ):
                 file.download(destination_path=directory_path)
                 return True
             else:
@@ -501,7 +499,7 @@ class ModelDirectory(Directory):
             # if found a single 'sample_outputs' directory,
             # assume it should be mapped to its the native framework
             expected_name = "sample_outputs"
-            if directories.name != expected_name:
+            if directories.name not in [expected_name, expected_name + ".tar.gz"]:
                 raise ValueError(
                     "Found single folder (or tar.gz archive)"
                     f"with expected name `{expected_name}`. However,"
@@ -515,6 +513,8 @@ class ModelDirectory(Directory):
             # inference engine
             for directory in directories:
                 engine_name = directory.name.split("_")[-1]
+                if engine_name.endswith(".tar.gz"):
+                    engine_name = engine_name.replace(".tar.gz", "")
                 if engine_name not in ENGINES:
                     raise ValueError(
                         f"The name of the 'sample_outputs' directory should "

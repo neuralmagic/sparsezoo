@@ -21,7 +21,7 @@ import traceback
 from typing import Dict, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.file import File
+from sparsezoo.v2.objects.file import File
 
 
 __all__ = ["Directory", "is_directory"]
@@ -151,7 +151,7 @@ class Directory(File):
         """
         # Directory can represent a tar file.
         if self.is_archive:
-            new_file_path = os.path.join(destination_path, self.name, ".tar.gz")
+            new_file_path = os.path.join(destination_path, self.name)
             for attempt in range(retries):
                 try:
                     download_file(
@@ -176,7 +176,9 @@ class Directory(File):
         # Directory can represent a folder or directory.
         else:
             for file in self.files:
-                file.download(destination_path=destination_path)
+                file.download(
+                    destination_path=os.path.join(destination_path, self.name)
+                )
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -278,7 +280,7 @@ class Directory(File):
         # To unpack the Directory the following criteria need to be fulfilled:
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
-        return self.is_archive and self.path
+        return self.is_archive and self.path is not None
 
 
 def is_directory(file: File) -> bool:
@@ -287,11 +289,12 @@ def is_directory(file: File) -> bool:
     if not isinstance(file, File):
         return False
     if file.path is None:
-        raise ValueError(
-            "Cannot call the method. "
-            "The File/Directory class object's `path` "
-            "attribute is None."
-        )
+        from pathlib import Path
+
+        # we are processing a downladable file
+        file_name_without_extension = Path(file.name).stem
+        return file_name_without_extension == file.name
+
     return os.path.isdir(file.path)
 
 
