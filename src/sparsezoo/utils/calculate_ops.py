@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import copy
+from copy import deepcopy
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy
@@ -194,43 +195,6 @@ def _get_gemm_dense_sparse_ops(
     return num_dense_ops, num_sparse_ops
 
 
-def _get_kernel_subview(
-    weight: numpy.ndarray,
-    x: int,
-    y: int,
-    spatial_shape: List[int],
-    kernel_shape: List[int],
-    pads: List[int],
-) -> Tuple[int, int, int, int]:
-    """
-    Calculates which spatial coordinates in the kernel will be applied to a pixel
-    at coordinates (x, y) and returns the coordinates of a subview of the kernel
-    containing only those spatial coordinates
-
-    :param weight: matrix with shape [out_channels, in_channels, kernel_h, kernel_w]
-    :param x: x coordinate of pixel in the input
-    :param y: y coordinate of pixel in the input
-    :param spatial_shape: spatial dimensions of input
-    :param kernel_shape: spatial dimensions of kernel
-    :param pads: list of paddings around the input
-    :return: the coordinates of a subview of the kernel containing only the
-        coordinates that will be multiplied with the pixel at coordinate (x, y)
-    """
-    distance_from_bottom = spatial_shape[0] - y - 1
-    y0 = kernel_shape[0] - pads[3] - distance_from_bottom - 1
-    y0 = max(y0, 0)
-    y1 = kernel_shape[0] + pads[1] + y
-    y1 = min(y1, kernel_shape[0])
-
-    distance_from_right = spatial_shape[1] - x - 1
-    x0 = kernel_shape[1] - pads[2] - distance_from_right - 1
-    x0 = max(x0, 0)
-    x1 = kernel_shape[1] + pads[0] + x
-    x1 = min(x1, kernel_shape[1])
-
-    return y0, y1, x0, x1
-
-
 def _get_conv_weight_dense_sparse_ops(
     weight: numpy.ndarray,
     input_shape: List[int],
@@ -271,24 +235,42 @@ def _get_conv_weight_dense_sparse_ops(
 
     dense_sum, sparse_sum = 0, 0
 
-    for x in range(0, spatial_shape[1], strides[1]):
-        for y in range(0, spatial_shape[0], strides[0]):
+    # area covered by each kernel position
+    kernel_receptive_field_shape = deepcopy(spatial_shape)
+    kernel_receptive_field_shape[1] -= kernel_shape[1] - 1
+    kernel_receptive_field_shape[0] -= kernel_shape[0] - 1
 
-            # Calculate a subview of the kernels which contains only the
-            # coordinates which apply to this pixel
-            kernel_subview_coords = _get_kernel_subview(
-                weight, x, y, spatial_shape, kernel_shape, pads
+    for kernel_x in range(kernel_shape[1]):
+        for kernel_y in range(kernel_shape[0]):
+            from_left = kernel_x
+            from_right = spatial_shape[1] + kernel_shape[1] - kernel_x - 3
+            from_top = kernel_y
+            from_bottom = spatial_shape[0] + kernel_shape[0] - kernel_y - 3
+
+            # calculate receptive field for each kernel coordinate
+            coord_receptive_field_shape = deepcopy(kernel_receptive_field_shape)
+
+            # expand area by pads[top, left, bottom, right]
+            coord_receptive_field_shape[1] += max(min(pads[3], from_right), 0)
+            coord_receptive_field_shape[1] += max(min(pads[1], from_left), 0)
+            coord_receptive_field_shape[0] += max(min(pads[0], from_top), 0)
+            coord_receptive_field_shape[0] += max(min(pads[2], from_bottom), 0)
+
+            # scale area by strides
+            coord_receptive_field_shape[1] = int(
+                numpy.ceil(coord_receptive_field_shape[1] / strides[1])
+            )
+            coord_receptive_field_shape[0] = int(
+                numpy.ceil(coord_receptive_field_shape[0] / strides[0])
             )
 
-            # Get the number of dense and sparse ops associated with each pixel
-            # in the kernel subview
-            kernel_ops_subview = kernel_dense_sparse_ops[
-                kernel_subview_coords[0] : kernel_subview_coords[1],
-                kernel_subview_coords[2] : kernel_subview_coords[3],
-            ]
-
-            dense_sum += numpy.sum(kernel_ops_subview[:, :, 0])
-            sparse_sum += numpy.sum(kernel_ops_subview[:, :, 1])
+            # accumulate
+            dense_sum += kernel_dense_sparse_ops[kernel_y, kernel_x, 0] * numpy.prod(
+                coord_receptive_field_shape
+            )
+            sparse_sum += kernel_dense_sparse_ops[kernel_y, kernel_x, 1] * numpy.prod(
+                coord_receptive_field_shape
+            )
 
     # Adjust for depthwise convolutions
     dense_sum = dense_sum // group
