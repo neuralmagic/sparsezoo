@@ -25,7 +25,7 @@ from onnx.helper import make_graph, make_model, make_node, make_tensor_value_inf
 
 import matplotlib.pyplot as plt
 from sparsezoo.utils.numpy import save_numpy
-from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects import File
 
 
 MODEL_CARD = """

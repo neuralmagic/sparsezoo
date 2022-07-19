@@ -23,7 +23,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional, Union
 
-from sparsezoo.v2 import Directory, File, NumpyDirectory, SampleOriginals
+from sparsezoo.v2 import Directory, File, NumpyDirectory
 
 
 __all__ = ["setup_model_directory"]
@@ -39,7 +39,7 @@ def setup_model_directory(
         List[Union[str, NumpyDirectory]], str, NumpyDirectory, None
     ] = None,
     sample_labels: Union[Directory, str, None] = None,
-    sample_originals: Union[SampleOriginals, str, None] = None,
+    sample_originals: Union[Directory, str, None] = None,
     logs: Union[Directory, str, None] = None,
     analysis: Union[File, str, None] = None,
     benchmarks: Union[File, str, None] = None,

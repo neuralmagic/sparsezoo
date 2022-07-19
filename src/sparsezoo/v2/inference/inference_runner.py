@@ -26,8 +26,7 @@ import onnx
 import onnxruntime as ort
 from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.inference.engines import ENGINES
-from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model_objects import NumpyDirectory
+from sparsezoo.v2.objects import File, NumpyDirectory
 
 
 __all__ = ["InferenceRunner"]

@@ -17,9 +17,10 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import numpy
 import pytest
 
-from sparsezoo.v2.objects.model_directory import ModelDirectory
+from sparsezoo.v2.objects import ModelDirectory
 from tests.sparsezoo.v2.objects.test_model_directory_download import (
     TestModelDirectoryFromZooApi,
 )
@@ -146,13 +147,11 @@ class TestModelDirectory:
             if o1.ndim != o2.ndim:
                 o2 = o2.squeeze(0)
             # for 'onnxruntime' accuracy, we use the default one (1e-5).
-            # for 'deepsparse' accuracy, we need to be mindful that we are
-            # comparing deepsparse inference output with onnxruntime gt output.
-            # this is why we lower the accuracy here (1e-4)
+            # for 'deepsparse' accuracy, we lower the accuracy here (1e-4)
             if engine == "onnxruntime":
-                assert pytest.approx(o1, abs=1e-5) == o2
+                assert numpy.isclose(o1, o2, atol=1e-5).all()
             else:
-                assert pytest.approx(o1, abs=1e-4) == o2
+                assert numpy.isclose(o1, o2, atol=1e-4).all()
 
         if engine == "onnxruntime":
             assert os.path.isfile(tar_file_expected_path)

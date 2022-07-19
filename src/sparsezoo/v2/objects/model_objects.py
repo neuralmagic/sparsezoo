@@ -24,38 +24,12 @@ from typing import List, Optional
 import onnx
 
 from sparsezoo.utils.numpy import load_numpy_list
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects import Directory, File
 
 
-__all__ = ["NumpyDirectory", "SampleOriginals"]
+__all__ = ["NumpyDirectory"]
 
 NUMPY_DIRECTORY_NAMES = ["sample-inputs", "sample-outputs"]
-
-
-class SampleOriginals(Directory):
-    """
-    Object that represents a directory with unedited data that
-    can be used as inputs to a training pipeline.
-
-    :param files: list of files contained within the SampleOriginals
-    :param name: name of the SampleOriginals
-    :param path: path of the SampleOriginals
-    :param url: url of the SampleOriginals
-    """
-
-    def __init__(
-        self,
-        files: List[File],
-        name: str,
-        path: Optional[str] = None,
-        url: Optional[str] = None,
-    ):
-        super().__init__(files=files, name=name, path=path, url=url)
-
-    def __iter__(self) -> File:
-        for file in self.files:
-            yield file
 
 
 class NumpyDirectory(Directory):

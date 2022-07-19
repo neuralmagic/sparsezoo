@@ -19,7 +19,7 @@ import tempfile
 
 import pytest
 
-from sparsezoo.v2 import Directory, File
+from sparsezoo.v2.objects import Directory, File
 from tests.sparsezoo.v2.objects.test_file import _create_sample_file
 
 

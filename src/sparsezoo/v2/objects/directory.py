@@ -21,7 +21,7 @@ import traceback
 from typing import Dict, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects import File
 
 
 __all__ = ["Directory", "is_directory"]
@@ -281,6 +281,10 @@ class Directory(File):
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
         return self.is_archive and self.path is not None
+
+    def __iter__(self) -> File:
+        for file in self.files:
+            yield file
 
 
 def is_directory(file: File) -> bool:

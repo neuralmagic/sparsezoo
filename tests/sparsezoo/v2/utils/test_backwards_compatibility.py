@@ -16,7 +16,7 @@ import pytest
 
 from sparsezoo.requests import parse_zoo_stub
 from sparsezoo.requests.get import get_model_get_request
-from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
+from sparsezoo.v2.utils import restructure_request_json
 
 
 EXPECTED_IC_FILES = {

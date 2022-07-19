@@ -21,8 +21,7 @@ import numpy
 
 from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
-from sparsezoo.v2.objects import Directory, File, is_directory
-from sparsezoo.v2.objects.model_objects import NumpyDirectory, SampleOriginals
+from sparsezoo.v2.objects import Directory, File, NumpyDirectory, is_directory
 
 
 __all__ = ["ModelDirectory"]
@@ -61,9 +60,9 @@ class ModelDirectory(Directory):
         self.training: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="training"
         )
-        self.sample_originals: SampleOriginals = self._directory_from_files(
+        self.sample_originals: Directory = self._directory_from_files(
             files,
-            directory_class=SampleOriginals,
+            directory_class=Directory,
             display_name="sample_originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
@@ -412,7 +411,7 @@ class ModelDirectory(Directory):
     def _directory_from_files(
         self,
         files: List[Dict[str, Any]],
-        directory_class: Union[Directory, NumpyDirectory, SampleOriginals] = Directory,
+        directory_class: Union[Directory, NumpyDirectory] = Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
         allow_multiple_outputs: Optional[bool] = False,

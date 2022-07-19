@@ -20,9 +20,7 @@ class objects are valid
 import os
 from typing import Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model_directory import ModelDirectory
+from sparsezoo.v2.objects import Directory, File, ModelDirectory
 from sparsezoo.v2.validation import (
     validate_cv_classification,
     validate_cv_detection,
