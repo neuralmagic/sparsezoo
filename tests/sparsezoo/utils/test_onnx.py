@@ -74,7 +74,6 @@ def pytest_generate_tests(metafunc):
         "test_get_node_weight_name",
     ]:
         metafunc.parametrize("model_name", get_test_model_names())
-        # metafunc.parametrize("model_name", ["mobilenet_v1_pruned_moderate"])
 
 
 @pytest.mark.parametrize(
