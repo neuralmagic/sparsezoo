@@ -40,7 +40,6 @@ def test_draw_sparsity_by_layer_chart(model_name, get_expected_analysis):
     draw_sparsity_by_layer_chart(
         model_analysis,
         model_name=model_name,
-        out_path=f"/Users/poketopa/Desktop/analysis_tool_results/{model_name}/test_draw_sparsity_by_layer_chart.png",
     )
 
 
@@ -49,7 +48,6 @@ def test_draw_operation_chart(model_name, get_expected_analysis):
     draw_operation_chart(
         model_analysis,
         model_name=model_name,
-        out_path=f"/Users/poketopa/Desktop/analysis_tool_results/{model_name}/test_draw_operation_chart.png",
     )
 
 
@@ -58,7 +56,6 @@ def test_draw_parameter_chart(model_name, get_expected_analysis):
     draw_parameter_chart(
         model_analysis,
         model_name=model_name,
-        out_path=f"/Users/poketopa/Desktop/analysis_tool_results/{model_name}/test_draw_parameter_chart.png",
     )
 
 
@@ -67,5 +64,4 @@ def test_draw_parameter_operation_combined_chart(model_name, get_expected_analys
     draw_parameter_operation_combined_chart(
         model_analysis,
         model_name=model_name,
-        out_path=f"/Users/poketopa/Desktop/analysis_tool_results/{model_name}/draw_parameter_operation_combined_chart.png",
     )
