@@ -18,10 +18,10 @@ import pathlib
 import tarfile
 import time
 import traceback
-from typing import Dict, List, Optional, Union
+from typing import Dict, Generator, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.objects import File
+from sparsezoo.v2.objects.file import File
 
 
 __all__ = ["Directory", "is_directory"]
@@ -282,7 +282,7 @@ class Directory(File):
         # 2) The Directory needs to have a `path` attribute.
         return self.is_archive and self.path is not None
 
-    def __iter__(self) -> File:
+    def __iter__(self) -> Generator[File, None, None]:
         for file in self.files:
             yield file
 
@@ -293,10 +293,8 @@ def is_directory(file: File) -> bool:
     if not isinstance(file, File):
         return False
     if file.path is None:
-        from pathlib import Path
-
-        # we are processing a downladable file
-        file_name_without_extension = Path(file.name).stem
+        # we are processing a downloadable file
+        file_name_without_extension = pathlib.Path(file.name).stem
         return file_name_without_extension == file.name
 
     return os.path.isdir(file.path)

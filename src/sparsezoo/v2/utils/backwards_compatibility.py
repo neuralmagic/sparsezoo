@@ -71,21 +71,17 @@ def restructure_request_json(
         x[1]["display_name"]
         for x in fetch_from_request_json(request_json, "file_type", "training")
     ]
-    nlp_folder = (
-        True
-        if (("config.json") in training_file_names)
-        and (("tokenizer.json") in training_file_names)
-        else False
-    )
+    nlp_folder = {"config.json", "tokenizer.json"}.issubset(set(training_file_names))
+
     if nlp_folder:
         for file_name in ["config.json", "tokenizer.json"]:
-            file_dict_training = fetch_from_request_json(
+            training_file_dict = fetch_from_request_json(
                 request_json, "display_name", file_name
             )
-            assert len(file_dict_training) == 1
-            file_dict_deployment = copy.copy(file_dict_training[0][1])
-            file_dict_deployment["file_type"] = "deployment"
-            request_json.append(file_dict_deployment)
+            assert len(training_file_dict) == 1
+            deployment_file_dict = copy.copy(training_file_dict[0][1])
+            deployment_file_dict["file_type"] = "deployment"
+            request_json.append(deployment_file_dict)
 
     # create recipes
     recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")

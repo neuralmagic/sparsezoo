@@ -21,7 +21,9 @@ import numpy
 
 from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
-from sparsezoo.v2.objects import Directory, File, NumpyDirectory, is_directory
+from sparsezoo.v2.objects.directory import Directory, is_directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
 __all__ = ["ModelDirectory"]
@@ -420,7 +422,7 @@ class ModelDirectory(Directory):
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
         # otherwise None.
-        if all([file_dict.get("file_type") for file_dict in files]):
+        if all(["file_type" in file_dict for file_dict in files]):
             # if file_dict is retrieved from the API as `request_json`
             # first check if a directory can be created from the
             # "loose" files (alternative to parsing a .tar.gz file as
@@ -468,7 +470,7 @@ class ModelDirectory(Directory):
             if file.url or (
                 file.url is None
                 and any(
-                    [isinstance(file, _class) for _class in [Directory, NumpyDirectory]]
+                    isinstance(file, _class) for _class in [Directory, NumpyDirectory]
                 )
             ):
                 file.download(destination_path=directory_path)

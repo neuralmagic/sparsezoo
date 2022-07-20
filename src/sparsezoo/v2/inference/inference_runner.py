@@ -26,7 +26,8 @@ import onnx
 import onnxruntime as ort
 from sparsezoo.utils.numpy import save_numpy
 from sparsezoo.v2.inference.engines import ENGINES
-from sparsezoo.v2.objects import File, NumpyDirectory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
 __all__ = ["InferenceRunner"]
@@ -110,16 +111,13 @@ class InferenceRunner:
 
         :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
-        validation = []
-
         sample_outputs = self._check_and_fetch_outputs(engine_name="onnxruntime")
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
             for o1, o2 in zip(target_output, output):
-                if o2.ndim != o1.ndim:
-                    o2 = o2.squeeze(0)
-                validation.append(numpy.allclose(o1, o2, atol=1e-5))
-        return all(validation)
+                if not numpy.allclose(o1, o2.squeeze(0), atol=1e-5):
+                    return False
+        return True
 
     def _save_outputs_to_tar(self, iterator: Callable, engine_type: str):
         output_files = []
