@@ -27,24 +27,25 @@ from sparsezoo.v2.objects.model import Model
 
 
 files_ic = {
-    "analysis.yaml",
+    "training",
     "deployment",
     "logs",
+    "onnx",
     "model.onnx",
     "recipe_original.md",
+    "recipe_transfer_learn.md",
     "sample_inputs.tar.gz",
     "sample_originals.tar.gz",
-    "benchmarks.yaml",
-    "eval.yaml",
-    "model.md",
-    "onnx",
-    "recipe_transfer_learn.md",
     "sample_labels.tar.gz",
     "sample_outputs.tar.gz",
-    "training",
     "sample_inputs",
     "sample_originals",
     "sample_labels",
+    "sample_outputs",
+    "benchmarks.yaml",
+    "eval.yaml",
+    "analysis.yaml",
+    "model.md",
 }
 
 files_nlp = copy.copy(files_ic)
@@ -171,7 +172,7 @@ class TestModel:
     @staticmethod
     def _add_mock_files(directory_path: str, clone_sample_outputs: bool):
         # add some mock files, to complete the full set of
-        # possible expected files in the `ModelDirectory`
+        # possible expected files in the `Model`
         # class object
 
         # add onnx directory

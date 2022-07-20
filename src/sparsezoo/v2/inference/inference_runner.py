@@ -38,7 +38,7 @@ class InferenceRunner:
     Helper class for running inference
     given `sample_inputs`, `sample_outputs` and the onnx model.
 
-    This is intended to be used by the ModelDirectory class object.
+    This is intended to be used by the Model class object.
 
     :params sample_inputs: File object containing sample inputs to the inference engine
     :params sample_outputs: File object containing sample outputs the inference engine

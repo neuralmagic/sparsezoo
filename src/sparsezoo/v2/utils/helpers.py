@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Helper functions pertaining to the creation of ModelDirectory
+Helper functions pertaining to the creation of Model
 """
 
 import copy

@@ -41,10 +41,10 @@ def restructure_request_json(
 ) -> Dict[str, Any]:
     """
     Takes the legacy API response and restructures it, so that the output is
-    compatible with the structure of ModelDirectory.
+    compatible with the structure of Model.
 
     :params request_json: data structure describing the
-        files in the ModelDirectory (output from NeuralMagic API).
+        files in the Model (output from NeuralMagic API).
     :params allowed_file_types: a set of `file_types`,
         that will not be filtered out during restructuring
     :return: restructured request_json

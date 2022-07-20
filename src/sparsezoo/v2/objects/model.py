@@ -214,7 +214,7 @@ class Model(Directory):
         if self.path is not None and not override:
             raise ValueError(
                 "Model class object was either created "
-                "using 'from_directory` factory method or "
+                "using path that points to a local directory or "
                 "`download()` method already invoked."
                 "Set `override` = True to override."
             )
@@ -264,10 +264,9 @@ class Model(Directory):
 
         if self.model_card.path is None:
             raise ValueError(
-                "It seems like the `Model` was created using "
-                "the `from_zoo_api()` method. Before running `validate()` "
+                "Model card missing! Before running `validate()` "
                 "method, the respective files must be present locally. "
-                "The solution is to call `download()` first."
+                "The solution may be to call `download()` first."
             )
 
         return self.integration_validator.validate(minimal_validation)
