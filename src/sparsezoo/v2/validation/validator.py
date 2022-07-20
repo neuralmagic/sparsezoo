@@ -20,8 +20,10 @@ class objects are valid
 import os
 from typing import Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.v2.objects import Directory, File, Model
-from sparsezoo.v2.validation import (
+from sparsezoo.v2.objects.directory import Directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model import Model
+from sparsezoo.v2.validation.integrations import (
     validate_cv_classification,
     validate_cv_detection,
     validate_cv_segmentation,
@@ -47,7 +49,7 @@ class IntegrationValidator:
     Helper class to facilitate the validation of the ModelDirectory class.
     It is called by the "validate" method of ModelDirectory.
 
-    :param model_directory: ModelDirectory class object to be
+    :param model: ModelDirectory class object to be
         validated
     :param required_files: a minimal set of file names in ModelDirectory,
         that need to be present, so that the validation is
@@ -58,11 +60,11 @@ class IntegrationValidator:
 
     def __init__(
         self,
-        model_directory: Model,
+        model: Model,
         required_files: Set[str] = REQUIRED_FILES,
         integration_to_data: Dict[str, Callable] = INTEGRATION_NAME_TO_DATA,
     ):
-        self.model_directory = model_directory
+        self.model = model
         self.required_files = required_files
         self.integration_to_data = integration_to_data
         self.minimal_validation = None
@@ -96,15 +98,13 @@ class IntegrationValidator:
                 f"(against the {mode} expected set of files) failed."
             )
         # validate files one by one
-        integration_name = self._get_integration_name(
-            model_card=self.model_directory.model_card
-        )
+        integration_name = self._get_integration_name(model_card=self.model.model_card)
         (
             training_files_validation,
             optional_training_files_validation,
             deployment_files_validation,
         ) = self.integration_to_data[integration_name]()
-        for file in self.model_directory.files:
+        for file in self.model.files:
             # checker for dict-type file
             if isinstance(file, dict):
                 validations[file.__repr__()] = all(
@@ -150,7 +150,7 @@ class IntegrationValidator:
             is valid and no errors arise
         """
         if self.minimal_validation:
-            for file in self.model_directory.files:
+            for file in self.model.files:
                 if isinstance(file, list) or isinstance(file, dict):
                     continue
                 else:
@@ -159,7 +159,7 @@ class IntegrationValidator:
 
         else:
             # make sure that all default files in ModelDirectory are present
-            return all([file is not None for file in self.model_directory.files])
+            return all([file is not None for file in self.model.files])
 
     def validate_directory(
         self,

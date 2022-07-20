@@ -13,23 +13,18 @@
 # limitations under the License.
 
 import logging
-import os
 from typing import Dict, Union
+
+import requests
 
 from sparsezoo.v2.utils.authentication import get_auth_header
 
 
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
-MODELS_API_URL = f"{BASE_API_URL}/models"
-DOWNLOAD_PATH = "download"
-import requests
-
+__all__ = ["download_get_request"]
 
 _LOGGER = logging.getLogger(__name__)
+
+DOWNLOAD_PATH = "download"
 
 
 def download_get_request(

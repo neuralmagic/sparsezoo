@@ -15,16 +15,18 @@
 import logging
 import os
 import warnings
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from sparsezoo.v2.requests.requests import download_get_request
+from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
 
+
+__all__ = ["load_files_from_stub", "load_files_from_directory"]
+
+_LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
 
-__all__ = ["load_files_from_stub"]
-
-_LOGGER = logging.getLogger(__name__)
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
     if os.getenv("SPARSEZOO_API_URL")
@@ -33,9 +35,44 @@ BASE_API_URL = (
 MODELS_API_URL = f"{BASE_API_URL}/models"
 
 
-def filter_files(files, params):
+def file_dictionary(**kwargs):
+    return kwargs
+
+
+def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
+    """
+    :param directory_path: a path to the directory,
+        that contains model files in the expected structure
+    :return list of file dictionaries
+    """
+    display_names = os.listdir(directory_path)
+    if not display_names:
+        raise ValueError(
+            "The directory path is empty. "
+            "Check whether the indicated directory exists."
+        )
+    files = [
+        file_dictionary(
+            display_name=display_name, path=os.path.join(directory_path, display_name)
+        )
+        for display_name in display_names
+    ]
+    return files
+
+
+def filter_files(
+    files: List[Dict[str, Any]], params: Dict[str, str]
+) -> List[Dict[str, Any]]:
+    """
+    Use the `params` to extract only the relevant files from `files`
+
+    :param files: a list of file dictionaries
+    :param params: a dictionary with filtering parameters
+    :return a filtered `files` object
+    """
     ((param, value),) = params.items()
     if param == "recipe":
+        # pick a recipe-type files with the correct file name
         files_filtered = [
             file_dict
             for file_dict in files
@@ -43,71 +80,57 @@ def filter_files(files, params):
             and file_dict["display_name"] == "recipe_" + value + ".md"
         ]
     elif param == "deployment":
+        # pick deployment-type files
         files_filtered = [
             file_dict for file_dict in files if file_dict["file_type"] == param
         ]
     else:
+        # pick training-type files
         files_filtered = [
             file_dict for file_dict in files if file_dict["file_type"] == "training"
         ]
-
     if not files_filtered:
-        raise ValueError("")
+        raise ValueError("No files found! The list of files is empty!")
     else:
         return files_filtered
 
 
-def file_dictionary(**kwargs):
-    return kwargs
-
-
-def load_files_from_directory(directory_path):
-    files = []
-    display_names = os.listdir(directory_path)
-    if not display_names:
-        raise ValueError(
-            "The directory path is empty. "
-            "Check whether the indicated directory exists."
-        )
-    for display_name in display_names:
-        files.append(
-            file_dictionary(
-                display_name=display_name,
-                path=os.path.join(directory_path, display_name),
-            )
-        )
-    return files
-
-
 def load_files_from_stub(
     stub: str,
+    valid_params: Optional[List[str]] = None,
     force_token_refresh: bool = False,
-) -> "Model":
+) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
     """
-    :param stub: the SparseZoo stub path to the model (string path)
-    :param override_folder_name: Override for the name of the folder to save
-        this file under
-    :param override_parent_path: Path to override the default save path
-        for where to save the parent folder for this file under
+    :param stub: the SparseZoo stub path to the model (optionally
+        may include string arguments)
+    :param valid_params: list of expected parameter names to be encoded in the
+        stub. Will raise a warning if any unexpected param names are given. Leave
+        as None to not raise any warnings. Default is None
     :param force_token_refresh: True to refresh the auth token, False otherwise
-    :return: The requested Model instance
+    :return: The tuple of
+        - list of file dictionaries
+        - parsed param dictionary
     """
     if isinstance(stub, str):
-        stub, params = _parse_zoo_stub(stub, valid_params=[])
+        stub, params = parse_zoo_stub(stub, valid_params=valid_params)
     _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
     response_json = download_get_request(
         base_url=MODELS_API_URL,
         args=stub,
-        # sub_path=file_name,
         force_token_refresh=force_token_refresh,
     )
-    return response_json["model"]["files"], params
+    # piece of code required for backwards compatibility
+    files = restructure_request_json(response_json["model"]["files"])
+    if params:
+        files = filter_files(files, params)
+    else:
+        files = response_json["model"]["files"]
+    return files, params
 
 
-def _parse_zoo_stub(
+def parse_zoo_stub(
     stub: str, valid_params: Optional[List[str]] = None
 ) -> Tuple[str, Dict[str, str]]:
-
     """
     :param stub: A SparseZoo model stub. i.e. 'model/stub/path',
         'zoo:model/stub/path', 'zoo:model/stub/path?param1=value1&param2=value2'

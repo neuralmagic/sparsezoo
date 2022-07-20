@@ -28,12 +28,10 @@ from sparsezoo.v2.objects.file import File
 from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
-__all__ = ["setup_model_directory"]
+__all__ = ["setup_model"]
 
 
-
-
-def setup_model_directory(
+def setup_model(
     output_dir: str,
     training: Union[str, Directory, List[Union[str, Directory]]],
     deployment: Union[str, Directory, List[Union[str, Directory]]],
@@ -54,10 +52,10 @@ def setup_model_directory(
     """
 
     The function takes Files and Directories that are expected by the
-    ModelDirectory (some Files/Directories are mandatory, some are optional),
+    Model (some Files/Directories are mandatory, some are optional),
     and then creates a new directory where the files are being copied to.
     The format of the new directory adheres to the structure expected by the
-    `ModelDirectory` class factory methods.
+    `Model` class factory methods.
 
     Note: Some of the   "loose" files/directories that would then be copied
 

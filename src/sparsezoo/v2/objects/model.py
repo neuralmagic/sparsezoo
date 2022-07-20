@@ -24,13 +24,11 @@ from sparsezoo.v2.inference.inference_runner import InferenceRunner
 from sparsezoo.v2.objects.directory import Directory, is_directory
 from sparsezoo.v2.objects.file import File
 from sparsezoo.v2.objects.model_objects import NumpyDirectory
-from sparsezoo.v2.objects.model_utils import (
+from sparsezoo.v2.utils.model_utils import (
     ZOO_STUB_PREFIX,
-    filter_files,
     load_files_from_directory,
     load_files_from_stub,
 )
-from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
 
 
 __all__ = ["Model"]
@@ -50,31 +48,27 @@ class Model(Directory):
     """
     Object to represent SparseZoo Model Directory.
 
-    The suggested way to create a class object is to use
-    any of the two factory methods:
-
-    - `from_zoo_api()` -> by using the output from the
-        `src.sparsezoo.requests.download.download_model_get_request()` function.
-
-    - `from_directory()` -> by using the path to the model directory on your machine.
-
-    :param files: list of files, where every file
-        is represented by a dictionary (note: not File object)
-    :directory_path: if ModelDirectory created using method `from_directory()`,
-        it points to the directory of the ModelDirectory. By default: None
+    :param path: a string argument that can be one of two things:
+        a) a SparseZoo model stub:
+            i) without additional string arguments
+                e.g. 'zoo:model/stub/path'
+            ii) with additional string arguments (that will restrict
+                the set of file/directory files handled by this
+                `Model` object)
+                e.g. 'zoo:model/stub/path?param1=value1&param2=value2'
+        b) a local directory path
+            e.g. `/home/user/model_path`
     """
 
-    def __init__(self, path):
+    def __init__(self, path: str):
 
         if path.startswith(ZOO_STUB_PREFIX):
-            # initializing the model from the stub
-            files, params = load_files_from_stub(path)
-            self._validate_params(params)
-            # piece of code required for backwards compatibility
-            files = restructure_request_json(files)
+            # initializing the files and params from the stub
+            files, params = load_files_from_stub(
+                path, valid_params=list(PARAM_DICT.keys())
+            )
             if params:
                 self._validate_params(params)
-                files = filter_files(files, params)
             path, url = None, os.path.dirname(files[0]["url"])
         else:
             # initializing the model from the path
@@ -176,23 +170,10 @@ class Model(Directory):
         )
 
         # importing the class here, otherwise a circular import error is being raised
-        # (IntegrationValidator script also imports ModelDirectory class object)
-        from sparsezoo.v2.validation import IntegrationValidator
+        # (IntegrationValidator script also imports Model class object)
+        from sparsezoo.v2.validation.validator import IntegrationValidator
 
-        self.integration_validator = IntegrationValidator(model_directory=self)
-
-    def _validate_params(self, params):
-        if len(params) == 0:
-            return
-        elif len(params) > 1:
-            raise ValueError("")
-        else:
-            ((param, value),) = params.items()
-            if param not in PARAM_DICT.keys():
-                raise ValueError("")
-            if value not in PARAM_DICT[param]:
-                raise ValueError("")
-            return
+        self.integration_validator = IntegrationValidator(model=self)
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
@@ -221,7 +202,7 @@ class Model(Directory):
     ) -> bool:
         """
         Attempt to download the files given the `url` attribute
-        of the files inside the ModelDirectory.
+        of the files inside the Model.
 
         :param directory_path: directory to download files to
         :param override: if True, the method can override old `directory_path`
@@ -232,7 +213,7 @@ class Model(Directory):
         """
         if self.path is not None and not override:
             raise ValueError(
-                "ModelDirectory class object was either created "
+                "Model class object was either created "
                 "using 'from_directory` factory method or "
                 "`download()` method already invoked."
                 "Set `override` = True to override."
@@ -259,7 +240,7 @@ class Model(Directory):
         self, validate_onnxruntime: bool = True, minimal_validation: bool = False
     ) -> bool:
         """
-        Validate the ModelDirectory class object:
+        Validate the Model class object:
         1. Validate that the sample inputs and outputs work with ONNX Runtime
             (if `validate_onnxruntime=True`)
         2. Validate all the folders (this is done by a separate helper class
@@ -283,7 +264,7 @@ class Model(Directory):
 
         if self.model_card.path is None:
             raise ValueError(
-                "It seems like the `ModelDirectory` was created using "
+                "It seems like the `Model` was created using "
                 "the `from_zoo_api()` method. Before running `validate()` "
                 "method, the respective files must be present locally. "
                 "The solution is to call `download()` first."
@@ -370,6 +351,8 @@ class Model(Directory):
                 match = display_name == file["display_name"]
 
                 if display_name == "model.onnx" and "file_type" in file:
+                    # handling a corner case when `files` only contains
+                    # file dicts with `file_type="deployment"`
                     if file["file_type"] == "deployment":
                         match = False
 
@@ -404,13 +387,13 @@ class Model(Directory):
         elif len(files_found) == 1:
             return files_found[0]
 
-        # elif display_name == "model.onnx" and len(files_found) == 2:
-        #     # `model.onnx` file may be found twice:
-        #     #   - directly in the root directory
-        #     #   - inside `deployment` directory
-        #     # if this is the case, return the first file
-        #     # (the other one is a duplicate)
-        #     return files_found[0]
+        elif display_name == "model.onnx" and len(files_found) == 2:
+            # `model.onnx` file may be found twice:
+            #   - directly in the root directory
+            #   - inside `deployment` directory
+            # if this is the case, return the first file
+            # (the other one is a duplicate)
+            return files_found[0]
         else:
             return files_found
 
@@ -568,3 +551,29 @@ class Model(Directory):
     def _is_file_tar(file):
         extension = file["display_name"].split(".")[-2:]
         return extension == ["tar", "gz"]
+
+    @staticmethod
+    def _validate_params(params: Dict[str, str]):
+        # make sure that the extracted
+        # params are correct
+        if len(params) == 0:
+            return
+        elif len(params) > 1:
+            raise ValueError(
+                "The model can be initialized with a single string argument. "
+                f"Found {len(params)} string arguments: {list(params.keys())}!"
+            )
+        else:
+            ((param, value),) = params.items()
+            if param not in PARAM_DICT.keys():
+                raise ValueError(
+                    f"String argument {param} not found in the "
+                    f"expected set of string arguments {list(PARAM_DICT.keys())}!"
+                )
+            if value not in PARAM_DICT[param]:
+                raise ValueError(
+                    f"String argument {param} has value {value}, "
+                    "cannot be found in the "
+                    f"expected set of values {list(PARAM_DICT[param])}!"
+                )
+            return

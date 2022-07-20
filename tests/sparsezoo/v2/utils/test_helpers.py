@@ -19,8 +19,9 @@ import tempfile
 import pytest
 
 from sparsezoo import Zoo
-from sparsezoo.v2.objects import Directory, File
-from sparsezoo.v2.utils import setup_model_directory
+from sparsezoo.v2.objects.directory import Directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.utils.helpers import setup_model
 
 
 @pytest.mark.parametrize(
@@ -29,7 +30,7 @@ from sparsezoo.v2.utils import setup_model_directory
         "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95"  # noqa E501
     ],
 )
-class TestSetupModelDirectory:
+class TestSetupModel:
     @pytest.fixture()
     def setup(self, stub):
         # setup
@@ -39,14 +40,14 @@ class TestSetupModelDirectory:
         yield model, temp_dir
         temp_dir.cleanup()
 
-    def test_setup_model_directory_from_paths(self, setup):
+    def test_setup_model_from_paths(self, setup):
         (
             model,
             temp_dir,
         ) = setup
         output_dir = tempfile.TemporaryDirectory(dir="/tmp")
 
-        setup_model_directory(
+        setup_model(
             output_dir=output_dir.name,
             training=model.framework_files[0].dir_path,
             deployment=glob.glob(os.path.join(model.framework_files[0].dir_path, "*")),
@@ -67,7 +68,7 @@ class TestSetupModelDirectory:
         } == set(os.path.basename(file) for file in folders)
         output_dir.cleanup()
 
-    def test_setup_model_directory(self, setup):
+    def test_setup_model_from_objects(self, setup):
         model, temp_dir = setup
         output_dir = tempfile.TemporaryDirectory(dir="/tmp")
 
@@ -101,7 +102,7 @@ class TestSetupModelDirectory:
             )
         ]
 
-        setup_model_directory(
+        setup_model(
             output_dir=output_dir.name,
             training=training,
             deployment=deployment,

@@ -14,9 +14,8 @@
 
 import pytest
 
-from sparsezoo.requests import parse_zoo_stub
-from sparsezoo.requests.get import get_model_get_request
-from sparsezoo.v2.utils import restructure_request_json
+from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
+from sparsezoo.v2.utils.model_utils import load_files_from_stub
 
 
 EXPECTED_IC_FILES = {
@@ -78,11 +77,8 @@ EXPECTED_YOLO_FILES = {
     scope="function",
 )
 def test_restructure_request_json(stub, expected_files):
-    stub, _ = parse_zoo_stub(stub, valid_params=[])
-    raw_request_json = get_model_get_request(args=stub, file_name=None,)[
-        "model"
-    ]["files"]
-    request_json = restructure_request_json(raw_request_json)
+    request_json, _ = load_files_from_stub(stub)
+    request_json = restructure_request_json(request_json)
     for file_type, file_names_expected in expected_files.items():
         file_names = set(
             file["display_name"]

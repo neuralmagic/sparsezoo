@@ -21,13 +21,15 @@ from pathlib import Path
 import numpy
 import pytest
 
-from sparsezoo.v2.objects import Directory, File, Model
+from sparsezoo.v2.objects.directory import Directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model import Model
 
 
 files_ic = {
     "analysis.yaml",
     "deployment",
-    "logs.tar.gz",
+    "logs",
     "model.onnx",
     "recipe_original.md",
     "sample_inputs.tar.gz",
@@ -35,11 +37,14 @@ files_ic = {
     "benchmarks.yaml",
     "eval.yaml",
     "model.md",
-    "onnx.tar.gz",
+    "onnx",
     "recipe_transfer_learn.md",
     "sample_labels.tar.gz",
     "sample_outputs.tar.gz",
     "training",
+    "sample_inputs",
+    "sample_originals",
+    "sample_labels",
 }
 
 files_nlp = copy.copy(files_ic)
@@ -90,6 +95,7 @@ def _assert_correct_files_downloaded(model, args):
     for file_name, file in model._files_dictionary.items():
         if args[0] == "recipe" and file_name == "recipes":
             assert isinstance(file, File)
+
         elif args[0] == "deployment" and file_name == "deployment":
             assert isinstance(file, Directory)
 
@@ -126,7 +132,7 @@ def _assert_correct_files_downloaded(model, args):
     ],
     scope="function",
 )
-class TestModelDirectory:
+class TestModel:
     @pytest.fixture()
     def setup(self, stub, clone_sample_outputs, expected_files):
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
@@ -140,7 +146,13 @@ class TestModelDirectory:
         shutil.rmtree(temp_dir.name)
 
     def test_folder_structure(self, setup):
-        _, _, expected_files, temp_dir = setup
+        _, clone_sample_outputs, expected_files, temp_dir = setup
+        if clone_sample_outputs:
+            for file_name in [
+                "sample_outputs_onnxruntime",
+                "sample_outputs_deepsparse",
+            ]:
+                expected_files.update({file_name, file_name + ".tar.gz"})
         assert not set(os.listdir(temp_dir.name)).difference(expected_files)
 
     def test_validate(self, setup):

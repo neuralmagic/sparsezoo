@@ -23,17 +23,19 @@ from typing import Dict
 import requests
 import yaml
 
-_LOGGER = logging.getLogger(__name__)
 
-PUBLIC_AUTH_TYPE = "public"
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
     if os.getenv("SPARSEZOO_API_URL")
     else "https://api.neuralmagic.com"
 )
 
+_LOGGER = logging.getLogger(__name__)
+
+PUBLIC_AUTH_TYPE = "public"
 CREDENTIALS_YAML_TOKEN_KEY = "nm_api_token"
 AUTH_API = f"{BASE_API_URL}/auth"
+NM_TOKEN_HEADER = "nm-token-header"
 
 
 def create_dirs(path: str):
@@ -66,6 +68,7 @@ def clean_path(path: str) -> str:
     :return: a cleaned version that expands the user path and creates an absolute path
     """
     return os.path.abspath(os.path.expanduser(path))
+
 
 CREDENTIALS_YAML = os.path.abspath(
     os.getenv("SPARSEZOO_CREDENTIALS")
@@ -140,9 +143,6 @@ class SparseZooCredentials:
         else:
             _LOGGER.debug(f"No sparse zoo credentials found at {CREDENTIALS_YAML}")
             return None
-
-
-NM_TOKEN_HEADER = "nm-token-header"
 
 
 def get_auth_header(

@@ -19,7 +19,7 @@ import onnx
 import pytest
 
 from sparsezoo.utils.numpy import load_numpy_list
-from sparsezoo.v2.objects import NumpyDirectory
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
 from tests.sparsezoo.v2.objects.test_directory import _create_files_directory
 from tests.sparsezoo.v2.objects.test_file import _create_onnx_file
 

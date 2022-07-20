@@ -24,7 +24,8 @@ from typing import List, Optional
 import onnx
 
 from sparsezoo.utils.numpy import load_numpy_list
-from sparsezoo.v2.objects import Directory, File
+from sparsezoo.v2.objects.directory import Directory
+from sparsezoo.v2.objects.file import File
 
 
 __all__ = ["NumpyDirectory"]
