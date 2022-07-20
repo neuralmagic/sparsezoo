@@ -21,7 +21,7 @@ import traceback
 from typing import Dict, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.objects import File
+from sparsezoo.v2.objects.file import File
 
 
 __all__ = ["Directory", "is_directory"]

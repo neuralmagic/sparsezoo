@@ -21,17 +21,32 @@ import numpy
 
 from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
-from sparsezoo.v2.objects import Directory, File, NumpyDirectory, is_directory
+from sparsezoo.v2.objects.directory import Directory, is_directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
+from sparsezoo.v2.objects.model_utils import (
+    ZOO_STUB_PREFIX,
+    filter_files,
+    load_files_from_directory,
+    load_files_from_stub,
+)
+from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
 
 
-__all__ = ["ModelDirectory"]
+__all__ = ["Model"]
+
+ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat", ""}
+ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
+ALLOWED_DEPLOYMENT_VALUES = {""}
+
+PARAM_DICT = {
+    "checkpoint": ALLOWED_CHECKPOINT_VALUES,
+    "recipe": ALLOWED_RECIPE_VALUES,
+    "deployment": ALLOWED_DEPLOYMENT_VALUES,
+}
 
 
-def file_dictionary(**kwargs):
-    return kwargs
-
-
-class ModelDirectory(Directory):
+class Model(Directory):
     """
     Object to represent SparseZoo Model Directory.
 
@@ -49,13 +64,22 @@ class ModelDirectory(Directory):
         it points to the directory of the ModelDirectory. By default: None
     """
 
-    def __init__(
-        self,
-        files: List[Dict[str, Any]],
-        name: str,
-        path: Optional[str] = None,
-        url: Optional[str] = None,
-    ):
+    def __init__(self, path):
+
+        if path.startswith(ZOO_STUB_PREFIX):
+            # initializing the model from the stub
+            files, params = load_files_from_stub(path)
+            self._validate_params(params)
+            # piece of code required for backwards compatibility
+            files = restructure_request_json(files)
+            if params:
+                self._validate_params(params)
+                files = filter_files(files, params)
+            path, url = None, os.path.dirname(files[0]["url"])
+        else:
+            # initializing the model from the path
+            files = load_files_from_directory(path)
+            url = None
 
         self.training: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="training"
@@ -73,17 +97,17 @@ class ModelDirectory(Directory):
 
         self.model_card: File = self._file_from_files(files, display_name="model.md")
 
-        self.sample_outputs: Dict[
-            str, NumpyDirectory
-        ] = self._sample_outputs_list_to_dict(
-            self._directory_from_files(
-                files,
-                directory_class=NumpyDirectory,
-                display_name="sample_outputs",
-                allow_multiple_outputs=True,
-                regex=True,
-            )
+        self.sample_outputs = self._directory_from_files(
+            files,
+            directory_class=NumpyDirectory,
+            display_name="sample_outputs",
+            allow_multiple_outputs=True,
+            regex=True,
         )
+        if self.sample_outputs is not None:
+            self.sample_outputs: Dict[
+                str, NumpyDirectory
+            ] = self._sample_outputs_list_to_dict(self.sample_outputs)
 
         self.sample_labels: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="sample_labels"
@@ -115,11 +139,14 @@ class ModelDirectory(Directory):
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
         # iterate over them
-        self.sample_inputs.files.sort(key=lambda x: x.name)
-        [
-            sample_outputs.files.sort(key=lambda x: x.name)
-            for sample_outputs in self.sample_outputs.values()
-        ]
+        if self.sample_inputs is not None:
+            self.sample_inputs.files.sort(key=lambda x: x.name)
+
+        if self.sample_outputs is not None:
+            [
+                sample_outputs.files.sort(key=lambda x: x.name)
+                for sample_outputs in self.sample_outputs.values()
+            ]
 
         self._files_dictionary = {
             "training": self.training,
@@ -145,7 +172,7 @@ class ModelDirectory(Directory):
         )
 
         super().__init__(
-            files=self._files_dictionary.values(), name=name, path=path, url=url
+            files=self._files_dictionary.values(), name="model", path=path, url=url
         )
 
         # importing the class here, otherwise a circular import error is being raised
@@ -154,43 +181,18 @@ class ModelDirectory(Directory):
 
         self.integration_validator = IntegrationValidator(model_directory=self)
 
-    @classmethod
-    def from_zoo_api(cls, request_json: List[Dict]) -> "ModelDirectory":
-        """
-        Factory method for creating ModelDirectory class object
-        from the output of the NeuralMagic API.
-
-        :param request_json: output of the NeuralMagic API; list of file dictionaries
-        :return: ModelDirectory class object
-        """
-        files = request_json
-        return ModelDirectory(files=files, name="model_directory")
-
-    @classmethod
-    def from_directory(cls, directory_path: str) -> "ModelDirectory":
-        """
-        Factory method for creating ModelDirectory class object
-        from the local directory.
-
-        :param directory_path: path to the local directory
-        :return: ModelDirectory class object
-        """
-        files = []
-        display_names = os.listdir(directory_path)
-        if not display_names:
-            raise ValueError(
-                "The directory path is empty. "
-                "Check whether the indicated directory exists."
-            )
-        for display_name in display_names:
-            files.append(
-                file_dictionary(
-                    display_name=display_name,
-                    path=os.path.join(directory_path, display_name),
-                )
-            )
-
-        return ModelDirectory(files=files, name="model_directory", path=directory_path)
+    def _validate_params(self, params):
+        if len(params) == 0:
+            return
+        elif len(params) > 1:
+            raise ValueError("")
+        else:
+            ((param, value),) = params.items()
+            if param not in PARAM_DICT.keys():
+                raise ValueError("")
+            if value not in PARAM_DICT[param]:
+                raise ValueError("")
+            return
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
@@ -367,6 +369,10 @@ class ModelDirectory(Directory):
 
                 match = display_name == file["display_name"]
 
+                if display_name == "model.onnx" and "file_type" in file:
+                    if file["file_type"] == "deployment":
+                        match = False
+
         if not match:
             logging.warning(
                 "Could not find a file with "
@@ -398,13 +404,13 @@ class ModelDirectory(Directory):
         elif len(files_found) == 1:
             return files_found[0]
 
-        elif display_name == "model.onnx" and len(files_found) == 2:
-            # `model.onnx` file may be found twice:
-            #   - directly in the root directory
-            #   - inside `deployment` directory
-            # if this is the case, return the first file
-            # (the other one is a duplicate)
-            return files_found[0]
+        # elif display_name == "model.onnx" and len(files_found) == 2:
+        #     # `model.onnx` file may be found twice:
+        #     #   - directly in the root directory
+        #     #   - inside `deployment` directory
+        #     # if this is the case, return the first file
+        #     # (the other one is a duplicate)
+        #     return files_found[0]
         else:
             return files_found
 

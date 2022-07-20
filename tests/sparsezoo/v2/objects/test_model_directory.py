@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import os
 import shutil
 import tempfile
@@ -20,70 +21,143 @@ from pathlib import Path
 import numpy
 import pytest
 
-from sparsezoo.v2.objects import ModelDirectory
-from tests.sparsezoo.v2.objects.test_model_directory_download import (
-    TestModelDirectoryFromZooApi,
-)
+from sparsezoo.v2.objects import Directory, File, Model
+
+
+files_ic = {
+    "analysis.yaml",
+    "deployment",
+    "logs.tar.gz",
+    "model.onnx",
+    "recipe_original.md",
+    "sample_inputs.tar.gz",
+    "sample_originals.tar.gz",
+    "benchmarks.yaml",
+    "eval.yaml",
+    "model.md",
+    "onnx.tar.gz",
+    "recipe_transfer_learn.md",
+    "sample_labels.tar.gz",
+    "sample_outputs.tar.gz",
+    "training",
+}
+
+files_nlp = copy.copy(files_ic)
+files_nlp.remove("recipe_transfer_learn.md")
+files_yolo = copy.copy(files_ic)
 
 
 @pytest.mark.parametrize(
-    "stub, clone_sample_outputs",
+    "stub, args, should_pass",
     [
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            ("recipe", "transfer_learn"),
             True,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            ("recipe", "some_dummy_name"),
             False,
         ),
         (
             "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            ("deployment", ""),
             True,
+        ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            ("checkpoint", "preqat"),
+            True,
+        ),
+    ],
+    scope="function",
+)
+def test_model_from_stub(stub, args, should_pass):
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    path = stub + "?" + args[0] + "=" + args[1]
+    if should_pass:
+        model = Model(path)
+        model.download(directory_path=temp_dir.name)
+        _assert_correct_files_downloaded(model, args)
+    else:
+        with pytest.raises(ValueError):
+            model = Model(path)
+            model.download(directory_path=temp_dir.name)
+
+
+def _assert_correct_files_downloaded(model, args):
+    for file_name, file in model._files_dictionary.items():
+        if args[0] == "recipe" and file_name == "recipes":
+            assert isinstance(file, File)
+        elif args[0] == "deployment" and file_name == "deployment":
+            assert isinstance(file, Directory)
+
+        elif args[0] == "checkpoint" and file_name == "training":
+            assert isinstance(file, Directory)
+
+        else:
+            assert file is None
+
+
+@pytest.mark.parametrize(
+    "stub, clone_sample_outputs, expected_files",
+    [
+        (
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            True,
+            files_ic,
+        ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            False,
+            files_nlp,
+        ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            True,
+            files_nlp,
         ),
         (
             "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
             True,
+            files_yolo,
         ),
     ],
     scope="function",
 )
 class TestModelDirectory:
     @pytest.fixture()
-    def setup(self, stub, clone_sample_outputs):
+    def setup(self, stub, clone_sample_outputs, expected_files):
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        request_json = TestModelDirectoryFromZooApi._get_request_json(stub)
-        if clone_sample_outputs:
-            request_json = TestModelDirectoryFromZooApi._clone_sample_outputs(
-                request_json
-            )
-        model_directory = ModelDirectory.from_zoo_api(request_json)
-        model_directory.download(directory_path=temp_dir.name)
-        self._add_mock_files(temp_dir.name)
-        model_directory = ModelDirectory.from_directory(temp_dir.name)
+        model = Model(path=stub)
+        model.download(directory_path=temp_dir.name)
+        self._add_mock_files(temp_dir.name, clone_sample_outputs=clone_sample_outputs)
+        model = Model(path=temp_dir.name)
 
-        yield model_directory, clone_sample_outputs
+        yield model, clone_sample_outputs, expected_files, temp_dir
 
         shutil.rmtree(temp_dir.name)
 
+    def test_folder_structure(self, setup):
+        _, _, expected_files, temp_dir = setup
+        assert not set(os.listdir(temp_dir.name)).difference(expected_files)
+
     def test_validate(self, setup):
-        model_directory, clone_sample_outputs = setup
-        assert model_directory.validate(validate_onnxruntime=clone_sample_outputs)
-        assert model_directory.validate(
+        model, clone_sample_outputs, _, _ = setup
+        assert model.validate(validate_onnxruntime=clone_sample_outputs)
+        assert model.validate(
             validate_onnxruntime=clone_sample_outputs, minimal_validation=True
         )
 
     def test_generate_outputs(self, setup):
-        model_directory, clone_sample_outputs = setup
+        model, clone_sample_outputs, _, _ = setup
         if clone_sample_outputs:
             for engine in ["onnxruntime", "deepsparse"]:
-                self._test_generate_outputs_single_engine(engine, model_directory)
-
-    def test_analysis(self, setup):
-        pass
+                self._test_generate_outputs_single_engine(engine, model)
 
     @staticmethod
-    def _add_mock_files(directory_path: str):
+    def _add_mock_files(directory_path: str, clone_sample_outputs: bool):
         # add some mock files, to complete the full set of
         # possible expected files in the `ModelDirectory`
         # class object
@@ -120,6 +194,17 @@ class TestModelDirectory:
             expected_file_dir = os.path.join(directory_path, file_name)
             if not os.path.isfile(expected_file_dir):
                 shutil.copyfile(mock_sample_file, expected_file_dir)
+
+        if clone_sample_outputs:
+            sample_outputs_file = os.path.join(directory_path, "sample_outputs.tar.gz")
+            for file_name in [
+                "sample_outputs_onnxruntime.tar.gz",
+                "sample_outputs_deepsparse.tar.gz",
+            ]:
+                shutil.copyfile(
+                    sample_outputs_file, os.path.join(directory_path, file_name)
+                )
+            os.remove(sample_outputs_file)
 
     def _test_generate_outputs_single_engine(self, engine, model_directory):
         directory_path = model_directory.path

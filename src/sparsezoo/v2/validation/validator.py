@@ -20,7 +20,7 @@ class objects are valid
 import os
 from typing import Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.v2.objects import Directory, File, ModelDirectory
+from sparsezoo.v2.objects import Directory, File, Model
 from sparsezoo.v2.validation import (
     validate_cv_classification,
     validate_cv_detection,
@@ -58,7 +58,7 @@ class IntegrationValidator:
 
     def __init__(
         self,
-        model_directory: ModelDirectory,
+        model_directory: Model,
         required_files: Set[str] = REQUIRED_FILES,
         integration_to_data: Dict[str, Callable] = INTEGRATION_NAME_TO_DATA,
     ):

@@ -23,10 +23,14 @@ import shutil
 from pathlib import Path
 from typing import List, Optional, Union
 
-from sparsezoo.v2 import Directory, File, NumpyDirectory
+from sparsezoo.v2.objects.directory import Directory
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
 __all__ = ["setup_model_directory"]
+
+
 
 
 def setup_model_directory(
