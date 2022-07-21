@@ -8,19 +8,22 @@ from sparsezoo import Model
 
 stub = "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate"
 stub = stub + "?" + "recipe=transfer_learn"
+# will read all the files from the server, except all the recipe files. The only recipe 
+# file that will be "seen" by the `model` is "transfer learn"
 model = Model(path=stub)
-model.download() # will only download only recipe file (as indicated by the string argument). If no argument provided, .download() will download to cache
-recipes: str = model.recipes.downloaded_path() 
+model.download() # optional: may be called to download all the files, but is not required (see below). Will be omitted in further examples
+recipes: str = model.recipes.downloaded_path() # will automatically download the file (if not already downloaded) and return the path
 ...
 ```
 ```python
 from sparsezoo import Model
 
 stub = "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate"
-stub = stub + "?" + "deployment" # if we want the whole directory, the parameter does not have to have value
+stub = stub + "?" + "checkpoint=preqat"
+# will read all the files from the server, except for the full training folder. Training folder
+# will be identical to prequat checkpoint directory
 model = Model(path=stub)
-model.download()
-deployment: str = model.recipes.downloaded_path() 
+training: str = model.training.downloaded_path() 
 ...
 ```
 ### Through the API purely
@@ -29,7 +32,11 @@ from sparsezoo import Model
 
 stub = "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate"
 model = Model(path=stub)
-recipe: str = model.recipes.download(recipe="transfer_learn")
+# ALTERNATIVE ONE: filtering on download
+model.recipes.download(recipe="transfer_learn")
+recipe: str = model.recipes.downloaded_path()
+# ALTERNATIVE TWO: filtering on .downloaded_path()
+recipe: str = model.recipes.downloaded_path(recipe="transfer_learn")
 ```
 
 ```python
@@ -37,7 +44,11 @@ from sparsezoo import Model
 
 stub = "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate"
 model = Model(path=stub)
-recipe: str = model.deployment.download()
+# ALTERNATIVE ONE: filtering on download
+model.training.download(checkpoint="preqat")
+training: str = model.training.downloaded_path()
+# ALTERNATIVE TWO: filtering on .downloaded_path()
+training: str = model.training.downloaded_path(checkpoint="preqat")
 ```
 
 ## Download multiple chosen files (also in parallel)
@@ -50,7 +61,6 @@ stub = "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-
 # choose the files through the string arguments
 stub = stub + "?" + "recipe=transfer_learn" + "&" + "checkpoint=preqat" + "&" + "recipe=original"
 model = Model(path=stub)
-model.download() # will only download the specified files
 recipes: List[str] = model.recipes.downloaded_path() 
 training: str = model.training.downloaded_path() # training will be a Directory with a preqat checkpoint
 ...
@@ -89,12 +99,13 @@ Q: What happens if the user calls `.download()` on the file that fails to get do
 A: Verbose error, that either explains why 
 - a file cannot be downloaded (e.g. if the user calls `.download()` on the file that we do not have data on from the API)
 - a file that should be downloaded does not get downloaded (e.g. if timeout on waiting from the response from the server)
+--> ideally, we would like the user to avoid this pathway and directly use `.downloaded_path()`
 
 Q: What happens if the user calls `.downloaded_path()` on a file that does not have one
-A: Verbose error, that explains why one cannot call `.downloaded_path()` and shortly proposes a solution (if exists)
+A: The file should realize the it has not been downloaded yet, download itself and then return the correct path automatically
 
 ## Questions from my side:
 1. Should the user be able to download and access any file? I am talking about "private" ones like `benchmark.yaml`, `eval.yaml`,
-`sample_outputs` or  `logs`.
+`sample_outputs` or  `logs`. I would be mostly worried about the heavy ones like `onnx folder`.
 2. Should the user be able to download each and any files using string parameters? Or just `recipe`, `checkpoint` and `deployment`.
-
+3. Did we agree how do we hash the folder names in `~/../.cache/sparsezoo` - so that we are more human readable?
