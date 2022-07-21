@@ -47,11 +47,12 @@ class File:
     """
 
     def __init__(
-        self, name: str, path: Optional[str] = None, url: Optional[str] = None
+        self, name: str, path: Optional[str] = None, url: Optional[str] = None, owner_path: Optional[str] = None
     ):
         self.name = name
         self.url = url
         self.path = path
+        self.owner_path = owner_path
 
         # self.path can have any extension, including no extension.
         # However, the File object also contains information
@@ -71,7 +72,7 @@ class File:
         }
 
     @classmethod
-    def from_dict(cls, file: Dict[str, Any]) -> "File":
+    def from_dict(cls, file: Dict[str, Any], owner_path: Optional[str]= None) -> "File":
         """
         Factory method for creating a File class object
         from a file dictionary
@@ -89,11 +90,18 @@ class File:
             name=name,
             path=path,
             url=url,
+            owner_path = owner_path
         )
+
+    def downloaded_path(self):
+        if self.path is None:
+            self.download(self.owner_path)
+        return self.path
+
 
     def download(
         self,
-        destination_path: str,
+        destination_path: Optional[str] = None,
         overwrite: bool = True,
         retries: int = 1,
         retry_sleep_sec: int = 5,
@@ -107,6 +115,12 @@ class File:
         :param retries: The maximum number of times to ping the API for the response
         :type retry_sleep_sec: How long to wait between `retry` attempts
         """
+        if destination_path is None:
+            if self.owner_path is not None:
+                destination_path = self.owner_path
+            else:
+                raise ValueError("")
+
         new_file_path = os.path.join(destination_path, self.name)
 
         if self.url is None:

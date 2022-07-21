@@ -23,7 +23,7 @@ from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
 from sparsezoo.v2.objects.directory import Directory, is_directory
 from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model_objects import NumpyDirectory
+from sparsezoo.v2.objects.model_objects import NumpyDirectory, FileList, FileDict
 from sparsezoo.v2.utils.model_utils import (
     ZOO_STUB_PREFIX,
     load_files_from_directory,
@@ -32,6 +32,8 @@ from sparsezoo.v2.utils.model_utils import (
 
 
 __all__ = ["Model"]
+
+CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo", "model"))
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat", ""}
 ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
@@ -69,11 +71,13 @@ class Model(Directory):
             )
             if params:
                 self._validate_params(params)
-            path, url = None, os.path.dirname(files[0]["url"])
+            path, url = CACHE_DIR, os.path.dirname(files[0]["url"])
         else:
             # initializing the model from the path
             files = load_files_from_directory(path)
             url = None
+
+        self.path = path
 
         self.training: Directory = self._directory_from_files(
             files, directory_class=Directory, display_name="training"
@@ -198,7 +202,7 @@ class Model(Directory):
             yield output
 
     def download(
-        self, directory_path: str, override: bool = False, strict_mode: bool = False
+        self, directory_path: Optional[str] = None, override: bool = False, strict_mode: bool = False
     ) -> bool:
         """
         Attempt to download the files given the `url` attribute
@@ -211,13 +215,16 @@ class Model(Directory):
             By default, False.
         :return: boolean flag; was download successful or not.
         """
-        if self.path is not None and not override:
+        if directory_path is None:
+            directory_path = self.path
+        if os.path.isdir(directory_path) and not override:
             raise ValueError(
                 "Model class object was either created "
                 "using path that points to a local directory or "
                 "`download()` method already invoked."
                 "Set `override` = True to override."
             )
+
         else:
             downloads = []
             for key, file in self._files_dictionary.items():
@@ -309,7 +316,7 @@ class Model(Directory):
 
         # directory is a tar file
         if self._is_file_tar(file):
-            directory = directory_class(files=[], name=name, path=path, url=url)
+            directory = directory_class(files=[], name=name, path=path, url=url, owner_path=self.path)
             return directory
 
         # directory is folder
@@ -324,12 +331,12 @@ class Model(Directory):
                 files_in_directory.append(file)
 
             directory = directory_class(
-                files=files_in_directory, name=name, path=path, url=url
+                files=files_in_directory, name=name, path=path, url=url, owner_path=self.path
             )
             return directory
 
-    @staticmethod
     def _get_file(
+        self,
         file: Dict[str, Any],
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
@@ -362,7 +369,7 @@ class Model(Directory):
             )
             return None
         else:
-            file = File.from_dict(file)
+            file = File.from_dict(file, owner_path = self.path)
 
             return file
 
@@ -375,7 +382,7 @@ class Model(Directory):
         # Parses a list of file dictionaries and returns
         # a File() object or a list of File() objects, if successful,
         # otherwise None.
-        files_found = []
+        files_found = FileList()
         for file in files:
             file = self._get_file(file=file, display_name=display_name, regex=regex)
             if file is not None:
@@ -414,7 +421,7 @@ class Model(Directory):
             # "loose" files (alternative to parsing a .tar.gz file as
             # a directory)
             directory = self._get_directory_from_loose_api_files(
-                files=files, directory_class=directory_class, display_name=display_name
+                files=files, directory_class=directory_class, display_name=display_name, owner_path = self.path
             )
         else:
             directory = None
@@ -512,7 +519,7 @@ class Model(Directory):
         return engine_to_numpydir_map
 
     @staticmethod
-    def _get_directory_from_loose_api_files(files, directory_class, display_name):
+    def _get_directory_from_loose_api_files(files, directory_class, display_name, owner_path):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
         files = [
@@ -542,7 +549,7 @@ class Model(Directory):
         else:
             files = [File.from_dict(file) for file in files]
             directory = directory_class(
-                files=files, name=display_name, path=None, url=None
+                files=files, name=display_name, path=None, url=None, owner_path=owner_path
             )
             return directory
 

@@ -30,7 +30,7 @@ from sparsezoo.v2.objects.file import File
 
 __all__ = ["NumpyDirectory"]
 
-NUMPY_DIRECTORY_NAMES = ["sample-inputs", "sample-outputs"]
+NUMPY_DIRECTORY_NAMES = ["sample_inputs", "sample_outputs"]
 
 
 class NumpyDirectory(Directory):
@@ -50,8 +50,9 @@ class NumpyDirectory(Directory):
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
+        owner_path: Optional[str]=None
     ):
-        super().__init__(files=files, name=name, path=path, url=url)
+        super().__init__(files=files, name=name, path=path, url=url, owner_path = owner_path)
 
     def validate(
         self,
@@ -115,3 +116,16 @@ class NumpyDirectory(Directory):
                         f"Found keys in numpy {key_type}: {list(numpy_dict.keys())}."
                     )
         return True
+
+class FileList(list):
+
+    def download(self):
+        [file.download() for file in self.__iter__()]
+
+    def downloaded_path(self):
+        return [file.downloaded_path() for file in self.__iter__()]
+
+
+class FileDict(dict):
+    def __getitem__(self, key):
+        return list.__getitem__(self, key - 1)

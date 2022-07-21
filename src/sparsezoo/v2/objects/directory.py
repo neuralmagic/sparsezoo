@@ -45,7 +45,7 @@ class Directory(File):
         files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
-    ):
+        owner_path: Optional[str]= None):
 
         self.files = (
             files if not files else _possibly_convert_files_to_directories(files)
@@ -53,7 +53,7 @@ class Directory(File):
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
-        super().__init__(name=name, path=path, url=url)
+        super().__init__(name=name, path=path, url=url, owner_path=owner_path)
 
         if self._unpack():
             self.unzip()
@@ -135,7 +135,7 @@ class Directory(File):
 
     def download(
         self,
-        destination_path: str,
+        destination_path: Optional[str] = None,
         overwrite: bool = True,
         retries: int = 1,
         retry_sleep_sec: int = 5,
@@ -149,6 +149,12 @@ class Directory(File):
         :param retries: The maximum number of times to ping the API for the response
         :type retry_sleep_sec: How long to wait between `retry` attempts
         """
+        if destination_path is None:
+            if self.owner_path is not None:
+                destination_path = self.owner_path
+            else:
+                raise ValueError("")
+
         # Directory can represent a tar file.
         if self.is_archive:
             new_file_path = os.path.join(destination_path, self.name)
@@ -179,6 +185,9 @@ class Directory(File):
                 file.download(
                     destination_path=os.path.join(destination_path, self.name)
                 )
+                file.path = os.path.join(destination_path, self.name, file.name)
+            self.path = os.path.join(destination_path, self.name)
+
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
