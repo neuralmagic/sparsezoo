@@ -14,6 +14,8 @@
 
 import logging
 import os
+import random
+import string
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -21,18 +23,11 @@ from sparsezoo.v2.requests.requests import download_get_request
 from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
 
 
-__all__ = ["load_files_from_stub", "load_files_from_directory"]
+__all__ = ["load_files_from_stub", "load_files_from_directory", "generate_model_name"]
 
 _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
-
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
-MODELS_API_URL = f"{BASE_API_URL}/models"
 
 
 def file_dictionary(**kwargs):
@@ -84,8 +79,9 @@ def filter_files(
             pass
 
         files_filtered.append(file_dict)
+
     if not files_filtered:
-        raise ValueError("No files found! The list of files is empty!")
+        raise ValueError("No files found - the list of files is empty!")
     else:
         return files_filtered
 
@@ -110,7 +106,6 @@ def load_files_from_stub(
         stub, params = parse_zoo_stub(stub, valid_params=valid_params)
     _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
     response_json = download_get_request(
-        base_url=MODELS_API_URL,
         args=stub,
         force_token_refresh=force_token_refresh,
     )
@@ -157,3 +152,12 @@ def parse_zoo_stub(
         )
 
     return stub, params
+
+
+# TODO: Remove that function later
+def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
+    """
+    Create simple randomized string that can temporarily serve as a hash name
+    for the model
+    """
+    return "".join(random.choice(chars) for _ in range(size))

@@ -42,6 +42,7 @@ class NumpyDirectory(Directory):
     :param name: name of the NumpyDirectory
     :param path: path of the NumpyDirectory
     :param url: url of the NumpyDirectory
+    :param owner_path: path of the parent NumpyDirectory
     """
 
     def __init__(
@@ -50,9 +51,11 @@ class NumpyDirectory(Directory):
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str]=None
+        owner_path: Optional[str] = None,
     ):
-        super().__init__(files=files, name=name, path=path, url=url, owner_path = owner_path)
+        super().__init__(
+            files=files, name=name, path=path, url=url, owner_path=owner_path
+        )
 
     def validate(
         self,
@@ -117,18 +120,33 @@ class NumpyDirectory(Directory):
                     )
         return True
 
+
 class SelectDirectory(Directory):
+    """
+    Object that represents a directory from which the
+    user can fetch the contained directories and file
+    by key values.
+
+    :param files: list of files contained within the SelectDirectory
+    :param name: name of the NumpyDirectory
+    :param path: path of the NumpyDirectory
+    :param url: url of the NumpyDirectory
+    :param owner_path: path of the parent SelectDirectory
+    """
+
     def __init__(
         self,
         files: List[File],
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str]=None
+        owner_path: Optional[str] = None,
     ):
         self._default, self._available = None, None
 
-        super().__init__(files=files, name=name, path=path, url=url, owner_path = owner_path)
+        super().__init__(
+            files=files, name=name, path=path, url=url, owner_path=owner_path
+        )
 
         self.files_dict = self.files_to_dictionary()
 
@@ -138,23 +156,19 @@ class SelectDirectory(Directory):
         return file
 
     def files_to_dictionary(self):
-        # if SelectDirectory is training directory
-        if self.name=='recipe':
-            recipe_dictionary = {file.name.replace("recipe_", "").replace(".md", ""): file for file in self.files}
+        if self.name == "recipe":
+            recipe_dictionary = {
+                file.name.replace("recipe_", "").replace(".md", ""): file
+                for file in self.files
+            }
             return recipe_dictionary
-        elif self.name=='training':
+        elif self.name == "training":
             training_dictionary = {"preqat": self}
             return training_dictionary
         elif self.name == "deployment":
             deployment_dictionary = {"default": self}
             return deployment_dictionary
 
-
-
-        # if SelectDirectory is recipes directory
-
-
-        # if SelectDirectory is deployment directory
     @property
     def default(self):
         if self.name == "recipe" and "original" in self.files_dict:
@@ -175,6 +189,3 @@ class SelectDirectory(Directory):
     @available.setter
     def available(self, value):
         self._available = value
-
-
-

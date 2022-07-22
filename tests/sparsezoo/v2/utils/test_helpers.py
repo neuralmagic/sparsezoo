@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import glob
+
 import os
 import tempfile
 
 import pytest
 
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.utils.helpers import setup_model
 from sparsezoo.v2.objects.model import Model
+from sparsezoo.v2.utils.helpers import setup_model
 
 
 @pytest.mark.parametrize(
@@ -47,14 +45,19 @@ class TestSetupModel:
             model,
             temp_dir,
             download_dir,
-
         ) = setup
 
-        training_path = model.training.get_path(download_directory = download_dir.name)
-        deployment_path = model.deployment.get_path(download_directory = download_dir.name)
-        onnx_model_path = model.onnx_model.get_path(download_directory = download_dir.name)
-        sample_inputs_path = model.sample_inputs.get_path(download_directory = download_dir.name)
-        recipes_path = model.recipes.get_path(download_directory = download_dir.name)
+        training_path = model.training.get_path(download_directory=download_dir.name)
+        deployment_path = model.deployment.get_path(
+            download_directory=download_dir.name
+        )
+        onnx_model_path = model.onnx_model.get_path(
+            download_directory=download_dir.name
+        )
+        sample_inputs_path = model.sample_inputs.get_path(
+            download_directory=download_dir.name
+        )
+        recipes_path = model.recipes.get_path(download_directory=download_dir.name)
 
         setup_model(
             output_dir=temp_dir.name,
@@ -63,7 +66,7 @@ class TestSetupModel:
             onnx_model=onnx_model_path,
             sample_inputs=sample_inputs_path,
             # TODO: .get_path() needs to be supported for dict-like obj
-            #sample_outputs=model.sample_outputs.get_path(),
+            # sample_outputs=model.sample_outputs.get_path(),
             recipes=recipes_path,
         )
 
@@ -74,7 +77,6 @@ class TestSetupModel:
             "model.onnx",
             "sample_inputs.tar.gz",
         } == set(os.listdir(temp_dir.name))
-
 
     def test_setup_model_from_objects(self, setup):
         model, temp_dir, download_dir = setup

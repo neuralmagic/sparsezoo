@@ -37,6 +37,7 @@ class Directory(File):
     :param name: name of the Directory
     :param path: path of the Directory
     :param url: url of the Directory
+    :param owner_path: path of the parent Directory
     """
 
     def __init__(
@@ -45,7 +46,8 @@ class Directory(File):
         files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str]= None):
+        owner_path: Optional[str] = None,
+    ):
 
         self.files = (
             files if not files else _possibly_convert_files_to_directories(files)
@@ -153,7 +155,10 @@ class Directory(File):
             if self.owner_path is not None:
                 destination_path = self.owner_path
             else:
-                raise ValueError("")
+                raise ValueError(
+                    "Failed to recognize a valid download path. "
+                    "Please make sure that `destination_path` argument is not None."
+                )
 
         # Directory can represent a tar file.
         if self.is_archive:
@@ -186,8 +191,8 @@ class Directory(File):
                     destination_path=os.path.join(destination_path, self.name)
                 )
                 file.path = os.path.join(destination_path, self.name, file.name)
-            self.path = os.path.join(destination_path, self.name)
 
+        self.path = os.path.join(destination_path, self.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """

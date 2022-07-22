@@ -30,6 +30,7 @@ from sparsezoo.utils.numpy import load_numpy_list
 
 __all__ = ["File"]
 
+
 class File:
     """
     Object to wrap around common files. Currently, supporting:
@@ -43,10 +44,15 @@ class File:
     :param name: name of the File
     :param path: path of the File
     :param url: url of the File
+    :param owner_path: path of the parent Directory
     """
 
     def __init__(
-        self, name: str, path: Optional[str] = None, url: Optional[str] = None, owner_path: Optional[str] = None
+        self,
+        name: str,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        owner_path: Optional[str] = None,
     ):
 
         self.name = name
@@ -72,7 +78,9 @@ class File:
         }
 
     @classmethod
-    def from_dict(cls, file: Dict[str, Any], owner_path: Optional[str]= None) -> "File":
+    def from_dict(
+        cls, file: Dict[str, Any], owner_path: Optional[str] = None
+    ) -> "File":
         """
         Factory method for creating a File class object
         from a file dictionary
@@ -80,23 +88,28 @@ class File:
 
         :param file: a dictionary which contains an information about
             the file (as returned by NeuralMagic API)
+        :param owner_path: path of the parent Directory
         :return: File class object
         """
         name = file.get("display_name")
         path = file.get("path")
         url = file.get("url")
 
-        return cls(
-            name=name,
-            path=path,
-            url=url,
-            owner_path = owner_path
-        )
-
+        return cls(name=name, path=path, url=url, owner_path=owner_path)
 
     def get_path(self, download_directory: Optional[str] = None):
+        """
+        Fetch the path of the file. If path is `None`, download the
+        contents to the `download_directory` if specified.
+        If not specified, will be downloaded to the root directory
+        of the owner Directory.
+
+        :param download_directory: the local path to save
+            the downloaded file to. Default is None
+        :return: path of the file
+        """
         if self.path is None:
-            self.download(destination_path = download_directory)
+            self.download(destination_path=download_directory)
         return self.path
 
     def download(
@@ -119,7 +132,10 @@ class File:
             if self.owner_path is not None:
                 destination_path = self.owner_path
             else:
-                raise ValueError("")
+                raise ValueError(
+                    "Failed to recognize a valid download path. "
+                    "Please make sure that `destination_path` argument is not None."
+                )
 
         new_file_path = os.path.join(destination_path, self.name)
 
@@ -290,5 +306,3 @@ class File:
             raise ValueError(error_msg)
         else:
             logging.warning(error_msg)
-
-

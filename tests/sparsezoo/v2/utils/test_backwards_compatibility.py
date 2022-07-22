@@ -16,8 +16,10 @@ import os
 
 import pytest
 
-from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
 from sparsezoo.v2.requests.requests import download_get_request
+from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
+
+
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
     if os.getenv("SPARSEZOO_API_URL")
@@ -87,7 +89,7 @@ EXPECTED_YOLO_FILES = {
 def test_restructure_request_json(stub, expected_files):
     if stub.startswith("zoo:"):
         stub = stub[len("zoo:") :]
-    request_json = download_get_request(base_url = MODELS_API_URL, args=stub)
+    request_json = download_get_request(args=stub)
     request_json = restructure_request_json(request_json["model"]["files"])
     for file_type, file_names_expected in expected_files.items():
         file_names = set(

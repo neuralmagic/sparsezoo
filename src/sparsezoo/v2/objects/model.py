@@ -16,9 +16,8 @@ import logging
 import os
 import re
 from typing import Any, Dict, Generator, List, Optional, Union
-import string
+
 import numpy
-import random
 
 from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
@@ -27,6 +26,7 @@ from sparsezoo.v2.objects.file import File
 from sparsezoo.v2.objects.model_objects import NumpyDirectory, SelectDirectory
 from sparsezoo.v2.utils.model_utils import (
     ZOO_STUB_PREFIX,
+    generate_model_name,
     load_files_from_directory,
     load_files_from_stub,
 )
@@ -38,7 +38,7 @@ CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
-ALLOWED_DEPLOYMENT_VALUES = {""}
+ALLOWED_DEPLOYMENT_VALUES = {"default"}
 
 PARAM_DICT = {
     "checkpoint": ALLOWED_CHECKPOINT_VALUES,
@@ -72,7 +72,8 @@ class Model(Directory):
             )
             if params:
                 self._validate_params(params)
-            path, url = os.path.join(CACHE_DIR, self.model_name_gen()), os.path.dirname(files[0]["url"])
+            path = os.path.join(CACHE_DIR, generate_model_name())
+            url = os.path.dirname(files[0]["url"])
         else:
             # initializing the model from the path
             files = load_files_from_directory(path)
@@ -113,7 +114,7 @@ class Model(Directory):
         )
 
         self.deployment: SelectDirectory = self._directory_from_files(
-            files,directory_class=SelectDirectory, display_name="deployment"
+            files, directory_class=SelectDirectory, display_name="deployment"
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -124,7 +125,7 @@ class Model(Directory):
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
         self.recipes: SelectDirectory = self._directory_from_files(
-            files, directory_class=SelectDirectory, display_name="recipe(.*).md", regex=True
+            files, directory_class=SelectDirectory, display_name="recipe"
         )
 
         self.onnx_model: File = self._file_from_files(files, display_name="model.onnx")
@@ -171,7 +172,10 @@ class Model(Directory):
         )
 
         super().__init__(
-            files=self._files_dictionary.values(), name="model", path=self.path, url=url
+            files=self._files_dictionary.values(),
+            name=os.path.basename(self.path),
+            path=self.path,
+            url=url,
         )
 
         # importing the class here, otherwise a circular import error is being raised
@@ -203,13 +207,17 @@ class Model(Directory):
             yield output
 
     def download(
-        self, directory_path: Optional[str] = None, override: bool = False, strict_mode: bool = False
+        self,
+        directory_path: Optional[str] = None,
+        override: bool = False,
+        strict_mode: bool = False,
     ) -> bool:
         """
         Attempt to download the files given the `url` attribute
         of the files inside the Model.
 
-        :param directory_path: directory to download files to
+        :param directory_path: directory to download files to. If not specified,
+            will use the `self.path` attribute.
         :param override: if True, the method can override old `directory_path`
         :param strict_mode: if True, will throw error if any file, that is
             attempted to be downloaded, turns out to be `None`.
@@ -218,14 +226,20 @@ class Model(Directory):
         """
         if directory_path is None:
             directory_path = self.path
-        if os.path.isdir(directory_path) and os.listdir(directory_path) and not override:
+
+        # if directory exists and is not empty, make sure that
+        # downloading is not possible unless `override` is True
+        if (
+            os.path.isdir(directory_path)
+            and os.listdir(directory_path)
+            and not override
+        ):
             raise ValueError(
                 "Model class object was either created "
                 "using path that points to a local directory or "
                 "`download()` method already invoked."
                 "Set `override` = True to override."
             )
-
         else:
             downloads = []
             for key, file in self._files_dictionary.items():
@@ -318,7 +332,9 @@ class Model(Directory):
 
         # directory is a tar file
         if self._is_file_tar(file):
-            directory = directory_class(files=[], name=name, path=path, url=url, owner_path=self.path)
+            directory = directory_class(
+                files=[], name=name, path=path, url=url, owner_path=self.path
+            )
             return directory
 
         # directory is folder
@@ -333,7 +349,11 @@ class Model(Directory):
                 files_in_directory.append(file)
 
             directory = directory_class(
-                files=files_in_directory, name=name, path=path, url=url, owner_path=self.path
+                files=files_in_directory,
+                name=name,
+                path=path,
+                url=url,
+                owner_path=self.path,
             )
             return directory
 
@@ -371,7 +391,7 @@ class Model(Directory):
             )
             return None
         else:
-            file = File.from_dict(file, owner_path = self.path)
+            file = File.from_dict(file, owner_path=self.path)
 
             return file
 
@@ -423,7 +443,10 @@ class Model(Directory):
             # "loose" files (alternative to parsing a .tar.gz file as
             # a directory)
             directory = self._get_directory_from_loose_api_files(
-                files=files, directory_class=directory_class, display_name=display_name, owner_path = self.path
+                files=files,
+                directory_class=directory_class,
+                display_name=display_name,
+                owner_path=self.path,
             )
         else:
             directory = None
@@ -521,11 +544,11 @@ class Model(Directory):
         return engine_to_numpydir_map
 
     @staticmethod
-    def _get_directory_from_loose_api_files(files, directory_class, display_name, owner_path):
+    def _get_directory_from_loose_api_files(
+        files, directory_class, display_name, owner_path
+    ):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
-        if display_name == "recipe(.*).md":
-            display_name = "recipe"
         files = [
             file_dict for file_dict in files if file_dict["file_type"] == display_name
         ]
@@ -551,9 +574,16 @@ class Model(Directory):
         if not files:
             return None
         else:
-            files = [File.from_dict(file, owner_path=os.path.join(owner_path, display_name)) for file in files]
+            files = [
+                File.from_dict(file, owner_path=os.path.join(owner_path, display_name))
+                for file in files
+            ]
             directory = directory_class(
-                files=files, name=display_name, path=None, url=None, owner_path=owner_path
+                files=files,
+                name=display_name,
+                path=None,
+                url=None,
+                owner_path=owner_path,
             )
             return directory
 
@@ -578,8 +608,5 @@ class Model(Directory):
                 raise ValueError(
                     f"String argument {key} has value {value}, "
                     "cannot be found in the "
-                    f"expected set of values {list(PARAM_DICT[key])}!")
-    # TODO: Remove that
-    @staticmethod
-    def model_name_gen(size=6, chars=string.ascii_uppercase + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))
+                    f"expected set of values {list(PARAM_DICT[key])}!"
+                )

@@ -21,8 +21,6 @@ from pathlib import Path
 import numpy
 import pytest
 
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
 from sparsezoo.v2.objects.model import Model
 
 
@@ -32,8 +30,7 @@ files_ic = {
     "logs",
     "onnx",
     "model.onnx",
-    "recipe_original.md",
-    "recipe_transfer_learn.md",
+    "recipe",
     "sample_inputs.tar.gz",
     "sample_originals.tar.gz",
     "sample_labels.tar.gz",
@@ -49,7 +46,6 @@ files_ic = {
 }
 
 files_nlp = copy.copy(files_ic)
-files_nlp.remove("recipe_transfer_learn.md")
 files_yolo = copy.copy(files_ic)
 
 
@@ -67,12 +63,12 @@ files_yolo = copy.copy(files_ic)
             False,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
-            ("deployment", ""),
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            ("deployment", "default"),
             True,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
             ("checkpoint", "preqat"),
             True,
         ),
@@ -93,18 +89,12 @@ def test_model_from_stub(stub, args, should_pass):
 
 
 def _assert_correct_files_downloaded(model, args):
-    for file_name, file in model._files_dictionary.items():
-        if args[0] == "recipe" and file_name == "recipes":
-            assert isinstance(file, File)
-
-        elif args[0] == "deployment" and file_name == "deployment":
-            assert isinstance(file, Directory)
-
-        elif args[0] == "checkpoint" and file_name == "training":
-            assert isinstance(file, Directory)
-
-        else:
-            assert file is None
+    if args[0] == "recipe":
+        assert len(model.recipes.available) == 1
+    elif args[0] == "checkpoint":
+        assert len(model.training.available) == 1
+    elif args[0] == "deployment":
+        assert len(model.training.available) == 1
 
 
 @pytest.mark.parametrize(
