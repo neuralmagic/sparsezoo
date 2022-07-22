@@ -12,10 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import pytest
 
 from sparsezoo.v2.utils.backwards_compatibility import restructure_request_json
-from sparsezoo.v2.utils.model_utils import load_files_from_stub
+from sparsezoo.v2.requests.requests import download_get_request
+BASE_API_URL = (
+    os.getenv("SPARSEZOO_API_URL")
+    if os.getenv("SPARSEZOO_API_URL")
+    else "https://api.neuralmagic.com"
+)
+MODELS_API_URL = f"{BASE_API_URL}/models"
 
 
 EXPECTED_IC_FILES = {
@@ -77,8 +85,10 @@ EXPECTED_YOLO_FILES = {
     scope="function",
 )
 def test_restructure_request_json(stub, expected_files):
-    request_json, _ = load_files_from_stub(stub)
-    request_json = restructure_request_json(request_json)
+    if stub.startswith("zoo:"):
+        stub = stub[len("zoo:") :]
+    request_json = download_get_request(base_url = MODELS_API_URL, args=stub)
+    request_json = restructure_request_json(request_json["model"]["files"])
     for file_type, file_names_expected in expected_files.items():
         file_names = set(
             file["display_name"]

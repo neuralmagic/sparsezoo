@@ -16,14 +16,15 @@ import logging
 import os
 import re
 from typing import Any, Dict, Generator, List, Optional, Union
-
+import string
 import numpy
+import random
 
 from sparsezoo.v2.inference.engines import ENGINES
 from sparsezoo.v2.inference.inference_runner import InferenceRunner
 from sparsezoo.v2.objects.directory import Directory, is_directory
 from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model_objects import NumpyDirectory, FileList, FileDict
+from sparsezoo.v2.objects.model_objects import NumpyDirectory, SelectDirectory
 from sparsezoo.v2.utils.model_utils import (
     ZOO_STUB_PREFIX,
     load_files_from_directory,
@@ -33,9 +34,9 @@ from sparsezoo.v2.utils.model_utils import (
 
 __all__ = ["Model"]
 
-CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo", "model"))
+CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
-ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat", ""}
+ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
 ALLOWED_DEPLOYMENT_VALUES = {""}
 
@@ -71,7 +72,7 @@ class Model(Directory):
             )
             if params:
                 self._validate_params(params)
-            path, url = CACHE_DIR, os.path.dirname(files[0]["url"])
+            path, url = os.path.join(CACHE_DIR, self.model_name_gen()), os.path.dirname(files[0]["url"])
         else:
             # initializing the model from the path
             files = load_files_from_directory(path)
@@ -79,8 +80,8 @@ class Model(Directory):
 
         self.path = path
 
-        self.training: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="training"
+        self.training: SelectDirectory = self._directory_from_files(
+            files, directory_class=SelectDirectory, display_name="training"
         )
         self.sample_originals: Directory = self._directory_from_files(
             files,
@@ -111,8 +112,8 @@ class Model(Directory):
             files, directory_class=Directory, display_name="sample_labels"
         )
 
-        self.deployment: Directory = self._directory_from_files(
-            files, display_name="deployment"
+        self.deployment: SelectDirectory = self._directory_from_files(
+            files,directory_class=SelectDirectory, display_name="deployment"
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -122,6 +123,10 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
+        self.recipes: SelectDirectory = self._directory_from_files(
+            files, directory_class=SelectDirectory, display_name="recipe(.*).md", regex=True
+        )
+
         self.onnx_model: File = self._file_from_files(files, display_name="model.onnx")
 
         self.analysis: File = self._file_from_files(files, display_name="analysis.yaml")
@@ -129,10 +134,6 @@ class Model(Directory):
             files, display_name="benchmarks.yaml"
         )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
-
-        self.recipes: List[File] = self._file_from_files(
-            files, display_name="recipe(.*).md", regex=True
-        )
 
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
@@ -170,7 +171,7 @@ class Model(Directory):
         )
 
         super().__init__(
-            files=self._files_dictionary.values(), name="model", path=path, url=url
+            files=self._files_dictionary.values(), name="model", path=self.path, url=url
         )
 
         # importing the class here, otherwise a circular import error is being raised
@@ -217,7 +218,7 @@ class Model(Directory):
         """
         if directory_path is None:
             directory_path = self.path
-        if os.path.isdir(directory_path) and not override:
+        if os.path.isdir(directory_path) and os.listdir(directory_path) and not override:
             raise ValueError(
                 "Model class object was either created "
                 "using path that points to a local directory or "
@@ -241,6 +242,7 @@ class Model(Directory):
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
+        self.path = directory_path
         return all(downloads)
 
     def validate(
@@ -382,7 +384,7 @@ class Model(Directory):
         # Parses a list of file dictionaries and returns
         # a File() object or a list of File() objects, if successful,
         # otherwise None.
-        files_found = FileList()
+        files_found = []
         for file in files:
             file = self._get_file(file=file, display_name=display_name, regex=regex)
             if file is not None:
@@ -522,6 +524,8 @@ class Model(Directory):
     def _get_directory_from_loose_api_files(files, directory_class, display_name, owner_path):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
+        if display_name == "recipe(.*).md":
+            display_name = "recipe"
         files = [
             file_dict for file_dict in files if file_dict["file_type"] == display_name
         ]
@@ -547,7 +551,7 @@ class Model(Directory):
         if not files:
             return None
         else:
-            files = [File.from_dict(file) for file in files]
+            files = [File.from_dict(file, owner_path=os.path.join(owner_path, display_name)) for file in files]
             directory = directory_class(
                 files=files, name=display_name, path=None, url=None, owner_path=owner_path
             )
@@ -564,22 +568,18 @@ class Model(Directory):
         # params are correct
         if len(params) == 0:
             return
-        elif len(params) > 1:
-            raise ValueError(
-                "The model can be initialized with a single string argument. "
-                f"Found {len(params)} string arguments: {list(params.keys())}!"
-            )
-        else:
-            ((param, value),) = params.items()
-            if param not in PARAM_DICT.keys():
+        for key, value in params.items():
+            if key not in PARAM_DICT.keys():
                 raise ValueError(
-                    f"String argument {param} not found in the "
+                    f"String argument {key} not found in the "
                     f"expected set of string arguments {list(PARAM_DICT.keys())}!"
                 )
-            if value not in PARAM_DICT[param]:
+            if value not in PARAM_DICT[key]:
                 raise ValueError(
-                    f"String argument {param} has value {value}, "
+                    f"String argument {key} has value {value}, "
                     "cannot be found in the "
-                    f"expected set of values {list(PARAM_DICT[param])}!"
-                )
-            return
+                    f"expected set of values {list(PARAM_DICT[key])}!")
+    # TODO: Remove that
+    @staticmethod
+    def model_name_gen(size=6, chars=string.ascii_uppercase + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))

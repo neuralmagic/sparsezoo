@@ -70,25 +70,20 @@ def filter_files(
     :param params: a dictionary with filtering parameters
     :return a filtered `files` object
     """
-    ((param, value),) = params.items()
-    if param == "recipe":
-        # pick a recipe-type files with the correct file name
-        files_filtered = [
-            file_dict
-            for file_dict in files
-            if file_dict["file_type"] == param
-            and file_dict["display_name"] == "recipe_" + value + ".md"
-        ]
-    elif param == "deployment":
-        # pick deployment-type files
-        files_filtered = [
-            file_dict for file_dict in files if file_dict["file_type"] == param
-        ]
-    else:
-        # pick training-type files
-        files_filtered = [
-            file_dict for file_dict in files if file_dict["file_type"] == "training"
-        ]
+    available_params = set(params.keys())
+    files_filtered = []
+    for file_dict in files:
+        if "recipe" in available_params and file_dict["file_type"] == "recipe":
+            value = params["recipe"]
+            if file_dict["display_name"] != "recipe_" + value + ".md":
+                continue
+        if "checkpoint" in available_params and file_dict["file_type"] == "training":
+            pass
+
+        if "deployment" in available_params and file_dict["file_type"] == "deployment":
+            pass
+
+        files_filtered.append(file_dict)
     if not files_filtered:
         raise ValueError("No files found! The list of files is empty!")
     else:

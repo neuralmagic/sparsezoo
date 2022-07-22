@@ -18,10 +18,10 @@ import tempfile
 
 import pytest
 
-from sparsezoo import Zoo
 from sparsezoo.v2.objects.directory import Directory
 from sparsezoo.v2.objects.file import File
 from sparsezoo.v2.utils.helpers import setup_model
+from sparsezoo.v2.objects.model import Model
 
 
 @pytest.mark.parametrize(
@@ -35,89 +35,73 @@ class TestSetupModel:
     def setup(self, stub):
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        model = Zoo.download_model_from_stub(stub, override_folder_name=temp_dir.name)
+        download_dir = tempfile.TemporaryDirectory(dir="/tmp")
+        model = Model(stub)
 
-        yield model, temp_dir
+        yield model, temp_dir, download_dir
         temp_dir.cleanup()
+        download_dir.cleanup()
 
     def test_setup_model_from_paths(self, setup):
         (
             model,
             temp_dir,
+            download_dir,
+
         ) = setup
-        output_dir = tempfile.TemporaryDirectory(dir="/tmp")
+
+        training_path = model.training.get_path(download_directory = download_dir.name)
+        deployment_path = model.deployment.get_path(download_directory = download_dir.name)
+        onnx_model_path = model.onnx_model.get_path(download_directory = download_dir.name)
+        sample_inputs_path = model.sample_inputs.get_path(download_directory = download_dir.name)
+        recipes_path = model.recipes.get_path(download_directory = download_dir.name)
 
         setup_model(
-            output_dir=output_dir.name,
-            training=model.framework_files[0].dir_path,
-            deployment=glob.glob(os.path.join(model.framework_files[0].dir_path, "*")),
-            onnx_model=model.onnx_file.path,
-            sample_inputs=model.data_inputs.path,
-            sample_outputs=model.data_outputs.path,
-            recipes=model.recipes[0].path,
+            output_dir=temp_dir.name,
+            training=training_path,
+            deployment=deployment_path,
+            onnx_model=onnx_model_path,
+            sample_inputs=sample_inputs_path,
+            # TODO: .get_path() needs to be supported for dict-like obj
+            #sample_outputs=model.sample_outputs.get_path(),
+            recipes=recipes_path,
         )
 
-        folders = glob.glob(os.path.join(output_dir.name, "*"))
         assert {
             "training",
             "deployment",
-            "original.md",
+            "recipe",
             "model.onnx",
-            "sample-outputs.tar.gz",
-            "sample-inputs.tar.gz",
-        } == set(os.path.basename(file) for file in folders)
-        output_dir.cleanup()
+            "sample_inputs.tar.gz",
+        } == set(os.listdir(temp_dir.name))
+
 
     def test_setup_model_from_objects(self, setup):
-        model, temp_dir = setup
-        output_dir = tempfile.TemporaryDirectory(dir="/tmp")
+        model, temp_dir, download_dir = setup
+        model.download(download_dir.name)
+        model.sample_inputs.unzip()
 
-        training_folder_path = model.framework_files[0].dir_path
-        training = File(
-            name=os.path.basename(training_folder_path), path=training_folder_path
-        )
-        training = [Directory.from_file(file=training)]
-
-        deployment_folder_path = model.framework_files[0].dir_path
-        deployment = File(
-            name=os.path.basename(deployment_folder_path), path=deployment_folder_path
-        )
-        deployment = Directory.from_file(file=deployment)
-
-        onnx_model = File(
-            name=os.path.basename(model.onnx_file.path), path=model.onnx_file.path
-        )
-
-        sample_inputs = File(
-            name=os.path.basename(model.data_inputs.path), path=model.data_inputs.path
-        )
-
-        sample_outputs = File(
-            name=os.path.basename(model.data_outputs.path), path=model.data_outputs.path
-        )
-
-        recipes = [
-            File(
-                name=os.path.basename(model.recipes[0].path), path=model.recipes[0].path
-            )
-        ]
+        training = model.training
+        deployment = model.deployment
+        onnx_model = model.onnx_model
+        sample_inputs = model.sample_inputs
+        # sample_outputs
+        recipes = model.recipes
 
         setup_model(
-            output_dir=output_dir.name,
+            output_dir=temp_dir.name,
             training=training,
             deployment=deployment,
             onnx_model=onnx_model,
             sample_inputs=sample_inputs,
-            sample_outputs=sample_outputs,
             recipes=recipes,
         )
-        folders = glob.glob(os.path.join(output_dir.name, "*"))
+
         assert {
             "training",
             "deployment",
-            "original.md",
+            "recipe",
             "model.onnx",
-            "sample-outputs.tar.gz",
-            "sample-inputs.tar.gz",
-        } == set(os.path.basename(file) for file in folders)
-        output_dir.cleanup()
+            "sample_inputs",
+        } == set(os.listdir(temp_dir.name))
+        download_dir.cleanup()

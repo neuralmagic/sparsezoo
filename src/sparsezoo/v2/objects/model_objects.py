@@ -98,7 +98,7 @@ class NumpyDirectory(Directory):
                 f"{NUMPY_DIRECTORY_NAMES + [x + '.tar.gz' for x in NUMPY_DIRECTORY_NAMES]}. "  # noqa E501
                 f"Found name: {self.name}."
             )
-        validating_inputs = file_name == "sample-inputs"
+        validating_inputs = file_name == "sample_inputs"
         expected_names = (
             [inp.name for inp in model.graph.input]
             if validating_inputs
@@ -117,15 +117,64 @@ class NumpyDirectory(Directory):
                     )
         return True
 
-class FileList(list):
+class SelectDirectory(Directory):
+    def __init__(
+        self,
+        files: List[File],
+        name: str,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        owner_path: Optional[str]=None
+    ):
+        self._default, self._available = None, None
 
-    def download(self):
-        [file.download() for file in self.__iter__()]
+        super().__init__(files=files, name=name, path=path, url=url, owner_path = owner_path)
 
-    def downloaded_path(self):
-        return [file.downloaded_path() for file in self.__iter__()]
+        self.files_dict = self.files_to_dictionary()
 
-
-class FileDict(dict):
     def __getitem__(self, key):
-        return list.__getitem__(self, key - 1)
+        file = self.files_dict[key]
+        file.get_path()
+        return file
+
+    def files_to_dictionary(self):
+        # if SelectDirectory is training directory
+        if self.name=='recipe':
+            recipe_dictionary = {file.name.replace("recipe_", "").replace(".md", ""): file for file in self.files}
+            return recipe_dictionary
+        elif self.name=='training':
+            training_dictionary = {"preqat": self}
+            return training_dictionary
+        elif self.name == "deployment":
+            deployment_dictionary = {"default": self}
+            return deployment_dictionary
+
+
+
+        # if SelectDirectory is recipes directory
+
+
+        # if SelectDirectory is deployment directory
+    @property
+    def default(self):
+        if self.name == "recipe" and "original" in self.files_dict:
+            return self["original"]
+        elif self.name == "training" and "preqat" in self.files_dict:
+            return self["preqat"]
+        else:
+            return next(iter(self.files_dict.values()))
+
+    @default.setter
+    def default(self, value):
+        self._default = value
+
+    @property
+    def available(self):
+        return list(self.files_dict.keys())
+
+    @available.setter
+    def available(self, value):
+        self._available = value
+
+
+

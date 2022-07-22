@@ -30,7 +30,6 @@ from sparsezoo.utils.numpy import load_numpy_list
 
 __all__ = ["File"]
 
-
 class File:
     """
     Object to wrap around common files. Currently, supporting:
@@ -49,6 +48,7 @@ class File:
     def __init__(
         self, name: str, path: Optional[str] = None, url: Optional[str] = None, owner_path: Optional[str] = None
     ):
+
         self.name = name
         self.url = url
         self.path = path
@@ -93,11 +93,11 @@ class File:
             owner_path = owner_path
         )
 
-    def downloaded_path(self):
-        if self.path is None:
-            self.download(self.owner_path)
-        return self.path
 
+    def get_path(self, download_directory: Optional[str] = None):
+        if self.path is None:
+            self.download(destination_path = download_directory)
+        return self.path
 
     def download(
         self,
@@ -290,3 +290,5 @@ class File:
             raise ValueError(error_msg)
         else:
             logging.warning(error_msg)
+
+

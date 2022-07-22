@@ -45,7 +45,7 @@ class TestNumpyDirectory:
 
     def test_validate(self, setup):
         name, path, files, onnx_model = setup
-        name = "sample-inputs"
+        name = "sample_inputs"
         numpy_directory = NumpyDirectory(name=name, files=files, path=path)
         assert numpy_directory.path == path
         assert numpy_directory.files == files
