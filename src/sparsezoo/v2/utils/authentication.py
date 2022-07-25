@@ -44,14 +44,7 @@ def create_dirs(path: str):
     """
     path = clean_path(path)
 
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            pass
-        else:
-            # Unexpected OSError, re-raise.
-            raise
+    os.makedirs(path, exist_ok=True)
 
 
 def create_parent_dirs(path: str):

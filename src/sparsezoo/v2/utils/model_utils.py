@@ -47,7 +47,7 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
             "Check whether the indicated directory exists."
         )
     files = [
-        file_dictionary(
+        dict(
             display_name=display_name, path=os.path.join(directory_path, display_name)
         )
         for display_name in display_names
@@ -160,4 +160,4 @@ def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
     Create simple randomized string that can temporarily serve as a hash name
     for the model
     """
-    return "".join(random.choice(chars) for _ in range(size))
+    return "".join(random.choices(chars, k=size))
