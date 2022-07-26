@@ -11,21 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""
-Object classes related to the sparsezoo
-"""
-
-# flake8: noqa
-
-from .base import *
-from .data import *
-from .downloadable import *
-from .file import *
-from .metadata import *
-from .model import *
-from .recipe import *
-from .release_version import *
-from .result import *
-from .tag import *
-from .user import *

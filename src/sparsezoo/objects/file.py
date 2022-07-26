@@ -12,367 +12,297 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Code related to files as stored for the sparsezoo as well a interacting with them
-such as downloading
-"""
-
+import json
 import logging
 import os
-from enum import Enum
-from typing import Dict, Union
+import re
+import time
+import traceback
+from typing import Any, Dict, Optional
 
-from sparsezoo.objects.base import BaseObject
-from sparsezoo.objects.downloadable import Downloadable
-from sparsezoo.objects.metadata import ModelMetadata
-from sparsezoo.objects.release_version import ReleaseVersion
-from sparsezoo.requests import download_model_get_request
-from sparsezoo.utils import create_parent_dirs, download_file
+import onnx
+import yaml
 
-
-__all__ = ["FileTypes", "File"]
-
-_LOGGER = logging.getLogger(__name__)
+from PIL import Image
+from sparsezoo.utils.downloader import download_file
+from sparsezoo.utils.numpy import load_numpy_list
 
 
-class FileTypes(Enum):
+__all__ = ["File"]
+
+
+class File:
     """
-    Types of files available in the sparsezoo
-    """
+    Object to wrap around common files. Currently, supporting:
+    - numpy files
+    - onnx files
+    - markdown files
+    - json files
+    - csv files
+    - image files
 
-    CARD = "card"
-    ONNX = "onnx"
-    ONNX_GZ = "onnx_gz"
-    RECIPE = "recipe"
-    FRAMEWORK = "framework"
-    DATA_ORIGINALS = "originals"
-    DATA_INPUTS = "inputs"
-    DATA_OUTPUTS = "outputs"
-    DATA_LABELS = "labels"
-
-
-class File(BaseObject, Downloadable):
-    """
-    A model repo file.
-
-    :param model_metadata: The metadata of the model the file belongs to
-    :param file_id: Id of the file as stored in the cloud
-    :param display_name: The file name and extension
-    :param file_type: The type of file the object represents
-    :param operator_version: Version of the file such as onnx OPSET for onnx files
-    :param release_version: The Release Version of the file, as a Dict or ReleaseVersion
-    :param checkpoint: True if the model is a checkpoint file
-        (for use with transfer learning flows), False otherwise
-    :param md5: The md5 hash for the file as stored in the cloud
-    :param file_size: The size of the file as stored in the cloud
-    :param downloads: The amount of times a download has been requested for
-        this file
-    :param url: The signed url to retrieve the file
-    :param child_folder_name: A child folder, if any, to store this file under locally
-    :param override_folder_name: Override for the name of the folder to save
-        this file under
-    :param override_parent_path: Path to override the default save path
-        for where to save the parent folder for this file under
+    :param name: name of the File
+    :param path: path of the File
+    :param url: url of the File
+    :param owner_path: path of the parent Directory
     """
 
     def __init__(
         self,
-        model_metadata: Union[Dict, ModelMetadata],
-        file_id: str,
-        display_name: str,
-        file_type: str,
-        operator_version: Union[str, None],
-        release_version: Union[Dict, ReleaseVersion],
-        checkpoint: bool,
-        md5: str,
-        file_size: int,
-        downloads: int,
-        url: str = None,
-        child_folder_name: Union[str, None] = None,
-        override_folder_name: Union[str, None] = None,
-        override_parent_path: Union[str, None] = None,
-        **kwargs,
+        name: str,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        owner_path: Optional[str] = None,
     ):
-        if isinstance(release_version, dict):
-            release_version = ReleaseVersion(**release_version)
 
-        if isinstance(model_metadata, dict):
-            if "release_version" not in model_metadata:
-                model_metadata = ModelMetadata(
-                    release_version=release_version, **model_metadata
-                )
-            else:
-                model_metadata = ModelMetadata(**model_metadata)
+        self.name = name
+        self.url = url
+        self.path = path
+        self.owner_path = owner_path
 
-        folder_name = (
-            model_metadata.model_id
-            if not override_folder_name
-            else override_folder_name
-        )
-        if child_folder_name:
-            folder_name = os.path.join(folder_name, child_folder_name)
+        # self.path can have any extension, including no extension.
+        # However, the File object also contains information
+        # About its loadable extensions.
+        # Loadable files can be read into the memory.
 
-        super(BaseObject, self).__init__(
-            folder_name=folder_name,
-            override_parent_path=override_parent_path,
-            **kwargs,
-        )
-        super(File, self).__init__(**kwargs)
-        self._model_metadata = model_metadata
-        self._file_id = file_id
-        self._display_name = display_name
-        self._file_type = file_type
-        self._operator_version = operator_version
-        self._checkpoint = checkpoint
-        self._md5 = md5
-        self._file_size = file_size
-        self._downloads = downloads
-        self._url = url
-        self._release_version = release_version
+        self.loadable_extensions = {
+            ".npz": self._validate_numpy,
+            ".onnx": self._validate_onnx,
+            ".md": self._validate_markdown,
+            ".json": self._validate_json,
+            ".csv": self._validate_csv,
+            ".jpg": self._validate_img,
+            ".png": self._validate_img,
+            ".jpeg": self._validate_img,
+            ".yaml": self._validate_yaml,
+        }
 
-    @property
-    def model_metadata(self) -> ModelMetadata:
+    @classmethod
+    def from_dict(
+        cls, file: Dict[str, Any], owner_path: Optional[str] = None
+    ) -> "File":
         """
-        :return: The metadata of the model the file belongs to
-        """
-        return self._model_metadata
+        Factory method for creating a File class object
+        from a file dictionary
+        (useful when working with the `request_json` from NeuralMagic).
 
-    @property
-    def file_id(self) -> str:
+        :param file: a dictionary which contains an information about
+            the file (as returned by NeuralMagic API)
+        :param owner_path: path of the parent Directory
+        :return: File class object
         """
-        :return: Id of the file as stored in the cloud
-        """
-        return self._file_id
+        name = file.get("display_name")
+        path = file.get("path")
+        url = file.get("url")
 
-    @property
-    def display_name(self) -> str:
-        """
-        :return: The file name and extension
-        """
-        return self._display_name
+        return cls(name=name, path=path, url=url, owner_path=owner_path)
 
-    @property
-    def file_type(self) -> str:
+    def get_path(self, download_directory: Optional[str] = None):
         """
-        :return: The type of file the object represents
-        """
-        return self._file_type
+        Fetch the path of the file. If path is `None`, download the
+        contents to the `download_directory` if specified.
+        If not specified, will be downloaded to the root directory
+        of the owner Directory.
 
-    @property
-    def file_type_card(self) -> bool:
+        :param download_directory: the local path to save
+            the downloaded file to. Default is None
+        :return: path of the file
         """
-        :return: True if the file type is a card, False otherwise
-        """
-        return self.file_type == FileTypes.CARD.value
-
-    @property
-    def file_type_onnx(self) -> bool:
-        """
-        :return: True if the file type is onnx, False otherwise
-        """
-        return self.file_type == FileTypes.ONNX.value
-
-    @property
-    def file_type_onnx_gz(self) -> bool:
-        """
-        :return: True if the file type is a gzipped onnx, False otherwise
-        """
-        return self.file_type == FileTypes.ONNX_GZ.value
-
-    @property
-    def file_type_recipe(self) -> bool:
-        """
-        :return: True if the file type is a recipe, False otherwise
-        """
-        return self.file_type == FileTypes.RECIPE.value
-
-    @property
-    def file_type_framework(self) -> bool:
-        """
-        :return: True if the file type is a framework file, False otherwise
-        """
-        return self.file_type == FileTypes.FRAMEWORK.value
-
-    @property
-    def file_type_data(self) -> bool:
-        """
-        :return: True if the file type is sample data, False otherwise
-        """
-        return (
-            self.file_type_data_originals
-            or self.file_type_data_inputs
-            or self.file_type_data_outputs
-            or self.file_type_data_labels
-        )
-
-    @property
-    def file_type_data_originals(self) -> bool:
-        """
-        :return: True if the file type is the original sample data, False otherwise
-        """
-        return self.file_type == FileTypes.DATA_ORIGINALS.value
-
-    @property
-    def file_type_data_inputs(self) -> bool:
-        """
-        :return: True if the file type is the input sample data, False otherwise
-        """
-        return self.file_type == FileTypes.DATA_INPUTS.value
-
-    @property
-    def file_type_data_outputs(self) -> bool:
-        """
-        :return: True if the file type is the output sample data, False otherwise
-        """
-        return self.file_type == FileTypes.DATA_OUTPUTS.value
-
-    @property
-    def file_type_data_labels(self) -> bool:
-        """
-        :return: True if the file type is the labels sample data, False otherwise
-        """
-        return self.file_type == FileTypes.DATA_LABELS.value
-
-    @property
-    def operator_version(self) -> Union[str, None]:
-        """
-        :return: Version of the file such as onnx OPSET for onnx files
-        """
-        return self._operator_version
-
-    @property
-    def checkpoint(self) -> bool:
-        """
-        :return: True if the model is a checkpoint file
-            (for use with transfer learning flows), False otherwise
-        """
-        return self._checkpoint
-
-    @property
-    def md5(self) -> str:
-        """
-        :return: The md5 hash for the file as stored in the cloud
-        """
-        return self._md5
-
-    @property
-    def file_size(self) -> int:
-        """
-        :return: The size of the file as stored in the cloud
-        """
-        return self._file_size
-
-    @property
-    def downloads(self) -> int:
-        """
-        :return: The amount of times a download has been requested for this file
-        """
-        return self._downloads
-
-    @property
-    def url(self) -> str:
-        """
-        :return: The signed url to retrieve the file.
-        """
-        return self._url
-
-    @property
-    def path(self) -> str:
-        """
-        :return: The path for where this file is (or can be) downloaded to
-        """
-        return f"{self.dir_path}/{self.display_name}"
-
-    @property
-    def downloaded(self):
-        """
-        :return: True if the file has already been downloaded, False otherwise
-        """
-        return os.path.exists(self.path)
-
-    @property
-    def release_version(self) -> ReleaseVersion:
-        """
-        :return: the file's release version
-        """
-        return self._release_version
-
-    def downloaded_path(self) -> str:
-        """
-        :return: The local path to the downloaded file.
-            Returns the same value as path, but if the file hasn't been downloaded
-            then it will automatically download
-        """
-        self.check_download()
-
+        if self.path is None:
+            self.download(destination_path=download_directory)
         return self.path
-
-    def check_download(
-        self,
-        overwrite: bool = False,
-        refresh_token: bool = False,
-        show_progress: bool = True,
-    ):
-        """
-        Check if the file has been downloaded, if not then call download()
-
-        :param overwrite: True to overwrite any previous file, False otherwise
-        :param refresh_token: True to refresh the auth token, False otherwise
-        :param show_progress: True to print tqdm progress, False otherwise
-        """
-        if not self.downloaded or overwrite:
-            self.download(overwrite, refresh_token, show_progress)
 
     def download(
         self,
-        overwrite: bool = False,
-        refresh_token: bool = False,
-        show_progress: bool = True,
+        destination_path: Optional[str] = None,
+        overwrite: bool = True,
+        retries: int = 1,
+        retry_sleep_sec: int = 5,
     ):
         """
-        Downloads a sparsezoo file.
+        Download the contents of the file from the url.
 
-        :param overwrite: True to overwrite any previous file, False otherwise
-        :param refresh_token: True to refresh the auth token, False otherwise
-        :param show_progress: True to print tqdm progress, False otherwise
+        :param destination_path: the local file path to save the downloaded file to
+        :param overwrite: True to overwrite any previous files if they exist,
+            False to not overwrite and raise an error if a file exists
+        :param retries: The maximum number of times to ping the API for the response
+        :type retry_sleep_sec: How long to wait between `retry` attempts
         """
-        if os.path.exists(self.path) and not overwrite:
-            _LOGGER.debug(
-                f"Model file {self.display_name} already exists, "
-                f"skipping download to {self.path}"
+        if destination_path is None:
+            if self.owner_path is not None:
+                destination_path = self.owner_path
+            else:
+                raise ValueError(
+                    "Failed to recognize a valid download path. "
+                    "Please make sure that `destination_path` argument is not None."
+                )
+
+        new_file_path = os.path.join(destination_path, self.name)
+
+        if self.url is None:
+            raise ValueError(
+                "The File object requires a valid attribute `url` to download "
+                "the file contents from. However, `url` is None."
             )
 
-            return
-
-        if not self.url:
-            _LOGGER.info(
-                "Getting signed url for "
-                f"{self.model_metadata.model_id}/{self.display_name}"
+        if self.path is not None:
+            logging.warning(
+                f"Overwriting the current location of the File: {self.path} "
+                f"with the new location: {new_file_path}."
             )
-            self._url = self._signed_url(refresh_token)
+        for attempt in range(retries):
+            try:
+                download_file(
+                    url_path=self.url,
+                    dest_path=new_file_path,
+                    overwrite=overwrite,
+                )
 
-        _LOGGER.info(f"Downloading model file {self.display_name} to {self.path}")
+                self.path = new_file_path
+                return
 
-        # cleaning up target
+            except Exception as err:
+                logging.error(err)
+                logging.error(traceback.format_exc())
+                time.sleep(retry_sleep_sec)
+            logging.error(
+                f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
+            )
+        logging.error("Download retry failed...")
+        raise Exception("Exceed max retry attempts: {} failed".format(retries))
+
+    def validate(self, strict_mode: bool = True) -> bool:
+        """
+        Validate whether the File object is loadable or not.
+
+        :param strict_mode: specifies the behavior of private `_validate_{}` methods:
+            - if strict_mode: method will raise ValueError on error
+            - if not strict_mode: method will raise warning on
+                error
+        :return: boolean flag; True if File instance is loadable, otherwise False
+        """
+        if not self.name or (not self.path and not self.url):
+            logging.warning(
+                "Failed to validate a file. A valid file needs to "
+                "have a valid `name` AND a valid `path` or `url`."
+            )
+            return False
+
+        else:
+            _, extension = os.path.splitext(self.name)
+
+            if extension in self.loadable_extensions.keys():
+                validation_function = self.loadable_extensions[extension]
+                validation_function(strict_mode=strict_mode)
+            # for files which do not have loadable_extensions,
+            # by default we assume they are valid
+            return True
+
+    def _validate_numpy(self, strict_mode):
+        if not load_numpy_list(self.path):
+            self._throw_error(
+                error_msg="Numpy file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _validate_onnx(self, strict_mode):
+        if not onnx.load(self.path):
+            self._throw_error(
+                error_msg="Onnx file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _validate_recipe(self, strict_mode):
+        # only validate whether a file is a recipe if sparseml is installed.
+        # this is optional, since we do not want to have an explicit dependency
+        # on sparseml in sparsezoo.
+        from sparseml.pytorch.optim import ScheduledModifierManager
+
         try:
-            os.remove(self.path)
-        except Exception:
-            pass
+            manager = ScheduledModifierManager.from_yaml(self.path)  # noqa  F841
+        except Exception as error:  # noqa: F841
+            self._throw_error(
+                error_msg="Markdown file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
 
-        # creating target and downloading
-        create_parent_dirs(self.path)
-        download_file(
-            self.url, self.path, overwrite=overwrite, show_progress=show_progress
-        )
+    def _validate_model_card(self):
+        try:
+            with open(self.path, "r") as yaml_file:
+                yaml_str = yaml_file.read()
 
-    def _signed_url(
-        self,
-        refresh_token: bool = False,
-    ) -> str:
-        response_json = download_model_get_request(
-            args=self.model_metadata,
-            file_name=self.display_name,
-            force_token_refresh=refresh_token,
-        )
+            # extract YAML front matter from markdown recipe card
+            # adapted from
+            # https://github.com/jonbeebe/frontmatter/blob/master/frontmatter
+            yaml_delim = r"(?:---|\+\+\+)"
+            _yaml = r"(.*?)"
+            re_pattern = r"^\s*" + yaml_delim + _yaml + yaml_delim
+            regex = re.compile(re_pattern, re.S | re.M)
+            result = regex.search(yaml_str)
+            yaml_str = result.group(1)
+            yaml_dict = yaml.safe_load(yaml_str)
+            # returns a string "{domain}-{sub_domain}, if valid
+            # this makes the method reusable to fetch the integration
+            # name for the integration validation
+            return yaml_dict
 
-        return response_json["file"]["url"]
+        except Exception as error:  # noqa: F841
+            logging.error(error)
+
+    def _validate_markdown(self, strict_mode):
+        # test if .md file is a model_card
+        is_valid_model_card = self._validate_model_card()
+        # if not, attempt to check if it is a recipe file
+        if not is_valid_model_card:
+            try:
+                from sparseml.pytorch.optim import (  # noqa  F401
+                    ScheduledModifierManager,
+                )
+            except Exception as error:  # noqa  F841
+                # if not model card and unable to check if recipe,
+                # optimistically assume the .md file is valid.
+                return
+            self._validate_recipe(strict_mode=strict_mode)
+
+    def _validate_json(self, strict_mode):
+        try:
+            with open(self.path) as file:
+                json.load(file)
+        except Exception as error:  # noqa: F841
+            self._throw_error(
+                error_msg="Json file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _validate_csv(self, strict_mode):
+        try:
+            with open(self.path) as file:
+                file.readlines()
+        except Exception as error:  # noqa: F841
+            self._throw_error(
+                error_msg="Csv file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _validate_img(self, strict_mode):
+        if not Image.open(self.path):
+            self._throw_error(
+                error_msg="Image file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _validate_yaml(self, strict_mode):
+        try:
+            with open(self.path) as file:
+                yaml.load(file, Loader=yaml.FullLoader)
+        except Exception as error:  # noqa: F841
+            self._throw_error(
+                error_msg="Yaml file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
+
+    def _throw_error(self, error_msg, strict_mode):
+        if strict_mode:
+            raise ValueError(error_msg)
+        else:
+            logging.warning(error_msg)
