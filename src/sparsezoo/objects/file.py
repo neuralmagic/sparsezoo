@@ -24,8 +24,7 @@ import onnx
 import yaml
 
 from PIL import Image
-from sparsezoo.utils.downloader import download_file
-from sparsezoo.utils.numpy import load_numpy_list
+from sparsezoo.utils import download_file, load_numpy_list
 
 
 __all__ = ["File"]
@@ -57,10 +56,14 @@ class File:
 
         self.name = name
         self.url = url
-        self.path = path
+        # private `_path` variable denotes that a File
+        # has a local path attached to it. Therefore,
+        # either has been downloaded or can be
+        # downloaded
+        self._path = path
         self.owner_path = owner_path
 
-        # self.path can have any extension, including no extension.
+        # self._path can have any extension, including no extension.
         # However, the File object also contains information
         # About its loadable extensions.
         # Loadable files can be read into the memory.
@@ -76,6 +79,19 @@ class File:
             ".jpeg": self._validate_img,
             ".yaml": self._validate_yaml,
         }
+
+    @property
+    def path(self):
+        if self._path is None:
+            self.download()
+        elif not os.path.exists(self._path):
+            self.download()
+
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self._path = value
 
     @classmethod
     def from_dict(
@@ -96,21 +112,6 @@ class File:
         url = file.get("url")
 
         return cls(name=name, path=path, url=url, owner_path=owner_path)
-
-    def get_path(self, download_directory: Optional[str] = None):
-        """
-        Fetch the path of the file. If path is `None`, download the
-        contents to the `download_directory` if specified.
-        If not specified, will be downloaded to the root directory
-        of the owner Directory.
-
-        :param download_directory: the local path to save
-            the downloaded file to. Default is None
-        :return: path of the file
-        """
-        if self.path is None:
-            self.download(destination_path=download_directory)
-        return self.path
 
     def download(
         self,
@@ -145,9 +146,9 @@ class File:
                 "the file contents from. However, `url` is None."
             )
 
-        if self.path is not None:
+        if self._path is not None:
             logging.warning(
-                f"Overwriting the current location of the File: {self.path} "
+                f"Overwriting the current location of the File: {self._path} "
                 f"with the new location: {new_file_path}."
             )
         for attempt in range(retries):
@@ -158,7 +159,7 @@ class File:
                     overwrite=overwrite,
                 )
 
-                self.path = new_file_path
+                self._path = new_file_path
                 return
 
             except Exception as err:
@@ -181,7 +182,7 @@ class File:
                 error
         :return: boolean flag; True if File instance is loadable, otherwise False
         """
-        if not self.name or (not self.path and not self.url):
+        if not self.name or (not self._path and not self.url):
             logging.warning(
                 "Failed to validate a file. A valid file needs to "
                 "have a valid `name` AND a valid `path` or `url`."
@@ -199,14 +200,14 @@ class File:
             return True
 
     def _validate_numpy(self, strict_mode):
-        if not load_numpy_list(self.path):
+        if not load_numpy_list(self._path):
             self._throw_error(
                 error_msg="Numpy file could not been loaded properly",
                 strict_mode=strict_mode,
             )
 
     def _validate_onnx(self, strict_mode):
-        if not onnx.load(self.path):
+        if not onnx.load(self._path):
             self._throw_error(
                 error_msg="Onnx file could not been loaded properly",
                 strict_mode=strict_mode,
@@ -219,7 +220,7 @@ class File:
         from sparseml.pytorch.optim import ScheduledModifierManager
 
         try:
-            manager = ScheduledModifierManager.from_yaml(self.path)  # noqa  F841
+            manager = ScheduledModifierManager.from_yaml(self._path)  # noqa  F841
         except Exception as error:  # noqa: F841
             self._throw_error(
                 error_msg="Markdown file could not been loaded properly",
@@ -228,7 +229,7 @@ class File:
 
     def _validate_model_card(self):
         try:
-            with open(self.path, "r") as yaml_file:
+            with open(self._path, "r") as yaml_file:
                 yaml_str = yaml_file.read()
 
             # extract YAML front matter from markdown recipe card
@@ -266,7 +267,7 @@ class File:
 
     def _validate_json(self, strict_mode):
         try:
-            with open(self.path) as file:
+            with open(self._path) as file:
                 json.load(file)
         except Exception as error:  # noqa: F841
             self._throw_error(
@@ -276,7 +277,7 @@ class File:
 
     def _validate_csv(self, strict_mode):
         try:
-            with open(self.path) as file:
+            with open(self._path) as file:
                 file.readlines()
         except Exception as error:  # noqa: F841
             self._throw_error(
@@ -285,7 +286,7 @@ class File:
             )
 
     def _validate_img(self, strict_mode):
-        if not Image.open(self.path):
+        if not Image.open(self._path):
             self._throw_error(
                 error_msg="Image file could not been loaded properly",
                 strict_mode=strict_mode,
@@ -293,7 +294,7 @@ class File:
 
     def _validate_yaml(self, strict_mode):
         try:
-            with open(self.path) as file:
+            with open(self._path) as file:
                 yaml.load(file, Loader=yaml.FullLoader)
         except Exception as error:  # noqa: F841
             self._throw_error(

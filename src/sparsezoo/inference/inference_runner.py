@@ -15,28 +15,30 @@
 Helper class for running inference using
 the selected engine and input/output files
 """
-import os
+from __future__ import annotations
+
 from collections import OrderedDict
-from pathlib import Path
-from typing import Callable, Generator, List
+from typing import TYPE_CHECKING, Generator, List
 
 import numpy
 import onnx
 
 import onnxruntime as ort
-from sparsezoo.utils.numpy import save_numpy
-from sparsezoo.v2.inference.engines import ENGINES
-from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
-__all__ = ["InferenceRunner"]
+if TYPE_CHECKING:
+    from sparsezoo.objects import File, NumpyDirectory
+
+
+__all__ = ["InferenceRunner", "ENGINES"]
+
+ENGINES = ["onnxruntime", "deepsparse"]
 
 
 class InferenceRunner:
     """
     Helper class for running inference
-    given `sample_inputs`, `sample_outputs` and the onnx model.
+    given `sample_inputs`,`sample_outputs` and the onnx model.
 
     This is intended to be used by the Model class object.
 
@@ -98,9 +100,6 @@ class InferenceRunner:
                 f"Supported engines: {self.engine_type_to_iterator.keys()}."
             )
 
-        if save_to_tar:
-            self._save_outputs_to_tar(iterator, engine_type)
-
         for output in iterator():
             yield output
 
@@ -121,30 +120,6 @@ class InferenceRunner:
                     o2 = o2.squeeze(0)
                 validation.append(numpy.allclose(o1, o2, atol=1e-5))
         return all(validation)
-
-    def _save_outputs_to_tar(self, iterator: Callable, engine_type: str):
-        output_files = []
-
-        path = os.path.join(
-            os.path.dirname(self.sample_inputs.path),
-            f"sample_outputs_{engine_type}",
-        )
-        if not os.path.exists(path):
-            os.mkdir(path)
-
-        for input_file, output in zip(self.sample_inputs.files, iterator()):
-            # if input's name is `inp-XXXX.npz`
-            # output's name should be `out-XXXX.npz`
-            name = input_file.name.replace("inp", "out")
-            # we need to remove `.npz`, this is
-            # required by save_numpy() function
-            save_numpy(array=output, export_dir=path, name=Path(name).stem)
-            output_files.append(File(name=name, path=os.path.join(path, name)))
-
-        output_directory = NumpyDirectory(
-            name=os.path.basename(path), path=path, files=output_files
-        )
-        output_directory.gzip()
 
     def _run_with_deepsparse(self):
         try:

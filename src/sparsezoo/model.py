@@ -19,17 +19,22 @@ from typing import Any, Dict, Generator, List, Optional, Union
 
 import numpy
 
-from sparsezoo.inference.engines import ENGINES
-from sparsezoo.inference.inference_runner import InferenceRunner
-from sparsezoo.objects.directory import Directory, is_directory
-from sparsezoo.objects.file import File
-from sparsezoo.objects.model_objects import NumpyDirectory, SelectDirectory
-from sparsezoo.utils.model_utils import (
+from sparsezoo.inference import ENGINES, InferenceRunner
+from sparsezoo.objects import (
+    Directory,
+    File,
+    NumpyDirectory,
+    SelectDirectory,
+    is_directory,
+    save_outputs_to_tar,
+)
+from sparsezoo.objects.model_helpers import (
     ZOO_STUB_PREFIX,
     generate_model_name,
     load_files_from_directory,
     load_files_from_stub,
 )
+from sparsezoo.validation import IntegrationValidator
 
 
 __all__ = ["Model"]
@@ -63,12 +68,14 @@ class Model(Directory):
             e.g. `/home/user/model_path`
     """
 
-    def __init__(self, path: str):
+    def __init__(self, source: str):
 
-        if path.startswith(ZOO_STUB_PREFIX):
+        self.source = source
+
+        if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
             files, params = load_files_from_stub(
-                path, valid_params=list(PARAM_DICT.keys())
+                self.source, valid_params=list(PARAM_DICT.keys())
             )
             if params:
                 self._validate_params(params)
@@ -76,7 +83,8 @@ class Model(Directory):
             url = os.path.dirname(files[0]["url"])
         else:
             # initializing the model from the path
-            files = load_files_from_directory(path)
+            files = load_files_from_directory(self.source)
+            path = source
             url = None
 
         self.path = path
@@ -173,14 +181,10 @@ class Model(Directory):
 
         super().__init__(
             files=self._files_dictionary.values(),
-            name=os.path.basename(self.path),
-            path=self.path,
+            name=os.path.basename(self._path),
+            path=self._path,
             url=url,
         )
-
-        # importing the class here, otherwise a circular import error is being raised
-        # (IntegrationValidator script also imports Model class object)
-        from sparsezoo.validation.validator import IntegrationValidator
 
         self.integration_validator = IntegrationValidator(model=self)
 
@@ -196,10 +200,13 @@ class Model(Directory):
         :params save_to_tar: boolean flag; if True, the output generated
             by the `inference_runner` will be additionally saved to
             the archive file `sample_outputs_{engine_type}.tar.gz
-            (located in the `self.path` directory).
+            (located in the `self._path` directory).
         :returns list containing numpy arrays, representing the output
             from the inference engine
         """
+        if save_to_tar:
+            iterator = self.inference_runner.engine_type_to_iterator.get(engine_type)
+            save_outputs_to_tar(self.sample_inputs, iterator, engine_type)
 
         for output in self.inference_runner.generate_outputs(
             engine_type=engine_type, save_to_tar=save_to_tar
@@ -217,7 +224,7 @@ class Model(Directory):
         of the files inside the Model.
 
         :param directory_path: directory to download files to. If not specified,
-            will use the `self.path` attribute.
+            will use the `self._path` attribute.
         :param override: if True, the method can override old `directory_path`
         :param strict_mode: if True, will throw error if any file, that is
             attempted to be downloaded, turns out to be `None`.
@@ -225,7 +232,7 @@ class Model(Directory):
         :return: boolean flag; was download successful or not.
         """
         if directory_path is None:
-            directory_path = self.path
+            directory_path = self._path
 
         # if directory exists and is not empty, make sure that
         # downloading is not possible unless `override` is True
@@ -252,7 +259,7 @@ class Model(Directory):
                         )
 
                     else:
-                        logging.warning(
+                        logging.debug(
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
@@ -285,7 +292,7 @@ class Model(Directory):
                 )
                 return False
 
-        if self.model_card.path is None:
+        if self.model_card._path is None:
             raise ValueError(
                 "Model card missing! Before running `validate()` "
                 "method, the respective files must be present locally. "
@@ -296,6 +303,18 @@ class Model(Directory):
 
     def analyze(self):
         raise NotImplementedError()
+
+    def __repr__(self):
+        if self.source.startswith(ZOO_STUB_PREFIX):
+            return f"{self.__class__.__name__}(stub={self.source})"
+        else:
+            return f"{self.__class__.__name__}(directory={self.source})"
+
+    def __str__(self):
+        if self.source.startswith(ZOO_STUB_PREFIX):
+            return f"{self.__class__.__name__}(stub={self.source})"
+        else:
+            return f"{self.__class__.__name__}(directory={self.source})"
 
     def _get_directory(
         self,
@@ -308,7 +327,7 @@ class Model(Directory):
         # Optionally, can do:
         #   string matching (if `display_name` not None)
         #   regex (if `display_name` not None and `regex`)
-        #   file validation (if file's path is not None)
+        #   file validation (if file's _path is not None)
 
         match = True
         if display_name:
@@ -322,7 +341,7 @@ class Model(Directory):
                 )
 
         if not match:
-            logging.warning(
+            logging.debug(
                 "Could not find a directory with "
                 f"display_name / regex_pattern: {display_name}"
             )
@@ -333,7 +352,7 @@ class Model(Directory):
         # directory is a tar file
         if self._is_file_tar(file):
             directory = directory_class(
-                files=[], name=name, path=path, url=url, owner_path=self.path
+                files=[], name=name, path=path, url=url, owner_path=self._path
             )
             return directory
 
@@ -353,7 +372,7 @@ class Model(Directory):
                 name=name,
                 path=path,
                 url=url,
-                owner_path=self.path,
+                owner_path=self._path,
             )
             return directory
 
@@ -385,13 +404,13 @@ class Model(Directory):
                         match = False
 
         if not match:
-            logging.warning(
+            logging.debug(
                 "Could not find a file with "
                 f"display_name / regex_pattern: {display_name}"
             )
             return None
         else:
-            file = File.from_dict(file, owner_path=self.path)
+            file = File.from_dict(file, owner_path=self._path)
 
             return file
 
@@ -446,7 +465,7 @@ class Model(Directory):
                 files=files,
                 directory_class=directory_class,
                 display_name=display_name,
-                owner_path=self.path,
+                owner_path=self._path,
             )
         else:
             directory = None

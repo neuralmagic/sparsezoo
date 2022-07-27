@@ -127,10 +127,10 @@ class TestModel:
     @pytest.fixture()
     def setup(self, stub, clone_sample_outputs, expected_files):
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        model = Model(path=stub)
+        model = Model(stub)
         model.download(directory_path=temp_dir.name)
         self._add_mock_files(temp_dir.name, clone_sample_outputs=clone_sample_outputs)
-        model = Model(path=temp_dir.name)
+        model = Model(temp_dir.name)
 
         yield model, clone_sample_outputs, expected_files, temp_dir
 

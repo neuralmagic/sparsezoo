@@ -19,9 +19,8 @@ import string
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
+from sparsezoo.objects.utils import restructure_request_json
 from sparsezoo.utils import download_get_request
-
-from .utils import restructure_request_json
 
 
 __all__ = [

@@ -20,7 +20,8 @@ import tempfile
 import pytest
 
 from sparsezoo.objects import Directory, File
-from tests.sparsezoo.v2.objects.test_file import _create_sample_file
+
+from .test_file import _create_sample_file
 
 
 def _create_files_directory(files_extensions, temp_dir):

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import errno
 import json
 import logging
 import os
@@ -23,12 +22,11 @@ from typing import Dict
 import requests
 import yaml
 
+from . import BASE_API_URL
+from .utils import clean_path, create_parent_dirs
 
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
+
+__all__ = ["get_auth_header"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,31 +34,6 @@ PUBLIC_AUTH_TYPE = "public"
 CREDENTIALS_YAML_TOKEN_KEY = "nm_api_token"
 AUTH_API = f"{BASE_API_URL}/auth"
 NM_TOKEN_HEADER = "nm-token-header"
-
-
-def create_dirs(path: str):
-    """
-    :param path: the directory path to try and create
-    """
-    path = clean_path(path)
-
-    os.makedirs(path, exist_ok=True)
-
-
-def create_parent_dirs(path: str):
-    """
-    :param path: the file path to try to create the parent directories for
-    """
-    parent = os.path.dirname(path)
-    create_dirs(parent)
-
-
-def clean_path(path: str) -> str:
-    """
-    :param path: the directory or file path to clean
-    :return: a cleaned version that expands the user path and creates an absolute path
-    """
-    return os.path.abspath(os.path.expanduser(path))
 
 
 CREDENTIALS_YAML = os.path.abspath(
@@ -140,8 +113,6 @@ class SparseZooCredentials:
 
 def get_auth_header(
     authentication_type: str = PUBLIC_AUTH_TYPE,
-    user_id: str = None,
-    app_id: str = None,
     force_token_refresh: bool = False,
 ) -> Dict:
     """
@@ -152,8 +123,6 @@ def get_auth_header(
     Currently only 'public' authentication type is supported.
 
     :param authentication_type: authentication type for generating token
-    :param user_id: user id if auth type requires user_id
-    :param app_id: app id if auth type requires app_id
     :param force_token_refresh: forces a new token to be generated
     :return: An authentication header with key 'nm-token-header' containing the header
         token

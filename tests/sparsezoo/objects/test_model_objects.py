@@ -20,8 +20,8 @@ import pytest
 
 from sparsezoo.objects import NumpyDirectory
 from sparsezoo.utils import load_numpy_list
-from tests.sparsezoo.v2.objects.test_directory import _create_files_directory
-from tests.sparsezoo.v2.objects.test_file import _create_onnx_file
+from tests.sparsezoo.objects.test_directory import _create_files_directory
+from tests.sparsezoo.objects.test_file import _create_onnx_file
 
 
 @pytest.mark.parametrize(

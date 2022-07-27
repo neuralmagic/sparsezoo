@@ -23,12 +23,13 @@ from typing import List, Optional
 
 import onnx
 
-from sparsezoo.utils.numpy import load_numpy_list
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
+from sparsezoo.utils import load_numpy_list
+
+from .directory import Directory
+from .file import File
 
 
-__all__ = ["NumpyDirectory"]
+__all__ = ["NumpyDirectory", "SelectDirectory"]
 
 NUMPY_DIRECTORY_NAMES = ["sample_inputs", "sample_outputs"]
 
@@ -152,7 +153,6 @@ class SelectDirectory(Directory):
 
     def __getitem__(self, key):
         file = self.files_dict[key]
-        file.get_path()
         return file
 
     def files_to_dictionary(self):

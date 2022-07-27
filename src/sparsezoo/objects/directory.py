@@ -20,8 +20,9 @@ import time
 import traceback
 from typing import Dict, List, Optional, Union
 
-from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.objects.file import File
+from sparsezoo import utils
+
+from .file import File
 
 
 __all__ = ["Directory", "is_directory"]
@@ -62,18 +63,18 @@ class Directory(File):
 
     @classmethod
     def from_file(cls, file: File) -> "Directory":
-        if not file.path:
+        if not file._path:
             raise ValueError(
                 f"Attempting to convert File class object {file.name} "
-                "to Directory class object, but the file.path is missing."
+                "to Directory class object, but the file._path is missing."
             )
         name = file.name
         files = [
-            File(name=os.path.basename(path), path=os.path.join(file.path, path))
-            for path in os.listdir(file.path)
+            File(name=os.path.basename(path), path=os.path.join(file._path, path))
+            for path in os.listdir(file._path)
         ]
         files = _possibly_convert_files_to_directories(files)
-        path = file.path
+        path = file._path
         return cls(name=name, files=files, path=path)
 
     @property
@@ -103,7 +104,7 @@ class Directory(File):
         :return: List with names of files
         """
         if self.is_archive:
-            tar = tarfile.open(self.path)
+            tar = tarfile.open(self._path)
             return [os.path.basename(member.name) for member in tar.getmembers()]
         else:
             return [file.name for file in self.files]
@@ -165,13 +166,13 @@ class Directory(File):
             new_file_path = os.path.join(destination_path, self.name)
             for attempt in range(retries):
                 try:
-                    download_file(
+                    utils.download_file(
                         url_path=self.url,
                         dest_path=new_file_path,
                         overwrite=overwrite,
                     )
 
-                    self.path = new_file_path
+                    self._path = new_file_path
                     return
 
                 except Exception as err:
@@ -192,7 +193,7 @@ class Directory(File):
                 )
                 file.path = os.path.join(destination_path, self.name, file.name)
 
-        self.path = os.path.join(destination_path, self.name)
+        self._path = os.path.join(destination_path, self.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -231,25 +232,25 @@ class Directory(File):
             parent_path = archive_directory
 
         else:
-            if self.path is None:
+            if self._path is None:
                 raise ValueError(
                     "Attempting to zip the folder Directory object files using "
                     "`path` attribute, but `self.path` is None. "
                     "Class object requires pointer to parent "
                     "folder directory to know where to save the tar archive file."
                 )
-            parent_path = pathlib.PurePath(self.path).parent
+            parent_path = pathlib.PurePath(self._path).parent
 
         tar_file_name = self.name + ".tar.gz"
         tar_file_path = os.path.join(parent_path, tar_file_name)
         with tarfile.open(tar_file_path, "w") as tar:
             for file in self.files:
-                tar.add(file.path)
+                tar.add(file._path)
 
         self.name = tar_file_name
         self.files = None
         self.url = None
-        self.path = tar_file_path
+        self._path = tar_file_path
         self.is_archive = True
 
     def unzip(self, extract_directory: Optional[str] = None):
@@ -263,7 +264,7 @@ class Directory(File):
         """
         files = []
         if extract_directory is None:
-            extract_directory = os.path.dirname(self.path)
+            extract_directory = os.path.dirname(self._path)
 
         if not self.is_archive:
             raise ValueError(
@@ -272,7 +273,7 @@ class Directory(File):
             )
 
         name = ".".join(self.name.split(".")[:-2])
-        tar = tarfile.open(self.path, "r")
+        tar = tarfile.open(self._path, "r")
         path = os.path.join(extract_directory, name)
 
         for member in tar.getmembers():
@@ -284,7 +285,7 @@ class Directory(File):
         self.name = name
         self.files = files
         self.url = None
-        self.path = path
+        self._path = path
         self.is_archive = False
 
     def __len__(self):
@@ -293,8 +294,8 @@ class Directory(File):
     def _unpack(self):
         # To unpack the Directory the following criteria need to be fulfilled:
         # 1) The Directory needs to be a tar archive
-        # 2) The Directory needs to have a `path` attribute.
-        return self.is_archive and self.path is not None
+        # 2) The Directory needs to have a `_path` attribute.
+        return self.is_archive and self._path is not None
 
     def __iter__(self) -> File:
         for file in self.files:
@@ -306,14 +307,14 @@ def is_directory(file: File) -> bool:
     # converted into a Directory class object
     if not isinstance(file, File):
         return False
-    if file.path is None:
+    if file._path is None:
         from pathlib import Path
 
         # we are processing a downladable file
         file_name_without_extension = Path(file.name).stem
         return file_name_without_extension == file.name
 
-    return os.path.isdir(file.path)
+    return os.path.isdir(file._path)
 
 
 def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:

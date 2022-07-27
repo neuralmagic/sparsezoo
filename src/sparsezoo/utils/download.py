@@ -1,12 +1,31 @@
+# Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
 import os
-import requests
 from typing import Iterator, NamedTuple, Union
+
+import requests
 from tqdm import auto, tqdm, tqdm_notebook
 
-from sparsezoo.utils.authentication import clean_path, create_parent_dirs
+from .utils import clean_path, create_parent_dirs
+
+
+__all__ = ["download_file"]
 
 _LOGGER = logging.getLogger(__name__)
+
 
 def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
     """
@@ -37,6 +56,7 @@ DownloadProgress = NamedTuple(
     ],
 )
 
+
 class PreviouslyDownloadedError(Exception):
     """
     Error raised when a file has already been downloaded and overwrite is False
@@ -44,6 +64,7 @@ class PreviouslyDownloadedError(Exception):
 
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
 
 def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
     _LOGGER.debug(f"downloading file from {url_path} to {dest_path}")
@@ -94,6 +115,7 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
         except Exception:
             pass
         raise err
+
 
 def download_file_iter(
     url_path: str,

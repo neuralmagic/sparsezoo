@@ -16,19 +16,23 @@
 Validator class that checks, whether the contents of ModelDirectory
 class objects are valid
 """
+from __future__ import annotations
 
 import os
-from typing import Callable, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.v2.objects.directory import Directory
-from sparsezoo.v2.objects.file import File
-from sparsezoo.v2.objects.model import Model
-from sparsezoo.v2.validation.integrations import (
+from sparsezoo.objects import Directory, File
+
+from .integrations import (
     validate_cv_classification,
     validate_cv_detection,
     validate_cv_segmentation,
     validate_nlp,
 )
+
+
+if TYPE_CHECKING:
+    from sparsezoo import Model
 
 
 __all__ = ["IntegrationValidator"]
