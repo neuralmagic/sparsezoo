@@ -104,7 +104,7 @@ def search_zoo_models(
     ]
 
 
-def model_dict_to_stub(model_dict: Dict[str, str]):
+def model_dict_to_stub(model_dict: Dict[str, str]) -> str:
     domain = model_dict.get("domain")
     sub_domain = model_dict.get("sub_domain")
     architecture = model_dict.get("architecture")
