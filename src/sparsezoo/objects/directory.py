@@ -264,7 +264,7 @@ class Directory(File):
         """
         files = []
         if extract_directory is None:
-            extract_directory = os.path.dirname(self._path)
+            extract_directory = os.path.dirname(self.path)
 
         if not self.is_archive:
             raise ValueError(
@@ -290,6 +290,12 @@ class Directory(File):
 
     def __len__(self):
         return len(self.files)
+
+    def __str__(self):
+        return f"Directory(name={self.name})"
+
+    def __repr__(self):
+        return f"Directory(name={self.name})"
 
     def _unpack(self):
         # To unpack the Directory the following criteria need to be fulfilled:

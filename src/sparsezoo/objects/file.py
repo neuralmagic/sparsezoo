@@ -199,6 +199,12 @@ class File:
             # by default we assume they are valid
             return True
 
+    def __str__(self):
+        return f"File(name={self.name})"
+
+    def __repr__(self):
+        return f"File(name={self.name})"
+
     def _validate_numpy(self, strict_mode):
         if not load_numpy_list(self._path):
             self._throw_error(

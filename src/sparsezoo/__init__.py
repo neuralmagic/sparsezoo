@@ -17,7 +17,7 @@
 from .inference import *
 from .model import *
 from .objects import *
-from .search_models import *
+from .search import *
 from .utils import *
 from .validation import *
 
@@ -28,5 +28,5 @@ __all__ = (
     + utils.__all__
     + validation.__all__
     + model.__all__
-    + search_models.__all__
+    + search.__all__
 )

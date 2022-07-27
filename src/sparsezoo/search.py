@@ -13,16 +13,16 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
 
 
-__all__ = ["search_zoo_models"]
+__all__ = ["search_models", "model_dict_to_stub"]
 
 
-def search_zoo_models(
+def search_models(
     domain: str,
     sub_domain: str,
     architecture: Union[str, None] = None,
@@ -104,7 +104,8 @@ def search_zoo_models(
     ]
 
 
-def model_dict_to_stub(model_dict: Dict[str, str]) -> str:
+def model_dict_to_stub(model_dict: Dict[str, Optional[str]]) -> str:
+
     domain = model_dict.get("domain")
     sub_domain = model_dict.get("sub_domain")
     architecture = model_dict.get("architecture")
@@ -114,8 +115,16 @@ def model_dict_to_stub(model_dict: Dict[str, str]) -> str:
     dataset = model_dict.get("dataset")
     sparse_tag = model_dict.get("sparse_tag")
 
-    stub = (
-        f"zoo:{domain}/{sub_domain}/{architecture}-"
-        f"{sub_architecture}/{framework}/{repo}/{dataset}/{sparse_tag}"
-    )
+    if sub_architecture is not None:
+        sub_architecture = '-' + sub_architecture
+
+    stub = f"zoo:{domain if domain is not None else ''}/" \
+           f"{sub_domain if sub_domain is not None else ''}/" \
+           f"{architecture if architecture is not None else ''}" \
+           f"{sub_architecture if sub_architecture is not None else ''}/" \
+           f"{framework if framework is not None else ''}/" \
+           f"{repo if repo is not None else ''}/" \
+           f"{dataset if dataset is not None else ''}/" \
+           f"{sparse_tag if sparse_tag is not None else ''}"
+
     return stub

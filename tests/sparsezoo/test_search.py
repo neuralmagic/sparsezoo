@@ -14,7 +14,7 @@
 
 import pytest
 
-from sparsezoo import search_zoo_models
+from sparsezoo import search_models
 
 
 @pytest.mark.parametrize(
@@ -37,5 +37,5 @@ from sparsezoo import search_zoo_models
     scope="function",
 )
 def test_search_models(search_args):
-    models = search_zoo_models(**search_args)
+    models = search_models(**search_args)
     assert len(models) > 0
