@@ -176,12 +176,29 @@ class NodeAnalysis(BaseModel):
             precision={
                 dtype: ZeroNonZeroParams(
                     zero=(
-                        num_sparse_parameters if node_weight is not None and str(node_weight.dtype) else 0
-                    ) + (node_bias_size - numpy.count_nonzero(node_bias) if node_bias is not None and str(node_bias.dtype) else 0),
-                    non_zero=(num_parameters - num_sparse_parameters if node_weight is not None and str(node_weight.dtype) else 0) + (numpy.count_nonzero(node_bias) if node_bias is not None and str(node_bias.dtype) else 0),
+                        num_sparse_parameters
+                        if node_weight is not None and str(node_weight.dtype)
+                        else 0
+                    )
+                    + (
+                        node_bias_size - numpy.count_nonzero(node_bias)
+                        if node_bias is not None and str(node_bias.dtype)
+                        else 0
+                    ),
+                    non_zero=(
+                        num_parameters - num_sparse_parameters
+                        if node_weight is not None and str(node_weight.dtype)
+                        else 0
+                    )
+                    + (
+                        numpy.count_nonzero(node_bias)
+                        if node_bias is not None and str(node_bias.dtype)
+                        else 0
+                    ),
                 )
                 for dtype in _ALL_PRECISIONS
-                if (node_weight is not None and str(node_weight.dtype) == dtype) or (node_bias is not None and str(node_bias.dtype) == dtype)
+                if (node_weight is not None and str(node_weight.dtype) == dtype)
+                or (node_bias is not None and str(node_bias.dtype) == dtype)
             },
         )
 
@@ -245,10 +262,8 @@ class NodeAnalysis(BaseModel):
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
-                    if (node_weight is not None
-                    and str(node_weight.dtype) == dtype)
-                    or (node_bias is not None
-                    and str(node_bias.dtype) == dtype)
+                    if (node_weight is not None and str(node_weight.dtype) == dtype)
+                    or (node_bias is not None and str(node_bias.dtype) == dtype)
                 },
             ),
             macs=OpsSummary(
@@ -566,7 +581,11 @@ class ModelAnalysis(BaseModel):
                     ),
                 )
                 for dtype in _ALL_PRECISIONS
-                if any(True for node_analysis in node_analyses if dtype in node_analysis.parameter_summary.precision)
+                if any(
+                    True
+                    for node_analysis in node_analyses
+                    if dtype in node_analysis.parameter_summary.precision
+                )
             },
         )
 
@@ -630,7 +649,8 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].dense
                                 for node_analysis in node_analyses
-                                if dtype in node_analysis.operation_summary.ops.precision
+                                if dtype
+                                in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                         sparse=sum(
@@ -639,12 +659,17 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].sparse
                                 for node_analysis in node_analyses
-                                if dtype in node_analysis.operation_summary.ops.precision
+                                if dtype
+                                in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
-                    if any(True for node_analysis in node_analyses if dtype in node_analysis.operation_summary.ops.precision)
+                    if any(
+                        True
+                        for node_analysis in node_analyses
+                        if dtype in node_analysis.operation_summary.ops.precision
+                    )
                 },
             ),
             macs=OpsSummary(
@@ -706,7 +731,8 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].dense
                                 for node_analysis in node_analyses
-                                if dtype in node_analysis.operation_summary.macs.precision
+                                if dtype
+                                in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                         sparse=sum(
@@ -715,12 +741,17 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].sparse
                                 for node_analysis in node_analyses
-                                if dtype in node_analysis.operation_summary.macs.precision
+                                if dtype
+                                in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
-                    if any(True for node_analysis in node_analyses if dtype in node_analysis.operation_summary.macs.precision)
+                    if any(
+                        True
+                        for node_analysis in node_analyses
+                        if dtype in node_analysis.operation_summary.macs.precision
+                    )
                 },
             ),
         )

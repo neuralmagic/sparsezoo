@@ -161,12 +161,14 @@ class ParameterSummary(BaseModel):
     """
 
     total: int = Field(
-        description="The number of parameters including those which have been pruned", default=0
+        description="The number of parameters including those which have been pruned",
+        default=0,
     )
-    pruned: int = Field(description="The number of parameters that have been pruned", default=0)
+    pruned: int = Field(
+        description="The number of parameters that have been pruned", default=0
+    )
     block_structure: Dict[str, ZeroNonZeroParams] = Field(
-        description="The number of parameters when grouped into blocks",
-        default={}
+        description="The number of parameters when grouped into blocks", default={}
     )
     precision: Dict[str, ZeroNonZeroParams] = Field(
         description="The number of parameters at each precision level", default={}

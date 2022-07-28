@@ -197,7 +197,14 @@ def test_get_node_num_zeros_and_size(
         model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
         num_zeros, size = get_node_num_zeros_and_size(model_graph, node)
 
-        weight_analysis = next((parameter for parameter in node_analysis.parameters if parameter.alias == "weight"), None)
+        weight_analysis = next(
+            (
+                parameter
+                for parameter in node_analysis.parameters
+                if parameter.alias == "weight"
+            ),
+            None,
+        )
         if weight_analysis is not None:
             assert size == weight_analysis.parameter_summary.total
             assert num_zeros == weight_analysis.parameter_summary.pruned
@@ -219,7 +226,14 @@ def test_get_node_num_four_block_zeros_and_size(
         )
         num_non_zero_blocks = num_blocks - num_zero_blocks
 
-        weight_analysis = next((parameter for parameter in node_analysis.parameters if parameter.alias == "weight"), None)
+        weight_analysis = next(
+            (
+                parameter
+                for parameter in node_analysis.parameters
+                if parameter.alias == "weight"
+            ),
+            None,
+        )
         if weight_analysis is not None:
             assert (
                 num_non_zero_blocks
@@ -255,10 +269,18 @@ def test_get_node_sparsity(
     for node_analysis in model_analysis.nodes:
         model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
 
-        weight_analysis = next((parameter for parameter in node_analysis.parameters if parameter.alias == "weight"), None)
+        weight_analysis = next(
+            (
+                parameter
+                for parameter in node_analysis.parameters
+                if parameter.alias == "weight"
+            ),
+            None,
+        )
         if weight_analysis is not None:
             assert get_node_sparsity(model_graph, node) == pytest.approx(
-                weight_analysis.parameter_summary.block_structure["single"].sparsity, abs=margin_of_error
+                weight_analysis.parameter_summary.block_structure["single"].sparsity,
+                abs=margin_of_error,
             )
         else:
             assert get_node_sparsity(model_graph, node) == pytest.approx(
@@ -287,10 +309,18 @@ def test_get_node_four_block_sparsity(
     for node_analysis in model_analysis.nodes:
         model_graph, node = get_model_graph_and_node(model_name, node_analysis.name)
 
-        weight_analysis = next((parameter for parameter in node_analysis.parameters if parameter.alias == "weight"), None)
+        weight_analysis = next(
+            (
+                parameter
+                for parameter in node_analysis.parameters
+                if parameter.alias == "weight"
+            ),
+            None,
+        )
         if weight_analysis is not None:
             assert get_node_four_block_sparsity(model_graph, node) == pytest.approx(
-                weight_analysis.parameter_summary.block_structure["block4"].sparsity, abs=margin_of_error
+                weight_analysis.parameter_summary.block_structure["block4"].sparsity,
+                abs=margin_of_error,
             )
         else:
             assert get_node_four_block_sparsity(model_graph, node) == 0
@@ -421,6 +451,7 @@ def test_get_node_bias_name(
         assert bias_name is None
     else:
         assert bias_name == expected_name
+
 
 def test_extract_node_id(
     model_name,
