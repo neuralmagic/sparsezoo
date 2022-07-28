@@ -76,7 +76,14 @@ class Model(Directory):
             # potentially cached path
             if os.path.exists(path) and os.listdir(path):
                 remove_tar_duplicates(path)
-                files, path, _ = self.initialize_model_from_directory(path)
+                local_files, path, _ = self.initialize_model_from_directory(path)
+                files_names = [file_dict['display_name'] for file_dict in files]
+                for local_file in local_files:
+                    if local_file['display_name'] in files_names:
+                        index = files_names.index(local_file.name)
+                        files[index] = local_file
+
+
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)

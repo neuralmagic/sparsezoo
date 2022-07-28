@@ -100,20 +100,19 @@ def search_models(
     )
 
     return [
-        Model(model_dict_to_stub(model_dict)) for model_dict in response_json["models"]
+        Model(model_dict_to_stub(**model_dict)) for model_dict in response_json["models"]
     ]
 
 
-def model_dict_to_stub(model_dict: Dict[str, Optional[str]]) -> str:
-
-    domain = model_dict.get("domain")
-    sub_domain = model_dict.get("sub_domain")
-    architecture = model_dict.get("architecture")
-    sub_architecture = model_dict.get("sub_architecture")
-    framework = model_dict.get("framework")
-    repo = model_dict.get("repo")
-    dataset = model_dict.get("dataset")
-    sparse_tag = model_dict.get("sparse_tag")
+def model_dict_to_stub(**kwargs) -> str:
+    domain = kwargs.get("domain")
+    sub_domain = kwargs.get("sub_domain")
+    architecture = kwargs.get("architecture")
+    sub_architecture = kwargs.get("sub_architecture")
+    framework = kwargs.get("framework")
+    repo = kwargs.get("repo")
+    dataset = kwargs.get("dataset")
+    sparse_tag = kwargs.get("sparse_tag")
 
     if sub_architecture is not None:
         sub_architecture = "-" + sub_architecture

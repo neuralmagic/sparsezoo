@@ -60,7 +60,7 @@ class File:
         # has a local path attached to it. Therefore,
         # either has been downloaded or can be
         # downloaded
-        self._path = path
+        self.path = path
         self.owner_path = owner_path
 
         # self._path can have any extension, including no extension.

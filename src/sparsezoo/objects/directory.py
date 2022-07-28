@@ -193,7 +193,7 @@ class Directory(File):
                 )
                 file.path = os.path.join(destination_path, self.name, file.name)
 
-        self._path = os.path.join(destination_path, self.name)
+        self.path = os.path.join(destination_path, self.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
