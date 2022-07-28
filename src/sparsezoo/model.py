@@ -15,7 +15,7 @@
 import logging
 import os
 import re
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
 
@@ -29,8 +29,8 @@ from sparsezoo.objects import (
     save_outputs_to_tar,
 )
 from sparsezoo.objects.model_helpers import (
+    CACHE_DIR,
     ZOO_STUB_PREFIX,
-    generate_model_name,
     load_files_from_directory,
     load_files_from_stub,
 )
@@ -38,8 +38,6 @@ from sparsezoo.validation import IntegrationValidator
 
 
 __all__ = ["Model"]
-
-CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
@@ -73,19 +71,13 @@ class Model(Directory):
         self.source = source
 
         if self.source.startswith(ZOO_STUB_PREFIX):
-            # initializing the files and params from the stub
-            files, params = load_files_from_stub(
-                self.source, valid_params=list(PARAM_DICT.keys())
-            )
-            if params:
-                self._validate_params(params)
-            path = os.path.join(CACHE_DIR, generate_model_name())
-            url = os.path.dirname(files[0]["url"])
+            files, path, url = self.initialize_model_from_stub(self.source)
+            # potentially cached path
+            if os.path.exists(path) and os.listdir(path):
+                files, path, _ = self.initialize_model_from_directory(path)
         else:
             # initializing the model from the path
-            files = load_files_from_directory(self.source)
-            path = source
-            url = None
+            files, path, url = self.initialize_model_from_directory(self.source)
 
         self.path = path
 
@@ -315,6 +307,26 @@ class Model(Directory):
             return f"{self.__class__.__name__}(stub={self.source})"
         else:
             return f"{self.__class__.__name__}(directory={self.source})"
+
+    def initialize_model_from_stub(
+        self, stub: str
+    ) -> Tuple[List[Dict[str, str]], str, str]:
+        files, model_id, params = load_files_from_stub(
+            stub, valid_params=list(PARAM_DICT.keys())
+        )
+        if params:
+            self._validate_params(params)
+        path = os.path.join(CACHE_DIR, model_id)
+        url = os.path.dirname(files[0]["url"])
+        return files, path, url
+
+    def initialize_model_from_directory(
+        self, directory: str
+    ) -> Tuple[List[Dict[str, str]], str, None]:
+        files = load_files_from_directory(directory)
+        path = directory
+        url = None
+        return files, path, url
 
     def _get_directory(
         self,

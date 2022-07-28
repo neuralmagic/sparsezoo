@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import copy
+import glob
 import os
 import shutil
 import tempfile
@@ -22,6 +23,7 @@ import numpy
 import pytest
 
 from sparsezoo import Model
+from sparsezoo.objects import CACHE_DIR
 
 
 files_ic = {
@@ -75,26 +77,57 @@ files_yolo = copy.copy(files_ic)
     ],
     scope="function",
 )
-def test_model_from_stub(stub, args, should_pass):
-    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-    path = stub + "?" + args[0] + "=" + args[1]
-    if should_pass:
-        model = Model(path)
-        model.download(directory_path=temp_dir.name)
-        _assert_correct_files_downloaded(model, args)
-    else:
-        with pytest.raises(ValueError):
+class TestSetupModel:
+    @pytest.fixture()
+    def setup(self, stub, args, should_pass):
+        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+
+        yield stub, args, should_pass
+
+        shutil.rmtree(temp_dir.name)
+
+    def test_model_cache(self, setup):
+        stub, _, _ = setup
+        # clear cache
+        [
+            shutil.rmtree(cached_model_dir)
+            for cached_model_dir in glob.glob(os.path.join(CACHE_DIR, "*"))
+            if os.path.isdir(cached_model_dir)
+        ]
+
+        # start the test
+        model1 = Model(stub)
+        assert not os.path.exists(model1._path)
+        model1.model_card.download()  # just download one file to make test lightweight
+        assert os.listdir(model1._path)
+        model2 = Model(stub)
+
+        assert os.listdir(model2._path)
+        assert model1.path == model2.path
+        assert model1.path.startswith(CACHE_DIR)
+
+        shutil.rmtree(model1.path)
+
+    def test_model_from_stub(self, stub, args, should_pass):
+        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+        path = stub + "?" + args[0] + "=" + args[1]
+        if should_pass:
             model = Model(path)
             model.download(directory_path=temp_dir.name)
+            self._assert_correct_files_downloaded(model, args)
+        else:
+            with pytest.raises(ValueError):
+                model = Model(path)
+                model.download(directory_path=temp_dir.name)
 
-
-def _assert_correct_files_downloaded(model, args):
-    if args[0] == "recipe":
-        assert len(model.recipes.available) == 1
-    elif args[0] == "checkpoint":
-        assert len(model.training.available) == 1
-    elif args[0] == "deployment":
-        assert len(model.training.available) == 1
+    @staticmethod
+    def _assert_correct_files_downloaded(model, args):
+        if args[0] == "recipe":
+            assert len(model.recipes.available) == 1
+        elif args[0] == "checkpoint":
+            assert len(model.training.available) == 1
+        elif args[0] == "deployment":
+            assert len(model.training.available) == 1
 
 
 @pytest.mark.parametrize(

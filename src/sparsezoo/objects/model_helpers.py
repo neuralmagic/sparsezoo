@@ -14,8 +14,6 @@
 
 import logging
 import os
-import random
-import string
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -26,13 +24,14 @@ from sparsezoo.utils import download_get_request
 __all__ = [
     "load_files_from_stub",
     "load_files_from_directory",
-    "generate_model_name",
+    "CACHE_DIR",
     "ZOO_STUB_PREFIX",
 ]
 
 _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
+CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -58,7 +57,7 @@ def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
     force_token_refresh: bool = False,
-) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+) -> Tuple[List[Dict[str, Any]], str, Dict[str, str]]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
         may include string arguments)
@@ -68,6 +67,7 @@ def load_files_from_stub(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: The tuple of
         - list of file dictionaries
+        - model_id (from the server)
         - parsed param dictionary
     """
     if isinstance(stub, str):
@@ -79,9 +79,10 @@ def load_files_from_stub(
     )
     # piece of code required for backwards compatibility
     files = restructure_request_json(response_json["model"]["files"])
+    model_id = response_json["model"]["model_id"]
     if params:
         files = filter_files(files, params)
-    return files, params
+    return files, model_id, params
 
 
 def filter_files(
@@ -149,11 +150,3 @@ def parse_zoo_stub(
         )
 
     return stub, params
-
-
-def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
-    """
-    Create simple randomized string that can temporarily serve as a hash name
-    for the model
-    """
-    return "".join(random.choices(chars, k=size))
