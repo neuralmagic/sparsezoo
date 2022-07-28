@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
 from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
@@ -116,15 +116,17 @@ def model_dict_to_stub(model_dict: Dict[str, Optional[str]]) -> str:
     sparse_tag = model_dict.get("sparse_tag")
 
     if sub_architecture is not None:
-        sub_architecture = '-' + sub_architecture
+        sub_architecture = "-" + sub_architecture
 
-    stub = f"zoo:{domain if domain is not None else ''}/" \
-           f"{sub_domain if sub_domain is not None else ''}/" \
-           f"{architecture if architecture is not None else ''}" \
-           f"{sub_architecture if sub_architecture is not None else ''}/" \
-           f"{framework if framework is not None else ''}/" \
-           f"{repo if repo is not None else ''}/" \
-           f"{dataset if dataset is not None else ''}/" \
-           f"{sparse_tag if sparse_tag is not None else ''}"
+    stub = (
+        f"zoo:{domain if domain is not None else ''}/"
+        f"{sub_domain if sub_domain is not None else ''}/"
+        f"{architecture if architecture is not None else ''}"
+        f"{sub_architecture if sub_architecture is not None else ''}/"
+        f"{framework if framework is not None else ''}/"
+        f"{repo if repo is not None else ''}/"
+        f"{dataset if dataset is not None else ''}/"
+        f"{sparse_tag if sparse_tag is not None else ''}"
+    )
 
     return stub

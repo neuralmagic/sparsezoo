@@ -34,6 +34,7 @@ from sparsezoo.objects.model_helpers import (
     load_files_from_directory,
     load_files_from_stub,
 )
+from sparsezoo.utils import remove_tar_duplicates
 from sparsezoo.validation import IntegrationValidator
 
 
@@ -74,6 +75,7 @@ class Model(Directory):
             files, path, url = self.initialize_model_from_stub(self.source)
             # potentially cached path
             if os.path.exists(path) and os.listdir(path):
+                remove_tar_duplicates(path)
                 files, path, _ = self.initialize_model_from_directory(path)
         else:
             # initializing the model from the path
