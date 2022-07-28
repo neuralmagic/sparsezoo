@@ -60,7 +60,9 @@ def draw_sparsity_by_layer_chart(
     }
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparsities"].append(node.parameters.single.sparsity * 100)
+        node_data["sparsities"].append(
+            node.parameter_summary.block_structure["single"].sparsity * 100
+        )
 
     # Draw chart data
     axes.bar(
@@ -123,8 +125,12 @@ def draw_parameter_chart(
     node_data = {"names": [], "zero_parameters": [], "non_zero_parameters": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["zero_parameters"].append(node.parameters.single.num_zero)
-        node_data["non_zero_parameters"].append(node.parameters.single.num_non_zero)
+        node_data["zero_parameters"].append(
+            node.parameter_summary.block_structure["single"].zero
+        )
+        node_data["non_zero_parameters"].append(
+            node.parameter_summary.block_structure["single"].non_zero
+        )
 
     # Draw parameters bars
     param_axes.bar(
@@ -208,8 +214,12 @@ def draw_operation_chart(
     node_data = {"names": [], "sparse_ops": [], "dense_ops": []}
     for node_i, node in enumerate(parameterized_prunable_nodes):
         node_data["names"].append(_get_node_name(node))
-        node_data["sparse_ops"].append(node.operations.num_operations.sparse)
-        node_data["dense_ops"].append(node.operations.num_operations.dense)
+        node_data["sparse_ops"].append(
+            node.operation_summary.ops.block_structure["single"].sparse
+        )
+        node_data["dense_ops"].append(
+            node.operation_summary.ops.block_structure["single"].dense
+        )
 
     # Draw operations bars
     ops_axes.bar(
@@ -299,10 +309,18 @@ def draw_parameter_operation_combined_chart(
         node_data["names"].append(_get_node_name(node))
         node_data["parameters_pos"].append(node_i - bar_width / 2)
         node_data["ops_pos"].append(node_i + bar_width / 2)
-        node_data["zero_parameters"].append(node.parameters.single.num_zero)
-        node_data["non_zero_parameters"].append(node.parameters.single.num_non_zero)
-        node_data["sparse_ops"].append(node.operations.num_operations.sparse)
-        node_data["dense_ops"].append(node.operations.num_operations.dense)
+        node_data["zero_parameters"].append(
+            node.parameter_summary.block_structure["single"].zero
+        )
+        node_data["non_zero_parameters"].append(
+            node.parameter_summary.block_structure["single"].non_zero
+        )
+        node_data["sparse_ops"].append(
+            node.operation_summary.ops.block_structure["single"].sparse
+        )
+        node_data["dense_ops"].append(
+            node.operation_summary.ops.block_structure["single"].dense
+        )
 
     # Draw parameters bars
     param_axes.bar(
@@ -395,17 +413,30 @@ def _get_node_name(node_analysis: NodeAnalysis) -> str:
     :param node: analysis of node whose name is being picked
     :return: an intutive name for this node
     """
+    node_weight_analysis = next(
+        (
+            parameter
+            for parameter in node_analysis.parameters
+            if parameter.alias == "weight"
+        ),
+        None,
+    )
     if (
         node_analysis.op_type == "Gather"
-        and ".embeddings." in node_analysis.weight.name
+        and node_weight_analysis is not None
+        and ".embeddings." in node_weight_analysis.name
     ):
-        name = node_analysis.weight.name
+        name = node_weight_analysis.name
         name = name.split(".embeddings.")[1]
         name = name.replace("weight", "")
         return name
-    if node_analysis.quantized_layer:
+    if node_analysis.quantized_node:
         return node_analysis.name
-    if node_analysis.weight.name and ".weight" in node_analysis.weight.name:
-        return node_analysis.weight.name.replace(".weight", "")
+    if (
+        node_weight_analysis is not None
+        and node_weight_analysis.name
+        and ".weight" in node_weight_analysis.name
+    ):
+        return node_weight_analysis.name.replace(".weight", "")
     else:
         return node_analysis.name

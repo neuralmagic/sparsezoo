@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy
 from onnx import NodeProto, numpy_helper
@@ -29,6 +29,7 @@ __all__ = [
     "get_node_weight_name",
     "get_node_weight",
     "get_node_bias",
+    "get_node_bias_name",
     "get_node_num_zeros_and_size",
     "get_zero_point",
     "is_four_block_sparse_layer",
@@ -37,7 +38,6 @@ __all__ = [
     "is_sparse_layer",
     "group_four_block",
     "extract_node_id",
-    "get_node_weight_shape",
     "get_node_attributes",
 ]
 
@@ -54,6 +54,20 @@ def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
     return attributes
 
 
+def get_node_bias_name(node: NodeProto) -> str:
+    """
+    :param node: node potentially containing a bias
+    :return: the name of the bias of the node
+    """
+    if node.op_type in ["Conv", "Gemm"]:
+        return _get_node_input(node, 2, default=None)
+
+    if node.op_type == "QLinearConv":
+        return _get_node_input(node, 8, default=None)
+
+    return None
+
+
 def get_node_bias(model_graph: ONNXGraph, node: NodeProto) -> numpy.ndarray:
     """
     Finds parameter value of node (the node weight)
@@ -63,16 +77,7 @@ def get_node_bias(model_graph: ONNXGraph, node: NodeProto) -> numpy.ndarray:
     :return: a numpy array of param value, None if not found
     """
 
-    def _get_node_bias_name(node: NodeProto) -> str:
-        if node.op_type in ["Conv", "Gemm"]:
-            return _get_node_input(node, 2, default=None)
-
-        if node.op_type == "QLinearConv":
-            return _get_node_input(node, 8, default=None)
-
-        return None
-
-    initializer_name = _get_node_bias_name(node)
+    initializer_name = get_node_bias_name(node)
     return get_initializer_value(model_graph, node, initializer_name)
 
 
@@ -415,21 +420,6 @@ def extract_node_id(node: NodeProto) -> str:
     outputs = node.output
 
     return str(outputs[0])
-
-
-def get_node_weight_shape(
-    model_graph: ONNXGraph, node: NodeProto
-) -> Union[List[int], None]:
-    """
-    :param model_graph: instance of ONNXGraph that contains the given node
-    :param node: node to which parameter belongs to
-    :return: shape of weight belonging to node if weight exists, None otherwise
-    """
-    weight = get_node_weight(model_graph, node)
-    if weight is None:
-        return None
-
-    return weight.shape
 
 
 def _get_node_input(

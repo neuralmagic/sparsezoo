@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 
 __all__ = [
+    "NodeCounts",
     "NodeIO",
-    "WeightAnalysis",
-    "BiasAnalysis",
-    "Operations",
-    "ModelOperations",
+    "ZeroNonZeroParams",
     "DenseSparseOps",
-    "Parameters",
-    "DenseSparseValues",
+    "ParameterSummary",
+    "OpsSummary",
+    "OperationSummary",
+    "ParameterComponent",
 ]
 
 
@@ -81,6 +81,19 @@ class PropertyBaseModel(BaseModel):
         return attribs
 
 
+class NodeCounts(BaseModel):
+    """
+    Pydantic model for specifying the number zero and non-zero operations and the
+    associated sparsity
+    """
+
+    total: int = Field(description="The total number of nodes")
+    quantized: int = Field(description="The number of nodes that have been quantized")
+    # quantizable
+    pruned: int = Field(description="The number of nodes that have been pruned")
+    prunable: int = Field(description="The number of nodes that can be pruned")
+
+
 class NodeIO(BaseModel):
     """
     Pydantic model for the inputs and outputs of a node in the onnx model graph
@@ -96,18 +109,41 @@ class NodeIO(BaseModel):
     )
 
 
+class ZeroNonZeroParams(PropertyBaseModel):
+    """
+    Pydantic model for specifying the number zero and non-zero operations and the
+    associated sparsity
+    """
+
+    zero: int = Field(
+        description="The number of parameters whose value is non-zero", default=0
+    )
+    non_zero: int = Field(
+        description="The number of parameters whose value is zero", default=0
+    )
+
+    @property
+    def sparsity(self):
+        total_values = self.non_zero + self.zero
+        if total_values > 0:
+            return self.zero / total_values
+        else:
+            return 0
+
+
 class DenseSparseOps(PropertyBaseModel):
     """
-    Pydantic model for describing the number of dense and sparse ops for an
-    operation type
+    Pydantic model for specifying the number dense and sparse operations and the
+    associated operation sparsity
     """
 
     dense: int = Field(
-        description="The number of operations performed during inference"
+        description="The number of operations performed during inference", default=0
     )
     sparse: int = Field(
         description="The number of operations that would have been performed "
-        "during inference had it not been for model sparsity"
+        "during inference had it not been for model sparsity",
+        default=0,
     )
 
     @property
@@ -119,99 +155,67 @@ class DenseSparseOps(PropertyBaseModel):
             return 0
 
 
-class Operations(BaseModel):
+class ParameterSummary(BaseModel):
     """
-    Pydantic model for describing the operation counts of a model, node, or
-    node component
-    """
-
-    num_operations: DenseSparseOps = Field(
-        description="The number of floating point or integer operations"
-    )
-    multiply_accumulates: DenseSparseOps = Field(
-        description="The number of MAC (multiply accumulate) operations"
-    )
-
-
-class ModelOperations(BaseModel):
-    """
-    Pydantic model for describing how many operations will be performed during
-    model inference using the deepsparse engine
+    Pydantic model for the analysis of the parameters of a node
     """
 
-    floating_or_quantized_ops: DenseSparseOps = Field(
-        description="The total number of floating or quantized operations performed "
-        "by the model during inference (floating_point_ops + quantized_ops)"
+    total: int = Field(
+        description="The number of parameters including those which have been pruned", default=0
     )
-    floating_point_ops: DenseSparseOps = Field(
-        description="The total number of floating point operations performed by the "
-        "model during inference"
+    pruned: int = Field(description="The number of parameters that have been pruned", default=0)
+    block_structure: Dict[str, ZeroNonZeroParams] = Field(
+        description="The number of parameters when grouped into blocks",
+        default={}
     )
-    quantized_ops: DenseSparseOps = Field(
-        description="The total number of quantized operations performed by the model"
-        "during inference"
-    )
-    multiply_accumulates: DenseSparseOps = Field(
-        description="The total number of MAC (multiply accumulate) operations "
-        "performed by the model during inference"
+    precision: Dict[str, ZeroNonZeroParams] = Field(
+        description="The number of parameters at each precision level", default={}
     )
 
 
-class DenseSparseValues(PropertyBaseModel):
+class OpsSummary(BaseModel):
     """
-    Pydantic model for describing the number of dense and sparse parameter values
+    Pydantic model for the analysis of a specific operation in a node, either ops
+    or macs
     """
 
-    num_non_zero: int = Field(
-        description="The number of parameters with non-zero values"
+    total: int = Field(
+        description="The total number of operations not accounting for sparsity"
     )
-    num_zero: int = Field(description="The number of parameters with zero values")
+    pruned: int = Field(
+        description="The number of operations not performed due to them being pruned"
+    )
+    block_structure: Dict[str, DenseSparseOps] = Field(
+        description="The number of operations performed using each block grouping"
+    )
+    precision: Dict[str, DenseSparseOps] = Field(
+        description="The number of operations performed at each precision"
+    )
 
-    @property
-    def sparsity(self):
-        total_values = self.num_non_zero + self.num_zero
-        if total_values > 0:
-            return self.num_zero / total_values
-        else:
-            return 0
 
-
-class Parameters(BaseModel):
+class OperationSummary(BaseModel):
     """
-    Pydantic model for describing the number of parameters in a model, node, weight
+    Pydantic model for the analysis of the operations in a node
+    """
+
+    ops: OpsSummary = Field(
+        description="The number of floating point or int operations"
+    )
+    macs: OpsSummary = Field(description="The number of multiply accumulates")
+
+
+class ParameterComponent(BaseModel):
+    """
+    Pydantic model for the analysis of a parameter component of a node such as weight
     or bias
     """
 
-    single: DenseSparseValues = Field(
-        description="The total number of dense and sparse ops"
-    )
-    four_block: DenseSparseValues = Field(
-        description="The number of parameters after they have been grouped by vnni "
-        "four block"
-    )
-
-
-class WeightAnalysis(BaseModel):
-    """
-    Pydantic model for the weight of a node
-    """
-
-    name: Optional[str] = Field(description="The name of the weight")
+    alias: str = Field(description="The type of parameter (weight, bias)")
+    name: Optional[str] = Field(description="The name of the parameter")
     shape: Optional[List[Union[None, int]]] = Field(
-        description="The weight's shape (assuming a batch size of 1)"
+        description="The shape of the parameter"
     )
-    parameters: Parameters = Field(description="The weight's parameter counts")
-    operations: Operations = Field(description="The weight's operation counts")
-    dtype: str = Field(description="The weight's data type")
-
-
-class BiasAnalysis(BaseModel):
-    """
-    Pydantic model for the weight of a node
-    """
-
-    shape: Optional[List[Union[None, int]]] = Field(
-        description="The bias' shape (assuming a batch size of 1)"
+    parameter_summary: ParameterSummary = Field(
+        description="A summary of the parameter"
     )
-    operations: Operations = Field(description="The bias' operation counts")
-    dtype: str = Field(description="The bias' data type")
+    dtype: str = Field(description="The data type of the parameter")
