@@ -34,7 +34,6 @@ from sparsezoo.objects.model_helpers import (
     load_files_from_directory,
     load_files_from_stub,
 )
-from sparsezoo.utils import remove_tar_duplicates
 from sparsezoo.validation import IntegrationValidator
 
 
@@ -72,18 +71,8 @@ class Model(Directory):
         self.source = source
 
         if self.source.startswith(ZOO_STUB_PREFIX):
+            # initializing the files and params from the stub
             files, path, url = self.initialize_model_from_stub(self.source)
-            # potentially cached path
-            if os.path.exists(path) and os.listdir(path):
-                remove_tar_duplicates(path)
-                local_files, path, _ = self.initialize_model_from_directory(path)
-                files_names = [file_dict['display_name'] for file_dict in files]
-                for local_file in local_files:
-                    if local_file['display_name'] in files_names:
-                        index = files_names.index(local_file.name)
-                        files[index] = local_file
-
-
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)

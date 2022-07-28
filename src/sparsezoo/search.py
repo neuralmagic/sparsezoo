@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, List, Optional, Union
+from typing import List, Union
 
 from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
@@ -100,7 +100,8 @@ def search_models(
     )
 
     return [
-        Model(model_dict_to_stub(**model_dict)) for model_dict in response_json["models"]
+        Model(model_dict_to_stub(**model_dict))
+        for model_dict in response_json["models"]
     ]
 
 

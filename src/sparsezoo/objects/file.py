@@ -83,7 +83,12 @@ class File:
     @property
     def path(self):
         if self._path is None:
-            self.download()
+            cached_path = os.path.join(self.owner_path, self.name)
+            if os.path.exists(cached_path):
+                self.path = cached_path
+                return cached_path
+            else:
+                self.download()
         elif not os.path.exists(self._path):
             self.download()
 
