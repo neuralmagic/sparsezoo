@@ -152,6 +152,7 @@ class NodeAnalysis(BaseModel):
 
         node_weight = get_node_weight(model_graph, node)
         node_bias = get_node_bias(model_graph, node)
+        node_bias_size = node_bias.size if node_bias is not None else 0
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_graph, node
         )
@@ -160,11 +161,11 @@ class NodeAnalysis(BaseModel):
             num_four_blocks,
         ) = get_node_num_four_block_zeros_and_size(model_graph, node)
         parameter_summary = ParameterSummary(
-            total=num_parameters,
+            total=num_parameters + node_bias_size,
             pruned=num_sparse_parameters,
             block_structure={
                 "single": ZeroNonZeroParams(
-                    zero=num_sparse_parameters,
+                    zero=num_sparse_parameters + node_bias_size,
                     non_zero=num_parameters - num_sparse_parameters,
                 ),
                 "block4": ZeroNonZeroParams(
@@ -174,12 +175,13 @@ class NodeAnalysis(BaseModel):
             },
             precision={
                 dtype: ZeroNonZeroParams(
-                    zero=num_sparse_parameters,
-                    non_zero=num_parameters - num_sparse_parameters,
+                    zero=(
+                        num_sparse_parameters if node_weight is not None and str(node_weight.dtype) else 0
+                    ) + (node_bias_size - numpy.count_nonzero(node_bias) if node_bias is not None and str(node_bias.dtype) else 0),
+                    non_zero=(num_parameters - num_sparse_parameters if node_weight is not None and str(node_weight.dtype) else 0) + (numpy.count_nonzero(node_bias) if node_bias is not None and str(node_bias.dtype) else 0),
                 )
-                if node_weight is not None and str(node_weight.dtype) == dtype
-                else ZeroNonZeroParams(zero=0, non_zero=0)
                 for dtype in _ALL_PRECISIONS
+                if (node_weight is not None and str(node_weight.dtype) == dtype) or (node_bias is not None and str(node_bias.dtype) == dtype)
             },
         )
 
@@ -243,6 +245,10 @@ class NodeAnalysis(BaseModel):
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
+                    if (node_weight is not None
+                    and str(node_weight.dtype) == dtype)
+                    or (node_bias is not None
+                    and str(node_bias.dtype) == dtype)
                 },
             ),
             macs=OpsSummary(
@@ -267,9 +273,8 @@ class NodeAnalysis(BaseModel):
                         dense=true_ops_dict["weight"]["num_dense_ops"] // 2,
                         sparse=true_ops_dict["weight"]["num_sparse_ops"] // 2,
                     )
-                    if node_weight is not None and str(node_weight.dtype) == dtype
-                    else DenseSparseOps(dense=0, sparse=0)
                     for dtype in _ALL_PRECISIONS
+                    if node_weight is not None and str(node_weight.dtype) == dtype
                 },
             ),
         )
@@ -299,10 +304,9 @@ class NodeAnalysis(BaseModel):
                                 zero=num_sparse_parameters,
                                 non_zero=num_parameters - num_sparse_parameters,
                             )
+                            for dtype in _ALL_PRECISIONS
                             if node_weight is not None
                             and str(node_weight.dtype) == dtype
-                            else ZeroNonZeroParams(zero=0, non_zero=0)
-                            for dtype in _ALL_PRECISIONS
                         },
                     ),
                     dtype=str(node_weight.dtype),
@@ -315,11 +319,11 @@ class NodeAnalysis(BaseModel):
                     name=get_node_bias_name(node),
                     shape=node_bias.shape,
                     parameter_summary=ParameterSummary(
-                        total=node_bias.size,
+                        total=node_bias_size,
                         pruned=0,
                         block_structure={
                             "single": ZeroNonZeroParams(
-                                zero=node_bias.size - numpy.count_nonzero(node_bias),
+                                zero=node_bias_size - numpy.count_nonzero(node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             ),
                             "block4": ZeroNonZeroParams(
@@ -329,12 +333,11 @@ class NodeAnalysis(BaseModel):
                         },
                         precision={
                             dtype: ZeroNonZeroParams(
-                                zero=node_bias.size - numpy.count_nonzero(node_bias),
+                                zero=node_bias_size - numpy.count_nonzero(node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             )
-                            if str(node_bias.dtype) == dtype
-                            else ZeroNonZeroParams(zero=0, non_zero=0)
                             for dtype in _ALL_PRECISIONS
+                            if str(node_bias.dtype) == dtype
                         },
                     ),
                     dtype=str(node_bias.dtype),
@@ -464,14 +467,14 @@ class ModelAnalysis(BaseModel):
                 [
                     1
                     for node_analysis in node_analyses
-                    if node_analysis.parameterized_prunable
+                    if not node_analysis.parameterized_prunable
                 ]
             ),
             quantized=len(
                 [
                     1
                     for node_analysis in node_analyses
-                    if node_analysis.parameterized_prunable
+                    if not node_analysis.parameterized_prunable
                     and node_analysis.quantized_node
                 ]
             ),
@@ -480,7 +483,7 @@ class ModelAnalysis(BaseModel):
                 [
                     1
                     for node_analysis in node_analyses
-                    if node_analysis.parameterized_prunable
+                    if not node_analysis.parameterized_prunable
                     and node_analysis.sparse_node
                 ]
             ),
@@ -488,37 +491,12 @@ class ModelAnalysis(BaseModel):
                 [
                     1
                     for node_analysis in node_analyses
-                    if node_analysis.parameterized_prunable
+                    if not node_analysis.parameterized_prunable
                 ]
             ),
         )
 
-        #""" TODO
-
-        def _add_nested_values(accumulator, to_add):
-            for key, value in to_add.__dict__.items():
-                print(key)
-                if isinstance(value, BaseModel):
-                    _add_nested_values(getattr(accumulator, key), value)
-                elif isinstance(value, dict):
-                    _add_nested_values(accumulator[key], value)
-                else:
-                    setattr(accumulator, key, value)
-
-        accumulator = ParameterSummary()
-        for node_analysis in node_analyses:
-            _add_nested_values(accumulator, node_analysis.parameter_summary)
-            break
-        print(accumulator)
-
-        """
-        def _sum_nested_keys(node_analyses, key):
-
-            accumulator = node_analyses[0][ke.class
-            for node_analysis in node_analyses:
-                if node_analysis[]
-        """
-
+        # this can be done with better run time efficiency with a recursive summing algo
         parameter_summary = ParameterSummary(
             total=sum(
                 [
@@ -576,16 +554,19 @@ class ModelAnalysis(BaseModel):
                         [
                             node_analysis.parameter_summary.precision[dtype].zero
                             for node_analysis in node_analyses
+                            if dtype in node_analysis.parameter_summary.precision
                         ]
                     ),
                     non_zero=sum(
                         [
                             node_analysis.parameter_summary.precision[dtype].non_zero
                             for node_analysis in node_analyses
+                            if dtype in node_analysis.parameter_summary.precision
                         ]
                     ),
                 )
                 for dtype in _ALL_PRECISIONS
+                if any(True for node_analysis in node_analyses if dtype in node_analysis.parameter_summary.precision)
             },
         )
 
@@ -649,6 +630,7 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].dense
                                 for node_analysis in node_analyses
+                                if dtype in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                         sparse=sum(
@@ -657,10 +639,12 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].sparse
                                 for node_analysis in node_analyses
+                                if dtype in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
+                    if any(True for node_analysis in node_analyses if dtype in node_analysis.operation_summary.ops.precision)
                 },
             ),
             macs=OpsSummary(
@@ -722,6 +706,7 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].dense
                                 for node_analysis in node_analyses
+                                if dtype in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                         sparse=sum(
@@ -730,10 +715,12 @@ class ModelAnalysis(BaseModel):
                                     dtype
                                 ].sparse
                                 for node_analysis in node_analyses
+                                if dtype in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                     )
                     for dtype in _ALL_PRECISIONS
+                    if any(True for node_analysis in node_analyses if dtype in node_analysis.operation_summary.macs.precision)
                 },
             ),
         )

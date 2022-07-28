@@ -102,6 +102,8 @@ def get_expected_analysis(get_generated_analysis):
             with open(model_truth_path, "w") as truth_file:
                 truth_file.write(model_analysis.json())
 
+            model_analysis.yaml(f"/Users/poketopa/Desktop/{model_name}.yaml")
+
         # read truth file
         with open(model_truth_path, "r") as truth_file:
             analysis = ModelAnalysis.parse_raw(truth_file.read())
