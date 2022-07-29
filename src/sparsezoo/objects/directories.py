@@ -23,10 +23,8 @@ from typing import List, Optional
 
 import onnx
 
+from sparsezoo.objects import Directory, File
 from sparsezoo.utils import load_numpy_list
-
-from .directory import Directory
-from .file import File
 
 
 __all__ = ["NumpyDirectory", "SelectDirectory"]

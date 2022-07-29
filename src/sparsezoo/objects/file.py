@@ -233,7 +233,7 @@ class File:
                 strict_mode=strict_mode,
             )
 
-    def _validate_model_card(self):
+    def _validate_model_card(self, strict_mode=True):
         try:
             with open(self._path, "r") as yaml_file:
                 yaml_str = yaml_file.read()
@@ -254,11 +254,14 @@ class File:
             return yaml_dict
 
         except Exception as error:  # noqa: F841
-            logging.error(error)
+            self._throw_error(
+                error_msg="Model card file could not been loaded properly",
+                strict_mode=strict_mode,
+            )
 
     def _validate_markdown(self, strict_mode):
         # test if .md file is a model_card
-        is_valid_model_card = self._validate_model_card()
+        is_valid_model_card = self._validate_model_card(strict_mode)
         # if not, attempt to check if it is a recipe file
         if not is_valid_model_card:
             try:

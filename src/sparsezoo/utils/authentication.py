@@ -23,7 +23,7 @@ import requests
 import yaml
 
 from . import BASE_API_URL
-from .utils import clean_path, create_parent_dirs
+from .helpers import clean_path, create_parent_dirs
 
 
 __all__ = ["get_auth_header"]

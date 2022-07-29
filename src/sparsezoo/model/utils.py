@@ -11,32 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-A set of helper functions that serve
-as a temporary bridge between
-sparsezoo v1 and v2
-"""
-from __future__ import annotations
 
 import copy
 import logging
 import os
+import random
 import shutil
+import string
+import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from sparsezoo.utils import save_numpy
-
-from .directory import Directory
-from .file import File
-from .model_objects import NumpyDirectory
+from sparsezoo.objects import Directory, File, NumpyDirectory
+from sparsezoo.utils import download_get_request, save_numpy
 
 
 __all__ = [
     "restructure_request_json",
     "fetch_from_request_json",
-    "save_outputs_to_tar",
     "setup_model",
+    "load_files_from_stub",
+    "load_files_from_directory",
+    "generate_model_name",
+    "ZOO_STUB_PREFIX",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -51,6 +48,134 @@ ALLOWED_FILE_TYPES = {
     "benchmarking",
     "outputs",
 }
+
+_LOGGER = logging.getLogger(__name__)
+
+ZOO_STUB_PREFIX = "zoo:"
+
+
+def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
+    """
+    :param directory_path: a path to the directory,
+        that contains model files in the expected structure
+    :return list of file dictionaries
+    """
+    display_names = os.listdir(directory_path)
+    if not display_names:
+        raise ValueError(
+            "The directory path is empty. "
+            "Check whether the indicated directory exists."
+        )
+    files = [
+        dict(display_name=display_name, path=os.path.join(directory_path, display_name))
+        for display_name in display_names
+    ]
+    return files
+
+
+def load_files_from_stub(
+    stub: str,
+    valid_params: Optional[List[str]] = None,
+    force_token_refresh: bool = False,
+) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+    """
+    :param stub: the SparseZoo stub path to the model (optionally
+        may include string arguments)
+    :param valid_params: list of expected parameter names to be encoded in the
+        stub. Will raise a warning if any unexpected param names are given. Leave
+        as None to not raise any warnings. Default is None
+    :param force_token_refresh: True to refresh the auth token, False otherwise
+    :return: The tuple of
+        - list of file dictionaries
+        - parsed param dictionary
+    """
+    if isinstance(stub, str):
+        stub, params = parse_zoo_stub(stub, valid_params=valid_params)
+    _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
+    response_json = download_get_request(
+        args=stub,
+        force_token_refresh=force_token_refresh,
+    )
+    # piece of code required for backwards compatibility
+    files = restructure_request_json(response_json["model"]["files"])
+    if params:
+        files = filter_files(files, params)
+    return files, params
+
+
+def filter_files(
+    files: List[Dict[str, Any]], params: Dict[str, str]
+) -> List[Dict[str, Any]]:
+    """
+    Use the `params` to extract only the relevant files from `files`
+
+    :param files: a list of file dictionaries
+    :param params: a dictionary with filtering parameters
+    :return a filtered `files` object
+    """
+    available_params = set(params.keys())
+    files_filtered = []
+    for file_dict in files:
+        if "recipe" in available_params and file_dict["file_type"] == "recipe":
+            value = params["recipe"]
+            if file_dict["display_name"] != "recipe_" + value + ".md":
+                continue
+        if "checkpoint" in available_params and file_dict["file_type"] == "training":
+            pass
+
+        if "deployment" in available_params and file_dict["file_type"] == "deployment":
+            pass
+
+        files_filtered.append(file_dict)
+
+    if not files_filtered:
+        raise ValueError("No files found - the list of files is empty!")
+    else:
+        return files_filtered
+
+
+def parse_zoo_stub(
+    stub: str, valid_params: Optional[List[str]] = None
+) -> Tuple[str, Dict[str, str]]:
+    """
+    :param stub: A SparseZoo model stub. i.e. 'model/stub/path',
+        'zoo:model/stub/path', 'zoo:model/stub/path?param1=value1&param2=value2'
+    :param valid_params: list of expected parameter names to be encoded in the
+        stub. Will raise a warning if any unexpected param names are given. Leave
+        as None to not raise any warnings. Default is None
+    :return: the parsed base stub and a dictionary of parameter names and their values
+    """
+    # strip optional zoo stub prefix
+    if stub.startswith(ZOO_STUB_PREFIX):
+        stub = stub[len(ZOO_STUB_PREFIX) :]
+
+    if "?" not in stub:
+        return stub, {}
+
+    stub_parts = stub.split("?")
+    if len(stub_parts) > 2:
+        raise ValueError(
+            "Invalid SparseZoo stub, query string must be preceded by only one '?'"
+            f"given {stub}"
+        )
+    stub, params = stub_parts
+    params = dict(param.split("=") for param in params.split("&"))
+
+    if valid_params is not None and any(param not in valid_params for param in params):
+        warnings.warn(
+            f"Invalid query string for stub {stub} valid params include {valid_params},"
+            f" given {list(params.keys())}"
+        )
+
+    return stub, params
+
+
+def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
+    """
+    Create simple randomized string that can temporarily serve as a hash name
+    for the model
+    """
+    return "".join(random.choices(chars, k=size))
 
 
 def save_outputs_to_tar(
@@ -122,22 +247,23 @@ def restructure_request_json(
 
     # if NLP model, add `config.json` and `tokenizer.json` to `deployment`
     training_file_names = [
-        x[1]["display_name"]
-        for x in fetch_from_request_json(request_json, "file_type", "training")
+        file_dict["display_name"]
+        for idx, file_dict in fetch_from_request_json(
+            request_json, "file_type", "training"
+        )
     ]
-    nlp_folder = (
-        True
-        if (("config.json") in training_file_names)
-        and (("tokenizer.json") in training_file_names)
-        else False
+    nlp_folder = ("config.json" in training_file_names) and (
+        "tokenizer.json" in training_file_names
     )
+
     if nlp_folder:
         for file_name in ["config.json", "tokenizer.json"]:
-            file_dict_training = fetch_from_request_json(
+            file_dict_training_list = fetch_from_request_json(
                 request_json, "display_name", file_name
             )
-            assert len(file_dict_training) == 1
-            file_dict_deployment = copy.copy(file_dict_training[0][1])
+            assert len(file_dict_training_list) == 1
+            _, file_dict_training = file_dict_training_list[0]
+            file_dict_deployment = copy.copy(file_dict_training)
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
 
@@ -170,10 +296,9 @@ def restructure_request_json(
         if len(data) == 1:
             # file present but needs
             # restructuring
-            file_dict = data[0][1]
+            idx, file_dict = data[0]
             file_dict["display_name"] = file_name
             file_dict["file_type"] = type
-            idx = data[0][0]
             request_json[idx] = file_dict
 
     # remove all undesired or duplicate files
@@ -189,12 +314,17 @@ def restructure_request_json(
 def fetch_from_request_json(
     request_json: List[Dict[str, Any]], key: str, value: str
 ) -> List[Tuple[int, Dict[str, Any]]]:
-    # searches through the `request_json` list to find a
-    # dictionary, that contains the requested
-    # key-value pair.
-    # return a list of tuples
-    # (every tuple is a file_dict, together
-    # with the respective list index)
+    """
+    Searches through the `request_json` list to find a
+    dictionary, that contains the requested
+    key-value pair.
+    :param request_json: A list of file dictionaries
+    :param key: lookup key for the file dictionary
+    :param value: lookup value for the file dictionary
+    :return a list of tuples
+        (index - the found file dictionary's position in the `request_json`,
+        the found file dictionary)
+    """
     return [
         (idx, copy.copy(file_dict))
         for (idx, file_dict) in enumerate(request_json)
@@ -228,7 +358,7 @@ def setup_model(
     The format of the new directory adheres to the structure expected by the
     `Model` class factory methods.
 
-    Note: Some of the   "loose" files/directories that would then be copied
+    Note: Some of the "loose" files/directories that would then be copied
 
 
     :params output_dir: path to the target directory
@@ -303,7 +433,9 @@ def _create_file_from_path(
 
 
 def _copy_file_contents(
-    output_dir: str, file: Union[File, Directory], name: Optional[str] = None
+    output_dir: str,
+    file: Union[File, Directory],
+    name: Optional[str] = None,
 ) -> None:
     # optional argument `name` only used to make sure
     # that the names of the saved folders are consistent
