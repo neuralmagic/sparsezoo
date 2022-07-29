@@ -179,22 +179,22 @@ class NodeAnalysis(BaseModel):
                 dtype: ZeroNonZeroParams(
                     zero=(
                         num_sparse_parameters
-                        if node_weight is not None and str(node_weight.dtype)
+                        if node_weight is not None and str(node_weight.dtype) == dtype
                         else 0
                     )
                     + (
                         node_bias_size - numpy.count_nonzero(node_bias)
-                        if node_bias is not None and str(node_bias.dtype)
+                        if node_bias is not None and str(node_bias.dtype) == dtype
                         else 0
                     ),
                     non_zero=(
                         num_parameters - num_sparse_parameters
-                        if node_weight is not None and str(node_weight.dtype)
+                        if node_weight is not None and str(node_weight.dtype) == dtype
                         else 0
                     )
                     + (
                         numpy.count_nonzero(node_bias)
-                        if node_bias is not None and str(node_bias.dtype)
+                        if node_bias is not None and str(node_bias.dtype) == dtype
                         else 0
                     ),
                 )
