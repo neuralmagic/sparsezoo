@@ -19,8 +19,8 @@ import tempfile
 import pytest
 
 from sparsezoo import Zoo
-from sparsezoo.v2 import Directory, File
-from sparsezoo.v2.helpers import setup_model_directory
+from sparsezoo.v2.objects import Directory, File
+from sparsezoo.v2.utils import setup_model_directory
 
 
 @pytest.mark.parametrize(

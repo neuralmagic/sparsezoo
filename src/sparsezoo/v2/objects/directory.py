@@ -18,10 +18,10 @@ import pathlib
 import tarfile
 import time
 import traceback
-from typing import List, Optional
+from typing import Dict, Generator, List, Optional, Union
 
 from sparsezoo.utils.downloader import download_file
-from sparsezoo.v2.file import File
+from sparsezoo.v2.objects.file import File
 
 
 __all__ = ["Directory", "is_directory"]
@@ -42,7 +42,7 @@ class Directory(File):
     def __init__(
         self,
         name: str,
-        files: Optional[List[File]] = None,
+        files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
     ):
@@ -98,7 +98,7 @@ class Directory(File):
         """
         Get the names of the files in the Directory
 
-        return: List with names of files
+        :return: List with names of files
         """
         if self.is_archive:
             tar = tarfile.open(self.path)
@@ -176,7 +176,9 @@ class Directory(File):
         # Directory can represent a folder or directory.
         else:
             for file in self.files:
-                file.download(destination_path=destination_path)
+                file.download(
+                    destination_path=os.path.join(destination_path, self.name)
+                )
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -278,7 +280,11 @@ class Directory(File):
         # To unpack the Directory the following criteria need to be fulfilled:
         # 1) The Directory needs to be a tar archive
         # 2) The Directory needs to have a `path` attribute.
-        return self.is_archive and self.path
+        return self.is_archive and self.path is not None
+
+    def __iter__(self) -> Generator[File, None, None]:
+        for file in self.files:
+            yield file
 
 
 def is_directory(file: File) -> bool:
@@ -287,11 +293,10 @@ def is_directory(file: File) -> bool:
     if not isinstance(file, File):
         return False
     if file.path is None:
-        raise ValueError(
-            "Cannot call the method. "
-            "The File/Directory class object's `path` "
-            "attribute is None."
-        )
+        # we are processing a downloadable file
+        file_name_without_extension = pathlib.Path(file.name).stem
+        return file_name_without_extension == file.name
+
     return os.path.isdir(file.path)
 
 

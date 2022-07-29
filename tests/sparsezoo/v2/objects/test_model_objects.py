@@ -19,51 +19,9 @@ import onnx
 import pytest
 
 from sparsezoo.utils.numpy import load_numpy_list
-from sparsezoo.v2 import NumpyDirectory, SampleOriginals
-from tests.sparsezoo.v2.test_directory import _create_files_directory
-from tests.sparsezoo.v2.test_file import _create_onnx_file
-
-
-@pytest.mark.parametrize(
-    "files_extensions", [([".npz", ".onnx", ".md"])], scope="function"
-)
-class TestSampleOriginals:
-    @pytest.fixture()
-    def setup(self, files_extensions):
-
-        # base temporary directory
-        _temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        # second temporary directory (of Directory object)
-        temp_dir = tempfile.TemporaryDirectory(dir=_temp_dir.name)
-
-        name, path, list_files = _create_files_directory(files_extensions, temp_dir)
-
-        yield name, path, list_files
-
-        _temp_dir.cleanup()
-
-    def test_sample_originals(self, setup):
-        (
-            name,
-            path,
-            files,
-        ) = setup
-        sample_originals = SampleOriginals(name=name, files=files, path=path)
-        assert sample_originals.path == path
-        assert sample_originals.files == files
-        assert sample_originals.name == name
-        assert sample_originals.validate()
-
-    def test_iterate(self, setup):
-        (
-            name,
-            path,
-            files,
-        ) = setup
-        sample_originals = SampleOriginals(name=name, files=files, path=path)
-
-        for sample_original, file in zip(files, sample_originals):
-            assert sample_original == file
+from sparsezoo.v2.objects import NumpyDirectory
+from tests.sparsezoo.v2.objects.test_directory import _create_files_directory
+from tests.sparsezoo.v2.objects.test_file import _create_onnx_file
 
 
 @pytest.mark.parametrize(

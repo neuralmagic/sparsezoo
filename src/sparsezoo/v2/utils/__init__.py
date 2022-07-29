@@ -14,7 +14,5 @@
 
 # flake8: noqa
 
-from .inference import *
-from .objects import *
-from .utils import *
-from .validation import *
+from .backwards_compatibility import *
+from .helpers import *

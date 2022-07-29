@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""
+Helper class for running inference using
+the selected engine and input/output files
+"""
 import os
 from collections import OrderedDict
 from pathlib import Path
@@ -22,13 +25,12 @@ import onnx
 
 import onnxruntime as ort
 from sparsezoo.utils.numpy import save_numpy
-from sparsezoo.v2.file import File
-from sparsezoo.v2.model_objects import NumpyDirectory
+from sparsezoo.v2.inference.engines import ENGINES
+from sparsezoo.v2.objects.file import File
+from sparsezoo.v2.objects.model_objects import NumpyDirectory
 
 
-__all__ = ["InferenceRunner", "ENGINES"]
-
-ENGINES = ["onnxruntime", "deepsparse"]
+__all__ = ["InferenceRunner"]
 
 
 class InferenceRunner:
@@ -109,18 +111,13 @@ class InferenceRunner:
 
         :return boolean flag; if True, outputs match expected outputs. False otherwise
         """
-        validation = []
-
         sample_outputs = self._check_and_fetch_outputs(engine_name="onnxruntime")
-
         for target_output, output in zip(sample_outputs, self._run_with_onnx_runtime()):
             target_output = list(target_output.values())
-            is_valid = [
-                numpy.allclose(o1, o2.flatten(), atol=1e-5)
-                for o1, o2 in zip(target_output, output)
-            ]
-            validation += is_valid
-        return all(validation)
+            for o1, o2 in zip(target_output, output):
+                if not numpy.allclose(o1, o2.squeeze(0), atol=1e-5):
+                    return False
+        return True
 
     def _save_outputs_to_tar(self, iterator: Callable, engine_type: str):
         output_files = []

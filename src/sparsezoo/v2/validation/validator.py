@@ -20,21 +20,20 @@ class objects are valid
 import os
 from typing import Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.v2.directory import Directory
-from sparsezoo.v2.file import File
-from sparsezoo.v2.integration_validation import (
+from sparsezoo.v2.objects import Directory, File, ModelDirectory
+from sparsezoo.v2.validation import (
     validate_cv_classification,
     validate_cv_detection,
     validate_cv_segmentation,
     validate_nlp,
 )
-from sparsezoo.v2.model_directory import ModelDirectory
 
 
 __all__ = ["IntegrationValidator"]
 
 # files/directories that are required for minimal validation
 REQUIRED_FILES = {"deployment", "training", "model.onnx"}
+
 INTEGRATION_NAME_TO_DATA = {
     "nlp": validate_nlp,
     "cv_classification": validate_cv_classification,
@@ -125,7 +124,8 @@ class IntegrationValidator:
 
                 elif file.name == "deployment":
                     self.validate_directory(
-                        directory=file, validation_files=deployment_files_validation
+                        directory=file,
+                        validation_files=deployment_files_validation,
                     )
 
                 validations[file.name] = file.validate()
@@ -205,9 +205,9 @@ class IntegrationValidator:
             file_names.discard(optional_file)
         if validation_files != file_names:
             raise ValueError(
-                f"Failed to find expected files "
+                "Failed to find expected files "
                 f"{validation_files.difference(file_names)} "
-                f"in the `deployment` directory {directory.name}."
+                f"in the `{directory.name}` directory."
             )
 
         return True
@@ -225,10 +225,9 @@ class IntegrationValidator:
             model_card = File(name=name, path=model_card)
 
         yaml_dict = model_card._validate_model_card()
-        # TODO: swap this hack for parsing the proper "integration" field
-        # in the future
+
         if yaml_dict["domain"] == "nlp":
             integration_name = "nlp"
         else:
-            integration_name = f"{yaml_dict['domain']}_{yaml_dict['subdomain']}"
+            integration_name = f"{yaml_dict['domain']}_{yaml_dict['sub_domain']}"
         return integration_name
