@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
 
 import copy
 import logging
@@ -20,10 +21,14 @@ import shutil
 import string
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from sparsezoo.objects import Directory, File, NumpyDirectory
 from sparsezoo.utils import download_get_request, save_numpy
+
+
+if TYPE_CHECKING:
+    from sparsezoo.model import Model
 
 
 __all__ = [
@@ -35,6 +40,7 @@ __all__ = [
     "generate_model_name",
     "ZOO_STUB_PREFIX",
     "save_outputs_to_tar",
+    "download_framework_model_by_recipe_type",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -53,6 +59,38 @@ ALLOWED_FILE_TYPES = {
 _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
+ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
+ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
+ALLOWED_DEPLOYMENT_VALUES = {"default"}
+
+PARAM_DICT = {
+    "checkpoint": ALLOWED_CHECKPOINT_VALUES,
+    "recipe": ALLOWED_RECIPE_VALUES,
+    "deployment": ALLOWED_DEPLOYMENT_VALUES,
+}
+
+
+def download_framework_model_by_recipe_type(
+    zoo_model: Model, recipe_name: Optional[str] = None
+) -> str:
+    """
+    Extract the path of the framework model from the
+    zoo model, conditioned on the name of the recipe.
+    By default, the function will return path to the final framework model.
+
+    :params zoo_model: a `Model` class object
+    :params recipe_name: a name of the recipe (e.g. "transfer_learn", "original" etc.).
+    :return: path to the framework model
+    """
+    if recipe_name:
+        if "transfer" in recipe_name.lower():
+            # fetching the model for transfer learning
+            framework_model = zoo_model.training.default.get_file("model.ckpt.pth")
+    else:
+        # fetching the model for inference
+        framework_model = zoo_model.training.default.get_file("model.pth")
+
+    return framework_model.path
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:

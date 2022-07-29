@@ -21,6 +21,7 @@ import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.utils import (
+    PARAM_DICT,
     ZOO_STUB_PREFIX,
     generate_model_name,
     load_files_from_directory,
@@ -40,16 +41,6 @@ from sparsezoo.validation import IntegrationValidator
 __all__ = ["Model"]
 
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
-
-ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
-ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
-ALLOWED_DEPLOYMENT_VALUES = {"default"}
-
-PARAM_DICT = {
-    "checkpoint": ALLOWED_CHECKPOINT_VALUES,
-    "recipe": ALLOWED_RECIPE_VALUES,
-    "deployment": ALLOWED_DEPLOYMENT_VALUES,
-}
 
 
 class Model(Directory):
