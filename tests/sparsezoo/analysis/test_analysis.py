@@ -38,7 +38,7 @@ def test_analysis(model_name, get_generated_analysis, get_expected_analysis):
     expected_model_analysis = get_expected_analysis(model_name)
 
     def _extract_nested_dict_values(dict_obj):
-        for key, value in dict_obj.items():
+        for key, value in sorted(dict_obj.items(), key=lambda item: item[0]):
             if isinstance(value, dict):
                 for pair in _extract_nested_dict_values(value):
                     yield (key, *pair)
