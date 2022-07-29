@@ -34,6 +34,7 @@ __all__ = [
     "load_files_from_directory",
     "generate_model_name",
     "ZOO_STUB_PREFIX",
+    "save_outputs_to_tar",
 ]
 
 ALLOWED_FILE_TYPES = {
