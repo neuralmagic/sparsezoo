@@ -18,6 +18,7 @@ from typing import List, Union
 from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
 
+
 __all__ = ["search_models", "model_args_to_stub"]
 
 
@@ -99,9 +100,9 @@ def search_models(
     )
 
     return [
-        Model(model_dict_to_stub(**model_dict))
-        for model_dict in response_json["models"]]
-
+        Model(model_args_to_stub(**model_dict))
+        for model_dict in response_json["models"]
+    ]
 
 
 def model_args_to_stub(**kwargs) -> str:
@@ -122,15 +123,17 @@ def model_args_to_stub(**kwargs) -> str:
         sparse_tag = sparse_name + "-" + sparse_category
 
     if sub_architecture is not None:
-        sub_architecture = '-' + sub_architecture
+        sub_architecture = "-" + sub_architecture
 
-    stub = f"zoo:{domain if domain is not None else ''}/" \
-           f"{sub_domain if sub_domain is not None else ''}/" \
-           f"{architecture if architecture is not None else ''}" \
-           f"{sub_architecture if sub_architecture is not None else ''}/" \
-           f"{framework if framework is not None else ''}/" \
-           f"{repo if repo is not None else ''}/" \
-           f"{dataset if dataset is not None else ''}/" \
-           f"{sparse_tag if sparse_tag is not None else ''}"
+    stub = (
+        f"zoo:{domain if domain is not None else ''}/"
+        f"{sub_domain if sub_domain is not None else ''}/"
+        f"{architecture if architecture is not None else ''}"
+        f"{sub_architecture if sub_architecture is not None else ''}/"
+        f"{framework if framework is not None else ''}/"
+        f"{repo if repo is not None else ''}/"
+        f"{dataset if dataset is not None else ''}/"
+        f"{sparse_tag if sparse_tag is not None else ''}"
+    )
 
     return stub
