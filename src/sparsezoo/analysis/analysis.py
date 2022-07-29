@@ -17,6 +17,7 @@ from typing import Dict, List, Optional, Union
 import numpy
 import onnx
 import yaml
+import copy
 from onnx import NodeProto
 from pydantic import BaseModel, Field
 
@@ -56,9 +57,6 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
-
-_ALL_PRECISIONS = ["uint8", "uint16", "int32", "float16", "float32", "float64"]
-
 
 class NodeAnalysis(BaseModel):
     """
@@ -153,6 +151,7 @@ class NodeAnalysis(BaseModel):
         node_weight = get_node_weight(model_graph, node)
         node_bias = get_node_bias(model_graph, node)
         node_bias_size = node_bias.size if node_bias is not None else 0
+        param_dtypes = [str(param.dtype) for param in [node_weight, node_bias] if param is not None]
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_graph, node
         )
@@ -196,9 +195,7 @@ class NodeAnalysis(BaseModel):
                         else 0
                     ),
                 )
-                for dtype in _ALL_PRECISIONS
-                if (node_weight is not None and str(node_weight.dtype) == dtype)
-                or (node_bias is not None and str(node_bias.dtype) == dtype)
+                for dtype in param_dtypes
             },
         )
 
@@ -215,6 +212,14 @@ class NodeAnalysis(BaseModel):
         true_ops_dict = (
             single_ops_dict if not is_four_block_sparse else four_block_ops_dict
         )
+
+        # collect all dtypes include "other" (non weight or bias)
+        operation_dtypes = copy.deepcopy(param_dtypes)
+        first_output = next(iter(outputs), None)
+        other_op_dtype = first_output.dtype if first_output is not None else "unknown"
+        if true_ops_dict["other"]["num_dense_ops"] + true_ops_dict["other"]["num_sparse_ops"] != 0:
+            operation_dtypes.append(other_op_dtype)
+
         operation_summary = OperationSummary(
             ops=OpsSummary(
                 total=_sum_across_keys(true_ops_dict, "num_dense_ops")
@@ -245,6 +250,11 @@ class NodeAnalysis(BaseModel):
                                 and str(node_bias.dtype) == dtype
                                 else 0
                             )
+                            + (
+                                true_ops_dict["other"]["num_dense_ops"]
+                                if other_op_dtype == dtype
+                                else 0
+                            )
                         ),
                         sparse=(
                             (
@@ -259,11 +269,14 @@ class NodeAnalysis(BaseModel):
                                 and str(node_bias.dtype) == dtype
                                 else 0
                             )
+                            + (
+                                true_ops_dict["other"]["num_sparse_ops"]
+                                if other_op_dtype == dtype
+                                else 0
+                            )
                         ),
                     )
-                    for dtype in _ALL_PRECISIONS
-                    if (node_weight is not None and str(node_weight.dtype) == dtype)
-                    or (node_bias is not None and str(node_bias.dtype) == dtype)
+                    for dtype in operation_dtypes
                 },
             ),
             macs=OpsSummary(
@@ -284,13 +297,11 @@ class NodeAnalysis(BaseModel):
                     ),
                 },
                 precision={
-                    dtype: DenseSparseOps(
+                    str(node_weight.dtype): DenseSparseOps(
                         dense=true_ops_dict["weight"]["num_dense_ops"] // 2,
                         sparse=true_ops_dict["weight"]["num_sparse_ops"] // 2,
                     )
-                    for dtype in _ALL_PRECISIONS
-                    if node_weight is not None and str(node_weight.dtype) == dtype
-                },
+                } if node_weight is not None else {},
             ),
         )
 
@@ -315,14 +326,11 @@ class NodeAnalysis(BaseModel):
                             ),
                         },
                         precision={
-                            dtype: ZeroNonZeroParams(
+                            str(node_weight.dtype): ZeroNonZeroParams(
                                 zero=num_sparse_parameters,
                                 non_zero=num_parameters - num_sparse_parameters,
                             )
-                            for dtype in _ALL_PRECISIONS
-                            if node_weight is not None
-                            and str(node_weight.dtype) == dtype
-                        },
+                        } if node_weight is not None else {},
                     ),
                     dtype=str(node_weight.dtype),
                 )
@@ -347,13 +355,11 @@ class NodeAnalysis(BaseModel):
                             ),
                         },
                         precision={
-                            dtype: ZeroNonZeroParams(
+                            str(node_bias.dtype): ZeroNonZeroParams(
                                 zero=node_bias_size - numpy.count_nonzero(node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             )
-                            for dtype in _ALL_PRECISIONS
-                            if str(node_bias.dtype) == dtype
-                        },
+                        } if node_bias is not None else {},
                     ),
                     dtype=str(node_bias.dtype),
                 )
@@ -511,6 +517,17 @@ class ModelAnalysis(BaseModel):
             ),
         )
 
+        all_parameter_dtypes = []
+        all_ops_operation_dtypes = []
+        all_macs_operation_dtypes = []
+        for node_analysis in node_analyses:
+            all_parameter_dtypes.extend(node_analysis.parameter_summary.precision.keys())
+            all_ops_operation_dtypes.extend(node_analysis.operation_summary.ops.precision.keys())
+            all_macs_operation_dtypes.extend(node_analysis.operation_summary.macs.precision.keys())
+        all_ops_operation_dtypes = set(all_ops_operation_dtypes)
+        all_macs_operation_dtypes = set(all_macs_operation_dtypes)
+        all_parameter_dtypes = set(all_parameter_dtypes)
+
         # this can be done with better run time efficiency with a recursive summing algo
         parameter_summary = ParameterSummary(
             total=sum(
@@ -580,12 +597,7 @@ class ModelAnalysis(BaseModel):
                         ]
                     ),
                 )
-                for dtype in _ALL_PRECISIONS
-                if any(
-                    True
-                    for node_analysis in node_analyses
-                    if dtype in node_analysis.parameter_summary.precision
-                )
+                for dtype in all_parameter_dtypes
             },
         )
 
@@ -664,12 +676,7 @@ class ModelAnalysis(BaseModel):
                             ]
                         ),
                     )
-                    for dtype in _ALL_PRECISIONS
-                    if any(
-                        True
-                        for node_analysis in node_analyses
-                        if dtype in node_analysis.operation_summary.ops.precision
-                    )
+                    for dtype in all_ops_operation_dtypes
                 },
             ),
             macs=OpsSummary(
@@ -746,12 +753,7 @@ class ModelAnalysis(BaseModel):
                             ]
                         ),
                     )
-                    for dtype in _ALL_PRECISIONS
-                    if any(
-                        True
-                        for node_analysis in node_analyses
-                        if dtype in node_analysis.operation_summary.macs.precision
-                    )
+                    for dtype in all_macs_operation_dtypes
                 },
             ),
         )
