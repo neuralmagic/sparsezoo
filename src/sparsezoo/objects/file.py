@@ -254,10 +254,7 @@ class File:
             return yaml_dict
 
         except Exception as error:  # noqa: F841
-            self._throw_error(
-                error_msg="Model card file could not been loaded properly",
-                strict_mode=strict_mode,
-            )
+            logging.error(error)
 
     def _validate_markdown(self, strict_mode):
         # test if .md file is a model_card
