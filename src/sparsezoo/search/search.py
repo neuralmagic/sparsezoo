@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, List, Optional, Union
+from typing import List, Union
 
 from sparsezoo.utils import search_model_get_request
 
 
-__all__ = ["search_models", "model_dict_to_stub"]
+__all__ = ["search_models", "model_args_to_stub"]
 
 
 def search_models(
@@ -98,19 +98,25 @@ def search_models(
         force_token_refresh=force_token_refresh,
     )
 
-    return [model_dict_to_stub(model_dict) for model_dict in response_json["models"]]
+    return [model_args_to_stub(**model_dict) for model_dict in response_json["models"]]
 
 
-def model_dict_to_stub(model_dict: Dict[str, Optional[str]]) -> str:
+def model_args_to_stub(**kwargs) -> str:
 
-    domain = model_dict.get("domain")
-    sub_domain = model_dict.get("sub_domain")
-    architecture = model_dict.get("architecture")
-    sub_architecture = model_dict.get("sub_architecture")
-    framework = model_dict.get("framework")
-    repo = model_dict.get("repo")
-    dataset = model_dict.get("dataset")
-    sparse_tag = model_dict.get("sparse_tag")
+    domain = kwargs.get("domain")
+    sub_domain = kwargs.get("sub_domain")
+    architecture = kwargs.get("architecture")
+    sub_architecture = kwargs.get("sub_architecture")
+    framework = kwargs.get("framework")
+    repo = kwargs.get("repo")
+    dataset = kwargs.get("dataset")
+    sparse_tag = kwargs.get("sparse_tag")
+
+    sparse_name = kwargs.get("sparse_name")
+    sparse_category = kwargs.get("sparse_category")
+
+    if not sparse_tag:
+        sparse_tag = sparse_name + "-" + sparse_category
 
     if sub_architecture is not None:
         sub_architecture = "-" + sub_architecture

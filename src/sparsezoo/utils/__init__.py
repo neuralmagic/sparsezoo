@@ -23,6 +23,7 @@ BASE_API_URL = (
     else "https://api.neuralmagic.com"
 )
 MODELS_API_URL = f"{BASE_API_URL}/models"
+LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
 
 from .authentication import *
 from .download import *
