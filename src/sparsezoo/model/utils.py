@@ -122,7 +122,7 @@ def filter_files(
     for file_dict in files:
         if "recipe" in available_params and file_dict["file_type"] == "recipe":
             value = params["recipe"]
-            if file_dict["display_name"] != "recipe_" + value + ".md":
+            if file_dict["display_name"] not in "recipe_" + value:
                 continue
         if "checkpoint" in available_params and file_dict["file_type"] == "training":
             pass
