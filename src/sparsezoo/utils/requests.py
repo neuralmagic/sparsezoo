@@ -90,7 +90,7 @@ def download_get_request(
     :param base_url: the base url
     :param args: the model args describing what should be downloaded for
     :param sub_path: the sub path from the model path if any e.g.
-        file_name for models api or recipe_name for the recipes api
+        file_name for models api or recipe_type for the recipes api
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
