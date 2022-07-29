@@ -15,8 +15,8 @@
 import logging
 from typing import List, Union
 
+from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
-
 
 __all__ = ["search_models", "model_args_to_stub"]
 
@@ -37,7 +37,7 @@ def search_models(
     page: int = 1,
     page_length: int = 20,
     force_token_refresh: bool = False,
-) -> List[str]:
+) -> List[Model]:
     """
     Obtains a list of Models matching the search parameters
     :param domain: The domain of the model the object belongs to;
@@ -98,7 +98,9 @@ def search_models(
         force_token_refresh=force_token_refresh,
     )
 
-    return [model_args_to_stub(**model_dict) for model_dict in response_json["models"]]
+    return [
+        Model(model_dict_to_stub(model_dict)) for model_dict in response_json["models"]
+    ]
 
 
 def model_args_to_stub(**kwargs) -> str:
