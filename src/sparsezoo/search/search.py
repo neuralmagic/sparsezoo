@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import List, Union
+from typing import Dict, List, Optional, Union
 
 from sparsezoo import Model
 from sparsezoo.utils import search_model_get_request
@@ -105,28 +105,27 @@ def search_models(
     ]
 
 
-def model_dict_to_stub(**kwargs) -> str:
-    domain = kwargs.get("domain")
-    sub_domain = kwargs.get("sub_domain")
-    architecture = kwargs.get("architecture")
-    sub_architecture = kwargs.get("sub_architecture")
-    framework = kwargs.get("framework")
-    repo = kwargs.get("repo")
-    dataset = kwargs.get("dataset")
-    sparse_tag = kwargs.get("sparse_tag")
+def model_dict_to_stub(model_dict: Dict[str, Optional[str]]) -> str:
+
+    domain = model_dict.get("domain")
+    sub_domain = model_dict.get("sub_domain")
+    architecture = model_dict.get("architecture")
+    sub_architecture = model_dict.get("sub_architecture")
+    framework = model_dict.get("framework")
+    repo = model_dict.get("repo")
+    dataset = model_dict.get("dataset")
+    sparse_tag = model_dict.get("sparse_tag")
 
     if sub_architecture is not None:
-        sub_architecture = "-" + sub_architecture
+        sub_architecture = '-' + sub_architecture
 
-    stub = (
-        f"zoo:{domain if domain is not None else ''}/"
-        f"{sub_domain if sub_domain is not None else ''}/"
-        f"{architecture if architecture is not None else ''}"
-        f"{sub_architecture if sub_architecture is not None else ''}/"
-        f"{framework if framework is not None else ''}/"
-        f"{repo if repo is not None else ''}/"
-        f"{dataset if dataset is not None else ''}/"
-        f"{sparse_tag if sparse_tag is not None else ''}"
-    )
+    stub = f"zoo:{domain if domain is not None else ''}/" \
+           f"{sub_domain if sub_domain is not None else ''}/" \
+           f"{architecture if architecture is not None else ''}" \
+           f"{sub_architecture if sub_architecture is not None else ''}/" \
+           f"{framework if framework is not None else ''}/" \
+           f"{repo if repo is not None else ''}/" \
+           f"{dataset if dataset is not None else ''}/" \
+           f"{sparse_tag if sparse_tag is not None else ''}"
 
     return stub

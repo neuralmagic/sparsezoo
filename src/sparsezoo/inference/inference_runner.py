@@ -15,7 +15,7 @@
 Helper class for running inference using
 the selected engine and input/output files
 """
-from __future__ import annotations
+from __future__ import annotations  # noqa F407
 
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Generator, List

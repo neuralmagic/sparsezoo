@@ -11,30 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# flake8: noqa
-
-import os
-
-
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
-MODELS_API_URL = f"{BASE_API_URL}/models"
-
-from .authentication import *
-from .download import *
-from .helpers import *
-from .numpy import *
-from .requests import *
-
-
-__all__ = (
-    helpers.__all__
-    + authentication.__all__
-    + download.__all__
-    + numpy.__all__
-    + requests.__all__
-)

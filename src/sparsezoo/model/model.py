@@ -20,19 +20,19 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
+from sparsezoo.model.utils import (
+    ZOO_STUB_PREFIX,
+    CACHE_DIR,
+    load_files_from_directory,
+    load_files_from_stub,
+    save_outputs_to_tar,
+)
 from sparsezoo.objects import (
     Directory,
     File,
     NumpyDirectory,
     SelectDirectory,
     is_directory,
-    save_outputs_to_tar,
-)
-from sparsezoo.objects.model_helpers import (
-    CACHE_DIR,
-    ZOO_STUB_PREFIX,
-    load_files_from_directory,
-    load_files_from_stub,
 )
 from sparsezoo.validation import IntegrationValidator
 

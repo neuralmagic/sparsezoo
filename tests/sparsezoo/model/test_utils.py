@@ -17,8 +17,7 @@ import tempfile
 
 import pytest
 
-from sparsezoo import Model
-from sparsezoo.objects import restructure_request_json, setup_model
+from sparsezoo.model import Model, restructure_request_json, setup_model
 from sparsezoo.utils import download_get_request
 
 

@@ -21,7 +21,7 @@ from typing import Dict, Iterable, List, Union
 
 import numpy
 
-from .utils import clean_path, create_dirs
+from .helpers import clean_path, create_dirs
 
 
 __all__ = ["save_numpy", "load_numpy_list"]
