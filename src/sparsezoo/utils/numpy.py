@@ -21,10 +21,17 @@ from typing import Dict, Iterable, List, Union
 
 import numpy
 
-from .helpers import clean_path, create_dirs
+from sparsezoo.utils.helpers import clean_path, create_dirs
 
 
-__all__ = ["save_numpy", "load_numpy_list"]
+__all__ = [
+    "save_numpy",
+    "load_numpy_list",
+    "NumpyArrayBatcher",
+]
+
+
+NDARRAY_KEY = "ndarray"
 
 
 def save_numpy(
@@ -139,3 +146,106 @@ def load_numpy_list(
         loaded.append(dat)
 
     return loaded
+
+
+class NumpyArrayBatcher(object):
+    """
+    Batcher instance to handle taking in dictionaries of numpy arrays,
+    appending multiple items to them to increase their batch size,
+    and then stack them into a single batched numpy array for all keys in the dicts.
+    """
+
+    def __init__(self):
+        self._items = OrderedDict()  # type: Dict[str, List[numpy.ndarray]]
+        self._batch_index = None
+
+    def __len__(self):
+        if len(self._items) == 0:
+            return 0
+
+        return len(self._items[list(self._items.keys())[0]])
+
+    def append(self, item: Union[numpy.ndarray, Dict[str, numpy.ndarray]]):
+        """
+        Append a new item into the current batch.
+        All keys and shapes must match the current state.
+        :param item: the item to add for batching
+        """
+        if len(self) < 1 and isinstance(item, numpy.ndarray):
+            self._items[NDARRAY_KEY] = [item]
+        elif len(self) < 1:
+            for key, val in item.items():
+                self._items[key] = [val]
+        elif isinstance(item, numpy.ndarray):
+            if self._batch_index is None:
+                self._batch_index = {NDARRAY_KEY: 0}
+            if NDARRAY_KEY not in self._items:
+                raise ValueError(
+                    "numpy ndarray passed for item, but prev_batch does not contain one"
+                )
+
+            if item.shape != self._items[NDARRAY_KEY][0].shape:
+                self._batch_index[NDARRAY_KEY] = 1
+
+            if item.shape != self._items[NDARRAY_KEY][0].shape and (
+                item.shape[0] != self._items[NDARRAY_KEY][0].shape[0]
+                or item.shape[2:] != self._items[NDARRAY_KEY][0].shape[2:]
+            ):
+                raise ValueError(
+                    (
+                        f"item of numpy ndarray of shape {item.shape} does not "
+                        f"match the current batch shape of "
+                        f"{self._items[NDARRAY_KEY][0].shape}"
+                    )
+                )
+
+            self._items[NDARRAY_KEY].append(item)
+        else:
+            diff_keys = list(set(item.keys()) - set(self._items.keys()))
+
+            if len(diff_keys) > 0:
+                raise ValueError(
+                    (
+                        f"numpy dict passed for item, not all keys match "
+                        f"with the prev_batch. difference: {diff_keys}"
+                    )
+                )
+
+            if self._batch_index is None:
+                self._batch_index = {key: 0 for key in item}
+
+            for key, val in item.items():
+                if val.shape != self._items[key][0].shape:
+                    self._batch_index[key] = 1
+
+                if val.shape != self._items[key][0].shape and (
+                    val.shape[0] != self._items[key][0].shape[0]
+                    or val.shape[2:] != self._items[key][0].shape[2:]
+                ):
+                    raise ValueError(
+                        (
+                            f"item with key {key} of shape {val.shape} does not "
+                            f"match the current batch shape of "
+                            f"{self._items[key][0].shape}"
+                        )
+                    )
+
+                self._items[key].append(val)
+
+    def stack(
+        self, as_list: bool = False
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]:
+        """
+        Stack the current items into a batch along a new, zeroed dimension
+        :param as_list: True to return the items as a list,
+            False to return items in a named ordereddict
+        :return: the stacked items
+        """
+        batch_dict = OrderedDict()
+
+        for key, val in self._items.items():
+            if self._batch_index is None or self._batch_index[key] == 0:
+                batch_dict[key] = numpy.stack(val)
+            else:
+                batch_dict[key] = numpy.concatenate(val, axis=self._batch_index[key])
+        return batch_dict if not as_list else list(batch_dict.values())
