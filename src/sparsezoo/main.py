@@ -139,7 +139,7 @@ optional arguments:
                         the max release version of the model in semantic
                         version format
   --save-dir SAVE_DIR   The directory to save the model files in, defaults to
-                        the cwd with the model description as a sub folder
+                        the cache directory of the sparsezoo
 
 
 ##########
@@ -288,7 +288,7 @@ def parse_args():
         type=str,
         default=None,
         help="The directory to save the model files in, "
-        "defaults to the cwd with the model description as a sub folder",
+        "defaults to the cache directory of the sparsezoo",
     )
     download_parser.add_argument(
         "--overwrite",
@@ -392,6 +392,10 @@ def main():
         )
 
         model = Model(stub)
+        if args.save_dir:
+            model.download(directory_path=args.save_dir)
+        else:
+            model.download()
 
         print("Download results")
         print("====================")

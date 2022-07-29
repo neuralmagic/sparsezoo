@@ -72,7 +72,7 @@ def parse_args():
         type=str,
         default=None,
         help="The directory to save the model files in, "
-        "defaults to the cwd with the model description as a sub folder",
+        "defaults to the cache directory of the sparsezoo",
     )
     parser.add_argument(
         "--overwrite",
@@ -96,6 +96,12 @@ def main():
         raise ValueError("Model stub must start with 'zoo:'")
 
     model = Model(args.model_stub)
+    if args.save_dir:
+        model.path = args.save_dir
+        if args.overwrite:
+            model.download(override=args.overwrite)
+        else:
+            model.download()
 
     print("Download results")
     print("====================")
