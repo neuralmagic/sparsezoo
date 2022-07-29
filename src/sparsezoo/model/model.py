@@ -15,14 +15,14 @@
 import logging
 import os
 import re
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.utils import (
     ZOO_STUB_PREFIX,
-    generate_model_name,
+    CACHE_DIR,
     load_files_from_directory,
     load_files_from_stub,
     save_outputs_to_tar,
@@ -38,8 +38,6 @@ from sparsezoo.validation import IntegrationValidator
 
 
 __all__ = ["Model"]
-
-CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
@@ -74,18 +72,10 @@ class Model(Directory):
 
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
-            files, params = load_files_from_stub(
-                self.source, valid_params=list(PARAM_DICT.keys())
-            )
-            if params:
-                self._validate_params(params)
-            path = os.path.join(CACHE_DIR, generate_model_name())
-            url = os.path.dirname(files[0]["url"])
+            files, path, url = self.initialize_model_from_stub(self.source)
         else:
             # initializing the model from the path
-            files = load_files_from_directory(self.source)
-            path = source
-            url = None
+            files, path, url = self.initialize_model_from_directory(self.source)
 
         self.path = path
 
@@ -316,6 +306,26 @@ class Model(Directory):
         else:
             return f"{self.__class__.__name__}(directory={self.source})"
 
+    def initialize_model_from_stub(
+        self, stub: str
+    ) -> Tuple[List[Dict[str, str]], str, str]:
+        files, model_id, params = load_files_from_stub(
+            stub, valid_params=list(PARAM_DICT.keys())
+        )
+        if params:
+            self._validate_params(params)
+        path = os.path.join(CACHE_DIR, model_id)
+        url = os.path.dirname(files[0]["url"])
+        return files, path, url
+
+    def initialize_model_from_directory(
+        self, directory: str
+    ) -> Tuple[List[Dict[str, str]], str, None]:
+        files = load_files_from_directory(directory)
+        path = directory
+        url = None
+        return files, path, url
+
     def _get_directory(
         self,
         file: Dict[str, Any],
@@ -352,7 +362,7 @@ class Model(Directory):
         # directory is a tar file
         if self._is_file_tar(file):
             directory = directory_class(
-                files=[], name=name, path=path, url=url, owner_path=self._path
+                files=[], name=name, path=path, url=url, parent_directory=self._path
             )
             return directory
 
@@ -372,7 +382,7 @@ class Model(Directory):
                 name=name,
                 path=path,
                 url=url,
-                owner_path=self._path,
+                parent_directory=self._path,
             )
             return directory
 
@@ -410,7 +420,7 @@ class Model(Directory):
             )
             return None
         else:
-            file = File.from_dict(file, owner_path=self._path)
+            file = File.from_dict(file, parent_directory=self._path)
 
             return file
 
@@ -465,7 +475,7 @@ class Model(Directory):
                 files=files,
                 directory_class=directory_class,
                 display_name=display_name,
-                owner_path=self._path,
+                parent_directory=self._path,
             )
         else:
             directory = None
@@ -564,7 +574,7 @@ class Model(Directory):
 
     @staticmethod
     def _get_directory_from_loose_api_files(
-        files, directory_class, display_name, owner_path
+        files, directory_class, display_name, parent_directory
     ):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
@@ -594,7 +604,9 @@ class Model(Directory):
             return None
         else:
             files = [
-                File.from_dict(file, owner_path=os.path.join(owner_path, display_name))
+                File.from_dict(
+                    file, parent_directory=os.path.join(parent_directory, display_name)
+                )
                 for file in files
             ]
             directory = directory_class(
@@ -602,7 +614,7 @@ class Model(Directory):
                 name=display_name,
                 path=None,
                 url=None,
-                owner_path=owner_path,
+                parent_directory=parent_directory,
             )
             return directory
 

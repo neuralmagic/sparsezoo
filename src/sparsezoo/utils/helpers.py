@@ -12,10 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import os
 
 
-__all__ = ["create_dirs", "create_parent_dirs", "clean_path"]
+__all__ = ["create_dirs", "create_parent_dirs", "clean_path", "remove_tar_duplicates"]
+
+
+def remove_tar_duplicates(directory: str):
+    """
+    If a directory contains similar the same data, both one
+    as a directory and a .tar file, remove the .tar file.
+    Example:
+
+    Before:
+        [directory_A, directory_B, directory_A.tar.gz,
+        directory_B.tar.gz, directory_C.tar.gz]
+    After:
+        [directory_A, directory_B, directory_C.tar.gz]
+
+    :param directory: A directory where the removal of tar duplicates is to happen
+    """
+    extension_to_remove = ".tar.gz"
+    files = glob.glob(os.path.join(directory, "*"))
+    possible_duplicates = [
+        file.replace(extension_to_remove, "")
+        for file in files
+        if file.endswith(extension_to_remove)
+    ]
+    remaining_files = [file for file in files if not file.endswith(extension_to_remove)]
+    duplicates = [file for file in remaining_files if file in possible_duplicates]
+    [os.remove(duplicate + extension_to_remove) for duplicate in duplicates]
 
 
 def create_dirs(path: str):

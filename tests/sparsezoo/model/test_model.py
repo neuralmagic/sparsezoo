@@ -75,26 +75,35 @@ files_yolo = copy.copy(files_ic)
     ],
     scope="function",
 )
-def test_model_from_stub(stub, args, should_pass):
-    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-    path = stub + "?" + args[0] + "=" + args[1]
-    if should_pass:
-        model = Model(path)
-        model.download(directory_path=temp_dir.name)
-        _assert_correct_files_downloaded(model, args)
-    else:
-        with pytest.raises(ValueError):
+class TestSetupModel:
+    @pytest.fixture()
+    def setup(self, stub, args, should_pass):
+        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+
+        yield stub, args, should_pass
+
+        shutil.rmtree(temp_dir.name)
+
+    def test_model_from_stub(self, stub, args, should_pass):
+        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+        path = stub + "?" + args[0] + "=" + args[1]
+        if should_pass:
             model = Model(path)
             model.download(directory_path=temp_dir.name)
+            self._assert_correct_files_downloaded(model, args)
+        else:
+            with pytest.raises(ValueError):
+                model = Model(path)
+                model.download(directory_path=temp_dir.name)
 
-
-def _assert_correct_files_downloaded(model, args):
-    if args[0] == "recipe":
-        assert len(model.recipes.available) == 1
-    elif args[0] == "checkpoint":
-        assert len(model.training.available) == 1
-    elif args[0] == "deployment":
-        assert len(model.training.available) == 1
+    @staticmethod
+    def _assert_correct_files_downloaded(model, args):
+        if args[0] == "recipe":
+            assert len(model.recipes.available) == 1
+        elif args[0] == "checkpoint":
+            assert len(model.training.available) == 1
+        elif args[0] == "deployment":
+            assert len(model.training.available) == 1
 
 
 @pytest.mark.parametrize(

@@ -42,7 +42,7 @@ class NumpyDirectory(Directory):
     :param name: name of the NumpyDirectory
     :param path: path of the NumpyDirectory
     :param url: url of the NumpyDirectory
-    :param owner_path: path of the parent NumpyDirectory
+    :param parent_directory: path of the parent NumpyDirectory
     """
 
     def __init__(
@@ -51,10 +51,14 @@ class NumpyDirectory(Directory):
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str] = None,
+        parent_directory: Optional[str] = None,
     ):
         super().__init__(
-            files=files, name=name, path=path, url=url, owner_path=owner_path
+            files=files,
+            name=name,
+            path=path,
+            url=url,
+            parent_directory=parent_directory,
         )
 
     def validate(
@@ -131,7 +135,7 @@ class SelectDirectory(Directory):
     :param name: name of the NumpyDirectory
     :param path: path of the NumpyDirectory
     :param url: url of the NumpyDirectory
-    :param owner_path: path of the parent SelectDirectory
+    :param parent_directory: path of the parent SelectDirectory
     """
 
     def __init__(
@@ -140,12 +144,16 @@ class SelectDirectory(Directory):
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str] = None,
+        parent_directory: Optional[str] = None,
     ):
         self._default, self._available = None, None
 
         super().__init__(
-            files=files, name=name, path=path, url=url, owner_path=owner_path
+            files=files,
+            name=name,
+            path=path,
+            url=url,
+            parent_directory=parent_directory,
         )
 
         self.files_dict = self.files_to_dictionary()
