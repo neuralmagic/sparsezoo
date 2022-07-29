@@ -47,6 +47,7 @@ PARAM_DICT = {
     "checkpoint": ALLOWED_CHECKPOINT_VALUES,
     "recipe": ALLOWED_RECIPE_VALUES,
     "deployment": ALLOWED_DEPLOYMENT_VALUES,
+    "recipe_type": None,  # backwards compatibility with v1 stubs
 }
 
 
@@ -69,6 +70,7 @@ class Model(Directory):
     def __init__(self, source: str):
 
         self.source = source
+        self._stub_params = {}
 
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
@@ -80,7 +82,10 @@ class Model(Directory):
         self.path = path
 
         self.training: SelectDirectory = self._directory_from_files(
-            files, directory_class=SelectDirectory, display_name="training"
+            files,
+            directory_class=SelectDirectory,
+            display_name="training",
+            stub_params=self.stub_params,
         )
         self.sample_originals: Directory = self._directory_from_files(
             files,
@@ -112,7 +117,10 @@ class Model(Directory):
         )
 
         self.deployment: SelectDirectory = self._directory_from_files(
-            files, directory_class=SelectDirectory, display_name="deployment"
+            files,
+            directory_class=SelectDirectory,
+            display_name="deployment",
+            stub_params=self.stub_params,
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -123,7 +131,10 @@ class Model(Directory):
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
         self.recipes: SelectDirectory = self._directory_from_files(
-            files, directory_class=SelectDirectory, display_name="recipe"
+            files,
+            directory_class=SelectDirectory,
+            display_name="recipe",
+            stub_params=self.stub_params,
         )
 
         self.onnx_model: File = self._file_from_files(files, display_name="model.onnx")
@@ -177,6 +188,14 @@ class Model(Directory):
         )
 
         self.integration_validator = IntegrationValidator(model=self)
+
+    @property
+    def stub_params(self) -> Dict[str, str]:
+        """
+        :return: mapping of variable name to value for query params in zoo stub
+            this Model was initialized from
+        """
+        return self._stub_params
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
@@ -314,6 +333,7 @@ class Model(Directory):
         )
         if params:
             self._validate_params(params)
+            self._stub_params.update(params)
         path = os.path.join(CACHE_DIR, model_id)
         url = os.path.dirname(files[0]["url"])
         return files, path, url
@@ -332,6 +352,7 @@ class Model(Directory):
         directory_class: Directory,
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
+        **kwargs,
     ) -> Union[Directory, None]:
         # Takes a file dictionary and returns a Directory() object, if successful.
         # Optionally, can do:
@@ -383,6 +404,7 @@ class Model(Directory):
                 path=path,
                 url=url,
                 parent_directory=self._path,
+                **kwargs,
             )
             return directory
 
@@ -461,6 +483,7 @@ class Model(Directory):
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
         allow_multiple_outputs: Optional[bool] = False,
+        **kwargs,
     ) -> Union[Directory, None]:
 
         # Takes a list of file dictionaries and returns
@@ -476,6 +499,7 @@ class Model(Directory):
                 directory_class=directory_class,
                 display_name=display_name,
                 parent_directory=self._path,
+                **kwargs,
             )
         else:
             directory = None
@@ -490,6 +514,7 @@ class Model(Directory):
                     directory_class=directory_class,
                     display_name=display_name,
                     regex=regex,
+                    **kwargs,
                 )
 
                 if directory is not None:
@@ -574,7 +599,7 @@ class Model(Directory):
 
     @staticmethod
     def _get_directory_from_loose_api_files(
-        files, directory_class, display_name, parent_directory
+        files, directory_class, display_name, parent_directory, **kwargs
     ):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
@@ -615,6 +640,7 @@ class Model(Directory):
                 path=None,
                 url=None,
                 parent_directory=parent_directory,
+                **kwargs,
             )
             return directory
 
@@ -635,7 +661,7 @@ class Model(Directory):
                     f"String argument {key} not found in the "
                     f"expected set of string arguments {list(PARAM_DICT.keys())}!"
                 )
-            if value not in PARAM_DICT[key]:
+            if PARAM_DICT[key] and value not in PARAM_DICT[key]:
                 raise ValueError(
                     f"String argument {key} has value {value}, "
                     "cannot be found in the "

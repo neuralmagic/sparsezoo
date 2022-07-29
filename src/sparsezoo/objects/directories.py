@@ -19,7 +19,7 @@ Class objects for standardization and validation of a model folder structure
 
 import logging
 from collections import OrderedDict
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import onnx
 
@@ -132,10 +132,12 @@ class SelectDirectory(Directory):
     by key values.
 
     :param files: list of files contained within the SelectDirectory
-    :param name: name of the NumpyDirectory
-    :param path: path of the NumpyDirectory
-    :param url: url of the NumpyDirectory
+    :param name: name of the SelectDirectory
+    :param path: path of the SelectDirectory
+    :param url: url of the SelectDirectory
     :param parent_directory: path of the parent SelectDirectory
+    :param stub_params: dictionary of zoo stub params that this directory
+        was specified with
     """
 
     def __init__(
@@ -145,6 +147,7 @@ class SelectDirectory(Directory):
         path: Optional[str] = None,
         url: Optional[str] = None,
         parent_directory: Optional[str] = None,
+        stub_params: Optional[Dict[str, str]] = None,
     ):
         self._default, self._available = None, None
 
@@ -156,11 +159,20 @@ class SelectDirectory(Directory):
             parent_directory=parent_directory,
         )
 
+        self._stub_params = stub_params or {}
         self.files_dict = self.files_to_dictionary()
 
     def __getitem__(self, key):
         file = self.files_dict[key]
         return file
+
+    @property
+    def stub_params(self) -> Dict[str, str]:
+        """
+        :return: mapping of variable name to value for query params in zoo stub
+            this directory was initialized from
+        """
+        return self._stub_params
 
     def files_to_dictionary(self):
         if self.name == "recipe":
@@ -178,12 +190,22 @@ class SelectDirectory(Directory):
 
     @property
     def default(self):
-        if self.name == "recipe" and "original" in self.files_dict:
-            return self["original"]
-        elif self.name == "training" and "preqat" in self.files_dict:
+        if self.name == "recipe":
+            # maybe to extract desired recipe name from stub params
+            recipe_type = self.stub_params.get("recipe_type") or (
+                self.stub_params.get("recipe")
+            )
+            if not recipe_type and "original" in self.files_dict:
+                # default to original recipe
+                return self["original"]
+            # try to find recipe satisfying the recipe type
+            for recipe_name in self.files_dict:
+                if recipe_type.lower() == recipe_name.lower():
+                    return self[recipe_name]
+        if self.name == "training" and "preqat" in self.files_dict:
             return self["preqat"]
-        else:
-            return next(iter(self.files_dict.values()))
+        # default to first value
+        return next(iter(self.files_dict.values()))
 
     @default.setter
     def default(self, value):
