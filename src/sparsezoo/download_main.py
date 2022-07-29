@@ -47,7 +47,7 @@ sparsezoo.download \
 import argparse
 import logging
 
-from sparsezoo.models import Zoo
+from sparsezoo import Model
 
 
 __all__ = ["main"]
@@ -72,7 +72,7 @@ def parse_args():
         type=str,
         default=None,
         help="The directory to save the model files in, "
-        "defaults to the cwd with the model description as a sub folder",
+        "defaults to the cache directory of the sparsezoo",
     )
     parser.add_argument(
         "--overwrite",
@@ -95,16 +95,18 @@ def main():
     if not args.model_stub.startswith("zoo:"):
         raise ValueError("Model stub must start with 'zoo:'")
 
-    model = Zoo.download_model_from_stub(
-        stub=args.model_stub,
-        override_parent_path=args.save_dir,
-        overwrite=args.overwrite,
-    )
+    model = Model(args.model_stub)
+    if args.save_dir:
+        model.path = args.save_dir
+        if args.overwrite:
+            model.download(override=args.overwrite)
+        else:
+            model.download()
 
     print("Download results")
     print("====================")
     print()
-    print(f"{model.display_name} downloaded to {model.dir_path}")
+    print(f"{str(model)} downloaded to {model.path}")
 
 
 if __name__ == "__main__":
