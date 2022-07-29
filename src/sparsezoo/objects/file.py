@@ -43,7 +43,7 @@ class File:
     :param name: name of the File
     :param path: path of the File
     :param url: url of the File
-    :param owner_path: path of the parent Directory
+    :param parent_directory: path of the parent Directory
     """
 
     def __init__(
@@ -51,7 +51,7 @@ class File:
         name: str,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str] = None,
+        parent_directory: Optional[str] = None,
     ):
 
         self.name = name
@@ -61,7 +61,7 @@ class File:
         # either has been downloaded or can be
         # downloaded
         self.path = path
-        self.owner_path = owner_path
+        self.parent_directory = parent_directory
 
         # self._path can have any extension, including no extension.
         # However, the File object also contains information
@@ -83,12 +83,13 @@ class File:
     @property
     def path(self):
         if self._path is None:
-            cached_path = os.path.join(self.owner_path, self.name)
-            if os.path.exists(cached_path):
-                self.path = cached_path
-                return cached_path
+            expected_path = os.path.join(self.parent_directory, self.name)
+            if os.path.exists(expected_path):
+                self.path = expected_path
+                return expected_path
             else:
                 self.download()
+
         elif not os.path.exists(self._path):
             self.download()
 
@@ -100,7 +101,7 @@ class File:
 
     @classmethod
     def from_dict(
-        cls, file: Dict[str, Any], owner_path: Optional[str] = None
+        cls, file: Dict[str, Any], parent_directory: Optional[str] = None
     ) -> "File":
         """
         Factory method for creating a File class object
@@ -109,14 +110,14 @@ class File:
 
         :param file: a dictionary which contains an information about
             the file (as returned by NeuralMagic API)
-        :param owner_path: path of the parent Directory
+        :param parent_directory: path of the parent Directory
         :return: File class object
         """
         name = file.get("display_name")
         path = file.get("path")
         url = file.get("url")
 
-        return cls(name=name, path=path, url=url, owner_path=owner_path)
+        return cls(name=name, path=path, url=url, parent_directory=parent_directory)
 
     def download(
         self,
@@ -135,8 +136,8 @@ class File:
         :type retry_sleep_sec: How long to wait between `retry` attempts
         """
         if destination_path is None:
-            if self.owner_path is not None:
-                destination_path = self.owner_path
+            if self.parent_directory is not None:
+                destination_path = self.parent_directory
             else:
                 raise ValueError(
                     "Failed to recognize a valid download path. "

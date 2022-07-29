@@ -362,7 +362,7 @@ class Model(Directory):
         # directory is a tar file
         if self._is_file_tar(file):
             directory = directory_class(
-                files=[], name=name, path=path, url=url, owner_path=self._path
+                files=[], name=name, path=path, url=url, parent_directory=self._path
             )
             return directory
 
@@ -382,7 +382,7 @@ class Model(Directory):
                 name=name,
                 path=path,
                 url=url,
-                owner_path=self._path,
+                parent_directory=self._path,
             )
             return directory
 
@@ -420,7 +420,7 @@ class Model(Directory):
             )
             return None
         else:
-            file = File.from_dict(file, owner_path=self._path)
+            file = File.from_dict(file, parent_directory=self._path)
 
             return file
 
@@ -475,7 +475,7 @@ class Model(Directory):
                 files=files,
                 directory_class=directory_class,
                 display_name=display_name,
-                owner_path=self._path,
+                parent_directory=self._path,
             )
         else:
             directory = None
@@ -574,7 +574,7 @@ class Model(Directory):
 
     @staticmethod
     def _get_directory_from_loose_api_files(
-        files, directory_class, display_name, owner_path
+        files, directory_class, display_name, parent_directory
     ):
         # fetch all the loose files that belong to the directory (use `file_type` key
         # from the `request_json` for proper mapping)
@@ -604,7 +604,9 @@ class Model(Directory):
             return None
         else:
             files = [
-                File.from_dict(file, owner_path=os.path.join(owner_path, display_name))
+                File.from_dict(
+                    file, parent_directory=os.path.join(parent_directory, display_name)
+                )
                 for file in files
             ]
             directory = directory_class(
@@ -612,7 +614,7 @@ class Model(Directory):
                 name=display_name,
                 path=None,
                 url=None,
-                owner_path=owner_path,
+                parent_directory=parent_directory,
             )
             return directory
 

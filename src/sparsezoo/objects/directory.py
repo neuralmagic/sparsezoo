@@ -38,7 +38,7 @@ class Directory(File):
     :param name: name of the Directory
     :param path: path of the Directory
     :param url: url of the Directory
-    :param owner_path: path of the parent Directory
+    :param parent_directory: path of the parent Directory
     """
 
     def __init__(
@@ -47,7 +47,7 @@ class Directory(File):
         files: Optional[List[Union[File, List[File], Dict[str, File]]]] = None,
         path: Optional[str] = None,
         url: Optional[str] = None,
-        owner_path: Optional[str] = None,
+        parent_directory: Optional[str] = None,
     ):
 
         self.files = (
@@ -56,7 +56,9 @@ class Directory(File):
         extension = name.split(".")[-2:]
         self._is_archive = (extension == ["tar", "gz"]) and (not self.files)
 
-        super().__init__(name=name, path=path, url=url, owner_path=owner_path)
+        super().__init__(
+            name=name, path=path, url=url, parent_directory=parent_directory
+        )
 
         if self._unpack():
             self.unzip()
@@ -153,8 +155,8 @@ class Directory(File):
         :type retry_sleep_sec: How long to wait between `retry` attempts
         """
         if destination_path is None:
-            if self.owner_path is not None:
-                destination_path = self.owner_path
+            if self.parent_directory is not None:
+                destination_path = self.parent_directory
             else:
                 raise ValueError(
                     "Failed to recognize a valid download path. "
