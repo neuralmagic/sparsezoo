@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 from typing import Dict, List, Optional, Union
 
 import numpy
 import onnx
 import yaml
-import copy
 from onnx import NodeProto
 from pydantic import BaseModel, Field
 
@@ -57,6 +57,7 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
+
 
 class NodeAnalysis(BaseModel):
     """
@@ -151,7 +152,9 @@ class NodeAnalysis(BaseModel):
         node_weight = get_node_weight(model_graph, node)
         node_bias = get_node_bias(model_graph, node)
         node_bias_size = node_bias.size if node_bias is not None else 0
-        param_dtypes = [str(param.dtype) for param in [node_weight, node_bias] if param is not None]
+        param_dtypes = [
+            str(param.dtype) for param in [node_weight, node_bias] if param is not None
+        ]
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_graph, node
         )
@@ -217,7 +220,11 @@ class NodeAnalysis(BaseModel):
         operation_dtypes = copy.deepcopy(param_dtypes)
         first_output = next(iter(outputs), None)
         other_op_dtype = first_output.dtype if first_output is not None else "unknown"
-        if true_ops_dict["other"]["num_dense_ops"] + true_ops_dict["other"]["num_sparse_ops"] != 0:
+        if (
+            true_ops_dict["other"]["num_dense_ops"]
+            + true_ops_dict["other"]["num_sparse_ops"]
+            != 0
+        ):
             operation_dtypes.append(other_op_dtype)
 
         operation_summary = OperationSummary(
@@ -301,7 +308,9 @@ class NodeAnalysis(BaseModel):
                         dense=true_ops_dict["weight"]["num_dense_ops"] // 2,
                         sparse=true_ops_dict["weight"]["num_sparse_ops"] // 2,
                     )
-                } if node_weight is not None else {},
+                }
+                if node_weight is not None
+                else {},
             ),
         )
 
@@ -330,7 +339,9 @@ class NodeAnalysis(BaseModel):
                                 zero=num_sparse_parameters,
                                 non_zero=num_parameters - num_sparse_parameters,
                             )
-                        } if node_weight is not None else {},
+                        }
+                        if node_weight is not None
+                        else {},
                     ),
                     dtype=str(node_weight.dtype),
                 )
@@ -359,7 +370,9 @@ class NodeAnalysis(BaseModel):
                                 zero=node_bias_size - numpy.count_nonzero(node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             )
-                        } if node_bias is not None else {},
+                        }
+                        if node_bias is not None
+                        else {},
                     ),
                     dtype=str(node_bias.dtype),
                 )
@@ -407,7 +420,7 @@ class ModelAnalysis(BaseModel):
     )
 
     nodes: List[NodeAnalysis] = Field(
-        description="List of analyses for each layer in the model graph", default=[]
+        description="List of analyses for each node in the model graph", default=[]
     )
 
     @classmethod
@@ -521,9 +534,15 @@ class ModelAnalysis(BaseModel):
         all_ops_operation_dtypes = []
         all_macs_operation_dtypes = []
         for node_analysis in node_analyses:
-            all_parameter_dtypes.extend(node_analysis.parameter_summary.precision.keys())
-            all_ops_operation_dtypes.extend(node_analysis.operation_summary.ops.precision.keys())
-            all_macs_operation_dtypes.extend(node_analysis.operation_summary.macs.precision.keys())
+            all_parameter_dtypes.extend(
+                node_analysis.parameter_summary.precision.keys()
+            )
+            all_ops_operation_dtypes.extend(
+                node_analysis.operation_summary.ops.precision.keys()
+            )
+            all_macs_operation_dtypes.extend(
+                node_analysis.operation_summary.macs.precision.keys()
+            )
         all_ops_operation_dtypes = set(all_ops_operation_dtypes)
         all_macs_operation_dtypes = set(all_macs_operation_dtypes)
         all_parameter_dtypes = set(all_parameter_dtypes)
