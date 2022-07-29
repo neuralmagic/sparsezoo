@@ -23,7 +23,8 @@ from typing import List, Optional
 
 import onnx
 
-from sparsezoo.objects import Directory, File
+from sparsezoo.objects.directory import Directory
+from sparsezoo.objects.file import File
 from sparsezoo.utils import load_numpy_list
 
 
