@@ -25,7 +25,7 @@ import onnx
 
 from sparsezoo.objects.directory import Directory
 from sparsezoo.objects.file import File
-from sparsezoo.utils import load_numpy_list
+from sparsezoo.utils import DataLoader, Dataset, load_numpy_list
 
 
 __all__ = ["NumpyDirectory", "SelectDirectory"]
@@ -96,6 +96,36 @@ class NumpyDirectory(Directory):
         for file in self.files:
             for numpy_dict in load_numpy_list(file.path):
                 yield numpy_dict
+
+    def dataset(self) -> Dataset:
+        """
+        A dataset for interacting with the sample data.
+        If the data is not found on the local disk, will automatically download.
+
+        :return: The created dataset from the sample data files
+        """
+        return Dataset(self.name, self.path)
+
+    def loader(
+        self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
+    ) -> DataLoader:
+        """
+        A dataloader for interfacing with the sample data in a batched format.
+
+        :param batch_size: the size of the batches to create the loader for
+        :param iter_steps: the number of steps (batches) to create.
+            Set to -1 for infinite, 0 for running through the loaded data once,
+            or a positive integer for the desired number of steps
+        :param batch_as_list: True to return multiple inputs/outputs/etc
+            within the dataset as lists, False for an ordereddict
+        :return: The created dataloader from the sample data files
+        """
+        return DataLoader(
+            self.dataset(),
+            batch_size=batch_size,
+            iter_steps=iter_steps,
+            batch_as_list=batch_as_list,
+        )
 
     def _validate_model(self, model: onnx.ModelProto) -> bool:
         file_name = self.name.split(".")[:-2] if self.is_archive else self.name
