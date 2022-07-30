@@ -34,6 +34,7 @@ from sparsezoo.objects import (
     SelectDirectory,
     is_directory,
 )
+from sparsezoo.utils import DataLoader
 from sparsezoo.validation import IntegrationValidator
 
 
@@ -345,6 +346,53 @@ class Model(Directory):
         path = directory
         url = None
         return files, path, url
+
+    def data_loader(
+        self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
+    ) -> DataLoader:
+        """
+        Create a  data loader containing all of the available data for this model
+        :param batch_size: the size of batches to create for the iterator
+        :param iter_steps: the number of steps (batches) to create.
+            Set to -1 for infinite, 0 for running through the loaded data once,
+            or a positive integer for the desired number of steps
+        :param batch_as_list: True to create the items from each dataset
+            as a list, False for an ordereddict
+        :return: The created data loader
+        """
+        datasets = []
+
+        if self.sample_inputs is not None:
+            datasets.append(self.sample_inputs.dataset())
+        if self.sample_outputs:
+            datasets.append(next(val for val in self.sample_outputs.values()).dataset())
+
+        if len(datasets) < 1:
+            raise FileNotFoundError(
+                "no datasets available for this model to create a loader from"
+            )
+
+        return DataLoader(
+            *datasets,
+            batch_size=batch_size,
+            iter_steps=iter_steps,
+            batch_as_list=batch_as_list,
+        )
+
+    def sample_batch(
+        self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]:
+        """
+        Get a sample batch of data from the data loader
+        :param batch_index: the index of the batch to get
+        :param batch_size: the size of the batches to create the loader for
+        :param batch_as_list: True to return multiple inputs/outputs/etc
+            within the dataset as lists, False for an ordereddict
+        :return: The sample batch for use with the model
+        """
+        loader = self.data_loader(batch_size=batch_size, batch_as_list=batch_as_list)
+
+        return loader.get_batch(bath_index=batch_index)
 
     def _get_directory(
         self,

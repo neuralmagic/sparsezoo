@@ -19,8 +19,9 @@ Class objects for standardization and validation of a model folder structure
 
 import logging
 from collections import OrderedDict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
+import numpy
 import onnx
 
 from sparsezoo.objects.directory import Directory
@@ -126,6 +127,21 @@ class NumpyDirectory(Directory):
             iter_steps=iter_steps,
             batch_as_list=batch_as_list,
         )
+
+    def sample_batch(
+        self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
+    ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]:
+        """
+        Get a sample batch of data from the data loader
+        :param batch_index: the index of the batch to get
+        :param batch_size: the size of the batches to create the loader for
+        :param batch_as_list: True to return multiple inputs/outputs/etc
+            within the dataset as lists, False for an ordereddict
+        :return: The sample batch for use with the model
+        """
+        loader = self.loader(batch_size=batch_size, batch_as_list=batch_as_list)
+
+        return loader.get_batch(bath_index=batch_index)
 
     def _validate_model(self, model: onnx.ModelProto) -> bool:
         file_name = self.name.split(".")[:-2] if self.is_archive else self.name
