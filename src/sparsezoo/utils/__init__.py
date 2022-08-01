@@ -12,13 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Utils for working with the sparsezoo
-"""
-
 # flake8: noqa
 
+import os
+
+
+BASE_API_URL = (
+    os.getenv("SPARSEZOO_API_URL")
+    if os.getenv("SPARSEZOO_API_URL")
+    else "https://api.neuralmagic.com"
+)
+MODELS_API_URL = f"{BASE_API_URL}/models"
+LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
+
+from .authentication import *
 from .data import *
-from .downloader import *
+from .download import *
 from .helpers import *
 from .numpy import *
+from .requests import *
