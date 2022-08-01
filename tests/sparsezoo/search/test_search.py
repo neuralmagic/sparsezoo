@@ -20,7 +20,7 @@ from sparsezoo import search_models
 @pytest.mark.parametrize(
     "search_args",
     [
-        ({"domain": "nlp", "sub_domain": "question_answering"}),
+        ({"domain": "nlp", "sub_domain": "text_classification"}),
         (
             {
                 "domain": "cv",
