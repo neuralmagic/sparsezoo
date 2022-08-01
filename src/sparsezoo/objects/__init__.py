@@ -17,6 +17,3 @@ from .directory import *
 
 # flake8: noqa
 from .file import *
-
-
-__all__ = file.__all__ + directory.__all__ + directories.__all__

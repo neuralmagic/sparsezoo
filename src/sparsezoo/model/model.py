@@ -313,10 +313,7 @@ class Model(Directory):
         raise NotImplementedError()
 
     def __repr__(self):
-        if self.source.startswith(ZOO_STUB_PREFIX):
-            return f"{self.__class__.__name__}(stub={self.source})"
-        else:
-            return f"{self.__class__.__name__}(directory={self.source})"
+        return str(self)
 
     def __str__(self):
         if self.source.startswith(ZOO_STUB_PREFIX):
@@ -362,7 +359,7 @@ class Model(Directory):
 
         if self.sample_inputs is not None:
             datasets.append(self.sample_inputs.dataset())
-        if self.sample_outputs:
+        if self.sample_outputs is not None:
             datasets.append(next(val for val in self.sample_outputs.values()).dataset())
 
         if len(datasets) < 1:

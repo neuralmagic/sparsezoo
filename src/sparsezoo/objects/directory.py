@@ -111,7 +111,7 @@ class Directory(File):
         else:
             return [file.name for file in self.files]
 
-    def validate(self, strict_mode: bool = True):
+    def validate(self, strict_mode: bool = True) -> bool:
         """
         Validates the structure of directory.
 
