@@ -218,9 +218,7 @@ class Model(Directory):
             iterator = self.inference_runner.engine_type_to_iterator.get(engine_type)
             save_outputs_to_tar(self.sample_inputs, iterator, engine_type)
 
-        for output in self.inference_runner.generate_outputs(
-            engine_type=engine_type, save_to_tar=save_to_tar
-        ):
+        for output in self.inference_runner.generate_outputs(engine_type=engine_type):
             yield output
 
     def download(
