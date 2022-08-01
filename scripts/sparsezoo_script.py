@@ -139,7 +139,7 @@ optional arguments:
                         the max release version of the model in semantic
                         version format
   --save-dir SAVE_DIR   The directory to save the model files in, defaults to
-                        the cache directory of the sparsezoo
+                        the cwd with the model description as a sub folder
 
 
 ##########
@@ -156,13 +156,13 @@ python3 scripts/sparsezoo.py search --domain cv --sub-domain classification \
 #########
 Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
-    --sub-architecture 1.0 --framework pytorch --repo sparseml --dataset imagenet \
+    --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --sparse-name base --sparse-category none
 
 #########
 Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
-    --sub-architecture 1.0 --framework pytorch --repo sparseml --dataset imagenet \
+    --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
     --sparse-name base --sparse-category none --release-version 0.1.0
 
 

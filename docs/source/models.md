@@ -37,26 +37,19 @@ The properties within each model stub are defined as the following:
 | SPARSE_TARGET    | (optional) Descriptor for the target environment the model was sparsified for                  | disk, edge, deepsparse, gpu                                                        |
 
 The contents of each model are made up of the following:
- 
-- `training`: The directory containing checkpoints. Every checkpoint contains a set of files required to load 
-   a model in the specific state (e.g. directly after pruning). The checkpoint stores the trained model in the 
-   native ML framework in which it was originally trained such as PyTorch, Keras, Tensorflow V1.
-- `deployment`: The directory containing all the files necessary for the deployment of the model within an inference
-   pipeline. 
-- `logs`: The directory containing the artifacts generated during the training flow that helps to track the 
-   reproducibility and audibility. Optional directory.
-- `model.onnx`: The [ONNX](https://onnx.ai/) representation of the model's graph.
-- `onnx`: The directory to store different opset representations of the `model.onnx`. Optional directory.
+
 - `model.md`: The model card containing metadata, descriptions, and information for the model.
-- `benchmarks.yaml`: The information about the performance of the `model.onnx` on given hardware systems. Optional file.
-- `metrics.yaml`: Reporting metrics such as accuracy for the model on the given datasets such as validation and training. Optional file.
-- `recipes`: The directory containing the recipes - the original sparsification recipe (`recipe_original.md`) 
-   or others(e.g. transfer learning recipe).
+- `model.onnx`: The [ONNX](https://onnx.ai/) representation of the model's graph.
+- `model.onnx.tar.gz`: A compressed format for the ONNX file. 
+    Currently, ONNX does not support sparse tensors and quantized sparse tensors well for compression.
+- `[FRAMEWORK]/model.[EXTENSION]`: The native ML framework file(s) for the model in which it was originally trained.
+    Such as PyTorch, Keras, TensorFlow V1
+- `recipes/original.[md|yaml]`: The original sparsification recipe used to create the model.
+- `recipes/[NAME].[md|yaml]`: Additional sparsification recipes that can be used with the model such as transfer learning.
 - `sample-originals`: The original sample data without any pre-processing for use with the model.
 - `sample-inputs`: The sample data after pre-processing for use with the model.
 - `sample-outputs`: The outputs after running the sample inputs through the model.
 - `sample-labels`: The labels that classify the sample inputs.
-- `sample_originals`: The unedited data that can be used as inputs to a training pipeline (images, text files, numpy arrays, etc).
 
 ### Image Classification
 
