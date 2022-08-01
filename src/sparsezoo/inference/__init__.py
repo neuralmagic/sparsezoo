@@ -15,6 +15,3 @@
 # flake8: noqa
 
 from .inference_runner import *
-
-
-__all__ = inference_runner.__all__

@@ -31,12 +31,3 @@ from .download import *
 from .helpers import *
 from .numpy import *
 from .requests import *
-
-
-__all__ = (
-    helpers.__all__
-    + authentication.__all__
-    + download.__all__
-    + numpy.__all__
-    + requests.__all__
-)
