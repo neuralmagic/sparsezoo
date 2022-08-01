@@ -69,7 +69,7 @@ EXPECTED_YOLO_FILES = {
             EXPECTED_IC_FILES,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
             EXPECTED_NLP_FILES,
         ),
         (
@@ -96,7 +96,7 @@ def test_restructure_request_json(stub, expected_files):
 @pytest.mark.parametrize(
     "stub",
     [
-        "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95"  # noqa E501
+        "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni"  # noqa E501
     ],
 )
 class TestSetupModel:

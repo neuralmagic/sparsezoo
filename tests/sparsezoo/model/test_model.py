@@ -115,13 +115,8 @@ class TestSetupModel:
             files_ic,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
+            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
             False,
-            files_nlp,
-        ),
-        (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-aggressive_95",  # noqa E501
-            True,
             files_nlp,
         ),
         (
@@ -165,8 +160,7 @@ class TestModel:
     def test_generate_outputs(self, setup):
         model, clone_sample_outputs, _, _ = setup
         if clone_sample_outputs:
-            for engine in ["onnxruntime", "deepsparse"]:
-                self._test_generate_outputs_single_engine(engine, model)
+            self._test_generate_outputs_single_engine("onnxruntime", model)
 
     @staticmethod
     def _add_mock_files(directory_path: str, clone_sample_outputs: bool):
