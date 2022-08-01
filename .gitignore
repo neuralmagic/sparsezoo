@@ -763,3 +763,9 @@ MigrationBackup/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,python,react,pycharm,emacs,vim,visualstudio,visualstudiocode
 .idea/
+
+# vscode debugger 
+.vscode
+
+# ignore all files with name name scratch
+**/[Ss]cratch*

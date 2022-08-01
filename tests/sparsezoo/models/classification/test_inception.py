@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from datetime import datetime
+
 import pytest
 
 from sparsezoo.models.classification import inception_v3
@@ -40,13 +43,14 @@ def test_inception_v3(
     sparse_target,
 ):
     model_constructor(
-        inception_v3,
-        download,
-        framework,
-        repo,
-        dataset,
-        training_scheme,
-        sparse_name,
-        sparse_category,
-        sparse_target,
+        constructor_function=inception_v3,
+        download=download,
+        framework=framework,
+        repo=repo,
+        dataset=dataset,
+        training_scheme=training_scheme,
+        sparse_name=sparse_name,
+        sparse_category=sparse_category,
+        sparse_target=sparse_target,
+        test_name=os.path.join(os.path.basename(__file__), str(datetime.now())),
     )

@@ -23,11 +23,17 @@ from sparsezoo.objects import Model
 from sparsezoo.utils import CACHE_DIR
 
 
-def download_and_verify(model: str, other_args: Optional[Dict] = None):
+def download_and_verify(
+    model: str, test_name: str = "", other_args: Optional[Dict] = None
+):
     if other_args is None:
         other_args = {
-            "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+            "override_parent_path": os.path.join(CACHE_DIR, "test_download", test_name),
         }
+    else:
+        other_args["override_parent_path"] = os.path.join(
+            "test_download", test_name, other_args["override_parent_path"]
+        )
     model = Zoo.load_model_from_stub(model, **other_args)
     model.download(overwrite=True)
     validate_downloaded_model(model, check_other_args=other_args)
@@ -44,9 +50,12 @@ def model_constructor(
     sparse_name: str,
     sparse_category: str,
     sparse_target: Optional[str],
+    test_name: str = "",
 ):
     other_args = {
-        "override_parent_path": os.path.join(CACHE_DIR, "test_download"),
+        "override_parent_path": os.path.join(
+            CACHE_DIR, "test_download", str(test_name)
+        ),
     }
 
     if framework is None:
