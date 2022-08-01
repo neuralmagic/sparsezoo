@@ -306,6 +306,10 @@ class File:
 
     def _validate_yaml(self, strict_mode):
         try:
+            with open(self._path) as yaml_str:
+                if re.search(r"- !.+Modifier", yaml_str.read()):
+                    # YAML file contains modifier definitions, skip further validation
+                    return
             with open(self._path) as file:
                 yaml.load(file, Loader=yaml.FullLoader)
         except Exception as error:  # noqa: F841

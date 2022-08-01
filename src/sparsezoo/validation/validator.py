@@ -206,10 +206,12 @@ class IntegrationValidator:
         file_names = {file.name for file in loose_files}
         for optional_file in optional_validation_files:
             file_names.discard(optional_file)
-        if validation_files != file_names:
+
+        missing_validation_files = validation_files - file_names
+        if missing_validation_files:
             raise ValueError(
                 "Failed to find expected files "
-                f"{validation_files.difference(file_names)} "
+                f"{missing_validation_files} "
                 f"in the `{directory.name}` directory."
             )
 
