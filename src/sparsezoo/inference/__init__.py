@@ -14,19 +14,7 @@
 
 # flake8: noqa
 
-from .inference import *
-from .model import *
-from .objects import *
-from .search import *
-from .utils import *
-from .validation import *
+from .inference_runner import *
 
 
-__all__ = (
-    inference.__all__
-    + objects.__all__
-    + utils.__all__
-    + validation.__all__
-    + model.__all__
-    + search.__all__
-)
+__all__ = inference_runner.__all__

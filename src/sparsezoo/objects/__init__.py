@@ -12,20 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Object classes related to the sparsezoo
-"""
+from .directories import *
+from .directory import *
 
 # flake8: noqa
-
-from .base import *
-from .data import *
-from .downloadable import *
 from .file import *
-from .metadata import *
-from .model import *
-from .recipe import *
-from .release_version import *
-from .result import *
-from .tag import *
-from .user import *
+
+
+__all__ = file.__all__ + directory.__all__ + directories.__all__

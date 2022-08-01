@@ -53,7 +53,7 @@ _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
 _dev_deps = [
     "beautifulsoup4==4.9.3",
-    "black>=20.8b1",
+    "black==21.5b2",
     "flake8>=3.8.3",
     "flaky>=3.7.0",
     "isort>=5.7.0",

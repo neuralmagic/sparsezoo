@@ -19,7 +19,7 @@ from typing import Optional
 
 import requests
 
-from sparsezoo.requests import LATEST_PACKAGE_VERSION_URL
+from sparsezoo.utils import LATEST_PACKAGE_VERSION_URL
 
 
 LOGGER = logging.getLogger(__name__)
