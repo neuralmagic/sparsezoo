@@ -15,19 +15,14 @@
 Helper class for running inference using
 the selected engine and input/output files
 """
-from __future__ import annotations  # noqa F407
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Generator, List
+from typing import Generator, List
 
 import numpy
 import onnx
 
 import onnxruntime as ort
-
-
-if TYPE_CHECKING:
-    from sparsezoo.objects import File, NumpyDirectory
 
 
 __all__ = ["InferenceRunner", "ENGINES"]
@@ -51,9 +46,9 @@ class InferenceRunner:
 
     def __init__(
         self,
-        sample_inputs: NumpyDirectory,
-        sample_outputs: NumpyDirectory,
-        onnx_file: File,
+        sample_inputs: "NumpyDirectory",  # noqa F821
+        sample_outputs: "NumpyDirectory",  # noqa F821
+        onnx_file: "File",  # noqa F821
         supported_engines: List[str] = ENGINES,
     ):
         self.sample_inputs = sample_inputs
@@ -67,7 +62,7 @@ class InferenceRunner:
         }
 
     def generate_outputs(
-        self, engine_type: str, save_to_tar: bool
+        self, engine_type: str
     ) -> Generator[List[numpy.ndarray], None, None]:
         """
         Chooses the appropriate engine type to load the onnx model
@@ -78,12 +73,6 @@ class InferenceRunner:
         `sample_inputs`, given the inference engine.
 
         :params engine_type: name of the inference engine
-        :params save_to_tar: boolean flag; if True, the output generated
-            by the engine from `sample_inputs` directory will be saved to
-            the archive file `sample_outputs_{engine_type}.tar.gz
-            (located in the same folder as `sample_inputs`).
-            If False, the function will yield model outputs in the
-            iterative fashion (one per input)
         :returns Sequentially return a tuple of list
             containing numpy arrays, representing the output
             from the inference engine
@@ -152,7 +141,9 @@ class InferenceRunner:
             output = ort_sess.run(None, model_input)
             yield output
 
-    def _check_and_fetch_outputs(self, engine_name: str) -> NumpyDirectory:
+    def _check_and_fetch_outputs(
+        self, engine_name: str
+    ) -> "NumpyDirectory":  # noqa F821
         sample_outputs = self.sample_outputs.get(engine_name)
         if sample_outputs is None:
             raise KeyError(

@@ -16,10 +16,8 @@
 Validator class that checks, whether the contents of ModelDirectory
 class objects are valid
 """
-from __future__ import annotations  # noqa F407
-
 import os
-from typing import TYPE_CHECKING, Callable, Dict, Optional, Set, Tuple, Union
+from typing import Callable, Dict, Optional, Set, Tuple, Union
 
 from sparsezoo.objects import Directory, File
 from sparsezoo.validation import (
@@ -28,10 +26,6 @@ from sparsezoo.validation import (
     validate_cv_segmentation,
     validate_nlp,
 )
-
-
-if TYPE_CHECKING:
-    from sparsezoo import Model
 
 
 __all__ = ["IntegrationValidator"]
@@ -63,7 +57,7 @@ class IntegrationValidator:
 
     def __init__(
         self,
-        model: Model,
+        model: "Model",  # noqa F821
         required_files: Set[str] = REQUIRED_FILES,
         integration_to_data: Dict[str, Callable] = INTEGRATION_NAME_TO_DATA,
     ):
