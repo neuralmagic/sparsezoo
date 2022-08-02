@@ -102,6 +102,8 @@ class IntegrationValidator:
             deployment_files_validation,
         ) = self.integration_to_data[integration_name]()
         for file in self.model.files:
+            if file is None:
+                continue
             # checker for dict-type file
             if isinstance(file, dict):
                 validations[file.__repr__()] = all(
@@ -148,7 +150,7 @@ class IntegrationValidator:
         """
         if self.minimal_validation:
             for file in self.model.files:
-                if isinstance(file, list) or isinstance(file, dict):
+                if isinstance(file, list) or isinstance(file, dict) or (file is None):
                     continue
                 else:
                     self.required_files.discard(file.name)
