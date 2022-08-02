@@ -86,37 +86,28 @@ pip install sparsezoo
 ### Python APIs
 
 The Python APIs respect this format enabling you to search and download models. Some code examples are given below.
+The [SparseZoo UI](https://sparsezoo.neuralmagic.com/) also enables users to load models by copying
+a stub directly from a model page.
+
+
+#### Loading from a Stub
+
+```python
+from sparsezoo import Model
+
+# copied from https://sparsezoo.neuralmagic.com/
+stub = "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned90_quant-none"
+model = Model(stub)
+print(model)
+```
 
 #### Searching the Zoo
 
 ```python
-from sparsezoo import Zoo
+from sparsezoo import search_models
 
-models = Zoo.search_models(domain="cv", sub_domain="classification")
+models = search_models(domain="cv", sub_domain="classification", architecture="mobilenet_v1")
 print(models)
-```
-
-#### Common Models
-
-```python
-from sparsezoo.models.classification import resnet_50
-
-model = resnet_50()
-model.download()
-
-print(model.onnx_file.downloaded_path())
-```
-
-#### Searching Optimized Versions
-
-```python
-from sparsezoo import Zoo
-from sparsezoo.models.classification import resnet_50
-
-search_model = resnet_50()
-sparse_models = Zoo.search_sparse_models(search_model)
-
-print(sparse_models)
 ```
 
 ### Environmental Variables
@@ -158,10 +149,10 @@ Search command help
 sparsezoo search -h
 ```
 
-<br>Searching for all classification models in the computer vision domain
+<br>Searching for all classification MobileNetV1 models in the computer vision domain
 
 ```shell script
-sparsezoo search --domain cv --sub-domain classification
+sparsezoo search --domain cv --sub-domain classification --architecture mobilenet_v1
 ```
 
 <br>Searching for all ResNet-50 models
