@@ -22,8 +22,6 @@ from typing import Generator, List
 import numpy
 import onnx
 
-import onnxruntime as ort
-
 
 __all__ = ["InferenceRunner", "ENGINES"]
 
@@ -113,8 +111,10 @@ class InferenceRunner:
     def _run_with_deepsparse(self):
         try:
             import deepsparse  # noqa F401
-        except ModuleNotFoundError as e:  # noqa F841
-            raise e
+        except ModuleNotFoundError as err:  # noqa F841
+            raise RuntimeError(
+                f"deepsparse install not detected for sample inference: {err}"
+            )
 
         from deepsparse import compile_model
 
@@ -126,8 +126,14 @@ class InferenceRunner:
             yield output
 
     def _run_with_onnx_runtime(self):
+        try:
+            import onnxruntime  # noqa F401
+        except ModuleNotFoundError as err:  # noqa F841
+            raise RuntimeError(
+                f"onnxruntime install not detected for sample inference: {err}"
+            )
 
-        ort_sess = ort.InferenceSession(self.onnx_file.path)
+        ort_sess = onnxruntime.InferenceSession(self.onnx_file.path)
         model = onnx.load(self.onnx_file.path)
         input_names = [inp.name for inp in model.graph.input]
 
