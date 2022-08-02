@@ -52,10 +52,10 @@ The contents of each model are made up of the following:
 - `metrics.yaml`: Reporting metrics such as accuracy for the model on the given datasets such as validation and training. Optional file.
 - `recipes`: The directory containing the recipes - the original sparsification recipe (`recipe_original.md`) 
    or others(e.g. transfer learning recipe).
-- `sample-originals`: The original sample data without any pre-processing for use with the model.
-- `sample-inputs`: The sample data after pre-processing for use with the model.
-- `sample-outputs`: The outputs after running the sample inputs through the model.
-- `sample-labels`: The labels that classify the sample inputs.
+- `sample_originals`: The original sample data without any pre-processing for use with the model.
+- `sample_inputs`: The sample data after pre-processing for use with the model.
+- `sample_outputs`: The outputs after running the sample inputs through the model.
+- `sample_labels`: The labels that classify the sample inputs.
 - `sample_originals`: The unedited data that can be used as inputs to a training pipeline (images, text files, numpy arrays, etc).
 
 ### Image Classification
