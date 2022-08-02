@@ -106,7 +106,11 @@ print(model)
 ```python
 from sparsezoo import search_models
 
-models = search_models(domain="cv", sub_domain="classification", architecture="mobilenet_v1")
+models = search_models(
+    domain="cv",
+    sub_domain="classification",
+    return_stubs=True,
+)
 print(models)
 ```
 
