@@ -38,6 +38,7 @@ def search_models(
     page: int = 1,
     page_length: int = 20,
     force_token_refresh: bool = False,
+    return_stubs: bool = False,
 ) -> List[Model]:
     """
     Obtains a list of Models matching the search parameters
@@ -72,6 +73,8 @@ def search_models(
     :param override_parent_path: Path to override the default save path
         for where to save the parent folder for this file under
     :param force_token_refresh: True to refresh the auth token, False otherwise
+    :param return_stubs: if True, found models will be returned as stubs only
+        instead of retrieving full info for each found model. Default False
     :return: The requested list of Model instances
     """
     args = {
@@ -99,10 +102,12 @@ def search_models(
         force_token_refresh=force_token_refresh,
     )
 
-    return [
-        Model(model_args_to_stub(**model_dict))
-        for model_dict in response_json["models"]
-    ]
+    stubs = [model_args_to_stub(**model_dict) for model_dict in response_json["models"]]
+
+    if return_stubs:
+        return stubs
+
+    return [Model(stub) for stub in stubs]
 
 
 def model_args_to_stub(**kwargs) -> str:
