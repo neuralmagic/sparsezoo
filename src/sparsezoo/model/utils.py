@@ -32,7 +32,6 @@ __all__ = [
     "setup_model",
     "load_files_from_stub",
     "load_files_from_directory",
-    "generate_model_name",
     "ZOO_STUB_PREFIX",
     "CACHE_DIR",
 ]
@@ -172,14 +171,6 @@ def parse_zoo_stub(
         )
 
     return stub, params
-
-
-def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
-    """
-    Create simple randomized string that can temporarily serve as a hash name
-    for the model
-    """
-    return "".join(random.choices(chars, k=size))
 
 
 def save_outputs_to_tar(
