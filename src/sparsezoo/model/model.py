@@ -300,12 +300,8 @@ class Model(Directory):
                 )
                 return False
 
-        if self.model_card._path is None:
-            raise ValueError(
-                "Model card missing! Before running `validate()` "
-                "method, the respective files must be present locally. "
-                "The solution may be to call `download()` first."
-            )
+        if self.model_card is None:
+            raise ValueError("Model card missing in the model!")
 
         return self.integration_validator.validate(minimal_validation)
 
