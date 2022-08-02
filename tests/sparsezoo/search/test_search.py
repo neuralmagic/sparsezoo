@@ -37,5 +37,5 @@ from sparsezoo import search_models
     scope="function",
 )
 def test_search_models(search_args):
-    models = search_models(**search_args)
+    models = search_models(**search_args, return_stubs=True)
     assert len(models) > 0
