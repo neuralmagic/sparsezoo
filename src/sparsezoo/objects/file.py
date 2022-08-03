@@ -298,7 +298,6 @@ class File:
             )
 
     def _validate_img(self, strict_mode):
-
         if not imghdr.what(self.path):
             self._throw_error(
                 error_msg="Image file could not been loaded properly",
