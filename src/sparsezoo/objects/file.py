@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import imghdr
 import json
 import logging
 import os
@@ -23,7 +24,6 @@ from typing import Any, Dict, Optional
 import onnx
 import yaml
 
-from PIL import Image
 from sparsezoo.utils import download_file, load_numpy_list
 
 
@@ -298,7 +298,8 @@ class File:
             )
 
     def _validate_img(self, strict_mode):
-        if not Image.open(self.path):
+
+        if not imghdr.what(self.path):
             self._throw_error(
                 error_msg="Image file could not been loaded properly",
                 strict_mode=strict_mode,
