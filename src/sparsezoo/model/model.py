@@ -41,7 +41,7 @@ from sparsezoo.validation import IntegrationValidator
 __all__ = ["Model"]
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
-ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
+ALLOWED_RECIPE_VALUES = {"original", "transfer"}
 ALLOWED_DEPLOYMENT_VALUES = {"default"}
 
 PARAM_DICT = {
@@ -700,9 +700,9 @@ class Model(Directory):
                     f"String argument {key} not found in the "
                     f"expected set of string arguments {list(PARAM_DICT.keys())}!"
                 )
-            if PARAM_DICT[key] and value not in PARAM_DICT[key]:
+            if not any(expected_identifier in value for expected_identifier in PARAM_DICT[key]):
                 raise ValueError(
                     f"String argument {key} has value {value}, "
-                    "cannot be found in the "
-                    f"expected set of values {list(PARAM_DICT[key])}!"
+                    "that does not contain any of the "
+                    f"expected set of identifiers {list(PARAM_DICT[key])}!"
                 )
