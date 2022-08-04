@@ -146,7 +146,7 @@ class TestSetupModel:
 
     def test_setup_model_from_objects(self, setup):
         model, temp_dir, download_dir = setup
-        model.download(download_dir.name)
+        model.path = download_dir.name
         model.sample_inputs.unzip()
 
         training = model.training

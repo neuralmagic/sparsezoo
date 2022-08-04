@@ -68,7 +68,7 @@ class Model(Directory):
             e.g. `/home/user/model_path`
     """
 
-    def __init__(self, source: str):
+    def __init__(self, source: str, download_path: Optional[str] = None):
 
         self.source = source
         self._stub_params = {}
@@ -76,9 +76,17 @@ class Model(Directory):
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
             files, path, url = self.initialize_model_from_stub(self.source)
+            if download_path is not None:
+                path = download_path
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)
+            if download_path is not None:
+                raise ValueError(
+                    "Ambiguous input to the constructor. "
+                    "When attempting to create Model from a local directory path, "
+                    f"`download_path` argument should be None, not {download_path}!"
+                )
 
         self.path = path
 
@@ -223,43 +231,30 @@ class Model(Directory):
 
     def download(
         self,
-        directory_path: Optional[str] = None,
-        override: bool = False,
         strict_mode: bool = False,
     ) -> bool:
         """
         Attempt to download the files given the `url` attribute
         of the files inside the Model.
 
-        :param directory_path: directory to download files to. If not specified,
-            will use the `self._path` attribute.
-        :param override: if True, the method can override old `directory_path`
         :param strict_mode: if True, will throw error if any file, that is
             attempted to be downloaded, turns out to be `None`.
             By default, False.
         :return: boolean flag; was download successful or not.
         """
-        if directory_path is None:
-            directory_path = self._path
+        download_path = self._path
 
         # if directory exists and is not empty, make sure that
-        # downloading is not possible unless `override` is True
-        if (
-            os.path.isdir(directory_path)
-            and os.listdir(directory_path)
-            and not override
-        ):
+        # downloading is not possible
+        if os.path.isdir(download_path) and os.listdir(download_path):
             raise ValueError(
-                "Model class object was either created "
-                "using path that points to a local directory or "
-                "`download()` method already invoked."
-                "Set `override` = True to override."
+                "Attempting to download the model files to already existing directory!"
             )
         else:
             downloads = []
             for key, file in self._files_dictionary.items():
                 if file is not None:
-                    downloads.append(self._download(file, directory_path))
+                    downloads.append(self._download(file, download_path))
                 else:
                     if strict_mode:
                         raise ValueError(
@@ -271,7 +266,6 @@ class Model(Directory):
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
-        self.path = directory_path
         return all(downloads)
 
     def validate(
