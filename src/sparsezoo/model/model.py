@@ -243,7 +243,7 @@ class Model(Directory):
         Attempt to download the files given the `url` attribute
         of the files inside the Model. To avoid the risk of corrupting
         the files while downloading, they are firstly downloaded to
-        a temporary directory, validated and finally copied over to the
+        a temporary directory, validated, and finally copied over to the
         target path of the model.
 
         :param strict_mode: if True, will throw error if any file, that is
