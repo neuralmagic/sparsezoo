@@ -257,7 +257,8 @@ class Model(Directory):
         # downloading is not possible
         if os.path.isdir(download_path) and os.listdir(download_path):
             raise ValueError(
-                f"Attempting to download the model files to already existing directory {download_path}"
+                "Attempting to download the model files "
+                f"to already existing directory {download_path}"
             )
         else:
             downloads = []

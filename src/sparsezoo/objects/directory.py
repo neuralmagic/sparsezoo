@@ -266,7 +266,7 @@ class Directory(File):
         """
         files = []
         if extract_directory is None:
-            extract_directory = os.path.dirname(self.path)
+            extract_directory = os.path.dirname(self._path)
 
         if not self.is_archive:
             raise ValueError(
