@@ -77,7 +77,7 @@ class Model(Directory):
             # initializing the files and params from the stub
             files, path, url = self.initialize_model_from_stub(self.source)
             if download_path is not None:
-                path = download_path
+                path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)
@@ -85,7 +85,7 @@ class Model(Directory):
                 raise ValueError(
                     "Ambiguous input to the constructor. "
                     "When attempting to create Model from a local directory path, "
-                    f"`download_path` argument should be None, not {download_path}!"
+                    f"`download_path` argument should be None, not {download_path}"
                 )
 
         self.path = path
@@ -248,7 +248,7 @@ class Model(Directory):
         # downloading is not possible
         if os.path.isdir(download_path) and os.listdir(download_path):
             raise ValueError(
-                "Attempting to download the model files to already existing directory!"
+                f"Attempting to download the model files to already existing directory {download_path}"
             )
         else:
             downloads = []
