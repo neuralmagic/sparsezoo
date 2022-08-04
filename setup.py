@@ -41,7 +41,7 @@ _PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
 
 _deps = [
     "numpy>=1.0.0",
-    "onnx>=1.0.0,<=1.10.1",
+    "onnx>=1.5.0,<=1.12.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
@@ -129,6 +129,11 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",
