@@ -60,7 +60,7 @@ class File:
         # has a local path attached to it. Therefore,
         # either has been downloaded or can be
         # downloaded
-        self.path = path
+        self._path = path
         self.parent_directory = parent_directory
 
         # self._path can have any extension, including no extension.
@@ -85,7 +85,7 @@ class File:
         if self._path is None:
             expected_path = os.path.join(self.parent_directory, self.name)
             if os.path.exists(expected_path):
-                self.path = expected_path
+                self._path = expected_path
                 return expected_path
             else:
                 self.download()
@@ -94,10 +94,6 @@ class File:
             self.download()
 
         return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
 
     @classmethod
     def from_dict(
