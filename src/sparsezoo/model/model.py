@@ -388,8 +388,8 @@ class Model(Directory):
     @property
     def available_files(self):
         return {
-            name: file for
-            name, file in self._files_dictionary.items()
+            name: file
+            for name, file in self._files_dictionary.items()
             if file is not None
         }
 
