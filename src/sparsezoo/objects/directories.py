@@ -108,8 +108,6 @@ class NumpyDirectory(Directory):
 
         # sample_{...} or sample_{...}.tar.gz --> sample_{...}
         dataset_name = self.name.split(".")[0]
-        # sample_{...} --> {...} ("inputs" or "outputs")
-        dataset_name = dataset_name.split("_")[-1]
         return Dataset(dataset_name, self.path)
 
     def loader(
