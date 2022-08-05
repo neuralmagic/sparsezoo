@@ -116,11 +116,16 @@ def filter_files(
     """
     available_params = set(params.keys())
     files_filtered = []
+    num_recipe_file_dicts = 0
     for file_dict in files:
         if "recipe" in available_params and file_dict["file_type"] == "recipe":
-            value = params["recipe"]
-            if not file_dict["display_name"].startswith("recipe_" + value):
+            expected_recipe_name = params["recipe"]
+            if not file_dict["display_name"].startswith(
+                "recipe_" + expected_recipe_name
+            ):
                 continue
+            else:
+                num_recipe_file_dicts += 1
         if "checkpoint" in available_params and file_dict["file_type"] == "training":
             pass
 
@@ -131,6 +136,17 @@ def filter_files(
 
     if not files_filtered:
         raise ValueError("No files found - the list of files is empty!")
+
+    if num_recipe_file_dicts >= 2:
+        recipe_names = [
+            file_dict["display_name"]
+            for file_dict in files_filtered
+            if file_dict["file_type"] == "recipe"
+        ]
+        raise ValueError(
+            f"Found multiple recipes: {recipe_names}, "
+            f"for the string argument {expected_recipe_name}"
+        )
     else:
         return files_filtered
 
