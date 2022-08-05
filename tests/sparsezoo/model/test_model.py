@@ -59,7 +59,7 @@ files_yolo = copy.copy(files_ic)
         ),
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
-            ("recipe", "some_dummy_name"),
+            ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
