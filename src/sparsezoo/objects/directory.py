@@ -193,9 +193,9 @@ class Directory(File):
                 file.download(
                     destination_path=os.path.join(destination_path, self.name)
                 )
-                file.path = os.path.join(destination_path, self.name, file.name)
+                file._path = os.path.join(destination_path, self.name, file.name)
 
-        self.path = os.path.join(destination_path, self.name)
+        self._path = os.path.join(destination_path, self.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -266,7 +266,7 @@ class Directory(File):
         """
         files = []
         if extract_directory is None:
-            extract_directory = os.path.dirname(self.path)
+            extract_directory = os.path.dirname(self._path)
 
         if not self.is_archive:
             raise ValueError(
@@ -318,7 +318,7 @@ def is_directory(file: File) -> bool:
     if file._path is None:
         from pathlib import Path
 
-        # we are processing a downladable file
+        # we are processing a downloadable file
         file_name_without_extension = Path(file.name).stem
         return file_name_without_extension == file.name
 
