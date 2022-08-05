@@ -385,6 +385,14 @@ class Model(Directory):
 
         return loader.get_batch(bath_index=batch_index)
 
+    @property
+    def available_files(self):
+        return {
+            name: file
+            for name, file in self._files_dictionary.items()
+            if file is not None
+        }
+
     def _get_directory(
         self,
         file: Dict[str, Any],
