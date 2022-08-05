@@ -15,9 +15,7 @@
 import copy
 import logging
 import os
-import random
 import shutil
-import string
 import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -32,7 +30,6 @@ __all__ = [
     "setup_model",
     "load_files_from_stub",
     "load_files_from_directory",
-    "generate_model_name",
     "ZOO_STUB_PREFIX",
     "CACHE_DIR",
 ]
@@ -119,11 +116,16 @@ def filter_files(
     """
     available_params = set(params.keys())
     files_filtered = []
+    num_recipe_file_dicts = 0
     for file_dict in files:
         if "recipe" in available_params and file_dict["file_type"] == "recipe":
-            value = params["recipe"]
-            if not file_dict["display_name"].startswith("recipe_" + value):
+            expected_recipe_name = params["recipe"]
+            if not file_dict["display_name"].startswith(
+                "recipe_" + expected_recipe_name
+            ):
                 continue
+            else:
+                num_recipe_file_dicts += 1
         if "checkpoint" in available_params and file_dict["file_type"] == "training":
             pass
 
@@ -134,6 +136,17 @@ def filter_files(
 
     if not files_filtered:
         raise ValueError("No files found - the list of files is empty!")
+
+    if num_recipe_file_dicts >= 2:
+        recipe_names = [
+            file_dict["display_name"]
+            for file_dict in files_filtered
+            if file_dict["file_type"] == "recipe"
+        ]
+        raise ValueError(
+            f"Found multiple recipes: {recipe_names}, "
+            f"for the string argument {expected_recipe_name}"
+        )
     else:
         return files_filtered
 
@@ -172,14 +185,6 @@ def parse_zoo_stub(
         )
 
     return stub, params
-
-
-def generate_model_name(size=6, chars=string.ascii_uppercase + string.digits):
-    """
-    Create simple randomized string that can temporarily serve as a hash name
-    for the model
-    """
-    return "".join(random.choices(chars, k=size))
 
 
 def save_outputs_to_tar(

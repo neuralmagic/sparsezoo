@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import imghdr
 import json
 import logging
 import os
@@ -23,7 +24,6 @@ from typing import Any, Dict, Optional
 import onnx
 import yaml
 
-from PIL import Image
 from sparsezoo.utils import download_file, load_numpy_list
 
 
@@ -212,14 +212,14 @@ class File:
         return f"File(name={self.name})"
 
     def _validate_numpy(self, strict_mode):
-        if not load_numpy_list(self._path):
+        if not load_numpy_list(self.path):
             self._throw_error(
                 error_msg="Numpy file could not been loaded properly",
                 strict_mode=strict_mode,
             )
 
     def _validate_onnx(self, strict_mode):
-        if not onnx.load(self._path):
+        if not onnx.load(self.path):
             self._throw_error(
                 error_msg="Onnx file could not been loaded properly",
                 strict_mode=strict_mode,
@@ -241,7 +241,7 @@ class File:
 
     def _validate_model_card(self, strict_mode=True):
         try:
-            with open(self._path, "r") as yaml_file:
+            with open(self.path, "r") as yaml_file:
                 yaml_str = yaml_file.read()
 
             # extract YAML front matter from markdown recipe card
@@ -260,7 +260,7 @@ class File:
             return yaml_dict
 
         except Exception as error:  # noqa: F841
-            logging.error(error)
+            logging.debug(error)
 
     def _validate_markdown(self, strict_mode):
         # test if .md file is a model_card
@@ -279,7 +279,7 @@ class File:
 
     def _validate_json(self, strict_mode):
         try:
-            with open(self._path) as file:
+            with open(self.path) as file:
                 json.load(file)
         except Exception as error:  # noqa: F841
             self._throw_error(
@@ -289,7 +289,7 @@ class File:
 
     def _validate_csv(self, strict_mode):
         try:
-            with open(self._path) as file:
+            with open(self.path) as file:
                 file.readlines()
         except Exception as error:  # noqa: F841
             self._throw_error(
@@ -298,7 +298,7 @@ class File:
             )
 
     def _validate_img(self, strict_mode):
-        if not Image.open(self._path):
+        if not imghdr.what(self.path):
             self._throw_error(
                 error_msg="Image file could not been loaded properly",
                 strict_mode=strict_mode,
@@ -306,7 +306,7 @@ class File:
 
     def _validate_yaml(self, strict_mode):
         try:
-            with open(self._path) as yaml_str:
+            with open(self.path) as yaml_str:
                 if re.search(r"- !.+Modifier", yaml_str.read()):
                     # YAML file contains modifier definitions, skip further validation
                     return

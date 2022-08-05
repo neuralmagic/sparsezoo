@@ -41,13 +41,12 @@ from sparsezoo.validation import IntegrationValidator
 __all__ = ["Model"]
 
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
-ALLOWED_RECIPE_VALUES = {"original", "transfer_learn"}
 ALLOWED_DEPLOYMENT_VALUES = {"default"}
 
 PARAM_DICT = {
     "checkpoint": ALLOWED_CHECKPOINT_VALUES,
-    "recipe": ALLOWED_RECIPE_VALUES,
     "deployment": ALLOWED_DEPLOYMENT_VALUES,
+    "recipe": None,
     "recipe_type": None,  # backwards compatibility with v1 stubs
 }
 
@@ -300,12 +299,8 @@ class Model(Directory):
                 )
                 return False
 
-        if self.model_card._path is None:
-            raise ValueError(
-                "Model card missing! Before running `validate()` "
-                "method, the respective files must be present locally. "
-                "The solution may be to call `download()` first."
-            )
+        if self.model_card is None:
+            raise ValueError("Model card missing in the model!")
 
         return self.integration_validator.validate(minimal_validation)
 
@@ -388,6 +383,14 @@ class Model(Directory):
         loader = self.data_loader(batch_size=batch_size, batch_as_list=batch_as_list)
 
         return loader.get_batch(bath_index=batch_index)
+
+    @property
+    def available_files(self):
+        return {
+            name: file
+            for name, file in self._files_dictionary.items()
+            if file is not None
+        }
 
     def _get_directory(
         self,
@@ -704,6 +707,7 @@ class Model(Directory):
                     f"String argument {key} not found in the "
                     f"expected set of string arguments {list(PARAM_DICT.keys())}!"
                 )
+
             if PARAM_DICT[key] and value not in PARAM_DICT[key]:
                 raise ValueError(
                     f"String argument {key} has value {value}, "
