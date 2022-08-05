@@ -15,8 +15,6 @@
 import logging
 import os
 import re
-import shutil
-import tempfile
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
@@ -241,10 +239,7 @@ class Model(Directory):
     ) -> bool:
         """
         Attempt to download the files given the `url` attribute
-        of the files inside the Model. To avoid the risk of corrupting
-        the files while downloading, they are firstly downloaded to
-        a temporary directory, validated, and finally copied over to the
-        target path of the model.
+        of the files inside the Model.
 
         :param strict_mode: if True, will throw error if any file, that is
             attempted to be downloaded, turns out to be `None`.
@@ -262,11 +257,10 @@ class Model(Directory):
             )
         else:
             downloads = []
-            temporary_directory = tempfile.mkdtemp()
             for key, file in self._files_dictionary.items():
                 if file is not None:
                     # save all the files to a temporary directory
-                    downloads.append(self._download(file, temporary_directory))
+                    downloads.append(self._download(file, download_path))
                 else:
                     if strict_mode:
                         raise ValueError(
@@ -278,29 +272,6 @@ class Model(Directory):
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
-        # validate that there are no corrupted files
-        temporary_files = [
-            File(
-                name=os.path.basename(name),
-                path=os.path.join(temporary_directory, name),
-            )
-            for name in os.listdir(temporary_directory)
-        ]
-        temporary_files = [
-            Directory.from_file(file) if is_directory(file) else file
-            for file in temporary_files
-        ]
-        for file in temporary_files:
-            if not file.validate(strict_mode=False):
-                raise ValueError(
-                    f"Failed to validate file {file.name}, "
-                    f"it seems that the model folder {self._path} is corrupted. "
-                    f"Please clear your cache: {CACHE_DIR}, and then"
-                    f"rerun the `.download()` method"
-                )
-        # copy files from temporary to final directory
-        shutil.copytree(temporary_directory, download_path, dirs_exist_ok=True)
-        shutil.rmtree(temporary_directory)
 
         return all(downloads)
 
