@@ -21,7 +21,7 @@ import os
 import onnx
 import pytest
 
-from sparsezoo import Zoo
+from sparsezoo import Model
 from sparsezoo.analysis import ModelAnalysis
 from sparsezoo.utils.graph_editor import ONNXGraph
 
@@ -78,9 +78,8 @@ def get_generated_analysis():
     model_generated_analyses = {}
     for model_name in _MODEL_PATHS.keys():
         model_stub = _MODEL_PATHS[model_name]["stub"]
-        model = Zoo.load_model_from_stub(model_stub)
-        model.onnx_file.download()
-        onnx_path = model.onnx_file.downloaded_path()
+        model = Model(model_stub)
+        onnx_path = model.onnx_model.path
         analysis = ModelAnalysis.from_onnx(onnx_path)
         model_generated_analyses[model_name] = analysis
 
@@ -118,9 +117,8 @@ def get_model_graph():
     model_graphs = {}
     for model_name in _MODEL_PATHS.keys():
         model_stub = _MODEL_PATHS[model_name]["stub"]
-        model = Zoo.load_model_from_stub(model_stub)
-        model.onnx_file.download()
-        onnx_path = model.onnx_file.downloaded_path()
+        model = Model(model_stub)
+        onnx_path = model.onnx_model.path
         model_onnx = onnx.load(onnx_path)
         model_graph = ONNXGraph(model_onnx)
         model_graphs[model_name] = model_graph

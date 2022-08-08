@@ -17,7 +17,7 @@ Script to download a model from SparseZoo
 
 ##########
 Command help:
-usage: sparsezoo.download [-h] [--save-dir SAVE_DIR] [--overwrite] model_stub
+usage: sparsezoo.download [-h] [--save-dir SAVE_DIR] model_stub
 
 Download specific models from the SparseZoo repo
 
@@ -29,8 +29,6 @@ optional arguments:
   -h, --help           show this help message and exit
   --save-dir SAVE_DIR  The directory to save the model files in, defaults to
                        the cwd with the model description as a sub folder
-  --overwrite          Overwrites existing model files if previously
-                       downloaded
 
 #########
 Example download ResNet50:
@@ -47,7 +45,7 @@ sparsezoo.download \
 import argparse
 import logging
 
-from sparsezoo.models import Zoo
+from sparsezoo import Model
 
 
 __all__ = ["main"]
@@ -72,12 +70,7 @@ def parse_args():
         type=str,
         default=None,
         help="The directory to save the model files in, "
-        "defaults to the cwd with the model description as a sub folder",
-    )
-    parser.add_argument(
-        "--overwrite",
-        action="store_true",
-        help="Overwrites existing model files if previously downloaded",
+        "defaults to the cache directory of the sparsezoo",
     )
 
     return parser.parse_args()
@@ -95,16 +88,16 @@ def main():
     if not args.model_stub.startswith("zoo:"):
         raise ValueError("Model stub must start with 'zoo:'")
 
-    model = Zoo.download_model_from_stub(
-        stub=args.model_stub,
-        override_parent_path=args.save_dir,
-        overwrite=args.overwrite,
-    )
+    if args.save_dir:
+        model = Model(args.model_stub, download_path=args.save_dir)
+    else:
+        model = Model(args.model_stub)
+    model.download()
 
     print("Download results")
     print("====================")
     print()
-    print(f"{model.display_name} downloaded to {model.dir_path}")
+    print(f"{str(model)} downloaded to {model.path}")
 
 
 if __name__ == "__main__":

@@ -139,7 +139,7 @@ optional arguments:
                         the max release version of the model in semantic
                         version format
   --save-dir SAVE_DIR   The directory to save the model files in, defaults to
-                        the cwd with the model description as a sub folder
+                        the cache directory of the sparsezoo
 
 
 ##########
@@ -156,13 +156,13 @@ python3 scripts/main.py search --domain cv --sub-domain classification \
 #########
 Example download MobileNetV1:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
-    --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
+    --sub-architecture 1.0 --framework pytorch --repo sparseml --dataset imagenet \
     --sparse-name base --sparse-category none
 
 #########
 Example download MobileNetV1 with maximum release version:
 sparsezoo download --domain cv --sub-domain classification --architecture mobilenet_v1 \
-    --sub-architecture 1.0 --framework pytorch --repo torchvision --dataset imagenet \
+    --sub-architecture 1.0 --framework pytorch --repo sparseml --dataset imagenet \
     --sparse-name base --sparse-category none --release-version 0.1.0
 
 
@@ -170,8 +170,7 @@ sparsezoo download --domain cv --sub-domain classification --architecture mobile
 import argparse
 import logging
 
-from sparsezoo.models import Zoo
-from sparsezoo.objects import Model
+from sparsezoo import Model, model_args_to_stub, search_models
 
 
 __all__ = ["main"]
@@ -289,12 +288,7 @@ def parse_args():
         type=str,
         default=None,
         help="The directory to save the model files in, "
-        "defaults to the cwd with the model description as a sub folder",
-    )
-    download_parser.add_argument(
-        "--overwrite",
-        action="store_true",
-        help="Overwrites existing model files if previously downloaded",
+        "defaults to the cache directory of the sparsezoo",
     )
 
     search_parser.add_argument(
@@ -340,7 +334,7 @@ def _get_command_from_model(model: Model):
 
 def search(args):
     LOGGER.info("loading available models...")
-    models = Zoo.search_models(
+    models = search_models(
         domain=args.domain,
         sub_domain=args.sub_domain,
         architecture=args.architecture,
@@ -366,21 +360,9 @@ def search(args):
 
     for index, model in enumerate(models):
         result_index = (index + 1) + (args.page_length * (args.page - 1))
-        header = f"{result_index}) {model.display_name}"
+        header = f"{result_index}) {str(model)}"
         print(header)
         print("-------------------------")
-        print(f"Model Description: {model.display_description}")
-        print("")
-        print(f"Framework: {model.framework}")
-        print("")
-        print(f"Repository: {model.repo}")
-        print("")
-        tag_string = ", ".join([tag.display_name for tag in model.tags])
-        print(f"Tags: {tag_string}")
-        print("")
-        print(f"Download Command: {_get_command_from_model(model)}")
-        print("")
-        print("")
 
 
 def main():
@@ -389,7 +371,7 @@ def main():
 
     if args.command == DOWNLOAD_COMMAND:
         LOGGER.info("Downloading files from model...")
-        model = Zoo.download_model(
+        stub = model_args_to_stub(
             domain=args.domain,
             sub_domain=args.sub_domain,
             architecture=args.architecture,
@@ -402,14 +384,19 @@ def main():
             sparse_category=args.sparse_category,
             sparse_target=args.sparse_target,
             release_version=args.release_version,
-            override_parent_path=args.save_dir,
-            overwrite=args.overwrite,
         )
+
+        if args.save_dir:
+            model = Model(stub, download_path=args.save_dir)
+        else:
+            model = Model(stub)
+
+        model.download()
 
         print("Download results")
         print("====================")
         print("")
-        print(f"downloaded to {model.dir_path}")
+        print(f"downloaded to {model.path}")
     elif args.command == SEARCH_COMMAND:
         search(args)
 

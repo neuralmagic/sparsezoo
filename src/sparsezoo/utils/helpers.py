@@ -12,48 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Code related to helper functions for model zoo
-"""
-
-import errno
+import glob
 import os
-from typing import Any, Union
-
-from tqdm import auto, tqdm, tqdm_notebook
 
 
-__all__ = [
-    "CACHE_DIR",
-    "clean_path",
-    "convert_to_bool",
-    "create_dirs",
-    "create_parent_dirs",
-    "create_tqdm_auto_constructor",
-    "tqdm_auto",
-]
-
-CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
+__all__ = ["create_dirs", "create_parent_dirs", "clean_path", "remove_tar_duplicates"]
 
 
-def clean_path(path: str) -> str:
+def remove_tar_duplicates(directory: str):
     """
-    :param path: the directory or file path to clean
-    :return: a cleaned version that expands the user path and creates an absolute path
-    """
-    return os.path.abspath(os.path.expanduser(path))
+    If a directory contains similar the same data, both one
+    as a directory and a .tar file, remove the .tar file.
+    Example:
 
+    Before:
+        [directory_A, directory_B, directory_A.tar.gz,
+        directory_B.tar.gz, directory_C.tar.gz]
+    After:
+        [directory_A, directory_B, directory_C.tar.gz]
 
-def convert_to_bool(val: Any):
+    :param directory: A directory where the removal of tar duplicates is to happen
     """
-    :param val: a value
-    :return: False if value is a Falsy value e.g. 0, f, false, None, otherwise True.
-    """
-    return (
-        bool(val)
-        if not isinstance(val, str)
-        else bool(val) and "f" not in val.lower() and "0" not in val.lower()
-    )
+    extension_to_remove = ".tar.gz"
+    files = glob.glob(os.path.join(directory, "*"))
+    possible_duplicates = [
+        file.replace(extension_to_remove, "")
+        for file in files
+        if file.endswith(extension_to_remove)
+    ]
+    remaining_files = [file for file in files if not file.endswith(extension_to_remove)]
+    duplicates = [file for file in remaining_files if file in possible_duplicates]
+    [os.remove(duplicate + extension_to_remove) for duplicate in duplicates]
 
 
 def create_dirs(path: str):
@@ -62,14 +51,7 @@ def create_dirs(path: str):
     """
     path = clean_path(path)
 
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            pass
-        else:
-            # Unexpected OSError, re-raise.
-            raise
+    os.makedirs(path, exist_ok=True)
 
 
 def create_parent_dirs(path: str):
@@ -80,20 +62,9 @@ def create_parent_dirs(path: str):
     create_dirs(parent)
 
 
-def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
+def clean_path(path: str) -> str:
     """
-    :return: the tqdm instance to use for progress.
-        If ipywidgets is installed then will return auto.tqdm,
-        if not will return tqdm so that notebooks will not break
+    :param path: the directory or file path to clean
+    :return: a cleaned version that expands the user path and creates an absolute path
     """
-    try:
-        import ipywidgets as widgets  # noqa: F401
-
-        return auto.tqdm
-    except Exception:
-        pass
-
-    return tqdm
-
-
-tqdm_auto = create_tqdm_auto_constructor()
+    return os.path.abspath(os.path.expanduser(path))
