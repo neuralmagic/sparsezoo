@@ -14,11 +14,12 @@
 
 
 from sparsezoo.git_server_model.models.benchmark import Benchmark
-from sparsezoo.git_server_model.models.model_metadata import ModelMetadata
-from sparsezoo.git_server_model.validations import BenchmarkValidation, ModelValidation
+from sparsezoo.git_server_model.models.modelcard_metadata import (
+    GitServerModelCardMetadata,
+)
 
 
-class Model:
-    def __init__(self, model_path: str):
-        self.model = ModelMetadata(model_path)
+class GitServerModel:
+    def __init__(self, model_path: str, platform: str = "web"):
+        self.model = GitServerModelCardMetadata(path=model_path, platform=platform)
         self.benchmark = Benchmark(model_path)

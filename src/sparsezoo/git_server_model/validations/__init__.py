@@ -14,4 +14,4 @@
 
 
 from .benchmark_validation import *
-from .model_validation import *
+from .modelcard_validation import *

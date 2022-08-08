@@ -14,12 +14,11 @@
 
 
 import re
-from email.contentmanager import raw_data_manager
 
 import requests
 import yaml
 
-from .constants import GIT_SERVER_REGEX, RAW_FILE_CONTENT_URL
+from .helpers import GIT_SERVER_REGEX, RAW_FILE_CONTENT_URL
 
 
 def extract_git_server_metadata(git_server_path: str):
@@ -59,6 +58,4 @@ def web_load(git_server_url: str, filename: str, branch: str = "main"):
         )
     )
     response.raise_for_status()
-    return response.text
-
-    pass
+    return next(yaml.safe_load_all(response.text))
