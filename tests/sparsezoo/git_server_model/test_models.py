@@ -18,7 +18,9 @@ pytest /Users/george/neuralmagic/sparsezoo/tests/sparsezoo/git_server_model/test
 
 
 """
-from sparsezoo.git_server_model.models.modelcard_metadata import GitServerModelCardMetadata
+from sparsezoo.git_server_model.models.modelcard_metadata import (
+    GitServerModelCardMetadata,
+)
 from sparsezoo.git_server_model.utils import (
     extract_git_server_metadata,
     local_load,
@@ -86,3 +88,6 @@ def test_web_load():
     filename = "model.md"
     for path in paths:
         payload = web_load(git_server_url=path, filename=filename)
+
+
+# Test metadata popuilation using class

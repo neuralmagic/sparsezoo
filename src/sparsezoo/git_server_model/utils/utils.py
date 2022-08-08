@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import os
 import re
 
 import requests
@@ -36,9 +37,10 @@ def extract_git_server_metadata(git_server_path: str):
     }
 
 
-def local_load(file_path: str):
+def local_load(folder_path: str, filename: str):
     """Given a file_path, return a dict with its contents as metadata"""
 
+    file_path = os.path.join(folder_path, filename)
     with open(file_path, "r") as yaml_file:
         raw_data = next(yaml.safe_load_all(yaml_file.read()))
     return raw_data
