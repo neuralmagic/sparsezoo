@@ -31,7 +31,7 @@ __all__ = [
     "load_files_from_stub",
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
-    "CACHE_DIR",
+    "SAVE_DIR",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -51,6 +51,8 @@ _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
+ENVIRONMENT_VARIABLE_PATH = os.getenv("SPARSEZOO_MODELS_PATH", "")
+SAVE_DIR = ENVIRONMENT_VARIABLE_PATH if ENVIRONMENT_VARIABLE_PATH else CACHE_DIR
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
