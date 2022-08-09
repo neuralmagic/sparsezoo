@@ -12,4 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sparsezoo.git_server_model.validations import BenchmarkValidation, ModelValidation
+# flake8: noqa
+
+from sparsezoo.git_server.validations import BenchmarkValidation, ModelValidation
