@@ -23,6 +23,15 @@ FILE_NAME = "benchmark.yaml"
 
 class Benchmark:
     def __init__(self, path: str, platform: str = "web", branch="main"):
+        """
+        Get the benchmark metadata
+
+        :param path: path the folder that contains benchmark.yaml
+        :param platform: Set to either 'web' or 'local'.
+            'web' reads from git server, local reads from
+            the local dir
+        :param branch: git server branch
+        """
 
         self.benchmarks = get_model_file(
             path=path, file_name=FILE_NAME, platform=platform, branch=branch
@@ -39,11 +48,17 @@ class Benchmark:
         ]
         self.results = self.metadata["benchmarks"]["results"]
 
-    staticmethod
-
+    @staticmethod
     def validate(path: str, platform: str = "web", branch="main") -> bool:
         """
         Given a benchmark file, validate its metadata
+
+        :param path: path the folder that contains benchmark.yaml
+        :param platform: Set to either 'web' or 'local'.
+            'web' reads from git server, local reads from
+            the local dir
+        :param branch: git server branch
+        :return: boolean, whether validation (metadata population) passed
         """
         candidate = get_model_file(
             path=path, file_name=FILE_NAME, platform=platform, branch=branch

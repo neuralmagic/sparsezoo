@@ -12,6 +12,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+import os
 
-from sparsezoo.git_server.validations import BenchmarkValidation, ModelValidation
+import pytest
+
+from sparsezoo.git_server import Benchmark, ModelCardMetadata
+
+
+FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "https://git.neuralmagic.com/neuralmagic/cary",
+        "git@git.neuralmagic.com:neuralmagic/cary.git",
+        "https://git.neuralmagic.com/neuralmagic/cary.git",
+    ],
+    scope="function",
+)
+def test_benchmark(path):
+    benchmark = Benchmark(path, platform="web")
+
+    # check if there are values, metadata may update, so will not check values
+    assert (
+        benchmark.benchmarks
+        and benchmark.git_ssh_url
+        and benchmark.deepsparse_version
+        and benchmark.model_commit_sha
+        and benchmark.results
+    ), "Benchmark metadata not populated correctly"
+
+
+@pytest.mark.parametrize(
+    "path, expected",
+    [
+        (
+            FIXTURE_PATH,
+            {
+                "card_version": "1.0.0",
+                "base": "_some_base_stub",
+                "parent": None,
+                "domain": "cv",
+                "task": "classification",
+                "architecture": "resnet_v1",
+                "framework": "pytorch",
+                "repo": "sparseml",
+                "source_dataset": "imagenet",
+                "train_dataset": "imagenet_2",
+                "optimizations": "pruned95-none",
+                "display_name": "95% Pruned ResNet-50",
+                "tags": [
+                    "resnet",
+                    "resnet_v1",
+                    "resnet50",
+                    "pruned",
+                    "pruned95",
+                    "sparseml",
+                    "pytorch",
+                    "imagenet",
+                ],
+                "commands": None,
+            },
+        )
+    ],
+    scope="function",
+)
+def test_model_card_metadata(path, expected):
+    model_metadata = ModelCardMetadata(path=path, platform="local")
+
+    # model card should be immutable
+    assert model_metadata.card_version == expected["card_version"], (
+        "card version mismatch. "
+        f"Expected {expected['card_version']}, got {model_metadata.card_version}"
+    )
+    assert expected["base"] == model_metadata.base
+    assert expected["parent"] == model_metadata.parent
+    assert expected["domain"] == model_metadata.domain
+    assert expected["task"] == model_metadata.task
+    assert expected["architecture"] == model_metadata.architecture
+    assert expected["framework"] == model_metadata.framework
+    assert expected["repo"] == model_metadata.repo
+    assert expected["source_dataset"] == model_metadata.source_dataset
+    assert expected["train_dataset"] == model_metadata.train_dataset
+    assert expected["optimizations"] == model_metadata.optimizations
+    assert expected["display_name"] == model_metadata.display_name
+    assert expected["tags"] == model_metadata.tags
+    assert expected["commands"] == model_metadata.commands

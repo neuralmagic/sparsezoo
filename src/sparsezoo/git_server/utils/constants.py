@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # flake8: noqa
-GIT_SERVER_REGEX = r"^(.*)?git.neuralmagic.com[/ | :](?P<namespace>[a-zA-Z0-9]+)/(?P<name>[a-zA-Z0-9]+)"
+
+# GIT_SERVER_REGEX = r"^(.*)?git.neuralmagic.com[/:](?P<namespace>[a-zA-Z0-9]+)/(?P<name>[a-zA-Z0-9]+)"
+GIT_SERVER_REGEX = r"^(?:git@git.neuralmagic.com:|https://git.neuralmagic.com/)(?P<namespace>[a-zA-Z0-9]+)/(?P<name>[a-zA-Z0-9]+)"
 RAW_FILE_CONTENT_URL = (
-    "https://git.neuralmagic.com/{namespace}/{name}/-/raw/{branch}/{filename}"
+    "https://git.neuralmagic.com/{namespace}/{name}/-/raw/{branch}/{file_name}"
 )

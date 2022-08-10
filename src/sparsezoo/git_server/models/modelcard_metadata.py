@@ -21,6 +21,15 @@ FILE_NAME = "model.md"
 
 class ModelCardMetadata:
     def __init__(self, path: str, platform: str = "web", branch="main"):
+        """
+        Model metadata population from the model_card
+
+        :param path: path the folder that contains model.md
+        :param platform: Set to either 'web' or 'local'. 'web' reads from git server,
+            local reads from local dir
+        :param branch: git server branch
+        :return: boolean, whether validation (metadata population) passed
+        """
 
         self.model_card = get_model_file(
             path=path, file_name=FILE_NAME, platform=platform, branch=branch

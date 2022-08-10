@@ -19,5 +19,16 @@ from sparsezoo.git_server.models.modelcard_metadata import ModelCardMetadata
 
 class GitServerModel:
     def __init__(self, model_path: str, platform: str = "web"):
+        """
+        Class containing git server model info
+
+        :param path: path the folder that contains model files
+            (model.md, benchmark.yaml, etc)
+        :param platform: Set to either 'web' or 'local'. 'web' reads from
+            the git server, local reads from local dir
+        :param branch: git server branch
+        :return: boolean, whether validation (metadata population) passed
+        """
+
         self.card = ModelCardMetadata(path=model_path, platform=platform)
         self.benchmark = Benchmark(model_path, platform=platform)

@@ -26,9 +26,9 @@ FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtur
 @pytest.mark.parametrize(
     "path",
     [
-        "https://git.neuralmagic.com/neuralmagic/cary",  # noqa E501
-        "git@git.neuralmagic.com:neuralmagic/cary.git",  # noqa E501
-        "https://git.neuralmagic.com/neuralmagic/cary.git",  # noqa E501
+        "https://git.neuralmagic.com/neuralmagic/cary",
+        "git@git.neuralmagic.com:neuralmagic/cary.git",
+        "https://git.neuralmagic.com/neuralmagic/cary.git",
     ],
     scope="function",
 )
@@ -42,13 +42,13 @@ def test_git_server_metadata(path):
 @pytest.mark.parametrize(
     "path",
     [
-        FIXTURE_PATH,  # noqa E501
+        FIXTURE_PATH,
     ],
     scope="function",
 )
 def test_model_card_local_load(path):
 
-    metadata = local_load(path, filename="model.md")
+    metadata = local_load(path, file_name="model.md")
     output = {
         "card_version": "1.0.0",
         "domain": "cv",
@@ -80,15 +80,15 @@ def test_model_card_local_load(path):
 @pytest.mark.parametrize(
     "path",
     [
-        "https://git.neuralmagic.com/neuralmagic/cary",  # noqa E501
-        "git@git.neuralmagic.com:neuralmagic/cary.git",  # noqa E501
-        "https://git.neuralmagic.com/neuralmagic/cary.git",  # noqa E501
+        "https://git.neuralmagic.com/neuralmagic/cary",
+        "git@git.neuralmagic.com:neuralmagic/cary.git",
+        "https://git.neuralmagic.com/neuralmagic/cary.git",
     ],
     scope="function",
 )
 def test_web_load(path):
 
-    payload = web_load(git_server_url=path, filename="model.md")
+    payload = web_load(git_server_url=path, file_name="model.md")
     output = {
         "card_version": "0.8.0",
         "domain": "cv",

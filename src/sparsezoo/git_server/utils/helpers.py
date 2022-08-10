@@ -37,6 +37,9 @@ def extract_git_server_metadata(git_server_path: str) -> Dict[str, str]:
         model url           : https://git.neuralmagic.com/neuralmagic/cary
         git clone ssh url   : git@git.neuralmagic.com:neuralmagic/cary.git
         git clone http url  : https://git.neuralmagic.com/neuralmagic/cary.git
+
+    :param git_server_path: path of the git server
+    :return: dict containing 'name' and 'namespace'
     """
 
     matches = re.match(GIT_SERVER_REGEX, git_server_path)
@@ -51,37 +54,53 @@ def get_model_file(
 ) -> Dict:
     """
     Get the file info from local or git-server
+
+    :param path: path containing the desired file
+    :param file_name: name of the desired file
+    :param platform: either 'web' or 'platform'
+    :param branch: git server branch
+    :return: Dict of the desired file's raw metadata
     """
     if platform == "web":
-        return web_load(path, filename=file_name, branch=branch)
+        return web_load(path, file_name=file_name, branch=branch)
     elif platform == "local":
-        return local_load(path, filename=file_name)
+        return local_load(path, file_name=file_name)
     raise ValueError(
         "[get_model_file]: input arg 'platform' must be 'web' or 'local'"
         f"for path: {path}, file_name {file_name}"
     )
 
 
-def local_load(folder_path: str, filename: str) -> Dict:
-    """Given a file_path, return a dict with its contents as metadata"""
+def local_load(path: str, file_name: str) -> Dict:
+    """
+    Given a file_path, return a dict with its contents as metadata
 
-    file_path = os.path.join(folder_path, filename)
+    :param path: path containing the desired file
+    :param file_name: name of the desired file
+    :return: raw metadata of file_name
+    """
+
+    file_path = os.path.join(path, file_name)
     with open(file_path, "r") as yaml_file:
         raw_data = next(yaml.safe_load_all(yaml_file.read()))
     return raw_data
 
 
-def web_load(git_server_url: str, filename: str, branch: str = "main") -> Dict:
+def web_load(git_server_url: str, file_name: str, branch: str = "main") -> Dict:
     """
     Given a gitserver url (url of the gitserver model, or git clone ssh/http),
     and the file name, get the contents of the file using http request
 
-    returns a text/str of the response
+    :param git_server_url: url /git clone of the git server model
+    :param file_name: name of the file to be loaded
+    :param branch: git server branch
+
+    :return: a text/str of the response
     """
     git_server_metadata = extract_git_server_metadata(git_server_url)
     response = requests.get(
         RAW_FILE_CONTENT_URL.format(
-            **git_server_metadata, **{"filename": filename, "branch": branch}
+            **git_server_metadata, **{"file_name": file_name, "branch": branch}
         )
     )
     response.raise_for_status()
