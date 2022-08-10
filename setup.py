@@ -45,6 +45,7 @@ _deps = [
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
+    "pydantic>=1.8.2",
     "click==8.0",
     "protobuf>=3.12.2,<4",
 ]
@@ -59,8 +60,6 @@ _dev_deps = [
     "m2r2~=0.2.7",
     "mistune==0.8.4",
     "myst-parser~=0.14.0",
-    "onnxruntime>=1.0.0",
-    "pytest>=6.0.0",
     "rinohtype>=0.4.2",
     "sphinx>=3.4.0",
     "sphinx-copybutton>=0.3.0",
@@ -69,6 +68,7 @@ _dev_deps = [
     "pytest>=6.0.0",
     "sphinx-rtd-theme",
     "wheel>=0.36.2",
+    "onnxruntime>=1.0.0",
     "matplotlib>=3.0.0",
 ]
 
