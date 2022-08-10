@@ -64,7 +64,6 @@ class ModelCardMetadata:
         )
         try:
             if ModelCardValidation(**candidate):
-                print("[ModelCardMetadata]: metadata validation successful")
                 return True
         except Exception as _err:
             print(_err)

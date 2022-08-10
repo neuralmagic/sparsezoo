@@ -86,16 +86,51 @@ def test_model_card_metadata(path, expected):
         "card version mismatch. "
         f"Expected {expected['card_version']}, got {model_metadata.card_version}"
     )
-    assert expected["base"] == model_metadata.base
-    assert expected["parent"] == model_metadata.parent
-    assert expected["domain"] == model_metadata.domain
-    assert expected["task"] == model_metadata.task
-    assert expected["architecture"] == model_metadata.architecture
-    assert expected["framework"] == model_metadata.framework
-    assert expected["repo"] == model_metadata.repo
-    assert expected["source_dataset"] == model_metadata.source_dataset
-    assert expected["train_dataset"] == model_metadata.train_dataset
-    assert expected["optimizations"] == model_metadata.optimizations
-    assert expected["display_name"] == model_metadata.display_name
-    assert expected["tags"] == model_metadata.tags
-    assert expected["commands"] == model_metadata.commands
+    assert expected["base"] == model_metadata.base, (
+        "base mismatch. " f"Expected {expected['base']}, got {model_metadata.base}"
+    )
+    assert expected["parent"] == model_metadata.parent, (
+        "parent mismatch. "
+        f"Expected {expected['parent']}, got {model_metadata.parent}"
+    )
+    assert expected["domain"] == model_metadata.domain, (
+        "domain mismatch. "
+        f"Expected {expected['domain']}, got {model_metadata.domain}"
+    )
+    assert expected["task"] == model_metadata.task, (
+        "task mismatch. " f"Expected {expected['task']}, got {model_metadata.task}"
+    )
+    assert expected["architecture"] == model_metadata.architecture, (
+        "architecture mismatch. "
+        f"Expected {expected['architecture']}, got {model_metadata.architecture}"
+    )
+    assert expected["framework"] == model_metadata.framework, (
+        "framework mismatch. "
+        f"Expected {expected['framework']}, got {model_metadata.framework}"
+    )
+    assert expected["repo"] == model_metadata.repo, (
+        "repo mismatch. " f"Expected {expected['repo']}, got {model_metadata.repo}"
+    )
+    assert expected["source_dataset"] == model_metadata.source_dataset, (
+        "source_dataset mismatch. "
+        f"Expected {expected['source_dataset']}, got {model_metadata.source_dataset}"
+    )
+    assert expected["train_dataset"] == model_metadata.train_dataset, (
+        "train_dataset mismatch. "
+        f"Expected {expected['train_dataset']}, got {model_metadata.train_dataset}"
+    )
+    assert expected["optimizations"] == model_metadata.optimizations, (
+        "optimizations mismatch. "
+        f"Expected {expected['optimizations']}, got {model_metadata.optimizations}"
+    )
+    assert expected["display_name"] == model_metadata.display_name, (
+        "display_name mismatch. "
+        f"Expected {expected['display_name']}, got {model_metadata.display_name}"
+    )
+    assert expected["tags"] == model_metadata.tags, (
+        "tags mismatch. " f"Expected {expected['tags']}, got {model_metadata.tags}"
+    )
+    assert expected["commands"] == model_metadata.commands, (
+        "commands mismatch. "
+        f"Expected {expected['commands']}, got {model_metadata.commands}"
+    )
