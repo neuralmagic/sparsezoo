@@ -106,7 +106,7 @@ class Directory(File):
         :return: List with names of files
         """
         if self.is_archive:
-            tar = tarfile.open(self._path)
+            tar = tarfile.open(self.path)
             return [os.path.basename(member.name) for member in tar.getmembers()]
         else:
             return [file.name for file in self.files]
@@ -193,9 +193,9 @@ class Directory(File):
                 file.download(
                     destination_path=os.path.join(destination_path, self.name)
                 )
-                file.path = os.path.join(destination_path, self.name, file.name)
+                file._path = os.path.join(destination_path, self.name, file.name)
 
-        self.path = os.path.join(destination_path, self.name)
+        self._path = os.path.join(destination_path, self.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -234,14 +234,14 @@ class Directory(File):
             parent_path = archive_directory
 
         else:
-            if self._path is None:
+            if self.path is None:
                 raise ValueError(
                     "Attempting to zip the folder Directory object files using "
                     "`path` attribute, but `self.path` is None. "
                     "Class object requires pointer to parent "
                     "folder directory to know where to save the tar archive file."
                 )
-            parent_path = pathlib.PurePath(self._path).parent
+            parent_path = pathlib.PurePath(self.path).parent
 
         tar_file_name = self.name + ".tar.gz"
         tar_file_path = os.path.join(parent_path, tar_file_name)
@@ -275,7 +275,7 @@ class Directory(File):
             )
 
         name = ".".join(self.name.split(".")[:-2])
-        tar = tarfile.open(self._path, "r")
+        tar = tarfile.open(self.path, "r")
         path = os.path.join(extract_directory, name)
 
         for member in tar.getmembers():
@@ -318,11 +318,11 @@ def is_directory(file: File) -> bool:
     if file._path is None:
         from pathlib import Path
 
-        # we are processing a downladable file
+        # we are processing a downloadable file
         file_name_without_extension = Path(file.name).stem
         return file_name_without_extension == file.name
 
-    return os.path.isdir(file._path)
+    return os.path.isdir(file.path)
 
 
 def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:

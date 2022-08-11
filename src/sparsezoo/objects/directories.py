@@ -105,7 +105,10 @@ class NumpyDirectory(Directory):
 
         :return: The created dataset from the sample data files
         """
-        return Dataset(self.name, self.path)
+
+        # sample_{...} or sample_{...}.tar.gz --> sample_{...}
+        dataset_name = self.name.split(".")[0]
+        return Dataset(dataset_name, self.path)
 
     def loader(
         self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True

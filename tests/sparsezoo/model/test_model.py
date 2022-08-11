@@ -59,7 +59,7 @@ files_yolo = copy.copy(files_ic)
         ),
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
-            ("recipe", "some_dummy_name"),
+            ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
@@ -88,13 +88,11 @@ class TestSetupModel:
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         path = stub + "?" + args[0] + "=" + args[1]
         if should_pass:
-            model = Model(path)
-            model.download(directory_path=temp_dir.name)
+            model = Model(path, temp_dir.name)
             self._assert_correct_files_downloaded(model, args)
         else:
             with pytest.raises(ValueError):
                 model = Model(path)
-                model.download(directory_path=temp_dir.name)
 
     @staticmethod
     def _assert_correct_files_downloaded(model, args):
@@ -131,8 +129,8 @@ class TestModel:
     @pytest.fixture()
     def setup(self, stub, clone_sample_outputs, expected_files):
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        model = Model(stub)
-        model.download(directory_path=temp_dir.name)
+        model = Model(stub, temp_dir.name)
+        model.download()
         self._add_mock_files(temp_dir.name, clone_sample_outputs=clone_sample_outputs)
         model = Model(temp_dir.name)
 
