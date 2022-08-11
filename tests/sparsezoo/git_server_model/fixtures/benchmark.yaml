@@ -1,0 +1,74 @@
+benchmarks:
+  repo:
+    deepsparse_version: 1.0.2
+    git_ssh_url: git@git.neuralmagic.com:neuralmagic/cary.git
+    model_commit_sha: 80326cd90c125745cf75b52ee6933e83755ea462
+    model_id: 0244a528-a4e2-460b-8472-f8cdb5607fe1
+    sample_input_commit_sha: ''
+  results:
+  - batch_size: ' 1'
+    benchmark_result:
+      25.0%: 79.80114221572876
+      50.0%: 80.44004440307617
+      75.0%: 87.55040168762207
+      90.0%: 107.37605094909671
+      95.0%: 129.9875497817993
+      99.0%: 251.45411729812614
+      99.9%: 285.9786157608033
+      items_per_sec: 11.061157685945277
+      iterations: 222
+      mean: 90.40129936493194
+      median: 80.44004440307617
+      scenario: singlestream
+      seconds_ran: 20.070231914520264
+      std: 29.39552017268986
+    engine: ORTEngine
+    input_shapes:
+    - - 1
+      - 3
+      - 224
+      - 224
+    instance_type: c6a.12xlarge
+    model_path: /tmp/tmpjomy99m3
+    num_cores: ' 1'
+    num_streams: 1
+    onnx_file_path: ' cary/model.onnx'
+    orig_model_path: cary/model.onnx
+    scenario: singlestream
+    scheduler: None
+    seconds_to_run: 20
+    version: 1.0.2
+  - batch_size: ' 1'
+    benchmark_result:
+      25.0%: 33.63990783691406
+      50.0%: 34.22403335571289
+      75.0%: 34.67702865600586
+      90.0%: 35.19001007080078
+      95.0%: 35.38618087768555
+      99.0%: 35.59123992919922
+      99.9%: 35.66909599304199
+      items_per_sec: 29.242675568385515
+      iterations: 585
+      mean: 34.1926876296345
+      median: 34.22403335571289
+      scenario: multistream
+      seconds_ran: 20.005009412765503
+      std: 0.6978461716621728
+    cpu_avx_type: ' avx512'
+    cpu_vnni: ' True'
+    engine: deepsparse.engine.Engine
+    input_shapes:
+    - - 1
+      - 3
+      - 224
+      - 224
+    instance_type: c6i.12xlarge
+    model_path: /tmp/tmp28bjpin8
+    num_cores: ' 1'
+    num_streams: ' 0'
+    onnx_file_path: ' cary/model.onnx'
+    orig_model_path: cary/model.onnx
+    scenario: multistream
+    scheduler: ' Scheduler.multi_stream'
+    seconds_to_run: 20
+    version: 1.0.2
