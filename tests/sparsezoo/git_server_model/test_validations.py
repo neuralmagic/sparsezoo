@@ -20,19 +20,63 @@ from sparsezoo.git_server import Benchmark, ModelCardMetadata
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
+CARY_SERIALIZED_MODEL_CARD = {
+    "domain": "cv",
+    "optimizations": ["GMP 95%", "QAT Int8"],
+    "parent": "_some_parent_stub",
+    "tags": [
+        "resnet",
+        "resnet_v1",
+        "resnet50",
+        "pruned",
+        "pruned95",
+        "sparseml",
+        "pytorch",
+        "imagenet",
+    ],
+    "repo": "sparseml",
+    "framework": "pytorch",
+    "task": "classification",
+    "base": "_some_base_stub",
+    "train_dataset": "imagenet_2",
+    "commands": {
+        "train": {
+            "train_model_stop_at_epoch_20": "python3 sparseml.command.bar",
+            "command3": "sparseml.command.foo",
+            "train_model": "sparseml.command.bar stub",
+        },
+        "benchmark": {
+            "benchmark_on_instance": (
+                "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub"
+            ),
+            "benchmark": "deepsparse.benchmark stub",
+        },
+        "deploy": {
+            "command1": "sparseml.command.dosomething stub",
+            "deploy_model": "deepsparse.command.dosomething stub",
+        },
+    },
+    "card_version": "1.0.0",
+    "display_name": "95% Pruned ResNet-50",
+    "source_dataset": "imagenet",
+    "version": None,
+    "sub_architecture": 50,
+    "architecture": "resnet_v1",
+}
 
 
 @pytest.mark.parametrize(
-    "path",
+    "path, platform",
     [
-        "https://git.neuralmagic.com/neuralmagic/cary",
-        "git@git.neuralmagic.com:neuralmagic/cary.git",
-        "https://git.neuralmagic.com/neuralmagic/cary.git",
+        ("https://git.neuralmagic.com/neuralmagic/cary", "web"),
+        ("git@git.neuralmagic.com:neuralmagic/cary.git", "web"),
+        ("https://git.neuralmagic.com/neuralmagic/cary.git", "web"),
+        (FIXTURE_PATH, "local"),
     ],
     scope="function",
 )
-def test_benchmark(path):
-    benchmark = Benchmark(path, platform="web")
+def test_benchmark(platform, path):
+    benchmark = Benchmark(path=path, platform=platform)
 
     # check if there are values, metadata may update, so will not check values
     assert (
@@ -41,45 +85,33 @@ def test_benchmark(path):
         and benchmark.deepsparse_version
         and benchmark.model_commit_sha
         and benchmark.results
-    ), "Benchmark metadata not populated correctly"
+    ), "Benchmark metadata not populated as expected. Please check the fields"
 
 
 @pytest.mark.parametrize(
-    "path, expected",
+    "path, expected, platform",
     [
+        (FIXTURE_PATH, CARY_SERIALIZED_MODEL_CARD, "local"),
         (
-            FIXTURE_PATH,
-            {
-                "card_version": "1.0.0",
-                "base": "_some_base_stub",
-                "parent": None,
-                "domain": "cv",
-                "task": "classification",
-                "architecture": "resnet_v1",
-                "framework": "pytorch",
-                "repo": "sparseml",
-                "source_dataset": "imagenet",
-                "train_dataset": "imagenet_2",
-                "optimizations": "pruned95-none",
-                "display_name": "95% Pruned ResNet-50",
-                "tags": [
-                    "resnet",
-                    "resnet_v1",
-                    "resnet50",
-                    "pruned",
-                    "pruned95",
-                    "sparseml",
-                    "pytorch",
-                    "imagenet",
-                ],
-                "commands": None,
-            },
-        )
+            "https://git.neuralmagic.com/neuralmagic/cary",
+            CARY_SERIALIZED_MODEL_CARD,
+            "web",
+        ),
+        (
+            "git@git.neuralmagic.com:neuralmagic/cary.git",
+            CARY_SERIALIZED_MODEL_CARD,
+            "web",
+        ),
+        (
+            "https://git.neuralmagic.com/neuralmagic/cary.git",
+            CARY_SERIALIZED_MODEL_CARD,
+            "web",
+        ),
     ],
     scope="function",
 )
-def test_model_card_metadata(path, expected):
-    model_metadata = ModelCardMetadata(path=path, platform="local")
+def test_model_card_metadata(path, expected, platform):
+    model_metadata = ModelCardMetadata(path=path, platform=platform)
 
     # model card should be immutable
     assert model_metadata.card_version == expected["card_version"], (
@@ -133,4 +165,25 @@ def test_model_card_metadata(path, expected):
     assert expected["commands"] == model_metadata.commands, (
         "commands mismatch. "
         f"Expected {expected['commands']}, got {model_metadata.commands}"
+    )
+
+
+@pytest.mark.parametrize(
+    "path, platform, ModelClass",
+    [
+        (FIXTURE_PATH, "local", ModelCardMetadata),
+        ("https://git.neuralmagic.com/neuralmagic/cary", "web", ModelCardMetadata),
+        ("git@git.neuralmagic.com:neuralmagic/cary.git", "web", ModelCardMetadata),
+        ("https://git.neuralmagic.com/neuralmagic/cary.git", "web", ModelCardMetadata),
+        (FIXTURE_PATH, "local", Benchmark),
+        ("https://git.neuralmagic.com/neuralmagic/cary", "web", Benchmark),
+        ("git@git.neuralmagic.com:neuralmagic/cary.git", "web", Benchmark),
+        ("https://git.neuralmagic.com/neuralmagic/cary.git", "web", Benchmark),
+    ],
+    scope="function",
+)
+def test_metadata_population_validations(path, platform, ModelClass):
+    passed_validation = ModelClass.validate(path=path, platform=platform)
+    assert passed_validation, (
+        f"@staticmethod validation failed for {ModelClass} platform: {platform}",
     )

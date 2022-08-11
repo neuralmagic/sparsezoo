@@ -19,9 +19,9 @@ from pydantic import BaseModel, validator
 
 
 class ModelCommands(BaseModel):
-    deploy: List[Dict]
-    train: List[Dict]
-    benchmark: List[Dict]
+    deploy: Dict
+    train: Dict
+    benchmark: Dict
 
 
 class ModelCardValidation(BaseModel):
@@ -41,7 +41,7 @@ class ModelCardValidation(BaseModel):
     dataset: Optional[str] = None
     source_dataset: str
     train_dataset: Optional[str] = None
-    optimizations: str
+    optimizations: List[str]
     display_name: str
     tags: List[str]
     commands: Optional[ModelCommands] = None

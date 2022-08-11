@@ -10,7 +10,6 @@ repo: sparseml
 version: null
 source_dataset: imagenet
 train_dataset: imagenet_2
-optimizations: pruned95-none
 display_name: 95% Pruned ResNet-50
 tags:
 - resnet
@@ -21,6 +20,23 @@ tags:
 - sparseml
 - pytorch
 - imagenet
+parent: _some_parent_stub
+optimizations: 
+- GMP 95%
+- QAT Int8
+commands:
+  deploy:
+    command1: sparseml.command.dosomething stub
+    deploy_model: deepsparse.command.dosomething stub
+  train:
+    command3: sparseml.command.foo
+    train_model: sparseml.command.bar stub
+    train_model_stop_at_epoch_20: python3 sparseml.command.bar
+  benchmark: 
+    benchmark: deepsparse.benchmark stub
+    benchmark_on_instance: deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub
+
+
 ---
 
 # ResNet-50
