@@ -51,7 +51,6 @@ EXPECTED_NLP_FILES = {
         "model.onnx",
         "tokenizer.json",
         "config.json",
-        "tokenizer_config.json",
     },
 }
 EXPECTED_YOLO_FILES = {
