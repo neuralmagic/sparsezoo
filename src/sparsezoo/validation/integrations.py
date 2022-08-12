@@ -38,11 +38,7 @@ def validate_nlp():
         "recipe.yaml",
     }
     optional_training_files = {}
-    deployment_files = {
-        "model.onnx",
-        "config.json",
-        "tokenizer.json",
-    }
+    deployment_files = {"model.onnx", "config.json", "tokenizer.json"}
     return training_files, optional_training_files, deployment_files
 
 
