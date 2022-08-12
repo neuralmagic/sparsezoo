@@ -42,7 +42,6 @@ def validate_nlp():
         "model.onnx",
         "config.json",
         "tokenizer.json",
-        "tokenizer_config.json",
     }
     return training_files, optional_training_files, deployment_files
 
