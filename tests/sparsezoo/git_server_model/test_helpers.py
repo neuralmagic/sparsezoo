@@ -86,7 +86,9 @@ def test_model_card_local_load(path):
             },
             "benchmark": {
                 "benchmark": "deepsparse.benchmark stub",
-                "benchmark_on_instance": "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub",
+                "benchmark_on_instance": (
+                    "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub"
+                ),
             },
         },
     }
@@ -142,7 +144,9 @@ def test_web_load(path):
             },
             "benchmark": {
                 "benchmark": "deepsparse.benchmark stub",
-                "benchmark_on_instance": "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub",
+                "benchmark_on_instance": (
+                    "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub"
+                ),
             },
         },
     }
