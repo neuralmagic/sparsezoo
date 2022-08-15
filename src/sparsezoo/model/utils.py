@@ -276,6 +276,16 @@ def restructure_request_json(
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
 
+        # add tokenizer_config.json if available
+        tok_config_dict_training_list = fetch_from_request_json(
+            request_json, "display_name", "tokenizer_config.json"
+        )
+        if len(tok_config_dict_training_list) >= 1:
+            _, tok_config_dict_training = tok_config_dict_training_list[0]
+            tok_config_dict_deployment = copy.copy(tok_config_dict_training)
+            tok_config_dict_deployment["file_type"] = "deployment"
+            request_json.append(tok_config_dict_deployment)
+
     # create recipes
     recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")
     for (idx, file_dict) in recipe_dicts_list:
