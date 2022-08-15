@@ -36,6 +36,7 @@ commands:
     benchmark: deepsparse.benchmark stub
     benchmark_on_instance: deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub
 
+
 ---
 
 # ResNet-50

@@ -49,7 +49,7 @@ def test_git_server_metadata(path):
 def test_model_card_local_load(path):
 
     metadata = local_load(path, file_name="model.md")
-    output = {
+    expected = {
         "card_version": "1.0.0",
         "domain": "cv",
         "base": "_some_base_stub",
@@ -61,7 +61,6 @@ def test_model_card_local_load(path):
         "version": None,
         "source_dataset": "imagenet",
         "train_dataset": "imagenet_2",
-        "optimizations": "pruned95-none",
         "display_name": "95% Pruned ResNet-50",
         "tags": [
             "resnet",
@@ -73,8 +72,25 @@ def test_model_card_local_load(path):
             "pytorch",
             "imagenet",
         ],
+        "parent": "_some_parent_stub",
+        "optimizations": ["GMP 95%", "QAT Int8"],
+        "commands": {
+            "deploy": {
+                "command1": "sparseml.command.dosomething stub",
+                "deploy_model": "deepsparse.command.dosomething stub",
+            },
+            "train": {
+                "command3": "sparseml.command.foo",
+                "train_model": "sparseml.command.bar stub",
+                "train_model_stop_at_epoch_20": "python3 sparseml.command.bar",
+            },
+            "benchmark": {
+                "benchmark": "deepsparse.benchmark stub",
+                "benchmark_on_instance": "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub",
+            },
+        },
     }
-    assert metadata == output, "[test_model_card_local_load]: local_load(path) failed"
+    assert expected == metadata, "[test_model_card_local_load]: local_load(path) failed"
 
 
 @pytest.mark.parametrize(
@@ -89,24 +105,19 @@ def test_model_card_local_load(path):
 def test_web_load(path):
 
     payload = web_load(git_server_url=path, file_name="model.md")
-    output = {
-        "card_version": "0.8.0",
+    expected = {
+        "card_version": "1.0.0",
         "domain": "cv",
-        "sub_domain": "classification",
+        "base": "_some_base_stub",
+        "task": "classification",
         "architecture": "resnet_v1",
         "sub_architecture": 50,
         "framework": "pytorch",
         "repo": "sparseml",
         "version": None,
-        "dataset": "imagenet",
-        "training_scheme": None,
-        "sparse_tag": "pruned95-none",
+        "source_dataset": "imagenet",
+        "train_dataset": "imagenet_2",
         "display_name": "95% Pruned ResNet-50",
-        "display_description": (
-            "Pruned ResNet-50 architecture trained on the ImageNet dataset. "
-            "75.9% top1 validation accuracy, recovering over 99% of "
-            "the top1 validation accuracy of the baseline model (76.1%)."
-        ),
         "tags": [
             "resnet",
             "resnet_v1",
@@ -117,5 +128,22 @@ def test_web_load(path):
             "pytorch",
             "imagenet",
         ],
+        "parent": "_some_parent_stub",
+        "optimizations": ["GMP 95%", "QAT Int8"],
+        "commands": {
+            "deploy": {
+                "command1": "sparseml.command.dosomething stub",
+                "deploy_model": "deepsparse.command.dosomething stub",
+            },
+            "train": {
+                "command3": "sparseml.command.foo",
+                "train_model": "sparseml.command.bar stub",
+                "train_model_stop_at_epoch_20": "python3 sparseml.command.bar",
+            },
+            "benchmark": {
+                "benchmark": "deepsparse.benchmark stub",
+                "benchmark_on_instance": "deepsparse.benchmark --instance_type c5.12xlarge --stub zoo_stub",
+            },
+        },
     }
-    assert payload == output, "[test_model_card_local_load]: local_load(path) failed"
+    assert expected == payload, "[test_model_card_local_load]: local_load(path) failed"
