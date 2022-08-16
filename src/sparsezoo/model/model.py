@@ -326,7 +326,6 @@ class Model(Directory):
         if params:
             self._validate_params(params)
             self._stub_params.update(params)
-
         path = os.path.join(CACHE_DIR, model_id)
         url = os.path.dirname(files[0]["url"])
         return files, path, url
