@@ -99,6 +99,16 @@ def load_files_from_stub(
         force_token_refresh=force_token_refresh,
     )
     # piece of code required for backwards compatibility
+    interesting_files = [
+        x["display_name"]
+        for x in response_json["model"]["files"]
+        if x["display_name"]
+        in ["tokenizer.json", "tokenizer_config.json", "config.json"]
+    ]
+    if len(interesting_files) != 3:
+        print(stub)
+        print(interesting_files)
+        print("-----")
     files = restructure_request_json(response_json["model"]["files"])
     model_id = response_json["model"]["model_id"]
     if params:
@@ -256,19 +266,19 @@ def restructure_request_json(
     onnx_model_file_dict["file_type"] = "deployment"
     request_json.append(onnx_model_file_dict)
 
-    # if NLP model, add `config.json` and `tokenizer.json` to `deployment`
     training_file_names = [
         file_dict["display_name"]
         for idx, file_dict in fetch_from_request_json(
             request_json, "file_type", "training"
         )
     ]
-    nlp_folder = ("config.json" in training_file_names) and (
-        "tokenizer.json" in training_file_names
-    )
+    # if NLP model,
+    # add `config.json`,`tokenizer.json`,`tokenizer_config.json` to `deployment`
+    nlp_deployment_files = {"config.json", "tokenizer.json", "tokenizer_config.json"}
+    nlp_folder = nlp_deployment_files.issubset(set(training_file_names))
 
     if nlp_folder:
-        for file_name in ["config.json", "tokenizer.json"]:
+        for file_name in nlp_deployment_files:
             file_dict_training_list = fetch_from_request_json(
                 request_json, "display_name", file_name
             )
@@ -277,16 +287,6 @@ def restructure_request_json(
             file_dict_deployment = copy.copy(file_dict_training)
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
-
-        # add tokenizer_config.json if available
-        tok_config_dict_training_list = fetch_from_request_json(
-            request_json, "display_name", "tokenizer_config.json"
-        )
-        if len(tok_config_dict_training_list) >= 1:
-            _, tok_config_dict_training = tok_config_dict_training_list[0]
-            tok_config_dict_deployment = copy.copy(tok_config_dict_training)
-            tok_config_dict_deployment["file_type"] = "deployment"
-            request_json.append(tok_config_dict_deployment)
 
     # create recipes
     recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")
