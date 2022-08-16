@@ -31,7 +31,7 @@ __all__ = [
     "load_files_from_stub",
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
-    "SAVE_DIR",
+    "CACHE_DIR",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -51,8 +51,6 @@ _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
-ENVIRONMENT_VARIABLE_PATH = os.getenv("SPARSEZOO_MODELS_PATH", "")
-SAVE_DIR = ENVIRONMENT_VARIABLE_PATH if ENVIRONMENT_VARIABLE_PATH else CACHE_DIR
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -256,19 +254,19 @@ def restructure_request_json(
     onnx_model_file_dict["file_type"] = "deployment"
     request_json.append(onnx_model_file_dict)
 
-    # if NLP model, add `config.json` and `tokenizer.json` to `deployment`
     training_file_names = [
         file_dict["display_name"]
         for idx, file_dict in fetch_from_request_json(
             request_json, "file_type", "training"
         )
     ]
-    nlp_folder = ("config.json" in training_file_names) and (
-        "tokenizer.json" in training_file_names
-    )
+    # if NLP model,
+    # add `config.json`,`tokenizer.json`,`tokenizer_config.json` to `deployment`
+    nlp_deployment_files = {"config.json", "tokenizer.json", "tokenizer_config.json"}
+    nlp_folder = nlp_deployment_files.issubset(set(training_file_names))
 
     if nlp_folder:
-        for file_name in ["config.json", "tokenizer.json"]:
+        for file_name in nlp_deployment_files:
             file_dict_training_list = fetch_from_request_json(
                 request_json, "display_name", file_name
             )
@@ -277,16 +275,6 @@ def restructure_request_json(
             file_dict_deployment = copy.copy(file_dict_training)
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
-
-        # add tokenizer_config.json if available
-        tok_config_dict_training_list = fetch_from_request_json(
-            request_json, "display_name", "tokenizer_config.json"
-        )
-        if len(tok_config_dict_training_list) >= 1:
-            _, tok_config_dict_training = tok_config_dict_training_list[0]
-            tok_config_dict_deployment = copy.copy(tok_config_dict_training)
-            tok_config_dict_deployment["file_type"] = "deployment"
-            request_json.append(tok_config_dict_deployment)
 
     # create recipes
     recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")
