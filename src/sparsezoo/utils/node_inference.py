@@ -69,7 +69,7 @@ def extract_nodes_shapes_and_dtypes_ort(
     :param model: an ONNX model
     :return: a list of NodeArg with their shape exposed
     """
-    import onnxruntime  # import protected by @require_onnxruntime()
+    import onnxruntime
 
     model_copy = deepcopy(model)
 
@@ -178,11 +178,10 @@ def extract_nodes_shapes_and_dtypes(
     try:
         output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes_ort(model)
     except Exception as err:
-        _LOGGER.warning(
-            "Extracting shapes using ONNX Runtime session failed: {}".format(err)
-        )
+        _LOGGER.warning(f"Extracting shapes using ONNX Runtime session failed: {err}")
 
     if output_shapes is None or output_dtypes is None:
+        _LOGGER.warning("Falling back to ONNX shape_inference")
         try:
             (
                 output_shapes,

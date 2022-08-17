@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import copy
+import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -30,6 +31,8 @@ from sparsezoo.utils import (
 )
 from sparsezoo.utils.node_inference import NodeShape
 
+
+_LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "get_ops_dict",
@@ -110,6 +113,14 @@ def get_ops_dict(
         ) * _numpy_prod_none_safe(kernel_shape)
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
+        if input_shapes is None:
+            _LOGGER.warn(
+                "Invalid shape, skipping "
+                f"{'four block ' if is_four_block_sparse else ''}ops calculation"
+                f" for {node.name}"
+            )
+            return ops_dict
+
         input_shape = input_shapes[0]
 
         # If no weight supplied, treat other input as dense weight
@@ -134,6 +145,14 @@ def get_ops_dict(
             ops_dict["bias"]["num_sparse_ops"] = bias_sparse_ops
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
+        if input_shapes is None:
+            _LOGGER.warn(
+                "Invalid shape, skipping "
+                f"{'four block ' if is_four_block_sparse else ''}ops calculation"
+                f" for {node.name}"
+            )
+            return ops_dict
+
         input_shape = input_shapes[0]
         pads = node_attributes["pads"] if "pads" in node_attributes else [0, 0, 0, 0]
         strides = node_attributes["strides"] if "strides" in node_attributes else [1, 1]
