@@ -249,7 +249,7 @@ class SelectDirectory(Directory):
                 return self["original"]
             # try to find recipe satisfying the recipe type
             for recipe_name in self.files_dict:
-                if recipe_type.lower() == recipe_name.lower():
+                if recipe_type and recipe_type.lower() == recipe_name.lower():
                     return self[recipe_name]
         if self.name == "training" and "preqat" in self.files_dict:
             return self["preqat"]
