@@ -47,7 +47,12 @@ EXPECTED_NLP_FILES = {
     },
     "card": {"model.md"},
     "inputs": {"sample_inputs.tar.gz"},
-    "deployment": {"model.onnx", "tokenizer.json", "config.json"},
+    "deployment": {
+        "model.onnx",
+        "tokenizer.json",
+        "config.json",
+        "tokenizer_config.json",
+    },
 }
 EXPECTED_YOLO_FILES = {
     "originals": {"sample_originals.tar.gz"},
