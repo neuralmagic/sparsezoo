@@ -51,7 +51,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
-SAVE_DIR =  os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
+SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
