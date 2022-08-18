@@ -21,7 +21,7 @@ import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.utils import (
-    CACHE_DIR,
+    SAVE_DIR,
     ZOO_STUB_PREFIX,
     load_files_from_directory,
     load_files_from_stub,
@@ -326,7 +326,8 @@ class Model(Directory):
         if params:
             self._validate_params(params)
             self._stub_params.update(params)
-        path = os.path.join(CACHE_DIR, model_id)
+
+        path = os.path.join(SAVE_DIR, model_id)
         url = os.path.dirname(files[0]["url"])
         return files, path, url
 
