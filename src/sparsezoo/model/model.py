@@ -372,7 +372,7 @@ class Model(Directory):
         )
 
     def sample_batch(
-        self, batch_index: int = 0, batch_size: int = 1, batch_as_list: bool = True
+        self, batch_size: int = 1, batch_index: int = 0, batch_as_list: bool = True
     ) -> Union[List[numpy.ndarray], Dict[str, numpy.ndarray]]:
         """
         Get a sample batch of data from the data loader
