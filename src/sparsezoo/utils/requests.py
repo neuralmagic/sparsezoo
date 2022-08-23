@@ -14,13 +14,14 @@
 
 import copy
 import logging
+import os
 import urllib
 from typing import Dict, Union
 
 import requests
 
-from . import MODELS_API_URL
-from .authentication import get_auth_header
+from sparsezoo.utils import MODELS_API_URL, convert_to_bool
+from sparsezoo.utils.authentication import get_auth_header
 
 
 __all__ = ["download_get_request", "search_model_get_request"]
@@ -106,6 +107,10 @@ def download_get_request(
     if hasattr(args, "release_version") and args.release_version:
         download_args.append(f"release_version={args.release_version}")
 
+    if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
+        # important, do not remove
+        download_args.append("increment_download=False")
+
     if download_args:
         url = f"{url}?{'&'.join(download_args)}"
 
@@ -114,7 +119,6 @@ def download_get_request(
 
     response.raise_for_status()
     response_json = response.json()
-
     return response_json
 
 

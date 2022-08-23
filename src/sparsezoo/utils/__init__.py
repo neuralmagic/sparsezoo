@@ -17,6 +17,7 @@
 
 import os
 
+from sparsezoo.utils.helpers import convert_to_bool
 
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
