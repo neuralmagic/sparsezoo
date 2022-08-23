@@ -17,12 +17,14 @@
 
 import os
 
+from sparsezoo.utils.helpers import convert_to_bool
 
 BASE_API_URL = (
     os.getenv("SPARSEZOO_API_URL")
     if os.getenv("SPARSEZOO_API_URL")
     else "https://api.neuralmagic.com"
 )
+SPARSEZOO_TEST_MODE = convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE"))
 MODELS_API_URL = f"{BASE_API_URL}/models"
 LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
 

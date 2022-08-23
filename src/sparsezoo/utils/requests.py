@@ -19,7 +19,7 @@ from typing import Dict, Union
 
 import requests
 
-from . import MODELS_API_URL
+from . import MODELS_API_URL, SPARSEZOO_TEST_MODE
 from .authentication import get_auth_header
 
 
@@ -105,6 +105,10 @@ def download_get_request(
 
     if hasattr(args, "release_version") and args.release_version:
         download_args.append(f"release_version={args.release_version}")
+
+    if SPARSEZOO_TEST_MODE:
+        # important, do not remove
+        download_args.append("increment_download=False")
 
     if download_args:
         url = f"{url}?{'&'.join(download_args)}"
