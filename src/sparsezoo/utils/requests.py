@@ -113,8 +113,6 @@ def download_get_request(
     if download_args:
         url = f"{url}?{'&'.join(download_args)}"
 
-    print(url)
-
     _LOGGER.debug(f"GET download from {url}")
     response = requests.get(url=url, headers=header)
 
