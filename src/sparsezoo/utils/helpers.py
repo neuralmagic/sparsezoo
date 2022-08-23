@@ -14,9 +14,28 @@
 
 import glob
 import os
+from typing import Any
 
 
-__all__ = ["create_dirs", "create_parent_dirs", "clean_path", "remove_tar_duplicates"]
+__all__ = [
+    "create_dirs",
+    "create_parent_dirs",
+    "clean_path",
+    "remove_tar_duplicates",
+    "convert_to_bool",
+]
+
+
+def convert_to_bool(val: Any):
+    """
+    :param val: a value
+    :return: False if value is a Falsy value e.g. 0, f, false, None, otherwise True.
+    """
+    return (
+        bool(val)
+        if not isinstance(val, str)
+        else bool(val) and "f" not in val.lower() and "0" not in val.lower()
+    )
 
 
 def remove_tar_duplicates(directory: str):
