@@ -21,6 +21,7 @@ import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.utils import (
+    RECIPES_REGEX,
     SAVE_DIR,
     ZOO_STUB_PREFIX,
     load_files_from_directory,
@@ -142,7 +143,11 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.recipes: SelectDirectory = self._directory_from_files(
+        self.recipes: Union[SelectDirectory, Directory] = self._file_from_files(
+            files,
+            display_name=RECIPES_REGEX,
+            regex=True,
+        ) or self._directory_from_files(
             files,
             directory_class=SelectDirectory,
             display_name="recipe",
@@ -168,7 +173,7 @@ class Model(Directory):
                 sample_outputs.files.sort(key=lambda x: x.name)
                 for sample_outputs in self.sample_outputs.values()
             ]
-
+        print(self.recipes)
         self._files_dictionary = {
             "training": self.training,
             "deployment": self.deployment,
