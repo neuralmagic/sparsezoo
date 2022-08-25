@@ -53,22 +53,30 @@ files_yolo = copy.copy(files_ic)
     "stub, args, should_pass",
     [
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned"
+            "-moderate",
+            # noqa E501
             ("recipe", "transfer_learn"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned"
+            "-moderate",
+            # noqa E501
             ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned"
+            "-moderate",
+            # noqa E501
             ("deployment", "default"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned"
+            "-moderate",
+            # noqa E501
             ("checkpoint", "preqat"),
             True,
         ),
@@ -108,17 +116,23 @@ class TestSetupModel:
     "stub, clone_sample_outputs, expected_files",
     [
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned"
+            "-moderate",
+            # noqa E501
             True,
             files_ic,
         ),
         (
-            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
+            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad"
+            "/pruned80_quant-none-vnni",
+            # noqa E501
             False,
             files_nlp,
         ),
         (
-            "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
+            "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant"
+            "-aggressive_94",
+            # noqa E501
             True,
             files_yolo,
         ),
@@ -244,3 +258,25 @@ class TestModel:
 
         if engine == "onnxruntime":
             assert os.path.isfile(tar_file_expected_path)
+
+
+@pytest.mark.parametrize(
+    "stub, has_results",
+    [
+        (
+            "zoo:nlp/text_classification/bert-base/pytorch/huggingface/mnli"
+            "/12layer_pruned90-none",
+            True,
+        ),
+        (
+            "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet"
+            "/pruned95_quant-none",
+            False,
+        ),
+    ],
+)
+def test_model_has_eval_results(stub, has_results):
+    if has_results:
+        assert Model(stub).eval_results is not None
+    else:
+        assert Model(stub).eval_results is None

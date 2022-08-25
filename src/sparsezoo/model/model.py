@@ -155,7 +155,7 @@ class Model(Directory):
         self.benchmarks: File = self._file_from_files(
             files, display_name="benchmarks.yaml"
         )
-        self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
+        self.eval_results: File = self._get_eval_results(files)
 
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
@@ -200,6 +200,13 @@ class Model(Directory):
         )
 
         self.integration_validator = IntegrationValidator(model=self)
+
+    def _get_eval_results(self, files):
+        return (
+            self._file_from_files(files, display_name="eval.yaml")
+            or self._file_from_files(files, display_name=".*eval.*", regex=True)
+            or self._file_from_files(files, display_name=".*validation.*", regex=True)
+        )
 
     @property
     def stub_params(self) -> Dict[str, str]:
