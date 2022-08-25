@@ -101,7 +101,7 @@ class TestSetupModel:
         elif args[0] == "checkpoint":
             assert len(model.training.available) == 1
         elif args[0] == "deployment":
-            assert len(model.training.available) == 1
+            assert len(model.deployment.available) == 1
 
 
 @pytest.mark.parametrize(
