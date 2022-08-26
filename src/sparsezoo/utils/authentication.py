@@ -74,22 +74,28 @@ def get_auth_header(
 
 def _maybe_load_token(path: str):
     if not os.path.exists(path):
+        _LOGGER.debug(f"No sparse zoo credentials files found at {path}")
         return None
+
+    _LOGGER.debug(f"Loading sparse zoo credentials from {path}")
 
     with open(path) as fp:
         creds = yaml.safe_load(fp)
 
     if creds is None or CREDENTIALS_YAML_TOKEN_KEY not in creds:
+        _LOGGER.debug(f"No sparse zoo credentials found at {path}")
         return None
 
     info = creds[CREDENTIALS_YAML_TOKEN_KEY]
     if "token" not in info or "created" not in info:
+        _LOGGER.debug(f"No sparse zoo credentials found at {path}")
         return None
 
     date_created = datetime.fromtimestamp(info["created"], tz=timezone.utc)
     creation_difference = datetime.now(tz=timezone.utc) - date_created
 
     if creation_difference.days > 30:
+        _LOGGER.debug(f"Expired sparse zoo credentials at {path}")
         return None
 
     return info["token"]
