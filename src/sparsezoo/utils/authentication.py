@@ -45,77 +45,8 @@ CREDENTIALS_YAML = os.path.abspath(
 )
 
 
-class SparseZooCredentials:
-    """
-    Class wrapping around the sparse zoo credentials file.
-    """
-
-    def __init__(self):
-        if os.path.exists(CREDENTIALS_YAML):
-            _LOGGER.debug(f"Loading sparse zoo credentials from {CREDENTIALS_YAML}")
-            with open(CREDENTIALS_YAML) as credentials_file:
-                credentials_yaml = yaml.safe_load(credentials_file)
-                if credentials_yaml and CREDENTIALS_YAML_TOKEN_KEY in credentials_yaml:
-                    self._token = credentials_yaml[CREDENTIALS_YAML_TOKEN_KEY]["token"]
-                    self._created = credentials_yaml[CREDENTIALS_YAML_TOKEN_KEY][
-                        "created"
-                    ]
-                else:
-                    self._token = None
-                    self._created = None
-        else:
-            _LOGGER.debug(
-                f"No sparse zoo credentials files found at {CREDENTIALS_YAML}"
-            )
-            self._token = None
-            self._created = None
-
-    def save_token(self, token: str, created: float):
-        """
-        Save the jwt for accessing sparse zoo APIs. Will create the credentials file
-        if it does not exist already.
-
-        :param token: the jwt for accessing sparse zoo APIs
-        :param created: the approximate time the token was created
-        """
-        _LOGGER.debug(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
-        if not os.path.exists(CREDENTIALS_YAML):
-            create_parent_dirs(CREDENTIALS_YAML)
-        with open(CREDENTIALS_YAML, "w+") as credentials_file:
-            credentials_yaml = yaml.safe_load(credentials_file)
-            if credentials_yaml is None:
-                credentials_yaml = {}
-            credentials_yaml[CREDENTIALS_YAML_TOKEN_KEY] = {
-                "token": token,
-                "created": created,
-            }
-            self._token = token
-            self._created = created
-
-            yaml.safe_dump(credentials_yaml, credentials_file)
-
-    @property
-    def token(self):
-        """
-        :return: obtain the token if under 1 day old, else return None
-        """
-        _LOGGER.debug(f"Obtaining sparse zoo credentials from {CREDENTIALS_YAML}")
-        if self._token and self._created is not None:
-            creation_date = datetime.fromtimestamp(self._created, tz=timezone.utc)
-            creation_difference = datetime.now(tz=timezone.utc) - creation_date
-            if creation_difference.days < 30:
-                return self._token
-            else:
-                _LOGGER.debug(f"Expired sparse zoo credentials at {CREDENTIALS_YAML}")
-                return None
-        else:
-            _LOGGER.debug(f"No sparse zoo credentials found at {CREDENTIALS_YAML}")
-            return None
-
-
 def get_auth_header(
-    authentication_type: str = PUBLIC_AUTH_TYPE,
-    force_token_refresh: bool = False,
+    force_token_refresh: bool = False, path: str = CREDENTIALS_YAML
 ) -> Dict:
     """
     Obtain an authentication header token from either credentials file or from APIs
@@ -124,24 +55,57 @@ def get_auth_header(
 
     Currently only 'public' authentication type is supported.
 
-    :param authentication_type: authentication type for generating token
     :param force_token_refresh: forces a new token to be generated
     :return: An authentication header with key 'nm-token-header' containing the header
         token
     """
-    credentials = SparseZooCredentials()
-    token = credentials.token
-    if token and not force_token_refresh:
-        return {NM_TOKEN_HEADER: token}
-    elif authentication_type.lower() == PUBLIC_AUTH_TYPE:
+    token = _maybe_load_token(path)
+    if token is None or force_token_refresh:
         _LOGGER.info("Obtaining new sparse zoo credentials token")
-        created = time.time()
         response = requests.post(
             url=AUTH_API, data=json.dumps({"authentication_type": PUBLIC_AUTH_TYPE})
         )
         response.raise_for_status()
         token = response.json()["token"]
-        credentials.save_token(token, created)
-        return {NM_TOKEN_HEADER: token}
-    else:
-        raise Exception(f"Authentication type {PUBLIC_AUTH_TYPE} not supported.")
+        created = time.time()
+        _save_token(token, created, path)
+    return {NM_TOKEN_HEADER: token}
+
+
+def _maybe_load_token(path: str):
+    if not os.path.exists(path):
+        return None
+
+    with open(path) as fp:
+        creds = yaml.safe_load(fp)
+
+    if creds is None or CREDENTIALS_YAML_TOKEN_KEY not in creds:
+        return None
+
+    info = creds[CREDENTIALS_YAML_TOKEN_KEY]
+    if "token" not in info or "created" not in info:
+        return None
+
+    date_created = datetime.fromtimestamp(info["created"], tz=timezone.utc)
+    creation_difference = datetime.now(tz=timezone.utc) - date_created
+
+    if creation_difference.days > 30:
+        return None
+
+    return info["token"]
+
+
+def _save_token(token: str, created: float, path: str):
+    """
+    Save the jwt for accessing sparse zoo APIs. Will create the credentials file
+    if it does not exist already.
+
+    :param token: the jwt for accessing sparse zoo APIs
+    :param created: the approximate time the token was created
+    """
+    _LOGGER.debug(f"Saving sparse zoo credentials at {CREDENTIALS_YAML}")
+    if not os.path.exists(path):
+        create_parent_dirs(path)
+    with open(path, "w+") as fp:
+        auth = {CREDENTIALS_YAML_TOKEN_KEY: dict(token=token, created=created)}
+        yaml.safe_dump(auth, fp)
