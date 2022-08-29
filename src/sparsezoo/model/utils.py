@@ -20,6 +20,8 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
+from pydantic import BaseModel
+
 from sparsezoo.objects import Directory, File, NumpyDirectory
 from sparsezoo.utils import download_get_request, save_numpy
 
@@ -32,6 +34,7 @@ __all__ = [
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
+    "ModelResult",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -54,6 +57,49 @@ CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
 
 
+class ModelResult(BaseModel):
+    """
+    Base class to store common result information
+
+    :param result_type: A string representing the typr of result
+        ex `training`, `inference`, etc
+    :param recorded_value: The float value of the result
+    :param recorded_units: The unit in which result is specified
+    """
+
+    result_type: str
+    recorded_value: float
+    recorded_units: str
+
+
+class ValidationResult(ModelResult):
+    """
+    A class holding information for validation results
+
+    :param dataset_type: A string representing the type of dataset used
+        ex. `upstream`, `downstream`.
+    :param dataset_name: The name of the dataset current result was measured
+        on
+    """
+
+    dataset_type: str
+    dataset_name: str
+
+
+class ThroughputResults(ModelResult):
+    """
+    A class holding information for throughput based results
+
+    :param device_info: The device current result was measured on
+    :param num_cores: Number of cores used while measuring this result
+    :param batch_size: The batch size used while measuring this result
+    """
+
+    device_info: str
+    num_cores: int
+    batch_size: int
+
+
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     """
     :param directory_path: a path to the directory,
@@ -73,11 +119,20 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     return files
 
 
+def _get_compressed_size(request_json: List[Dict[str, Any]]) -> int:
+    compressed_file_name = "model.onnx.tar.gz"
+    for file in request_json:
+        if file["display_name"] == compressed_file_name:
+            return file["file_size"]
+
+    raise ValueError("Compressed file-size not found!")
+
+
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
     force_token_refresh: bool = False,
-) -> Tuple[List[Dict[str, Any]], str, Dict[str, str]]:
+) -> Tuple[List[Dict[str, Any]], str, Dict[str, str], List[ModelResult], int]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
         may include string arguments)
@@ -89,6 +144,8 @@ def load_files_from_stub(
         - list of file dictionaries
         - model_id (from the server)
         - parsed param dictionary
+        - validation results
+        - compressed model size in bytes
     """
     if isinstance(stub, str):
         stub, params = parse_zoo_stub(stub, valid_params=valid_params)
@@ -99,10 +156,12 @@ def load_files_from_stub(
     )
     # piece of code required for backwards compatibility
     files = restructure_request_json(response_json["model"]["files"])
+    compressed_file_size = _get_compressed_size(response_json["model"]["files"])
     model_id = response_json["model"]["model_id"]
     if params:
         files = filter_files(files, params)
-    return files, model_id, params
+    validation_results = _parse_validation_metrics(response_json["model"]["results"])
+    return files, model_id, params, validation_results, compressed_file_size
 
 
 def filter_files(
@@ -484,3 +543,32 @@ def _copy_and_overwrite(from_path, to_path, func):
     if os.path.exists(to_path):
         shutil.rmtree(to_path)
     func(from_path, to_path)
+
+
+def _parse_validation_metrics(
+    results_response: List[Dict[str, Union[str, float]]]
+) -> List[ValidationResult]:
+    results = []
+    for result in results_response:
+        if result["recorded_units"] in ["items/seconds", "items/second"]:
+            current_result = ThroughputResults(
+                result_type=result["result_type"],
+                recorded_value=result["recorded_value"],
+                recorded_units=result["recorded_units"],
+                device_info=result["device_info"],
+                num_cores=result["num_cores"],
+                batch_size=result["batch_size"],
+            )
+
+        else:
+            current_result = ValidationResult(
+                result_type=result["result_type"],
+                recorded_value=result["recorded_value"],
+                recorded_units=result["recorded_units"],
+                dataset_name=result["dataset_name"],
+                dataset_type=result["dataset_type"],
+            )
+
+        results.append(current_result)
+
+    return results

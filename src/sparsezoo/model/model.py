@@ -23,6 +23,7 @@ from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.utils import (
     SAVE_DIR,
     ZOO_STUB_PREFIX,
+    ModelResult,
     load_files_from_directory,
     load_files_from_stub,
     save_outputs_to_tar,
@@ -78,12 +79,14 @@ class Model(Directory):
 
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
-            files, path, url = self.initialize_model_from_stub(self.source)
+            _model_args = self.initialize_model_from_stub(self.source)
+            files, path, url, validation_results, compressed_size = _model_args
             if download_path is not None:
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)
+            validation_results = compressed_size = None
             if download_path is not None:
                 raise ValueError(
                     "Ambiguous input to the constructor. "
@@ -156,6 +159,11 @@ class Model(Directory):
             files, display_name="benchmarks.yaml"
         )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
+        # plaintext validation metrics optionally parsed from a zoo stub
+        self.validation_results: Optional[List[ModelResult]] = validation_results
+
+        # compressed file size on disk in bytes
+        self.compressed_size: Optional[int] = compressed_size
 
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
@@ -319,8 +327,8 @@ class Model(Directory):
 
     def initialize_model_from_stub(
         self, stub: str
-    ) -> Tuple[List[Dict[str, str]], str, str]:
-        files, model_id, params = load_files_from_stub(
+    ) -> Tuple[List[Dict[str, str]], str, str, List[ModelResult], int]:
+        files, model_id, params, validation_results, size = load_files_from_stub(
             stub, valid_params=list(PARAM_DICT.keys())
         )
         if params:
@@ -329,7 +337,7 @@ class Model(Directory):
 
         path = os.path.join(SAVE_DIR, model_id)
         url = os.path.dirname(files[0]["url"])
-        return files, path, url
+        return files, path, url, validation_results, size
 
     def initialize_model_from_directory(
         self, directory: str

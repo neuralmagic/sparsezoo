@@ -72,6 +72,11 @@ files_yolo = copy.copy(files_ic)
             ("checkpoint", "preqat"),
             True,
         ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-moderate",  # noqa E501
+            ("checkpoint", "postqat"),
+            True,
+        ),
     ],
     scope="function",
 )
@@ -90,9 +95,11 @@ class TestSetupModel:
         if should_pass:
             model = Model(path, temp_dir.name)
             self._assert_correct_files_downloaded(model, args)
+            self._assert_validation_results_exist(model)
+            assert model.compressed_size
         else:
             with pytest.raises(ValueError):
-                model = Model(path)
+                Model(path)
 
     @staticmethod
     def _assert_correct_files_downloaded(model, args):
@@ -102,6 +109,11 @@ class TestSetupModel:
             assert len(model.training.available) == 1
         elif args[0] == "deployment":
             assert len(model.training.available) == 1
+
+    @staticmethod
+    def _assert_validation_results_exist(model):
+        assert model.validation_results is not None
+        assert len(model.validation_results) >= 1
 
 
 @pytest.mark.parametrize(
