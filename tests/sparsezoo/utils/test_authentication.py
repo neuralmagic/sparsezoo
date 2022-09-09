@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
+import yaml
+
 from sparsezoo.utils.authentication import (
-    get_auth_header,
-    _maybe_load_token,
-    _save_token,
     CREDENTIALS_YAML_TOKEN_KEY,
     NM_TOKEN_HEADER,
+    _maybe_load_token,
+    _save_token,
+    get_auth_header,
 )
-import pytest
-from datetime import datetime, timedelta
-import yaml
-from unittest.mock import patch, MagicMock
 
 
 def test_load_token_no_path(tmp_path):
