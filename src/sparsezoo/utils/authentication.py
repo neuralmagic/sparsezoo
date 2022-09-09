@@ -50,7 +50,7 @@ def get_auth_header(
 ) -> Dict:
     """
     Obtain an authentication header token from either credentials file or from APIs
-    if token is over 1 day old. Location of credentials file can be changed by setting
+    if token is over 30 day old. Location of credentials file can be changed by setting
     the environment variable `NM_SPARSE_ZOO_CREDENTIALS`.
 
     Currently only 'public' authentication type is supported.
