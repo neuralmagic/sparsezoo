@@ -83,8 +83,8 @@ pip install sparsezoo
 
 ## Quick Tour
 
-The SparseZoo Python API enables you to search and download models. Code examples are given below.
-We encourage the users to load models by copying a stub directly from a [model page]((https://sparsezoo.neuralmagic.com/)).
+The SparseZoo Python API enables you to search and download sparsified models. Code examples are given below.
+We encourage the users to load SparseZoo models by copying a stub directly from a [model page]((https://sparsezoo.neuralmagic.com/)).
 
 ### Introduction to Model Class Object
 
@@ -127,10 +127,9 @@ stub = "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned95_qu
 download_directory = "./model_download_directory"
 
 model = Model(stub, download_path = download_directory)
-
 ```
 #### Downloading the Model Files
-Once the model is initialized from a stub, it may be downloaded either by using the `download()` method or by calling a `path` property. Both pathways are universal for all the files in SparseZoo. Calling the `path` property will always trigger file download unless the file has already been downloaded.
+Once the model is initialized from a stub, it may be downloaded either by calling the `download()` method or by invoking a `path` property. Both pathways are universal for all the files in SparseZoo. Invoking the `path` property will always trigger file download unless the file has already been downloaded.
 
 ```python
 # method 1
@@ -339,7 +338,6 @@ models = search_models(**args)
 >> Model(stub=zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/base-none)
 ```
 
-### 
 
 ### Environmental Variables
 
