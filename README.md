@@ -338,7 +338,6 @@ models = search_models(**args)
 >> Model(stub=zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/base-none)
 ```
 
-
 ### Environmental Variables
 
 Users can specify the directory where models (temporarily during download) and its required credentials will be saved in your working machine. 
