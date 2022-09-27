@@ -84,7 +84,7 @@ pip install sparsezoo
 ## Quick Tour
 
 The SparseZoo Python API enables you to search and download sparsified models. Code examples are given below.
-We encourage the users to load SparseZoo models by copying a stub directly from a [model page]((https://sparsezoo.neuralmagic.com/)).
+We encourage users to load SparseZoo models by copying a stub directly from a [model page]((https://sparsezoo.neuralmagic.com/)).
 
 ### Introduction to Model Class Object
 
