@@ -31,7 +31,7 @@ __all__ = [
     "load_files_from_stub",
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
-    "CACHE_DIR",
+    "SAVE_DIR",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -51,6 +51,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
+SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -116,11 +117,16 @@ def filter_files(
     """
     available_params = set(params.keys())
     files_filtered = []
+    num_recipe_file_dicts = 0
     for file_dict in files:
         if "recipe" in available_params and file_dict["file_type"] == "recipe":
-            value = params["recipe"]
-            if not file_dict["display_name"].startswith("recipe_" + value):
+            expected_recipe_name = params["recipe"]
+            if not file_dict["display_name"].startswith(
+                "recipe_" + expected_recipe_name
+            ):
                 continue
+            else:
+                num_recipe_file_dicts += 1
         if "checkpoint" in available_params and file_dict["file_type"] == "training":
             pass
 
@@ -131,6 +137,17 @@ def filter_files(
 
     if not files_filtered:
         raise ValueError("No files found - the list of files is empty!")
+
+    if num_recipe_file_dicts >= 2:
+        recipe_names = [
+            file_dict["display_name"]
+            for file_dict in files_filtered
+            if file_dict["file_type"] == "recipe"
+        ]
+        raise ValueError(
+            f"Found multiple recipes: {recipe_names}, "
+            f"for the string argument {expected_recipe_name}"
+        )
     else:
         return files_filtered
 
@@ -238,19 +255,19 @@ def restructure_request_json(
     onnx_model_file_dict["file_type"] = "deployment"
     request_json.append(onnx_model_file_dict)
 
-    # if NLP model, add `config.json` and `tokenizer.json` to `deployment`
     training_file_names = [
         file_dict["display_name"]
         for idx, file_dict in fetch_from_request_json(
             request_json, "file_type", "training"
         )
     ]
-    nlp_folder = ("config.json" in training_file_names) and (
-        "tokenizer.json" in training_file_names
-    )
+    # if NLP model,
+    # add `config.json`,`tokenizer.json`,`tokenizer_config.json` to `deployment`
+    nlp_deployment_files = {"config.json", "tokenizer.json", "tokenizer_config.json"}
+    nlp_folder = nlp_deployment_files.issubset(set(training_file_names))
 
     if nlp_folder:
-        for file_name in ["config.json", "tokenizer.json"]:
+        for file_name in nlp_deployment_files:
             file_dict_training_list = fetch_from_request_json(
                 request_json, "display_name", file_name
             )

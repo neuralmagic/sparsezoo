@@ -47,7 +47,12 @@ EXPECTED_NLP_FILES = {
     },
     "card": {"model.md"},
     "inputs": {"sample_inputs.tar.gz"},
-    "deployment": {"model.onnx", "tokenizer.json", "config.json"},
+    "deployment": {
+        "model.onnx",
+        "tokenizer.json",
+        "config.json",
+        "tokenizer_config.json",
+    },
 }
 EXPECTED_YOLO_FILES = {
     "originals": {"sample_originals.tar.gz"},
@@ -105,20 +110,18 @@ class TestSetupModel:
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         download_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        model = Model(stub)
-        model.path = download_dir.name
-
-        yield model, temp_dir, download_dir
+        yield stub, temp_dir, download_dir
         temp_dir.cleanup()
         download_dir.cleanup()
 
     def test_setup_model_from_paths(self, setup):
         (
-            model,
+            stub,
             temp_dir,
             download_dir,
         ) = setup
 
+        model = Model(stub, download_dir.name)
         training_path = model.training.path
         deployment_path = model.deployment.path
         onnx_model_path = model.onnx_model.path
@@ -145,8 +148,9 @@ class TestSetupModel:
         } == set(os.listdir(temp_dir.name))
 
     def test_setup_model_from_objects(self, setup):
-        model, temp_dir, download_dir = setup
-        model.download(download_dir.name)
+        stub, temp_dir, download_dir = setup
+        model = Model(stub, download_dir.name)
+        model.download()
         model.sample_inputs.unzip()
 
         training = model.training

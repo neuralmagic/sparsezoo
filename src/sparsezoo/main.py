@@ -290,11 +290,6 @@ def parse_args():
         help="The directory to save the model files in, "
         "defaults to the cache directory of the sparsezoo",
     )
-    download_parser.add_argument(
-        "--overwrite",
-        action="store_true",
-        help="Overwrites existing model files if previously downloaded",
-    )
 
     search_parser.add_argument(
         "--page", type=int, default=1, help="The page of search results to view"
@@ -391,11 +386,12 @@ def main():
             release_version=args.release_version,
         )
 
-        model = Model(stub)
         if args.save_dir:
-            model.download(directory_path=args.save_dir)
+            model = Model(stub, download_path=args.save_dir)
         else:
-            model.download()
+            model = Model(stub)
+
+        model.download()
 
         print("Download results")
         print("====================")

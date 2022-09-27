@@ -105,7 +105,10 @@ class NumpyDirectory(Directory):
 
         :return: The created dataset from the sample data files
         """
-        return Dataset(self.name, self.path)
+
+        # sample_{...} or sample_{...}.tar.gz --> sample_{...}
+        dataset_name = self.name.split(".")[0]
+        return Dataset(dataset_name, self.path)
 
     def loader(
         self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
@@ -246,7 +249,7 @@ class SelectDirectory(Directory):
                 return self["original"]
             # try to find recipe satisfying the recipe type
             for recipe_name in self.files_dict:
-                if recipe_type.lower() == recipe_name.lower():
+                if recipe_type and recipe_type.lower() == recipe_name.lower():
                     return self[recipe_name]
         if self.name == "training" and "preqat" in self.files_dict:
             return self["preqat"]

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import imghdr
 import json
 import logging
 import os
@@ -23,7 +24,6 @@ from typing import Any, Dict, Optional
 import onnx
 import yaml
 
-from PIL import Image
 from sparsezoo.utils import download_file, load_numpy_list
 
 
@@ -60,7 +60,7 @@ class File:
         # has a local path attached to it. Therefore,
         # either has been downloaded or can be
         # downloaded
-        self.path = path
+        self._path = path
         self.parent_directory = parent_directory
 
         # self._path can have any extension, including no extension.
@@ -85,7 +85,7 @@ class File:
         if self._path is None:
             expected_path = os.path.join(self.parent_directory, self.name)
             if os.path.exists(expected_path):
-                self.path = expected_path
+                self._path = expected_path
                 return expected_path
             else:
                 self.download()
@@ -94,10 +94,6 @@ class File:
             self.download()
 
         return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
 
     @classmethod
     def from_dict(
@@ -298,7 +294,7 @@ class File:
             )
 
     def _validate_img(self, strict_mode):
-        if not Image.open(self.path):
+        if not imghdr.what(self.path):
             self._throw_error(
                 error_msg="Image file could not been loaded properly",
                 strict_mode=strict_mode,

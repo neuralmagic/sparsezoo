@@ -41,11 +41,12 @@ _PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
 
 _deps = [
     "numpy>=1.0.0",
-    "onnx>=1.0.0,<=1.10.1",
+    "onnx>=1.5.0,<=1.12.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
     "tqdm>=4.0.0",
-    "click==8.0",
+    "pydantic>=1.8.2",
+    "click~=8.0.0",
     "protobuf>=3.12.2,<4",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
@@ -59,8 +60,6 @@ _dev_deps = [
     "m2r2~=0.2.7",
     "mistune==0.8.4",
     "myst-parser~=0.14.0",
-    "onnxruntime>=1.0.0",
-    "pytest>=6.0.0",
     "rinohtype>=0.4.2",
     "sphinx>=3.4.0",
     "sphinx-copybutton>=0.3.0",
@@ -69,6 +68,7 @@ _dev_deps = [
     "pytest>=6.0.0",
     "sphinx-rtd-theme",
     "wheel>=0.36.2",
+    "onnxruntime>=1.0.0",
     "matplotlib>=3.0.0",
 ]
 
@@ -129,6 +129,11 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",

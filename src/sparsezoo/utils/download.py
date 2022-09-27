@@ -22,7 +22,7 @@ from tqdm import auto, tqdm, tqdm_notebook
 from .helpers import clean_path, create_parent_dirs
 
 
-__all__ = ["download_file"]
+__all__ = ["download_file", "download_file_iter"]
 
 _LOGGER = logging.getLogger(__name__)
 
