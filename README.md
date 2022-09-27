@@ -83,15 +83,15 @@ pip install sparsezoo
 
 ## Quick Tour
 
-The Python APIs respect this format enabling you to search and download models. Some code examples are given below.
-The [SparseZoo UI](https://sparsezoo.neuralmagic.com/) also enables users to load models by copying
-a stub directly from a model page.
+The SparseZoo Python API enables you to search and download models. Code examples are given below.
+We encourage the users to load models by copying a stub directly from a [model page]((https://sparsezoo.neuralmagic.com/)).
 
-### Introduction to Model class object
+### Introduction to Model Class Object
 
-`Model` is a fundamental object, that serves as an main interface with the `sparsezoo` library. It represents a sparsezoo model, together with all its directories and files.
+The `Model` is a fundamental object that serves as a main interface with the SparseZoo library. 
+It represents a SparseZoo model, together with all its directories and files.
 
-#### Creating a model class object from SparseZoo stub
+#### Creating a Model Class Object From SparseZoo Stub
 ```python
 from sparsezoo import Model
 
@@ -103,7 +103,7 @@ print(str(model))
 >> Model(stub=zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned95_quant-none)
 ```
 
-#### Creating a model class object from local model directory
+#### Creating a Model Class Object From Local Model Directory
 ```python
 from sparsezoo import Model
 
@@ -115,9 +115,10 @@ print(str(model))
 >> Model(directory=.../.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0)
 ```
 
-#### Manually specifying the model download path
+#### Manually Specifying the Model Download Path
 
-Unless specified otherwise, the model created from the SparseZoo stub is saved to the local sparsezoo cache directory. This can be overridden by passing the additional download argument to the constructor:
+Unless specified otherwise, the model created from the SparseZoo stub is saved to the local sparsezoo cache directory. 
+This can be overridden by passing the optional `download_path` argument to the constructor:
 
 ```python
 from sparsezoo import Model
@@ -126,12 +127,10 @@ stub = "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned95_qu
 download_directory = "./model_download_directory"
 
 model = Model(stub, download_path = download_directory)
-print(str(model))
 
->> Model(...)
 ```
-#### Downloading the model files
-If the model is initialized from a stub, it may be downloaded either by using the `download()` method or by calling a property `path`. Both pathways are universal for all the files in sparsezoo. Calling the `path` property will always trigger file download unless the file has already been downloaded.
+#### Downloading the Model Files
+Once the model is initialized from a stub, it may be downloaded either by using the `download()` method or by calling a `path` property. Both pathways are universal for all the files in SparseZoo. Calling the `path` property will always trigger file download unless the file has already been downloaded.
 
 ```python
 # method 1
@@ -141,12 +140,12 @@ model.download()
 model_path = model.path
 ```
 
-#### Inspecting the contents of the SparseZoo model
+#### Inspecting the Contents of the SparseZoo Model
 
-We call the `available` method to inspect which files are present in the SparseZoo model. Then, we select a file by calling the appropriate attribute:
+We call the `available_files` method to inspect which files are present in the SparseZoo model. Then, we select a file by calling the appropriate attribute:
 
 ```python
-model.available
+model.available_files
 
 >> {'training': Directory(name=training), 
 >> 'deployment': Directory(name=deployment), 
@@ -157,7 +156,7 @@ model.available
 >> 'recipes': Directory(name=recipe), 
 >> 'onnx_model': File(name=model.onnx)}
 ```
-
+Then, we might take a closer look at the contents of the SparseZoo model:
 ```python
 model_card = model.model_card
 print(model_card)
@@ -168,17 +167,17 @@ print(model_card)
 model_card_path = model.model_card.path
 print(model_card_path)
 
->> /home/user/.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/model.md
+>> .../.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/model.md
 ```
 
 
 ### Model, Directory, and File
 
-In general, every file in sparsezoo shares a set of attributes: `name`, `path`, `URL`, and `parent` directory:
+In general, every file in the SparseZoo model shares a set of attributes: `name`, `path`, `URL`, and `parent`:
 - `name` serves as an identifier of the file/directory
 - `path` points to the location of the file/directory 
-- `URL` specifies the server address of a given resource
-- `parent` points to the location of the parent directory of the file/directory in question.
+- `URL` specifies the server address of the file/directory in question
+- `parent` points to the location of the parent directory of the file/directory in question
 
 A directory is a unique type of file that contains other files. For that reason, it has an additional `files` attribute.
 
@@ -193,9 +192,9 @@ print(f"File name: {model.onnx_model.name}\n"
       f"Parent directory: {model.onnx_model.parent_directory}")
       
 >> File name: model.onnx
->> File path: /home/user/.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/model.onnx
+>> File path: .../.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/model.onnx
 >> File URL: https://models.neuralmagic.com/cv-classification/...
->> Parent directory: /home/user/.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0
+>> Parent directory: .../.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0
 ```
 
 ```python
@@ -216,15 +215,15 @@ print(f"File name: {model.recipes.name}\n"
 >> Parent directory: /home/user/.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0
 ```
 
-### Selecting checkpoint-specific data
+### Selecting Checkpoint-Specific Data
 
-In `sparsezoo` a model may contain several checkpoints. An example would be one checkpoint that had been saved before the model was quantized - that checkpoint would be used for transfer learning. Another checkpoint might have been saved after the quantizatio - that one is usually directly used for inference.
+A SparseZoo model may contain several checkpoints. The model may contain a checkpoint that had been saved before the model was quantized - that checkpoint would be used for transfer learning. Another checkpoint might have been saved after the quantization step - that one is usually directly used for inference.
 
 The recipes may also vary depending on the use case. We may want to access a recipe that was used to sparsify the dense model (`recipe_original`) or the one that enables us to sparse transfer learn from the already sparsified model (`recipe_transfer`). 
 
 There are two ways to access those specific files.
 
-#### Accessing Recipes (through Python API)
+#### Accessing Recipes (Through Python API)
 ```python
 available_recipes = model.recipes.available
 print(available_recipes)
@@ -240,10 +239,10 @@ original_recipe = model.recipes.default # recipe defaults to `original`
 original_recipe_path = original_recipe.path # downloads the recipe and returns its path
 print(original_recipe_path)
 
->> /home/user/.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/recipe/recipe_original.md
+>> .../.cache/sparsezoo/eb977dae-2454-471b-9870-4cf38074acf0/recipe/recipe_original.md
 ```
 
-#### Accessing Checkpoints (through Python API)
+#### Accessing Checkpoints (Through Python API)
 In general, we are expecting the following checkpoints to be included in the model: 
 
 - `checkpoint_prepruning`
@@ -251,7 +250,7 @@ In general, we are expecting the following checkpoints to be included in the mod
 - `checkpoint_preqat`
 - `checkpoint_postqat` 
 
-The checkpoint that the model defaults to is the `preqat` state.
+The checkpoint that the model defaults to is the `preqat` state (just before the quantization step).
 
 ```python
 from sparsezoo import Model
@@ -283,9 +282,9 @@ print(preqat_checkpoint_path)
 ```
 
 
-### Accessing recipes (through stub string arguments)
+#### Accessing Recipes (Through Stub String Arguments)
 
-An alternative to ...
+You can also directly request a specific recipe/checkpoint type by appending the appropriate URL query arguments to the stub:
 ```python
 from sparsezoo import Model
 
@@ -295,20 +294,33 @@ model = Model(stub)
 
 # Inspect which files are present.
 # Note that the available recipes are restricted
-# according to the specified string arguments
+# according to the specified URL query arguments
 print(model.recipes.available)
 
 >> ['transfer-classification']
 
-transfer_recipe = model. recipes.default # Now the recipes default to the one selected by the stub string arguments
+transfer_recipe = model.recipes.default # Now the recipes default to the one selected by the stub string arguments
 print(transfer_recipe)
 
 >> File(name=recipe_transfer-classification.md)
 ```
 
+### Accessing Sample Data
 
-### New interface for model search
-`ModelArgs` class object is used to serve a similar purpose as a stub - containing information about the stub of interest. Even though it has been deprecated, the function `search_models` remained backward compatible and still consumes a similar type of data.
+The user may easily request a sample batch of data that represents the inputs and outputs of the model.
+
+```python
+sample_data = model.sample_batch(batch_size = 10)
+
+print(sample_data['sample_inputs'][0].shape)
+>> (10, 3, 224, 224) # (batch_size, num_channels, image_dim, image_dim)
+
+print(sample_data['sample_outputs'][0].shape)
+>> (10, 1000) # (batch_size, num_classes)
+```
+
+### Model Search
+The function `search_models` enables the user to quickly filter the contents of SparseZoo repository to find the stubs of interest:
 
 ```python
 from sparsezoo import search_models
@@ -326,6 +338,8 @@ models = search_models(**args)
 >> Model(stub=zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/pruned90-none)
 >> Model(stub=zoo:cv/segmentation/yolact-darknet53/pytorch/dbolya/coco/base-none)
 ```
+
+### 
 
 ### Environmental Variables
 
