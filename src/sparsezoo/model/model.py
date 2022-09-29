@@ -20,10 +20,10 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
+from sparsezoo.model.result_utils import ModelResult
 from sparsezoo.model.utils import (
     SAVE_DIR,
     ZOO_STUB_PREFIX,
-    ModelResult,
     load_files_from_directory,
     load_files_from_stub,
     save_outputs_to_tar,
@@ -57,7 +57,7 @@ class Model(Directory):
     Object to represent SparseZoo Model Directory.
 
     :param path: a string argument that can be one of two things:
-        a) a SparseZoo model stub:
+        a) A SparseZoo model stub:
             i) without additional string arguments
                 e.g. 'zoo:model/stub/path'
             ii) with additional string arguments (that will restrict
@@ -67,8 +67,8 @@ class Model(Directory):
         b) a local directory path
             e.g. `/home/user/model_path`
 
-    :param download_path: an optional argument to specify the download
-        directory of the Model. By default is None (the model is saved
+    :param download_path: an optional string argument to specify the download
+        directory of the Model. Defaults to `None` (the model is saved
         to sparsezoo cache directory)
     """
 
@@ -79,14 +79,14 @@ class Model(Directory):
 
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
-            _model_args = self.initialize_model_from_stub(self.source)
+            _model_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _model_args
             if download_path is not None:
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
             files, path, url = self.initialize_model_from_directory(self.source)
-            validation_results = compressed_size = None
+            validation_results, compressed_size = None, None
             if download_path is not None:
                 raise ValueError(
                     "Ambiguous input to the constructor. "
@@ -159,8 +159,11 @@ class Model(Directory):
             files, display_name="benchmarks.yaml"
         )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
+
         # plaintext validation metrics optionally parsed from a zoo stub
-        self.validation_results: Optional[List[ModelResult]] = validation_results
+        self.validation_results: Optional[
+            Dict[str, List[ModelResult]]
+        ] = validation_results
 
         # compressed file size on disk in bytes
         self.compressed_size: Optional[int] = compressed_size
@@ -327,21 +330,41 @@ class Model(Directory):
 
     def initialize_model_from_stub(
         self, stub: str
-    ) -> Tuple[List[Dict[str, str]], str, str, List[ModelResult], int]:
+    ) -> Tuple[List[Dict[str, str]], str, str, Dict[str, List[ModelResult]], int]:
+        """
+        :param stub: A string SparseZoo stub to initialize model from
+        :return: A tuple of
+            - list of file dictionaries
+            - local path of the model
+            - str url to the model directory on SparseZoo
+            - validation results dict
+            - compressed model size in bytes
+        """
         files, model_id, params, validation_results, size = load_files_from_stub(
-            stub, valid_params=list(PARAM_DICT.keys())
+            stub=stub,
+            valid_params=list(PARAM_DICT.keys()),
         )
         if params:
-            self._validate_params(params)
+            self._validate_params(params=params)
             self._stub_params.update(params)
 
         path = os.path.join(SAVE_DIR, model_id)
-        url = os.path.dirname(files[0]["url"])
+        if not files:
+            raise ValueError(f"No files found for given stub {stub}")
+        url = os.path.dirname(files[0].get("url"))
         return files, path, url, validation_results, size
 
+    @staticmethod
     def initialize_model_from_directory(
-        self, directory: str
+        directory: str,
     ) -> Tuple[List[Dict[str, str]], str, None]:
+        """
+        :param: The path to a local model directory
+        :return: A tuple of
+            - list of file dictionaries
+            - path to model directory
+            - `None` (representing a local model directory url)
+        """
         files = load_files_from_directory(directory)
         path = directory
         url = None
@@ -539,14 +562,14 @@ class Model(Directory):
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
         allow_multiple_outputs: Optional[bool] = False,
-        **kwargs,
+        **kwargs: object,
     ) -> Union[Directory, None]:
 
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
         # otherwise None.
         if all([file_dict.get("file_type") for file_dict in files]):
-            # if file_dict is retrieved from the API as `request_json`
+            # if file_dict is retrieved from the API as `files`
             # first check if a directory can be created from the
             # "loose" files (alternative to parsing a .tar.gz file as
             # a directory)
@@ -598,7 +621,7 @@ class Model(Directory):
             if file.url or (
                 file.url is None
                 and any(
-                    [isinstance(file, _class) for _class in [Directory, NumpyDirectory]]
+                    isinstance(file, _class) for _class in (Directory, NumpyDirectory)
                 )
             ):
                 file.download(destination_path=directory_path)
@@ -658,7 +681,7 @@ class Model(Directory):
         files, directory_class, display_name, parent_directory, **kwargs
     ):
         # fetch all the loose files that belong to the directory (use `file_type` key
-        # from the `request_json` for proper mapping)
+        # from the `files` for proper mapping)
         files = [
             file_dict for file_dict in files if file_dict["file_type"] == display_name
         ]

@@ -53,27 +53,32 @@ files_yolo = copy.copy(files_ic)
     "stub, args, should_pass",
     [
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
             ("recipe", "transfer_learn"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",  # noqa E501
             ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",  # noqa E501
             ("deployment", "default"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",  # noqa E501
             ("checkpoint", "preqat"),
             True,
         ),
         (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/pruned_quant-moderate",  # noqa E501
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
+            "pruned_quant-moderate",  # noqa E501
             ("checkpoint", "postqat"),
             True,
         ),
@@ -113,7 +118,9 @@ class TestSetupModel:
     @staticmethod
     def _assert_validation_results_exist(model):
         assert model.validation_results is not None
-        assert len(model.validation_results) >= 1
+        assert isinstance(model.validation_results, dict)
+        assert len(model.validation_results.keys()) >= 1
+        assert any(value for value in model.validation_results.values())
 
 
 @pytest.mark.parametrize(

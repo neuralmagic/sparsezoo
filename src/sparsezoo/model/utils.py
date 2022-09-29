@@ -17,11 +17,15 @@ import logging
 import os
 import shutil
 import warnings
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from pydantic import BaseModel
-
+from sparsezoo.model.result_utils import (
+    ModelResult,
+    ThroughputResults,
+    ValidationResult,
+)
 from sparsezoo.objects import Directory, File, NumpyDirectory
 from sparsezoo.utils import download_get_request, save_numpy
 
@@ -34,7 +38,6 @@ __all__ = [
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
-    "ModelResult",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -48,6 +51,7 @@ ALLOWED_FILE_TYPES = {
     "deployment",
     "benchmarking",
     "outputs",
+    "onnx_gz",
 }
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,49 +59,6 @@ _LOGGER = logging.getLogger(__name__)
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
-
-
-class ModelResult(BaseModel):
-    """
-    Base class to store common result information
-
-    :param result_type: A string representing the typr of result
-        ex `training`, `inference`, etc
-    :param recorded_value: The float value of the result
-    :param recorded_units: The unit in which result is specified
-    """
-
-    result_type: str
-    recorded_value: float
-    recorded_units: str
-
-
-class ValidationResult(ModelResult):
-    """
-    A class holding information for validation results
-
-    :param dataset_type: A string representing the type of dataset used
-        ex. `upstream`, `downstream`.
-    :param dataset_name: The name of the dataset current result was measured
-        on
-    """
-
-    dataset_type: str
-    dataset_name: str
-
-
-class ThroughputResults(ModelResult):
-    """
-    A class holding information for throughput based results
-
-    :param device_info: The device current result was measured on
-    :param num_cores: Number of cores used while measuring this result
-    :param batch_size: The batch size used while measuring this result
-    """
-
-    device_info: str
-    num_cores: int
-    batch_size: int
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -119,20 +80,30 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     return files
 
 
-def _get_compressed_size(request_json: List[Dict[str, Any]]) -> int:
-    compressed_file_name = "model.onnx.tar.gz"
-    for file in request_json:
-        if file["display_name"] == compressed_file_name:
-            return file["file_size"]
+def _get_compressed_size(files: List[Dict[str, Any]]) -> Optional[int]:
+    """
+    Utility method to return compressed file size in bytes, if the size cannot
+    be inferred `None` is returned
 
-    raise ValueError("Compressed file-size not found!")
+    :param files: List of file dictionaries
+    :return: `None` if file size cannot be determined, else an int representing
+        compressed size of the model in bytes
+    """
+    compressed_file_name = "model.onnx.tar.gz"
+    for file in files:
+        if file.get("display_name") == compressed_file_name:
+            return file.get("file_size")
+
+    _LOGGER.info("Compressed file-size not found!")
 
 
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
     force_token_refresh: bool = False,
-) -> Tuple[List[Dict[str, Any]], str, Dict[str, str], List[ModelResult], int]:
+) -> Tuple[
+    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
+]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
         may include string arguments)
@@ -147,20 +118,26 @@ def load_files_from_stub(
         - validation results
         - compressed model size in bytes
     """
+    params = None
     if isinstance(stub, str):
-        stub, params = parse_zoo_stub(stub, valid_params=valid_params)
-    _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
-    response_json = download_get_request(
+        stub, params = parse_zoo_stub(stub=stub, valid_params=valid_params)
+    _LOGGER.debug(f"load_files_from_stub: loading files from {stub}")
+    response = download_get_request(
         args=stub,
         force_token_refresh=force_token_refresh,
     )
+
     # piece of code required for backwards compatibility
-    files = restructure_request_json(response_json["model"]["files"])
-    compressed_file_size = _get_compressed_size(response_json["model"]["files"])
-    model_id = response_json["model"]["model_id"]
-    if params:
-        files = filter_files(files, params)
-    validation_results = _parse_validation_metrics(response_json["model"]["results"])
+    model_response = response.get("model", {})
+    files = model_response.get("files", [])
+    files = restructure_request_json(request_json=files)
+    compressed_file_size = _get_compressed_size(files=files)
+    model_id = model_response.get("model_id")
+    if params is not None:
+        files = filter_files(files=files, params=params)
+
+    model_results = model_response.get("results")
+    validation_results = _parse_validation_metrics(model_results_response=model_results)
     return files, model_id, params, validation_results, compressed_file_size
 
 
@@ -285,17 +262,18 @@ def save_outputs_to_tar(
 
 
 def restructure_request_json(
-    request_json: List[Dict[str, Any]], allowed_file_types: Set = ALLOWED_FILE_TYPES
-) -> Dict[str, Any]:
+    request_json: Union[Dict[str, Any], List[Dict[str, Any]]],
+    allowed_file_types: Set = ALLOWED_FILE_TYPES,
+) -> List[Dict[str, Any]]:
     """
     Takes the legacy API response and restructures it, so that the output is
     compatible with the structure of Model.
 
-    :params request_json: data structure describing the
+    :params files: data structure describing the
         files in the Model (output from NeuralMagic API).
     :params allowed_file_types: a set of `file_types`,
         that will not be filtered out during restructuring
-    :return: restructured request_json
+    :return: restructured files
     """
     # create `training` folder
     training_dicts_list = fetch_from_request_json(
@@ -384,14 +362,14 @@ def fetch_from_request_json(
     request_json: List[Dict[str, Any]], key: str, value: str
 ) -> List[Tuple[int, Dict[str, Any]]]:
     """
-    Searches through the `request_json` list to find a
+    Searches through the `files` list to find a
     dictionary, that contains the requested
     key-value pair.
     :param request_json: A list of file dictionaries
     :param key: lookup key for the file dictionary
     :param value: lookup value for the file dictionary
     :return a list of tuples
-        (index - the found file dictionary's position in the `request_json`,
+        (index - the found file dictionary's position in the `files`,
         the found file dictionary)
     """
     return [
@@ -546,29 +524,32 @@ def _copy_and_overwrite(from_path, to_path, func):
 
 
 def _parse_validation_metrics(
-    results_response: List[Dict[str, Union[str, float]]]
-) -> List[ValidationResult]:
-    results = []
-    for result in results_response:
-        if result["recorded_units"] in ["items/seconds", "items/second"]:
+    model_results_response: List[Dict[str, Union[str, float, int]]]
+) -> Dict[str, List[ModelResult]]:
+    results: Dict[str, List[ModelResult]] = defaultdict(list)
+    for result in model_results_response:
+        recorded_units = result.get("recorded_units").lower()
+        if recorded_units in ["items/seconds", "items/second"]:
+            key = "throughput"
             current_result = ThroughputResults(
-                result_type=result["result_type"],
-                recorded_value=result["recorded_value"],
-                recorded_units=result["recorded_units"],
-                device_info=result["device_info"],
-                num_cores=result["num_cores"],
-                batch_size=result["batch_size"],
+                result_type=result.get("result_type"),
+                recorded_value=result.get("recorded_value"),
+                recorded_units=result.get("recorded_units"),
+                device_info=result.get("device_info"),
+                num_cores=result.get("num_cores"),
+                batch_size=result.get("batch_size"),
             )
 
         else:
             current_result = ValidationResult(
-                result_type=result["result_type"],
-                recorded_value=result["recorded_value"],
-                recorded_units=result["recorded_units"],
-                dataset_name=result["dataset_name"],
-                dataset_type=result["dataset_type"],
+                result_type=result.get("result_type"),
+                recorded_value=result.get("recorded_value"),
+                recorded_units=recorded_units,
+                dataset_name=result.get("dataset_name"),
+                dataset_type=result.get("dataset_type"),
             )
+            key = "validation"
 
-        results.append(current_result)
+        results[key].append(current_result)
 
     return results
