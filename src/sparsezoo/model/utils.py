@@ -115,7 +115,7 @@ def load_files_from_stub(
         - list of file dictionaries
         - model_id (from the server)
         - parsed param dictionary
-        - validation results
+        - validation results dictionary
         - compressed model size in bytes
     """
     params = None
@@ -362,14 +362,14 @@ def fetch_from_request_json(
     request_json: List[Dict[str, Any]], key: str, value: str
 ) -> List[Tuple[int, Dict[str, Any]]]:
     """
-    Searches through the `files` list to find a
-    dictionary, that contains the requested
-    key-value pair.
+    Searches through the `request_json` list to find a
+    dictionary, that contains the requested key-value pair.
+
     :param request_json: A list of file dictionaries
     :param key: lookup key for the file dictionary
     :param value: lookup value for the file dictionary
     :return a list of tuples
-        (index - the found file dictionary's position in the `files`,
+        (index - the found file dictionary's position in the `request_json`,
         the found file dictionary)
     """
     return [
