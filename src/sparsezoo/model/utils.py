@@ -38,6 +38,7 @@ __all__ = [
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
+    "COMPRESSED_FILE_NAME",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -59,6 +60,7 @@ _LOGGER = logging.getLogger(__name__)
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
+COMPRESSED_FILE_NAME = "model.onnx.tar.gz"
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -89,9 +91,8 @@ def _get_compressed_size(files: List[Dict[str, Any]]) -> Optional[int]:
     :return: `None` if file size cannot be determined, else an int representing
         compressed size of the model in bytes
     """
-    compressed_file_name = "model.onnx.tar.gz"
     for file in files:
-        if file.get("display_name") == compressed_file_name:
+        if file.get("display_name") == COMPRESSED_FILE_NAME:
             return file.get("file_size")
 
     _LOGGER.info("Compressed file-size not found!")

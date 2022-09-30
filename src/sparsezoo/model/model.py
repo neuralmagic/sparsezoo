@@ -79,14 +79,14 @@ class Model(Directory):
 
         if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
-            _model_args = self.initialize_model_from_stub(stub=self.source)
-            files, path, url, validation_results, compressed_size = _model_args
+            _setup_args = self.initialize_model_from_stub(stub=self.source)
+            files, path, url, validation_results, compressed_size = _setup_args
             if download_path is not None:
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
-            files, path, url = self.initialize_model_from_directory(self.source)
-            validation_results, compressed_size = None, None
+            files, path = self.initialize_model_from_directory(self.source)
+            validation_results, compressed_size, url = None, None, None
             if download_path is not None:
                 raise ValueError(
                     "Ambiguous input to the constructor. "
@@ -363,12 +363,10 @@ class Model(Directory):
         :return: A tuple of
             - list of file dictionaries
             - path to model directory
-            - `None` (representing a local model directory url)
         """
         files = load_files_from_directory(directory)
         path = directory
-        url = None
-        return files, path, url
+        return files, path
 
     def data_loader(
         self, batch_size: int = 1, iter_steps: int = 0, batch_as_list: bool = True
@@ -569,7 +567,7 @@ class Model(Directory):
         # a Directory() object, if successful,
         # otherwise None.
         if all([file_dict.get("file_type") for file_dict in files]):
-            # if file_dict is retrieved from the API as `files`
+            # if file_dict is retrieved from the API as `request_json`
             # first check if a directory can be created from the
             # "loose" files (alternative to parsing a .tar.gz file as
             # a directory)
@@ -681,7 +679,7 @@ class Model(Directory):
         files, directory_class, display_name, parent_directory, **kwargs
     ):
         # fetch all the loose files that belong to the directory (use `file_type` key
-        # from the `files` for proper mapping)
+        # from the `request_json` for proper mapping)
         files = [
             file_dict for file_dict in files if file_dict["file_type"] == display_name
         ]

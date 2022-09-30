@@ -60,25 +60,25 @@ files_yolo = copy.copy(files_ic)
         ),
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",  # noqa E501
+            "pruned-moderate",
             ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",  # noqa E501
+            "pruned-moderate",
             ("deployment", "default"),
             True,
         ),
         (
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",  # noqa E501
+            "pruned-moderate",
             ("checkpoint", "preqat"),
             True,
         ),
         (
             "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
-            "pruned_quant-moderate",  # noqa E501
+            "12layer_pruned80_quant-none-vnni",
             ("checkpoint", "postqat"),
             True,
         ),
