@@ -17,9 +17,15 @@ import logging
 import os
 import shutil
 import warnings
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
+from sparsezoo.model.result_utils import (
+    ModelResult,
+    ThroughputResults,
+    ValidationResult,
+)
 from sparsezoo.objects import Directory, File, NumpyDirectory
 from sparsezoo.utils import download_get_request, save_numpy
 
@@ -32,6 +38,7 @@ __all__ = [
     "load_files_from_directory",
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
+    "COMPRESSED_FILE_NAME",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -45,6 +52,7 @@ ALLOWED_FILE_TYPES = {
     "deployment",
     "benchmarking",
     "outputs",
+    "onnx_gz",
 }
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +60,7 @@ _LOGGER = logging.getLogger(__name__)
 ZOO_STUB_PREFIX = "zoo:"
 CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
+COMPRESSED_FILE_NAME = "model.onnx.tar.gz"
 
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
@@ -73,11 +82,29 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     return files
 
 
+def _get_compressed_size(files: List[Dict[str, Any]]) -> Optional[int]:
+    """
+    Utility method to return compressed file size in bytes, if the size cannot
+    be inferred `None` is returned
+
+    :param files: List of file dictionaries
+    :return: `None` if file size cannot be determined, else an int representing
+        compressed size of the model in bytes
+    """
+    for file in files:
+        if file.get("display_name") == COMPRESSED_FILE_NAME:
+            return file.get("file_size")
+
+    _LOGGER.info("Compressed file-size not found!")
+
+
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
     force_token_refresh: bool = False,
-) -> Tuple[List[Dict[str, Any]], str, Dict[str, str]]:
+) -> Tuple[
+    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
+]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
         may include string arguments)
@@ -89,20 +116,30 @@ def load_files_from_stub(
         - list of file dictionaries
         - model_id (from the server)
         - parsed param dictionary
+        - validation results dictionary
+        - compressed model size in bytes
     """
+    params = None
     if isinstance(stub, str):
-        stub, params = parse_zoo_stub(stub, valid_params=valid_params)
-    _LOGGER.debug(f"load_model_from_stub: loading model from {stub}")
-    response_json = download_get_request(
+        stub, params = parse_zoo_stub(stub=stub, valid_params=valid_params)
+    _LOGGER.debug(f"load_files_from_stub: loading files from {stub}")
+    response = download_get_request(
         args=stub,
         force_token_refresh=force_token_refresh,
     )
+
     # piece of code required for backwards compatibility
-    files = restructure_request_json(response_json["model"]["files"])
-    model_id = response_json["model"]["model_id"]
-    if params:
-        files = filter_files(files, params)
-    return files, model_id, params
+    model_response = response.get("model", {})
+    files = model_response.get("files", [])
+    files = restructure_request_json(request_json=files)
+    compressed_file_size = _get_compressed_size(files=files)
+    model_id = model_response.get("model_id")
+    if params is not None:
+        files = filter_files(files=files, params=params)
+
+    model_results = model_response.get("results")
+    validation_results = _parse_validation_metrics(model_results_response=model_results)
+    return files, model_id, params, validation_results, compressed_file_size
 
 
 def filter_files(
@@ -226,17 +263,18 @@ def save_outputs_to_tar(
 
 
 def restructure_request_json(
-    request_json: List[Dict[str, Any]], allowed_file_types: Set = ALLOWED_FILE_TYPES
-) -> Dict[str, Any]:
+    request_json: Union[Dict[str, Any], List[Dict[str, Any]]],
+    allowed_file_types: Set = ALLOWED_FILE_TYPES,
+) -> List[Dict[str, Any]]:
     """
     Takes the legacy API response and restructures it, so that the output is
     compatible with the structure of Model.
 
-    :params request_json: data structure describing the
+    :params files: data structure describing the
         files in the Model (output from NeuralMagic API).
     :params allowed_file_types: a set of `file_types`,
         that will not be filtered out during restructuring
-    :return: restructured request_json
+    :return: restructured files
     """
     # create `training` folder
     training_dicts_list = fetch_from_request_json(
@@ -326,8 +364,8 @@ def fetch_from_request_json(
 ) -> List[Tuple[int, Dict[str, Any]]]:
     """
     Searches through the `request_json` list to find a
-    dictionary, that contains the requested
-    key-value pair.
+    dictionary, that contains the requested key-value pair.
+
     :param request_json: A list of file dictionaries
     :param key: lookup key for the file dictionary
     :param value: lookup value for the file dictionary
@@ -484,3 +522,35 @@ def _copy_and_overwrite(from_path, to_path, func):
     if os.path.exists(to_path):
         shutil.rmtree(to_path)
     func(from_path, to_path)
+
+
+def _parse_validation_metrics(
+    model_results_response: List[Dict[str, Union[str, float, int]]]
+) -> Dict[str, List[ModelResult]]:
+    results: Dict[str, List[ModelResult]] = defaultdict(list)
+    for result in model_results_response:
+        recorded_units = result.get("recorded_units").lower()
+        if recorded_units in ["items/seconds", "items/second"]:
+            key = "throughput"
+            current_result = ThroughputResults(
+                result_type=result.get("result_type"),
+                recorded_value=result.get("recorded_value"),
+                recorded_units=result.get("recorded_units"),
+                device_info=result.get("device_info"),
+                num_cores=result.get("num_cores"),
+                batch_size=result.get("batch_size"),
+            )
+
+        else:
+            current_result = ValidationResult(
+                result_type=result.get("result_type"),
+                recorded_value=result.get("recorded_value"),
+                recorded_units=recorded_units,
+                dataset_name=result.get("dataset_name"),
+                dataset_type=result.get("dataset_type"),
+            )
+            key = "validation"
+
+        results[key].append(current_result)
+
+    return results

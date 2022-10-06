@@ -72,7 +72,7 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Installation
 
-This repository is tested on Python 3.6-3.9, and Linux/Debian systems.
+This repository is tested on Python 3.7-3.9, and Linux/Debian systems.
 It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
 Install with pip using:

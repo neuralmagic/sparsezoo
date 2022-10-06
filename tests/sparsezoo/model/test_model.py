@@ -53,23 +53,33 @@ files_yolo = copy.copy(files_ic)
     "stub, args, should_pass",
     [
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
             ("recipe", "transfer_learn"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
             ("checkpoint", "some_dummy_name"),
             False,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
             ("deployment", "default"),
             True,
         ),
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
             ("checkpoint", "preqat"),
+            True,
+        ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
+            "12layer_pruned80_quant-none-vnni",
+            ("checkpoint", "postqat"),
             True,
         ),
     ],
@@ -90,9 +100,11 @@ class TestSetupModel:
         if should_pass:
             model = Model(path, temp_dir.name)
             self._assert_correct_files_downloaded(model, args)
+            self._assert_validation_results_exist(model)
+            assert model.compressed_size
         else:
             with pytest.raises(ValueError):
-                model = Model(path)
+                Model(path)
 
     @staticmethod
     def _assert_correct_files_downloaded(model, args):
@@ -102,6 +114,13 @@ class TestSetupModel:
             assert len(model.training.available) == 1
         elif args[0] == "deployment":
             assert len(model.training.available) == 1
+
+    @staticmethod
+    def _assert_validation_results_exist(model):
+        assert model.validation_results is not None
+        assert isinstance(model.validation_results, dict)
+        assert len(model.validation_results.keys()) >= 1
+        assert any(value for value in model.validation_results.values())
 
 
 @pytest.mark.parametrize(
