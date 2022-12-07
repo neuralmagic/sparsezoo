@@ -15,6 +15,8 @@
 import logging
 from typing import Dict, Union
 
+import requests
+
 from sparsezoo.utils import MODELS_API_URL
 
 
@@ -59,4 +61,41 @@ def search_model_get_request(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
+    url = "https://staging-api.neuralmagic.com/v2/graphql"
+    body = """
+    {{ 
+        models {request_args}
+            {{
+                architecture
+                base
+                baseModel
+                displayDescription
+                displayName
+                domain
+                framework
+                hidden
+                modelId
+                repo
+                repoName
+                repoNamespace
+                sparseTag
+                subArchitecture
+                task
+                taskDataset
+                trainingDataset
+                trainingScheme
+            }} 
+    }}
+    """
+    request_args = ""
+    for key, value in args.items():
+        if value is not None:
+            request_args += f'{key}: "{value}",'
+    request_args = "(" + request_args + ")"
+
+    response_json = requests.post(
+        url=url, json={"query": body.format(request_args=request_args)}
+    ).json()
+    print(response_json)
+
     pass
