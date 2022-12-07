@@ -17,6 +17,8 @@ from typing import Dict, Union
 
 import requests
 
+from sparsezoo import Model
+from sparsezoo.search import model_args_to_stub
 from sparsezoo.utils import MODELS_API_URL
 
 
@@ -61,9 +63,11 @@ def search_model_get_request(
     :param force_token_refresh: True to refresh the auth token, False otherwise
     :return: the json response as a dict
     """
-    url = "https://staging-api.neuralmagic.com/v2/graphql"
+    # url = "https://staging-api.neuralmagic.com/v2/graphql"
+    url = "https://api.neuralmagic.com/v2/graphql"
+    # url = "http://0.0.0.0:8000/prod/graphql"
     body = """
-    {{ 
+    {{
         models {request_args}
             {{
                 architecture
@@ -78,13 +82,14 @@ def search_model_get_request(
                 repo
                 repoName
                 repoNamespace
+                sourceDataset
                 sparseTag
                 subArchitecture
                 task
                 taskDataset
                 trainingDataset
                 trainingScheme
-            }} 
+            }}
     }}
     """
     request_args = ""
@@ -96,6 +101,17 @@ def search_model_get_request(
     response_json = requests.post(
         url=url, json={"query": body.format(request_args=request_args)}
     ).json()
-    print(response_json)
+
+    for model_args in response_json["data"]["models"]:
+        print(model_args_to_stub(**model_args))
+
+    models = [
+        Model(model_args_to_stub(**model_args))
+        for model_args in response_json["data"]["models"]
+    ]
+    print(models)
+
+    # models = [Model(model_args_to_stub(**model_args)) for model_args in response_json["data"]["models"]]
+    # print(models)
 
     pass

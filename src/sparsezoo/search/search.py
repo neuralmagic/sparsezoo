@@ -111,24 +111,39 @@ def search_models(
 
 
 def model_args_to_stub(**kwargs) -> str:
+    # print()
+    # print()
+    # print()
+    # print()
+
+    # print(kwargs)
+    # print()
+    # print()
+    # print()
+    # print()
 
     domain = kwargs.get("domain")
-    sub_domain = kwargs.get("sub_domain")
+    sub_domain = kwargs.get("sub_domain") or kwargs.get("task")
     architecture = kwargs.get("architecture")
-    sub_architecture = kwargs.get("sub_architecture")
+    sub_architecture = kwargs.get("sub_architecture") or kwargs.get("subArchitecture")
     framework = kwargs.get("framework")
     repo = kwargs.get("repo")
-    dataset = kwargs.get("dataset")
-    sparse_tag = kwargs.get("sparse_tag")
+    dataset = kwargs.get("dataset") or kwargs.get("sourceDataset")
+    sparse_tag = kwargs.get("sparse_tag") or kwargs.get("sparseTag")
 
-    sparse_name = kwargs.get("sparse_name")
-    sparse_category = kwargs.get("sparse_category")
+    sparse_name = kwargs.get("sparse_name") or kwargs.get("sparseName")
+    sparse_category = kwargs.get("sparse_category") or kwargs.get("sparseCategory")
 
     if not sparse_tag:
         sparse_tag = sparse_name + "-" + sparse_category
 
     if sub_architecture is not None:
         sub_architecture = "-" + sub_architecture
+    # print()
+    # print()
+    # print()
+    # print()
+    # print(dataset)
 
     stub = (
         f"zoo:{domain if domain is not None else ''}/"
