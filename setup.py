@@ -40,7 +40,7 @@ print(f"loaded version {version} from src/sparsezoo/version.py")
 _PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
 
 _deps = [
-    "numpy>=1.0.0",
+    "numpy>=1.0.0,<=1.21.6",
     "onnx>=1.5.0,<=1.12.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
