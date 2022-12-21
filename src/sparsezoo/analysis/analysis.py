@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Union
 import numpy
 import onnx
 import yaml
-from onnx import NodeProto
+from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field
 
 from sparsezoo.analysis.utils.models import (
@@ -424,15 +424,20 @@ class ModelAnalysis(BaseModel):
     )
 
     @classmethod
-    def from_onnx(cls, onnx_file_path: str):
+    def from_onnx(cls, onnx_file_path: Union[str, ModelProto]):
         """
         Model Analysis
 
         :param cls: class being constructed
-        :param onnx_file_path: path to onnx file being analyzed
+        :param onnx_file_path: path to onnx file, or a loaded onnx ModelProto to
+            analyze
         :return: instance of cls
         """
-        model_onnx = onnx.load(onnx_file_path)
+        model_onnx = (
+            onnx_file_path
+            if isinstance(onnx_file_path, ModelProto)
+            else onnx.load(onnx_file_path)
+        )
         model_graph = ONNXGraph(model_onnx)
 
         node_analyses = cls.analyze_nodes(model_graph)

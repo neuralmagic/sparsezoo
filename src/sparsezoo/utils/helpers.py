@@ -14,7 +14,7 @@
 
 import glob
 import os
-from typing import Any
+from typing import Any, Dict, List
 
 
 __all__ = [
@@ -87,3 +87,4 @@ def clean_path(path: str) -> str:
     :return: a cleaned version that expands the user path and creates an absolute path
     """
     return os.path.abspath(os.path.expanduser(path))
+

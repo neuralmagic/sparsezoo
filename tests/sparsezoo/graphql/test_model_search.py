@@ -12,27 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
-# isort: skip_file
 
-import os
+from sparsezoo.utils.graphql_requests import search_model_get_request
 
-from sparsezoo.utils.helpers import convert_to_bool
 
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
-MODELS_API_URL = f"{BASE_API_URL}/v2/models"
-LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
-
-from .authentication import *
-from .graph_editor import *
-from .onnx import *
-from .calculate_ops import *
-from .data import *
-from .download import *
-from .helpers import *
-from .node_inference import *
-from .numpy import *
+args = {
+    "domain": "cv",
+    "sub_domain": "classification",
+    # "dataset": "imagenet",
+    "repo": "sparseml",
+    "sparse_tag": "pruned95_uniform_quant-none",
+}
+search_model_get_request(args=args)

@@ -1,33 +1,25 @@
-# Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+
 
 import copy
 import logging
 import os
+import re
 import shutil
 import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
+import pydantic
+
+from sparsezoo.api.graphql import GraphQLAPI
 from sparsezoo.model.result_utils import (
     ModelResult,
     ThroughputResults,
     ValidationResult,
 )
 from sparsezoo.objects import Directory, File, NumpyDirectory
-from sparsezoo.utils import download_get_request, save_numpy
+from sparsezoo.utils import save_numpy
 
 
 __all__ = [
@@ -39,6 +31,7 @@ __all__ = [
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
     "COMPRESSED_FILE_NAME",
+    "get_model_metadata_from_stub",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -123,23 +116,47 @@ def load_files_from_stub(
     if isinstance(stub, str):
         stub, params = parse_zoo_stub(stub=stub, valid_params=valid_params)
     _LOGGER.debug(f"load_files_from_stub: loading files from {stub}")
-    response = download_get_request(
-        args=stub,
-        force_token_refresh=force_token_refresh,
+
+    arguments = get_model_metadata_from_stub(stub)
+
+    models = GraphQLAPI.fetch(
+        operation_body="models",
+        arguments=arguments,
+        fields=["modelId", "modelOnnxSizeCompressedBytes"],
     )
 
-    # piece of code required for backwards compatibility
-    model_response = response.get("model", {})
-    files = model_response.get("files", [])
-    files = restructure_request_json(request_json=files)
-    compressed_file_size = _get_compressed_size(files=files)
-    model_id = model_response.get("model_id")
-    if params is not None:
-        files = filter_files(files=files, params=params)
+    model_id = models[0]["model_id"]
 
-    model_results = model_response.get("results")
-    validation_results = _parse_validation_metrics(model_results_response=model_results)
-    return files, model_id, params, validation_results, compressed_file_size
+    files = GraphQLAPI.fetch(
+        operation_body="files",
+        arguments={"model_id": model_id},
+    )
+    include_file_download_url(files)
+
+    training_results = GraphQLAPI.fetch(
+        operation_body="training_results",
+        arguments={"model_id": model_id},
+    )
+
+    benchmark_results = GraphQLAPI.fetch(
+        operation_body="benchmark_results",
+        arguments={"model_id": model_id},
+    )
+
+    model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
+
+    throughput_results = _parse_results_metrics(
+        results=benchmark_results, parser=ThroughputResults
+    )
+    validation_results = _parse_results_metrics(
+        results=training_results, parser=ValidationResult
+    )
+
+    results: Dict[str, List[ModelResult]] = defaultdict(list)
+    results["validation"] = validation_results
+    results["throughput"] = throughput_results
+
+    return files, model_id, params, results, model_onnx_size_compressed_bytes
 
 
 def filter_files(
@@ -524,33 +541,60 @@ def _copy_and_overwrite(from_path, to_path, func):
     func(from_path, to_path)
 
 
-def _parse_validation_metrics(
-    model_results_response: List[Dict[str, Union[str, float, int]]]
-) -> Dict[str, List[ModelResult]]:
-    results: Dict[str, List[ModelResult]] = defaultdict(list)
-    for result in model_results_response:
-        recorded_units = result.get("recorded_units").lower()
-        if recorded_units in ["items/seconds", "items/second"]:
-            key = "throughput"
-            current_result = ThroughputResults(
-                result_type=result.get("result_type"),
-                recorded_value=result.get("recorded_value"),
-                recorded_units=result.get("recorded_units"),
-                device_info=result.get("device_info"),
-                num_cores=result.get("num_cores"),
-                batch_size=result.get("batch_size"),
+def _parse_results_metrics(
+    results: Dict[str, str],
+    parser: Callable[[Dict[str, str]], List[pydantic.BaseModel]],
+):
+    if parser.__name__.__eq__("ThroughputResults"):
+        result_type = "training"
+    elif parser.__name__.__eq__("ValidationResult"):
+        result_type = "inference"
+    else:
+        result_type = ""
+
+    metric_results = []
+    for result in results:
+        metric_results.append(
+            parser(
+                **result,
+                result_type=result_type,
             )
+        )
 
-        else:
-            current_result = ValidationResult(
-                result_type=result.get("result_type"),
-                recorded_value=result.get("recorded_value"),
-                recorded_units=recorded_units,
-                dataset_name=result.get("dataset_name"),
-                dataset_type=result.get("dataset_type"),
-            )
-            key = "validation"
+    return metric_results
 
-        results[key].append(current_result)
 
-    return results
+def include_file_download_url(files: List[Dict]):
+    for file in files:
+        file["url"] = GraphQLAPI.get_file_download_url(
+            model_id=file["model_id"], file_name=file["display_name"]
+        )
+
+
+def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
+    """
+    Return a dictionary of the model metadata from stub
+    """
+
+    stub_regex_expr = (
+        r"^(zoo:)?"
+        r"(?P<domain>[\.A-z0-9_]+)"
+        r"/(?P<sub_domain>[\.A-z0-9_]+)"
+        r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+        r"/(?P<framework>[\.A-z0-9_]+)"
+        r"/(?P<repo>[\.A-z0-9_]+)"
+        r"/(?P<dataset>[\.A-z0-9_]+)"
+        r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
+    )
+    matches = re.match(stub_regex_expr, stub)
+
+    return {
+        "domain": matches.group("domain"),
+        "sub_domain": matches.group("sub_domain"),
+        "architecture": matches.group("architecture"),
+        "sub_architecture": matches.group("sub_architecture"),
+        "framework": matches.group("framework"),
+        "repo": matches.group("repo"),
+        "dataset": matches.group("dataset"),
+        "sparse_tag": matches.group("sparse_tag"),
+    }

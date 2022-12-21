@@ -18,7 +18,9 @@ import tempfile
 import pytest
 
 from sparsezoo.model import Model, restructure_request_json, setup_model
-from sparsezoo.utils import download_get_request
+
+
+# from sparsezoo.utils import download_get_request
 
 
 EXPECTED_IC_FILES = {
@@ -66,36 +68,36 @@ EXPECTED_YOLO_FILES = {
 }
 
 
-@pytest.mark.parametrize(
-    "stub, expected_files",
-    [
-        (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
-            EXPECTED_IC_FILES,
-        ),
-        (
-            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
-            EXPECTED_NLP_FILES,
-        ),
-        (
-            "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
-            EXPECTED_YOLO_FILES,
-        ),
-    ],
-    scope="function",
-)
-def test_restructure_request_json(stub, expected_files):
-    if stub.startswith("zoo:"):
-        stub = stub[len("zoo:") :]
-    request_json = download_get_request(args=stub)
-    request_json = restructure_request_json(request_json["model"]["files"])
-    for file_type, file_names_expected in expected_files.items():
-        file_names = set(
-            file["display_name"]
-            for file in request_json
-            if file["file_type"] == file_type
-        )
-        assert not file_names_expected.difference(file_names)
+# @pytest.mark.parametrize(
+#     "stub, expected_files",
+#     [
+#         (
+#             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+#             EXPECTED_IC_FILES,
+#         ),
+#         (
+#             "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
+#             EXPECTED_NLP_FILES,
+#         ),
+#         (
+#             "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
+#             EXPECTED_YOLO_FILES,
+#         ),
+#     ],
+#     scope="function",
+# )
+# def test_restructure_request_json(stub, expected_files):
+#     if stub.startswith("zoo:"):
+#         stub = stub[len("zoo:") :]
+#     request_json = download_get_request(args=stub)
+#     request_json = restructure_request_json(request_json["model"]["files"])
+#     for file_type, file_names_expected in expected_files.items():
+#         file_names = set(
+#             file["display_name"]
+#             for file in request_json
+#             if file["file_type"] == file_type
+#         )
+#         assert not file_names_expected.difference(file_names)
 
 
 @pytest.mark.parametrize(

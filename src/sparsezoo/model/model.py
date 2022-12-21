@@ -21,7 +21,7 @@ import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.result_utils import ModelResult
-from sparsezoo.model.utils import (
+from sparsezoo.model.utils import ( 
     SAVE_DIR,
     ZOO_STUB_PREFIX,
     load_files_from_directory,
@@ -351,7 +351,9 @@ class Model(Directory):
         path = os.path.join(SAVE_DIR, model_id)
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
+
         url = os.path.dirname(files[0].get("url"))
+
         return files, path, url, validation_results, size
 
     @staticmethod

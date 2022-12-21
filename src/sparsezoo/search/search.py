@@ -16,7 +16,8 @@ import logging
 from typing import List, Union
 
 from sparsezoo import Model
-from sparsezoo.utils import search_model_get_request
+
+from sparsezoo.api.graphql import GraphQLAPI
 
 
 __all__ = ["search_models", "model_args_to_stub"]
@@ -92,17 +93,16 @@ def search_models(
         "release_version": release_version,
     }
 
-    args = {k: v for k, v in args.items() if v is not None}
+    arguments = {k: v for k, v in args.items() if v is not None}
 
     logging.debug(f"Search_models: searching models with args {args}")
-    response_json = search_model_get_request(
-        args=args,
-        page=page,
-        page_length=page_length,
-        force_token_refresh=force_token_refresh,
+
+    response_json = GraphQLAPI.fetch(
+        operation_body="models",
+        arguments=arguments,
     )
 
-    stubs = [model_args_to_stub(**model_dict) for model_dict in response_json["models"]]
+    stubs = [model_dict["stub"] for model_dict in response_json]
 
     if return_stubs:
         return stubs
@@ -111,16 +111,6 @@ def search_models(
 
 
 def model_args_to_stub(**kwargs) -> str:
-    # print()
-    # print()
-    # print()
-    # print()
-
-    # print(kwargs)
-    # print()
-    # print()
-    # print()
-    # print()
 
     domain = kwargs.get("domain")
     sub_domain = kwargs.get("sub_domain") or kwargs.get("task")
@@ -139,11 +129,6 @@ def model_args_to_stub(**kwargs) -> str:
 
     if sub_architecture is not None:
         sub_architecture = "-" + sub_architecture
-    # print()
-    # print()
-    # print()
-    # print()
-    # print(dataset)
 
     stub = (
         f"zoo:{domain if domain is not None else ''}/"
