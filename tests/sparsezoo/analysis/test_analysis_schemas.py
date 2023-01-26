@@ -12,8 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+import pytest
+import yaml
 
-from .analysis import *
-from .analysis_schemas import *
-from .utils.chart import *
+from sparsezoo.analysis import NodeInferenceResult
+
+
+@pytest.mark.parametrize(
+    "init_args", [dict(name="Node_A", avg_run_time=10.004, extras={})]
+)
+def test_node_inference_result(init_args):
+    expected_results = NodeInferenceResult(**init_args)
+    args_from_yaml = yaml.safe_load(str(expected_results.dict()))
+    actual_results = NodeInferenceResult(**args_from_yaml)
+
+    for arg in init_args:
+        assert getattr(expected_results, arg) == getattr(actual_results, arg)
