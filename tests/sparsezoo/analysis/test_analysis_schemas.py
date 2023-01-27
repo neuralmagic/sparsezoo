@@ -23,7 +23,7 @@ from sparsezoo.analysis import NodeInferenceResult
 )
 def test_node_inference_result(init_args):
     expected_results = NodeInferenceResult(**init_args)
-    args_from_yaml = yaml.safe_load(str(expected_results.dict()))
+    args_from_yaml = yaml.safe_load(expected_results.yaml())
     actual_results = NodeInferenceResult(**args_from_yaml)
 
     for arg in init_args:

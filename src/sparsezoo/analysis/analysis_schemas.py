@@ -16,8 +16,9 @@
 A module that contains schema definitions for benchmarking and/or performance
 analysis results
 """
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
+import yaml
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
 
@@ -27,7 +28,29 @@ __all__ = [
 ]
 
 
-class NodeInferenceResult(BaseModel):
+class YAMLSerializableBaseModel(BaseModel):
+    """
+    A BaseModel that adds a .yaml(...) function to all child classes
+    """
+
+    def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
+        """
+        :param file_path: optional file path to save yaml to
+        :return: if file_path is not given, the state of the analysis model
+            as a yaml string, otherwise None
+        """
+        file_stream = None if file_path is None else open(file_path, "w")
+        ret = yaml.dump(
+            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+        )
+
+        if file_stream is not None:
+            file_stream.close()
+
+        return ret
+
+
+class NodeInferenceResult(YAMLSerializableBaseModel):
     """
     Schema definition for benchmark results for an onnx node
     """
@@ -42,7 +65,7 @@ class NodeInferenceResult(BaseModel):
     )
 
 
-class ImposedSparsificationInfo(BaseModel):
+class ImposedSparsificationInfo(YAMLSerializableBaseModel):
     """
     Schema definition for applied sparsification techniques
     """
@@ -69,7 +92,7 @@ class ImposedSparsificationInfo(BaseModel):
     )
 
 
-class BenchmarkSetup(BaseModel):
+class BenchmarkSetup(YAMLSerializableBaseModel):
     batch_size: PositiveInt = Field(
         default=1,
         description="The batch size to use for benchmarking, defaults to 1",
