@@ -15,5 +15,4 @@
 # flake8: noqa
 
 from .analysis import *
-from .analysis_schemas import *
 from .utils.chart import *

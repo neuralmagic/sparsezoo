@@ -15,7 +15,11 @@
 import pytest
 import yaml
 
-from sparsezoo.analysis import ImposedSparsificationInfo, NodeInferenceResult
+from sparsezoo.analysis import (
+    BenchmarkSetup,
+    ImposedSparsificationInfo,
+    NodeInferenceResult,
+)
 
 
 @pytest.mark.parametrize(
@@ -29,6 +33,20 @@ from sparsezoo.analysis import ImposedSparsificationInfo, NodeInferenceResult
                 sparsity_block_structure="2:4",
                 quantization=True,
                 recipe=None,
+            ),
+        ),
+        (
+            BenchmarkSetup,
+            dict(
+                batch_size=4,
+                num_cores=None,
+                engine="deepsparse",
+                scenario="sync",
+                num_streams=None,
+                duration=10,
+                warmup_duration=10,
+                instructions=None,
+                analysis_only=False,
             ),
         ),
     ],
