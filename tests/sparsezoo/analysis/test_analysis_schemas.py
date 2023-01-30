@@ -15,16 +15,31 @@
 import pytest
 import yaml
 
-from sparsezoo.analysis import NodeInferenceResult
+from sparsezoo.analysis import ImposedSparsificationInfo, NodeInferenceResult
 
 
 @pytest.mark.parametrize(
-    "init_args", [dict(name="Node_A", avg_run_time=10.004, extras={})]
+    "cls, init_args",
+    [
+        (NodeInferenceResult, dict(name="Node_A", avg_run_time=10.004, extras={})),
+        (
+            ImposedSparsificationInfo,
+            dict(
+                sparsity=0.1,
+                sparsity_block_structure="2:4",
+                quantization=True,
+                recipe=None,
+            ),
+        ),
+    ],
 )
-def test_node_inference_result(init_args):
-    expected_results = NodeInferenceResult(**init_args)
+def test_yaml_serialization(
+    cls,
+    init_args,
+):
+    expected_results = cls(**init_args)
     args_from_yaml = yaml.safe_load(expected_results.yaml())
-    actual_results = NodeInferenceResult(**args_from_yaml)
+    actual_results = cls(**args_from_yaml)
 
     for arg in init_args:
         assert getattr(expected_results, arg) == getattr(actual_results, arg)
