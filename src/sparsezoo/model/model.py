@@ -21,7 +21,7 @@ import numpy
 
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.result_utils import ModelResult
-from sparsezoo.model.utils import ( 
+from sparsezoo.model.utils import (
     SAVE_DIR,
     ZOO_STUB_PREFIX,
     load_files_from_directory,

@@ -16,7 +16,6 @@ import logging
 from typing import List, Union
 
 from sparsezoo import Model
-
 from sparsezoo.api.graphql import GraphQLAPI
 
 

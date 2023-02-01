@@ -34,7 +34,6 @@ QUERY_BODY = """
 
 
 class GraphQLAPI:
-
     @staticmethod
     def get_file_download_url(
         model_id: str,
@@ -52,9 +51,11 @@ class GraphQLAPI:
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
-        Fetch data for models via api. Uses graohql convention of post, not get for requests.
+        Fetch data for models via api. Uses graohql convention of post,
+            not get for requests.
         Input args are parsed to make a query body for the api request.
-        For more details on the appropriate values, please refer to the url endpoint on the browser
+        For more details on the appropriate values, please refer to the
+            url endpoint on the browser
 
         :param operation_body: The data object of interest
         :param arguments: Used to filter data object in the backend

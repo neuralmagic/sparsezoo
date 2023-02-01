@@ -20,11 +20,7 @@ from .utils import to_camel_case
 
 DEFAULT_MODELS_FIELDS = ["modelId", "stub"]
 
-DEFAULT_FILES_FIELDS = [
-    "displayName",
-    "fileSize",
-    "modelId",
-]
+DEFAULT_FILES_FIELDS = ["displayName", "fileSize", "modelId", "fileType"]
 
 DEFAULT_TRAINING_RESULTS_FIELDS = [
     "datasetName",
@@ -124,5 +120,3 @@ class QueryParser:
     @fields.setter
     def fields(self, fields: str) -> None:
         self._fields = fields
-
-
