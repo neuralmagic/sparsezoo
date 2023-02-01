@@ -67,6 +67,14 @@ class GraphQLAPI:
         )
         query.parse()
 
+        print(
+            QUERY_BODY.format(
+                operation_body=query.operation_body,
+                arguments=query.arguments,
+                fields=query.fields,
+            )
+        )
+
         response = requests.post(
             url=url or f"{BASE_API_URL}/v2/graphql",
             json={

@@ -77,6 +77,8 @@ def search_models(
         instead of retrieving full info for each found model. Default False
     :return: The requested list of Model instances
     """
+    sparse_tag_components = [sparse_name, sparse_category, sparse_target]
+
     args = {
         "domain": domain,
         "sub_domain": sub_domain,
@@ -86,13 +88,13 @@ def search_models(
         "repo": repo,
         "dataset": dataset,
         "training_scheme": training_scheme,
-        "sparse_name": sparse_name,
-        "sparse_category": sparse_category,
-        "sparse_target": sparse_target,
+        "sparse_tag": "-".join(
+            component for component in sparse_tag_components if component
+        ),
         "release_version": release_version,
     }
 
-    arguments = {k: v for k, v in args.items() if v is not None}
+    arguments = {key: value for key, value in args.items() if value}
 
     logging.debug(f"Search_models: searching models with args {args}")
 
@@ -112,16 +114,16 @@ def search_models(
 def model_args_to_stub(**kwargs) -> str:
 
     domain = kwargs.get("domain")
-    sub_domain = kwargs.get("sub_domain") or kwargs.get("task")
+    sub_domain = kwargs.get("sub_domain")
     architecture = kwargs.get("architecture")
-    sub_architecture = kwargs.get("sub_architecture") or kwargs.get("subArchitecture")
+    sub_architecture = kwargs.get("sub_architecture")
     framework = kwargs.get("framework")
     repo = kwargs.get("repo")
-    dataset = kwargs.get("dataset") or kwargs.get("sourceDataset")
-    sparse_tag = kwargs.get("sparse_tag") or kwargs.get("sparseTag")
+    dataset = kwargs.get("dataset")
+    sparse_tag = kwargs.get("sparse_tag")
 
-    sparse_name = kwargs.get("sparse_name") or kwargs.get("sparseName")
-    sparse_category = kwargs.get("sparse_category") or kwargs.get("sparseCategory")
+    sparse_name = kwargs.get("sparse_name")
+    sparse_category = kwargs.get("sparse_category")
 
     if not sparse_tag:
         sparse_tag = sparse_name + "-" + sparse_category

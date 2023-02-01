@@ -88,26 +88,9 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     return files
 
 
-def _get_compressed_size(files: List[Dict[str, Any]]) -> Optional[int]:
-    """
-    Utility method to return compressed file size in bytes, if the size cannot
-    be inferred `None` is returned
-
-    :param files: List of file dictionaries
-    :return: `None` if file size cannot be determined, else an int representing
-        compressed size of the model in bytes
-    """
-    for file in files:
-        if file.get("display_name") == COMPRESSED_FILE_NAME:
-            return file.get("file_size")
-
-    _LOGGER.info("Compressed file-size not found!")
-
-
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
-    force_token_refresh: bool = False,
 ) -> Tuple[
     List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
 ]:
@@ -210,17 +193,18 @@ def filter_files(
         raise ValueError("No files found - the list of files is empty!")
 
     if num_recipe_file_dicts >= 2:
-        recipe_names = [
-            file_dict["display_name"]
-            for file_dict in files_filtered
-            if file_dict["file_type"] == "recipe"
-        ]
-        raise ValueError(
-            f"Found multiple recipes: {recipe_names}, "
-            f"for the string argument {expected_recipe_name}"
-        )
-    else:
-        return files_filtered
+        recipe_names = set()
+        for file_dict in files_filtered:
+            if file_dict["file_type"] == "recipe":
+                print(file_dict["display_name"])
+                recipe_names.add(file_dict["display_name"])
+        if len(recipe_names) > 1:
+            raise ValueError(
+                f"Found multiple recipes: {recipe_names}, "
+                f"for the string argument {expected_recipe_name}"
+            )
+
+    return files_filtered
 
 
 def parse_zoo_stub(
@@ -322,6 +306,7 @@ def restructure_request_json(
     onnx_model_dict_list = fetch_from_request_json(
         request_json, "display_name", "model.onnx"
     )
+    onnx_model_dict_list = [onnx_model_dict_list[0]]
     assert len(onnx_model_dict_list) == 1
     _, onnx_model_file_dict = copy.copy(onnx_model_dict_list[0])
     onnx_model_file_dict["file_type"] = "deployment"
@@ -562,19 +547,11 @@ def _parse_results_metrics(
     results: Dict[str, str],
     parser: Callable[[Dict[str, str]], List[pydantic.BaseModel]],
 ):
-    if parser.__name__.__eq__("ThroughputResults"):
-        result_type = "training"
-    elif parser.__name__.__eq__("ValidationResult"):
-        result_type = "inference"
-    else:
-        result_type = ""
-
     metric_results = []
     for result in results:
         metric_results.append(
             parser(
                 **result,
-                result_type=result_type,
             )
         )
 

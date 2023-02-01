@@ -545,7 +545,7 @@ class Model(Directory):
         elif len(files_found) == 1:
             return files_found[0]
 
-        elif display_name == "model.onnx" and len(files_found) == 2:
+        elif display_name == "model.onnx":
             # `model.onnx` file may be found twice:
             #   - directly in the root directory
             #   - inside `deployment` directory

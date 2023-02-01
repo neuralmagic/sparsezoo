@@ -79,8 +79,8 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
                 "error encountered when removing older "
                 f"cache_file at {dest_path}: {err}"
             )
-
     request = requests.get(url_path, stream=True)
+
     request.raise_for_status()
     content_length = request.headers.get("content-length")
 
@@ -98,7 +98,6 @@ def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
             for chunk in request.iter_content(chunk_size=1024):
                 if not chunk:
                     continue
-
                 file.write(chunk)
                 file.flush()
 
@@ -137,6 +136,10 @@ def download_file_iter(
     dest_path = clean_path(dest_path)
 
     create_parent_dirs(dest_path)
+    print()
+    print(url_path)
+    print()
+    print()
 
     if not overwrite and os.path.exists(dest_path):
         raise PreviouslyDownloadedError()
@@ -197,7 +200,6 @@ def download_file(
         nad overwrite is False
     """
     bar = None
-
     for progress in download_file_iter(url_path, dest_path, overwrite, num_retries):
         if (
             bar is None
