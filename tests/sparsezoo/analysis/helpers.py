@@ -80,7 +80,6 @@ def get_generated_analysis():
         model_stub = _MODEL_PATHS[model_name]["stub"]
         model = Model(model_stub)
 
-        print(model.onnx_model)
         onnx_path = model.onnx_model.path
         analysis = ModelAnalysis.from_onnx(onnx_path)
         model_generated_analyses[model_name] = analysis

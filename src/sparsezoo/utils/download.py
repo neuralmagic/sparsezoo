@@ -136,10 +136,6 @@ def download_file_iter(
     dest_path = clean_path(dest_path)
 
     create_parent_dirs(dest_path)
-    print()
-    print(url_path)
-    print()
-    print()
 
     if not overwrite and os.path.exists(dest_path):
         raise PreviouslyDownloadedError()

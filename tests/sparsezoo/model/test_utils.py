@@ -20,9 +20,6 @@ import pytest
 from sparsezoo.model import Model, load_files_from_stub, setup_model
 
 
-# from sparsezoo.utils import download_get_request
-
-
 EXPECTED_IC_FILES = {
     "originals": {"sample_originals.tar.gz"},
     "outputs": {"sample_outputs.tar.gz"},

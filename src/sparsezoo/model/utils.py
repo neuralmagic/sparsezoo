@@ -196,7 +196,6 @@ def filter_files(
         recipe_names = set()
         for file_dict in files_filtered:
             if file_dict["file_type"] == "recipe":
-                print(file_dict["display_name"])
                 recipe_names.add(file_dict["display_name"])
         if len(recipe_names) > 1:
             raise ValueError(
