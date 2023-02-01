@@ -91,7 +91,7 @@ class QueryParser:
         parsed_fields = ""
         for field in fields:
             camel_case_field = to_camel_case(field)
-            parsed_fields += rf"{camel_case_field} "
+            parsed_fields += f"{camel_case_field} "
         self.fields = parsed_fields
 
     @property
