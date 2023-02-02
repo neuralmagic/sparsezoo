@@ -34,8 +34,8 @@ QUERY_BODY = """
 
 
 class GraphQLAPI:
-    @staticmethod
     def get_file_download_url(
+        self,
         model_id: str,
         file_name: str,
         base_url: str = BASE_API_URL,
@@ -43,8 +43,8 @@ class GraphQLAPI:
         """Url to download a file"""
         return f"{base_url}/v2/models/{model_id}/files/{file_name}"
 
-    @staticmethod
     def fetch(
+        self,
         operation_body: str,
         arguments: Dict[str, str],
         fields: Optional[List[str]] = None,
@@ -62,6 +62,25 @@ class GraphQLAPI:
         :param field: the object's field of interest
         """
 
+        response_objects = self.make_request(
+            operation_body=operation_body,
+            arguments=arguments,
+            fields=fields,
+            url=url,
+        )
+
+        return [
+            map_keys(dictionary=response_object, mapper=to_snake_case)
+            for response_object in response_objects
+        ]
+
+    def make_request(
+        self,
+        operation_body: str,
+        arguments: Dict[str, str],
+        fields: Optional[List[str]] = None,
+        url: Optional[str] = None,
+    ) -> Dict:
         query = QueryParser(
             operation_body=operation_body, arguments=arguments, fields=fields
         )
@@ -81,9 +100,4 @@ class GraphQLAPI:
         response.raise_for_status()
         response_json = response.json()
 
-        respose_objects = response_json["data"][query.operation_body]
-
-        return [
-            map_keys(dictionary=respose_object, mapper=to_snake_case)
-            for respose_object in respose_objects
-        ]
+        return response_json["data"][query.operation_body]
