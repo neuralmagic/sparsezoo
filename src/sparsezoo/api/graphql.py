@@ -13,11 +13,12 @@
 # limitations under the License.
 
 
+import os
 from typing import Any, Dict, List, Optional
 
 import requests
 
-from sparsezoo.utils import BASE_API_URL
+from sparsezoo.utils import BASE_API_URL, convert_to_bool
 
 from .query_parser import QueryParser
 from .utils import map_keys, to_snake_case
@@ -34,14 +35,6 @@ QUERY_BODY = """
 
 
 class GraphQLAPI:
-    def get_file_download_url(
-        model_id: str,
-        file_name: str,
-        base_url: str = BASE_API_URL,
-    ):
-        """Url to download a file"""
-        return f"{base_url}/v2/models/{model_id}/files/{file_name}"
-
     def fetch(
         self,
         operation_body: str,
@@ -50,7 +43,7 @@ class GraphQLAPI:
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
-        Fetch data for models via api. Uses graohql convention of post,
+        Fetch data for models via api. Uses graphql convention of post,
             not get for requests.
         Input args are parsed to make a query body for the api request.
         For more details on the appropriate values, please refer to the
@@ -73,19 +66,6 @@ class GraphQLAPI:
             for response_object in response_objects
         ]
 
-    def parse_query(
-        self,
-        operation_body: str,
-        arguments: Dict[str, str],
-        fields: Optional[List[str]] = None,
-    ):
-        query = QueryParser(
-            operation_body=operation_body, arguments=arguments, fields=fields
-        )
-        query.parse()
-
-        return query
-
     def make_request(
         self,
         operation_body: str,
@@ -93,6 +73,11 @@ class GraphQLAPI:
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
+        """
+        Given the input args, parse them to a graphql appropriate format
+            and make an graph post request to get the desired raw response.
+        Raw response's keys are in camelCase, not snake_case
+        """
 
         query = self.parse_query(
             operation_body=operation_body, arguments=arguments, fields=fields
@@ -113,3 +98,34 @@ class GraphQLAPI:
         response_json = response.json()
 
         return response_json["data"][query.operation_body]
+
+    def parse_query(
+        self,
+        operation_body: str,
+        arguments: Dict[str, str],
+        fields: Optional[List[str]] = None,
+    ):
+        """
+        Parse the input arguments to a graphql appropriate format for a post request
+        """
+        query = QueryParser(
+            operation_body=operation_body, arguments=arguments, fields=fields
+        )
+        query.parse()
+
+        return query
+
+    @staticmethod
+    def get_file_download_url(
+        model_id: str,
+        file_name: str,
+        base_url: str = BASE_API_URL,
+    ):
+        """Url to download a file"""
+        download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
+
+        # important, do not remove
+        if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
+            download_url += "?increment_download=False"
+
+        return download_url

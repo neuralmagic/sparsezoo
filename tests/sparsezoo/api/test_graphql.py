@@ -20,14 +20,6 @@ from sparsezoo.api import DEFAULT_FIELDS, GraphQLAPI
 
 
 class TestGraphQLAPI(GraphQLAPI):
-    def parse_query(
-        self,
-        operation_body: str,
-        arguments: Dict[str, str],
-        fields: Optional[List[str]] = None,
-    ):
-        return super().parse_query(operation_body, arguments, fields)
-
     def fetch(
         self,
         operation_body: str,
