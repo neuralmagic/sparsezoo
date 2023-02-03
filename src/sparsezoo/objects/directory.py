@@ -20,7 +20,7 @@ import time
 import traceback
 from typing import Dict, List, Optional, Union
 
-from sparsezoo import utils
+from sparsezoo.utils import download_file
 
 from .file import File
 
@@ -168,7 +168,7 @@ class Directory(File):
             new_file_path = os.path.join(destination_path, self.name)
             for attempt in range(retries):
                 try:
-                    utils.download_file(
+                    download_file(
                         url_path=self.url,
                         dest_path=new_file_path,
                         overwrite=overwrite,

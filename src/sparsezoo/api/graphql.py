@@ -35,7 +35,6 @@ QUERY_BODY = """
 
 class GraphQLAPI:
     def get_file_download_url(
-        self,
         model_id: str,
         file_name: str,
         base_url: str = BASE_API_URL,
@@ -74,17 +73,30 @@ class GraphQLAPI:
             for response_object in response_objects
         ]
 
+    def parse_query(
+        self,
+        operation_body: str,
+        arguments: Dict[str, str],
+        fields: Optional[List[str]] = None,
+    ):
+        query = QueryParser(
+            operation_body=operation_body, arguments=arguments, fields=fields
+        )
+        query.parse()
+
+        return query
+
     def make_request(
         self,
         operation_body: str,
         arguments: Dict[str, str],
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
-    ) -> Dict:
-        query = QueryParser(
+    ) -> Dict[str, Any]:
+
+        query = self.parse_query(
             operation_body=operation_body, arguments=arguments, fields=fields
         )
-        query.parse()
 
         response = requests.post(
             url=url or f"{BASE_API_URL}/v2/graphql",

@@ -78,7 +78,10 @@ class QueryParser:
                 camel_case_key = to_camel_case(contemporary_key)
 
                 # single, double quotes matters
-                parsed_arguments += f'{camel_case_key}: "{value}",'
+                if isinstance(value, str):
+                    parsed_arguments += f'{camel_case_key}: "{value}",'
+                else:
+                    parsed_arguments += f"{camel_case_key}: {value},"
 
         if bool(parsed_arguments):
             parsed_arguments = "(" + parsed_arguments + ")"

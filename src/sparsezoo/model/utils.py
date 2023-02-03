@@ -115,7 +115,9 @@ def load_files_from_stub(
 
     arguments = get_model_metadata_from_stub(stub)
 
-    models = GraphQLAPI.fetch(
+    api = GraphQLAPI()
+
+    models = api.fetch(
         operation_body="models",
         arguments=arguments,
         fields=["modelId", "modelOnnxSizeCompressedBytes"],
@@ -123,7 +125,7 @@ def load_files_from_stub(
 
     model_id = models[0]["model_id"]
 
-    files = GraphQLAPI.fetch(
+    files = api.fetch(
         operation_body="files",
         arguments={"model_id": model_id},
     )
@@ -133,12 +135,12 @@ def load_files_from_stub(
     if params is not None:
         files = filter_files(files=files, params=params)
 
-    training_results = GraphQLAPI.fetch(
+    training_results = api.fetch(
         operation_body="training_results",
         arguments={"model_id": model_id},
     )
 
-    benchmark_results = GraphQLAPI.fetch(
+    benchmark_results = api.fetch(
         operation_body="benchmark_results",
         arguments={"model_id": model_id},
     )

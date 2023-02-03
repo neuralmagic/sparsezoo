@@ -98,7 +98,7 @@ def search_models(
 
     logging.debug(f"Search_models: searching models with args {args}")
 
-    response_json = GraphQLAPI.fetch(
+    response_json = GraphQLAPI().fetch(
         operation_body="models",
         arguments=arguments,
     )
