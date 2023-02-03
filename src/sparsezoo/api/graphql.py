@@ -38,7 +38,7 @@ class GraphQLAPI:
     def fetch(
         self,
         operation_body: str,
-        arguments: Dict[str, str],
+        arguments: Optional[Dict[str, str]] = None,
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -69,7 +69,7 @@ class GraphQLAPI:
     def make_request(
         self,
         operation_body: str,
-        arguments: Dict[str, str],
+        arguments: Optional[Dict[str, str]] = None,
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -102,7 +102,7 @@ class GraphQLAPI:
     def parse_query(
         self,
         operation_body: str,
-        arguments: Dict[str, str],
+        arguments: Optional[Dict[str, str]] = None,
         fields: Optional[List[str]] = None,
     ):
         """

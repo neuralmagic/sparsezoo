@@ -68,6 +68,18 @@ from sparsezoo import QueryParser
                 "fields": "modelId modelOnnxSizeCompressedBytes stub sparseTag ",
             },
         ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": None,
+                "fields": None,
+            },
+            {
+                "operation_body": "models",
+                "arguments": "",
+                "fields": "modelId stub ",
+            },
+        ),
     ],
 )
 def test_query_parser(

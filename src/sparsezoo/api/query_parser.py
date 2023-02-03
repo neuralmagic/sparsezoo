@@ -52,7 +52,7 @@ class QueryParser:
     def __init__(
         self,
         operation_body: str,
-        arguments: Dict[str, str],
+        arguments: Optional[Dict[str, str]] = None,
         fields: Optional[List[str]] = None,
     ):
         self._operation_body = operation_body
@@ -72,19 +72,20 @@ class QueryParser:
     def _parse_arguments(self) -> None:
         """Transform deprecated stub args and convert to camel case"""
         parsed_arguments = ""
-        for key, value in self.arguments.items():
-            if value is not None:
-                contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(key, key)
-                camel_case_key = to_camel_case(contemporary_key)
+        if self.arguments:
+            for key, value in self.arguments.items():
+                if value is not None:
+                    contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(key, key)
+                    camel_case_key = to_camel_case(contemporary_key)
 
-                # single, double quotes matters
-                if isinstance(value, str):
-                    parsed_arguments += f'{camel_case_key}: "{value}",'
-                else:
-                    parsed_arguments += f"{camel_case_key}: {value},"
+                    # single, double quotes matters
+                    if isinstance(value, str):
+                        parsed_arguments += f'{camel_case_key}: "{value}",'
+                    else:
+                        parsed_arguments += f"{camel_case_key}: {value},"
 
-        if bool(parsed_arguments):
-            parsed_arguments = "(" + parsed_arguments + ")"
+            if parsed_arguments:
+                parsed_arguments = "(" + parsed_arguments + ")"
 
         self._arguments = parsed_arguments
 
