@@ -142,9 +142,8 @@ class BenchmarkSetup(YAMLSerializableBaseModel):
     )
 
     num_cores: Optional[int] = Field(
-        default=None,
-        description="The number of cores to use for benchmarking, defaults "
-        "to `None`, which represents all cores",
+        description="The number of cores to use for benchmarking, can also take "
+        "in a `None` value, which represents all cores",
     )
 
     engine: str = Field(
@@ -167,7 +166,7 @@ class BenchmarkSetup(YAMLSerializableBaseModel):
         default=10,
         description="Number of seconds/steps the benchmark should run for, will use "
         "steps instead of seconds if `duration_in_steps` is `True`; "
-        "defaults to 10 secs or steps",
+        "defaults to 10",
     )
 
     warmup_duration: int = Field(
