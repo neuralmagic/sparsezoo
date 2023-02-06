@@ -16,37 +16,56 @@ import pytest
 import yaml
 
 from sparsezoo.analysis import (
+    BenchmarkResult,
     BenchmarkSetup,
     ImposedSparsificationInfo,
     NodeInferenceResult,
 )
 
 
+def _imposed_sparsification_args():
+    return dict(
+        sparsity=0.1,
+        sparsity_block_structure="2:4",
+        quantization=True,
+        recipe=None,
+    )
+
+
+def _benchmark_setup_args():
+    return dict(
+        batch_size=4,
+        num_cores=None,
+        engine="deepsparse",
+        scenario="sync",
+        num_streams=None,
+        duration=10,
+        warmup_duration=10,
+        instructions=None,
+        analysis_only=False,
+    )
+
+
+def _node_inference_result_args():
+    return dict(name="Node_A", avg_run_time=10.004, extras={})
+
+
 @pytest.mark.parametrize(
     "cls, init_args",
     [
-        (NodeInferenceResult, dict(name="Node_A", avg_run_time=10.004, extras={})),
+        (NodeInferenceResult, _node_inference_result_args()),
+        (ImposedSparsificationInfo, _imposed_sparsification_args()),
+        (BenchmarkSetup, _benchmark_setup_args()),
         (
-            ImposedSparsificationInfo,
+            BenchmarkResult,
             dict(
-                sparsity=0.1,
-                sparsity_block_structure="2:4",
-                quantization=True,
-                recipe=None,
-            ),
-        ),
-        (
-            BenchmarkSetup,
-            dict(
-                batch_size=4,
-                num_cores=None,
-                engine="deepsparse",
-                scenario="sync",
-                num_streams=None,
-                duration=10,
-                warmup_duration=10,
-                instructions=None,
-                analysis_only=False,
+                setup=BenchmarkSetup(**_benchmark_setup_args()),
+                imposed_sparsification=ImposedSparsificationInfo(
+                    **_imposed_sparsification_args(),
+                ),
+                items_per_second=1.5,
+                average_latency=666.67,
+                node_timings=[NodeInferenceResult(**_node_inference_result_args())],
             ),
         ),
     ],
