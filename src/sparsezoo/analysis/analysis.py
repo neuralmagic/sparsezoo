@@ -137,8 +137,7 @@ class BenchmarkSetup(YAMLSerializableBaseModel):
     """
 
     batch_size: PositiveInt = Field(
-        default=1,
-        description="The batch size to use for benchmarking, defaults to 1",
+        description="The batch size to use for benchmarking",
     )
 
     num_cores: Optional[int] = Field(
