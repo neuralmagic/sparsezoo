@@ -11,15 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+A module that contains schema definitions for benchmarking and/or performance
+analysis results
+"""
 
 import copy
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 import onnx
 import yaml
 from onnx import ModelProto, NodeProto
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
 from sparsezoo.analysis.utils.models import (
     DenseSparseOps,
@@ -54,12 +58,164 @@ from sparsezoo.utils import (
 
 
 __all__ = [
+    "NodeInferenceResult",
+    "ImposedSparsificationInfo",
+    "BenchmarkSetup",
+    "BenchmarkResult",
     "NodeAnalysis",
     "ModelAnalysis",
 ]
 
 
-class NodeAnalysis(BaseModel):
+class YAMLSerializableBaseModel(BaseModel):
+    """
+    A BaseModel that adds a .yaml(...) function to all child classes
+    """
+
+    def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
+        """
+        :param file_path: optional file path to save yaml to
+        :return: if file_path is not given, the state of the analysis model
+            as a yaml string, otherwise None
+        """
+        file_stream = None if file_path is None else open(file_path, "w")
+        ret = yaml.dump(
+            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+        )
+
+        if file_stream is not None:
+            file_stream.close()
+
+        return ret
+
+
+class NodeInferenceResult(YAMLSerializableBaseModel):
+    """
+    Schema representing node level information from a benchmarking experiment
+    """
+
+    name: str = Field(description="The node's name")
+    avg_run_time: PositiveFloat = Field(
+        description="Average run time for current node in milli-secs",
+    )
+    extras: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Extra arguments for DeepSparse specific results",
+    )
+
+
+class ImposedSparsificationInfo(YAMLSerializableBaseModel):
+    """
+    Schema definition for applied sparsification techniques
+    """
+
+    sparsity: Optional[PositiveFloat] = Field(
+        default=None,
+        description="Globally imposed sparsity level, should be " "within (0, 1.0]",
+    )
+
+    sparsity_block_structure: Optional[str] = Field(
+        default=None,
+        description="The sparsity block structure applied to the onnx model;"
+        " ex 2:4, 4",
+    )
+
+    quantization: bool = Field(
+        default=False,
+        description="Flag to ascertain if quantization should be applied or not",
+    )
+
+    recipe: Optional[str] = Field(
+        default=None,
+        description="The recipe to be applied",
+    )
+
+
+class BenchmarkSetup(YAMLSerializableBaseModel):
+    """
+    Schema representing information for a benchmarking experiment
+    """
+
+    batch_size: PositiveInt = Field(
+        description="The batch size to use for benchmarking",
+    )
+
+    num_cores: Optional[int] = Field(
+        description="The number of cores to use for benchmarking, can also take "
+        "in a `None` value, which represents all cores",
+    )
+
+    engine: str = Field(
+        default="deepsparse",
+        description="The engine to use for benchmarking, can be `deepsparse`"
+        "or `onnxruntime`; defaults to `deepsparse`",
+    )
+
+    scenario: str = Field(
+        default="sync",
+        description="The scenario to use for benchmarking, could be `sync` or "
+        "`async`; defaults to `sync`",
+    )
+
+    num_streams: Optional[int] = Field(
+        default=None, description="Number of streams to use for benchmarking"
+    )
+
+    duration: int = Field(
+        default=10,
+        description="Number of seconds/steps the benchmark should run for, will use "
+        "steps instead of seconds if `duration_in_steps` is `True`; "
+        "defaults to 10",
+    )
+
+    warmup_duration: int = Field(
+        default=10,
+        description="Number of seconds/steps the benchmark warmup should run for, "
+        "will use steps instead of seconds if `duration_in_steps` is "
+        "`True`; defaults to 10 secs or steps",
+    )
+
+    instructions: Optional[str] = Field(
+        default=None,
+        description="Max supported instruction set available during benchmark",
+    )
+
+    analysis_only: bool = Field(
+        default=False, description="Flag to only run analysis; defaults is `False`"
+    )
+
+
+class BenchmarkResult(YAMLSerializableBaseModel):
+    """
+    Schema representing results from a benchmarking experiment
+    """
+
+    setup: BenchmarkSetup = Field(
+        description="Information regarding hardware, cores, batch_size, scenario and "
+        "other info needed to run benchmark"
+    )
+
+    imposed_sparsification: Optional[ImposedSparsificationInfo] = Field(
+        default=None,
+        description="Information on sparsification techniques used for benchmarking "
+        "if any",
+    )
+
+    items_per_second: float = Field(
+        default=0.0, description="Number of items processed per second"
+    )
+
+    average_latency: float = Field(
+        default=float("inf"), description="Average time taken per item in milli-seconds"
+    )
+
+    node_timings: Optional[List[NodeInferenceResult]] = Field(
+        default=None,
+        description="Node level inference results",
+    )
+
+
+class NodeAnalysis(YAMLSerializableBaseModel):
     """
     Pydantic model for the analysis of a node within a model
     """
@@ -394,7 +550,7 @@ class NodeAnalysis(BaseModel):
         )
 
 
-class ModelAnalysis(BaseModel):
+class ModelAnalysis(YAMLSerializableBaseModel):
     """
     Pydantic model for analysis of a model
     """
@@ -421,6 +577,11 @@ class ModelAnalysis(BaseModel):
 
     nodes: List[NodeAnalysis] = Field(
         description="List of analyses for each node in the model graph", default=[]
+    )
+
+    benchmark_results: List[BenchmarkResult] = Field(
+        default=[],
+        description="A list of different benchmarking results for the onnx model",
     )
 
     @classmethod
@@ -830,19 +991,3 @@ class ModelAnalysis(BaseModel):
             nodes.append(node_analysis)
 
         return nodes
-
-    def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
-        """
-        :param file_path: optional file path to save yaml to
-        :return: if file_path is not given, the state of the analysis model
-            as a yaml string, otherwise None
-        """
-        file_stream = None if file_path is None else open(file_path, "w")
-        ret = yaml.dump(
-            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
-        )
-
-        if file_stream is not None:
-            file_stream.close()
-
-        return ret
