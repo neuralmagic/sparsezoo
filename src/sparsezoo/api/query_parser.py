@@ -73,9 +73,11 @@ class QueryParser:
         """Transform deprecated stub args and convert to camel case"""
         parsed_arguments = ""
         if self.arguments:
-            for key, value in self.arguments.items():
+            for argument, value in self.arguments.items():
                 if value is not None:
-                    contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(key, key)
+                    contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(
+                        argument, argument
+                    )
                     camel_case_key = to_camel_case(contemporary_key)
 
                     # single, double quotes matters

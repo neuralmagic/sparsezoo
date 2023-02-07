@@ -111,7 +111,7 @@ def load_files_from_stub(
     params = None
     if isinstance(stub, str):
         stub, params = parse_zoo_stub(stub=stub, valid_params=valid_params)
-    _LOGGER.debug(f"load_files_from_stub: loading files from {stub}")
+    _LOGGER.debug(f"load_files_from_stub: calling  files from {stub}")
 
     arguments = get_model_metadata_from_stub(stub)
 
@@ -123,42 +123,45 @@ def load_files_from_stub(
         fields=["modelId", "modelOnnxSizeCompressedBytes"],
     )
 
-    model_id = models[0]["model_id"]
+    if len(models):
+        model_id = models[0]["model_id"]
 
-    files = api.fetch(
-        operation_body="files",
-        arguments={"model_id": model_id},
-    )
-    include_file_download_url(files)
-    files = restructure_request_json(request_json=files)
+        files = api.fetch(
+            operation_body="files",
+            arguments={"model_id": model_id},
+        )
+        include_file_download_url(files)
+        files = restructure_request_json(request_json=files)
 
-    if params is not None:
-        files = filter_files(files=files, params=params)
+        if params is not None:
+            files = filter_files(files=files, params=params)
 
-    training_results = api.fetch(
-        operation_body="training_results",
-        arguments={"model_id": model_id},
-    )
+        training_results = api.fetch(
+            operation_body="training_results",
+            arguments={"model_id": model_id},
+        )
 
-    benchmark_results = api.fetch(
-        operation_body="benchmark_results",
-        arguments={"model_id": model_id},
-    )
+        benchmark_results = api.fetch(
+            operation_body="benchmark_results",
+            arguments={"model_id": model_id},
+        )
 
-    model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
+        model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
 
-    throughput_results = _parse_results_metrics(
-        results=benchmark_results, parser=ThroughputResults
-    )
-    validation_results = _parse_results_metrics(
-        results=training_results, parser=ValidationResult
-    )
+        throughput_results = _parse_results_metrics(
+            results=benchmark_results, parser=ThroughputResults
+        )
+        validation_results = _parse_results_metrics(
+            results=training_results, parser=ValidationResult
+        )
 
-    results: Dict[str, List[ModelResult]] = defaultdict(list)
-    results["validation"] = validation_results
-    results["throughput"] = throughput_results
+        results: Dict[str, List[ModelResult]] = defaultdict(list)
+        results["validation"] = validation_results
+        results["throughput"] = throughput_results
 
-    return files, model_id, params, results, model_onnx_size_compressed_bytes
+        return files, model_id, params, results, model_onnx_size_compressed_bytes
+
+    _LOGGER.warning(f"load_files_from_stub: No models found with the stub:{stub}")
 
 
 def filter_files(
@@ -548,15 +551,7 @@ def _parse_results_metrics(
     results: Dict[str, str],
     parser: Callable[[Dict[str, str]], List[pydantic.BaseModel]],
 ):
-    metric_results = []
-    for result in results:
-        metric_results.append(
-            parser(
-                **result,
-            )
-        )
-
-    return metric_results
+    return [parser(**result) for result in results]
 
 
 def include_file_download_url(files: List[Dict]):

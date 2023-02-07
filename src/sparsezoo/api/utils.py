@@ -35,8 +35,4 @@ def map_keys(
     dictionary: Dict[str, str], mapper: Callable[[str], str]
 ) -> Dict[str, str]:
     """Given a dictionary, update its key to a given mapper callable"""
-    mapped_dict = {}
-    for key, value in dictionary.items():
-        mapped_dict[mapper(key)] = value
-
-    return mapped_dict
+    return {mapper(key): value for key, value in dictionary.items()}
