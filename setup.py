@@ -46,14 +46,14 @@ _deps = [
     "requests>=2.0.0",
     "tqdm>=4.0.0",
     "pydantic>=1.8.2",
-    "click~=8.0.0",
+    "click>=7.1.2,!=8.0.0",  # latest version < 8.0 + blocked version with reported bug
     "protobuf>=3.12.2,<4",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
 _dev_deps = [
     "beautifulsoup4==4.9.3",
-    "black==21.5b2",
+    "black==22.12.0",
     "flake8>=3.8.3",
     "flaky>=3.7.0",
     "isort>=5.7.0",
