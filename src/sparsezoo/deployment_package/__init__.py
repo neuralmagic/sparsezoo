@@ -1,3 +1,5 @@
+# flake8: noqa
+
 # Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
-
-from . import deployment_package as deployment_package_module
-from .deployment_package import *
-from .inference import *
-from .model import *
-from .objects import *
-from .search import *
-from .utils import *
-from .validation import *
+from .main import *
