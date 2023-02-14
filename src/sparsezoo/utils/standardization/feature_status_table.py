@@ -17,7 +17,7 @@ Representation of feature status for a logical grouping of features
 """
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -72,6 +72,24 @@ class FeatureStatusTable(ABC, BaseModel):
         ]
 
     def markdown(self) -> str:
+        """
+        :return: markdown representation of this table with title. Headers will
+            be FeatureStatus property names. Single row will be status for this
+            project
+        """
+        table_headers, table_rows = self.table_header_and_rows()
+        table = create_markdown_table(table_headers, table_rows)
+
+        return _FEATURE_STATUS_TABLE_MARKDOWN_TEMPLATE.format(
+            name=self.name,
+            description=self.description,
+            table=table,
+        )
+
+    def table_header_and_rows(self) -> Tuple[List[str], List[List[str]]]:
+        """
+        :return: tuple of markdown table headers and list of rows represented as lists
+        """
         feature_status_fields = self.feature_status_fields
         table_headers = [field.name for field in feature_status_fields]
         table_emoji_rows = [
@@ -80,10 +98,58 @@ class FeatureStatusTable(ABC, BaseModel):
                 for field in feature_status_fields
             ]
         ]
-        table = create_markdown_table(table_headers, table_emoji_rows)
+        return table_headers, table_emoji_rows
+
+    @staticmethod
+    def merged_markdown(
+        project_names: List[str],
+        status_tables: List["FeatureStatusTable"],
+    ) -> str:
+        """
+        :param project_names: List of names for the projects that the tables represent
+        :param status_tables: list of status tables to merge. Must all be instances
+            of the same class
+        :return: combined markdown table for all given tables with title. Headers
+            will be project names. Rows will be feature status
+        """
+        if not status_tables:
+            return ""
+
+        if len(project_names) != len(status_tables):
+            raise ValueError(
+                f"number of project names does not match number of status tables "
+                f"{len(project_names)} != {len(status_tables)}"
+            )
+
+        if not all(
+            table.__class__ is status_tables[0].__class__ for table in status_tables
+        ):
+            raise ValueError(
+                f"All status tables must be instances of the same class. Found "
+                f"classes: {[table.__class__.__name__ for table in status_tables]}"
+            )
+
+        table_headers_and_rows = [
+            table.table_header_and_rows() for table in status_tables
+        ]
+
+        # build rows of feature name + feature statuses per project
+        rows = []
+        features = table_headers_and_rows[0][0]  # one row per feature
+        for row_idx, feature_name in enumerate(features):
+            feature_name = f"**{feature_name}**"  # feature name bolded
+            statuses = [
+                project_row[0][row_idx] for _, project_row in table_headers_and_rows
+            ]
+            rows.append([feature_name] + statuses)
+
+        # build headers as project names
+        headers = [""] + project_names
+
+        table = create_markdown_table(headers, rows)
 
         return _FEATURE_STATUS_TABLE_MARKDOWN_TEMPLATE.format(
-            name=self.name,
-            description=self.description,
+            name=status_tables[0].name,
+            description=status_tables[0].description,
             table=table,
         )

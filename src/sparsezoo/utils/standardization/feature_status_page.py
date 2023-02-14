@@ -83,6 +83,9 @@ class FeatureStatusPage(ABC, BaseModel):
         ]
 
     def markdown(self) -> str:
+        """
+        :return: page represented in markdown format
+        """
         feature_status_table_fields = self.feature_status_table_fields
         feature_status_table_markdowns = [
             getattr(self, field.name).markdown()
@@ -94,5 +97,48 @@ class FeatureStatusPage(ABC, BaseModel):
             name=self.name,
             project_description=self.project_description,
             tables="\n\n".join(feature_status_table_markdowns),
+            status_key=FeatureStatus.MARKDOWN_HELP,
+        )
+
+    @staticmethod
+    def merged_markdown(
+        status_pages: List["FeatureStatusPage"],
+        repo_name: str = "",
+    ) -> str:
+        """
+        :param status_pages: list of status pages to merge. Must all be instances
+            of the same class
+        :param repo_name: optional repo name to add to front of page title
+        :return: combined markdown page for all given pages
+        """
+        if not status_pages:
+            return ""
+
+        if not all(
+            page.__class__ is status_pages[0].__class__ for page in status_pages
+        ):
+            raise ValueError(
+                f"All status pages must be instances of the same class. Found "
+                f"classes: {[page.__class__.__name__ for page in status_pages]}"
+            )
+
+        project_names = [page.project_name for page in status_pages]
+        table_field_names = [
+            field.name for field in status_pages[0].feature_status_table_fields
+        ]
+        table_markdowns = []
+        for table_field_name in table_field_names:
+            status_tables = [
+                getattr(status_page, table_field_name) for status_page in status_pages
+            ]
+            table_markdowns.append(
+                FeatureStatusTable.merged_markdown(project_names, status_tables)
+            )
+
+        return _FEATURE_STATUS_PAGE_MARKDOWN_TEMPLATE.format(
+            project_name=repo_name,
+            name=status_pages[0].name,
+            project_description=status_pages[0].description,
+            tables="\n\n".join(table_markdowns),
             status_key=FeatureStatus.MARKDOWN_HELP,
         )
