@@ -116,7 +116,7 @@ def test_feature_status_table_markdown():
         project_description="Fake project status for testing",
         table_1=FakeStatusTable1(
             feature_1="y",
-            feature_2="?",
+            feature_2="q",
         ),
         table_2=FakeStatusTable2(
             feature_3="n",
@@ -135,7 +135,7 @@ def test_feature_status_table_merged_markdown():
         project_description="Yolo project",
         table_1=FakeStatusTable1(
             feature_1="y",
-            feature_2="?",
+            feature_2="q",
         ),
         table_2=FakeStatusTable2(
             feature_3="n",
@@ -175,3 +175,23 @@ def test_feature_status_table_merged_markdown():
     assert merged_markdown.strip() == (
         _EXPECTED_TEST_FEATURE_STATUS_TABLE_MERGED_MARKDOWN_OUTPUT.strip()
     )
+
+
+def test_feature_status_table_yaml_serialization():
+    page_obj = FakeStatusPage(
+        project_name="Fake Project",
+        project_description="Fake project status for testing",
+        table_1=FakeStatusTable1(
+            feature_1="y",
+            feature_2="q",
+        ),
+        table_2=FakeStatusTable2(
+            feature_3="n",
+            feature_4="e",
+        ),
+    )
+
+    page_yaml_str = page_obj.yaml_str()
+    page_reloaded = FakeStatusPage.from_yaml(page_yaml_str)
+
+    assert page_obj == page_reloaded

@@ -17,9 +17,11 @@ Page containing a collection of feature status tables. Useful for reporting
 project(s) feature status with groups and descriptions
 """
 
+import os
 from abc import ABC, abstractmethod
 from typing import List
 
+import yaml
 from pydantic import BaseModel, Field
 
 from sparsezoo.utils.standardization.feature_status import FeatureStatus
@@ -81,6 +83,42 @@ class FeatureStatusPage(ABC, BaseModel):
             for field in self.__fields__.values()
             if issubclass(field.type_, FeatureStatusTable)
         ]
+
+    @classmethod
+    def from_yaml(cls, yaml_str_or_path: str) -> "FeatureStatusPage":
+        """
+        :param yaml_str_or_path: yaml string or path to yaml file to load
+        :return: status page object loaded from yaml
+        """
+        if os.path.exists(yaml_str_or_path):
+            with open(yaml_str_or_path, "r") as yaml_file:
+                yaml_obj = yaml.safe_load(yaml_file)
+        else:
+            yaml_obj = yaml.safe_load(yaml_str_or_path)
+        return cls.parse_obj(yaml_obj)
+
+    def yaml_str(self) -> str:
+        """
+        :return: yaml reprsentation of this status page with one line per feature
+        """
+        yaml_str_lines = list()
+
+        # status key help txt
+        yaml_str_lines.append(FeatureStatus.YAML_HELP)
+        yaml_str_lines.append("\n")
+
+        # base fields
+        yaml_str_lines.append(f"project_name: {self.project_name}")
+        yaml_str_lines.append(f"project_description: {self.project_description}")
+
+        # append feature status tables with status indentations of '  '
+        for field in self.feature_status_table_fields:
+            yaml_str_lines.append("\n")
+            yaml_str_lines.append(f"{field.name}:")
+            status_table = getattr(self, field.name)
+            yaml_str_lines.extend(status_table.yaml_str_lines(indentation="  "))
+
+        return "\n".join(yaml_str_lines)
 
     def markdown(self) -> str:
         """
