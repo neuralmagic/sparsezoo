@@ -26,7 +26,7 @@ _STATUS_TO_GITHUB_EMOJI = {
     "y": ":white_check_mark:",  # (yes) - implemented by NM
     "e": ":heavy_check_mark:",  # (external) - implemented by external integration
     "n": ":x:",  # (no) - not implemented yet
-    "?": ":question:",  # (question) - not sure, not tested, or to be investigated
+    "q": ":question:",  # (question) - not sure, not tested, or to be investigated
 }
 
 _STATUS_HELP_TEXT = """
@@ -35,6 +35,16 @@ _STATUS_HELP_TEXT = """
  * :heavy_check_mark: - implemented by underlying integration
  * :x: - not implemented yet
  * :question: - not sure, not tested, or to be investigated
+""".strip()
+
+_YAML_HELP_TEXT = """
+###########################################################
+# Status Keys:
+# y: yes - implemented by NM
+# e: external - implemented by external integration
+# n: no - not implemented yet
+# q: question - not sure, not tested, or to be investigated
+###########################################################
 """.strip()
 
 
@@ -46,10 +56,11 @@ class FeatureStatus(str):
     'y' - (yes) - implemented by NM
     'e' - (external) - implemented by external integration
     'n' - (no) - not implemented yet
-    '?' - (question) - not sure, not tested, or to be investigated
+    'q' - (question) - not sure, not tested, or to be investigated
     """
 
     MARKDOWN_HELP = _STATUS_HELP_TEXT
+    YAML_HELP = _YAML_HELP_TEXT
     VALID_VALUES = list(_STATUS_TO_GITHUB_EMOJI.values())
 
     def github_emoji(self) -> str:
