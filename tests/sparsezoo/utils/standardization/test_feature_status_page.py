@@ -82,6 +82,33 @@ fake description
  * :question: - not sure, not tested, or to be investigated
 """
 
+_EXPECTED_TEST_FEATURE_STATUS_TABLE_MERGED_MARKDOWN_OUTPUT = """
+# SparseML Fake Project Status Page
+fake page description
+
+## fake table 1
+fake description
+
+|               | YOLOv5             | Image Classification | Question Answering |
+| ------------- | ------------------ | -------------------- | ------------------ |
+| **feature_1** | :white_check_mark: | :white_check_mark:   | :white_check_mark: |
+| **feature_2** | :question:         | :white_check_mark:   | :heavy_check_mark: |
+
+## fake table 2
+
+
+|               | YOLOv5             | Image Classification | Question Answering |
+| ------------- | ------------------ | -------------------- | ------------------ |
+| **feature_3** | :x:                | :white_check_mark:   | :heavy_check_mark: |
+| **feature_4** | :heavy_check_mark: | :white_check_mark:   | :white_check_mark: |
+
+### Key
+ * :white_check_mark: - implemented by neuralmagic integration
+ * :heavy_check_mark: - implemented by underlying integration
+ * :x: - not implemented yet
+ * :question: - not sure, not tested, or to be investigated
+"""
+
 
 def test_feature_status_table_markdown():
     page = FakeStatusPage(
@@ -99,4 +126,52 @@ def test_feature_status_table_markdown():
 
     assert page.markdown().strip() == (
         _EXPECTED_TEST_FEATURE_STATUS_TABLE_MARKDOWN_OUTPUT.strip()
+    )
+
+
+def test_feature_status_table_merged_markdown():
+    page_1 = FakeStatusPage(
+        project_name="YOLOv5",
+        project_description="Yolo project",
+        table_1=FakeStatusTable1(
+            feature_1="y",
+            feature_2="?",
+        ),
+        table_2=FakeStatusTable2(
+            feature_3="n",
+            feature_4="e",
+        ),
+    )
+    page_2 = FakeStatusPage(
+        project_name="Image Classification",
+        project_description="IC project",
+        table_1=FakeStatusTable1(
+            feature_1="y",
+            feature_2="y",
+        ),
+        table_2=FakeStatusTable2(
+            feature_3="y",
+            feature_4="y",
+        ),
+    )
+    page_3 = FakeStatusPage(
+        project_name="Question Answering",
+        project_description="NLP/QA project",
+        table_1=FakeStatusTable1(
+            feature_1="y",
+            feature_2="e",
+        ),
+        table_2=FakeStatusTable2(
+            feature_3="e",
+            feature_4="y",
+        ),
+    )
+    repo_name = "SparseML"
+
+    merged_markdown = FeatureStatusPage.merged_markdown(
+        [page_1, page_2, page_3], repo_name
+    )
+
+    assert merged_markdown.strip() == (
+        _EXPECTED_TEST_FEATURE_STATUS_TABLE_MERGED_MARKDOWN_OUTPUT.strip()
     )
