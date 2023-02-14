@@ -118,7 +118,7 @@ class FeatureStatusPage(ABC, BaseModel):
             status_table = getattr(self, field.name)
             yaml_str_lines.extend(status_table.yaml_str_lines(indentation="  "))
 
-        return "\n".join(yaml_str_lines)
+        return "\n".join(yaml_str_lines).replace("\n\n\n", "\n\n")
 
     def markdown(self) -> str:
         """
@@ -180,3 +180,24 @@ class FeatureStatusPage(ABC, BaseModel):
             tables="\n\n".join(table_markdowns),
             status_key=FeatureStatus.MARKDOWN_HELP,
         )
+
+    @classmethod
+    def default(cls) -> "FeatureStatusPage":
+        """
+        :return: default sattus page with all status values set to 'n'
+        """
+        default_constructor_args = {
+            field_name: field.type_.default()
+            for field_name, field in cls.__fields__.items()
+            if issubclass(field.type_, FeatureStatusTable)
+        }
+        default_constructor_args["project_name"] = "project name"
+        default_constructor_args["project_description"] = "description"
+        return cls(**default_constructor_args)
+
+    @classmethod
+    def template_yaml_str(cls) -> str:
+        """
+        :return: sample yaml string for this class with all status values set to 'n'
+        """
+        return cls.default().yaml_str()
