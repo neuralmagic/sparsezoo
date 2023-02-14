@@ -24,3 +24,4 @@ from .markdown_utils import *
 from .feature_status import *
 from .feature_status_table import *
 from .feature_status_page import *
+from .write_status_pages import *
