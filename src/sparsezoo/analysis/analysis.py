@@ -17,6 +17,7 @@ analysis results
 """
 
 import copy
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
 
 import numpy
@@ -951,6 +952,106 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             parameter_summary=parameter_summary,
             operation_summary=operation_summary,
             nodes=node_analyses,
+        )
+
+    def summary(self) -> Dict[str, Any]:
+        """
+        :return: A dict like object with a summary of current analysis
+        """
+
+        def _get_count_dict(param_summary: "ZeroNonZeroParams"):
+            return dict(
+                total=param_summary.zero + param_summary.non_zero,
+                pruned=param_summary.zero,
+                pruned_percentage=f"{param_summary.sparsity * 100:.2f} %",
+            )
+
+        pruned_percentage = (
+            self.parameter_summary.pruned * 100.0 / self.parameter_summary.total
+        )
+        parameter_count_summary = dict(
+            total=self.parameter_summary.total,
+            pruned=self.parameter_summary.pruned,
+            pruned_percentage=f"{pruned_percentage:.2f} %",
+        )
+
+        # single, block, ...
+        for sparsity_type, params in self.parameter_summary.block_structure.items():
+            parameter_count_summary[sparsity_type] = _get_count_dict(
+                param_summary=params
+            )
+
+        # fp32, int8, ...
+        for param_type, params in self.parameter_summary.precision.items():
+            parameter_count_summary[param_type] = _get_count_dict(param_summary=params)
+
+        parameterized_operations_summary = self.parameterized.dict()
+        non_parameterized_operations_summary = self.non_parameterized.dict()
+
+        # basic parameterized and non parameterized ops summary
+        for op_dict in (
+            parameterized_operations_summary,
+            non_parameterized_operations_summary,
+        ):
+            for param_type in ["pruned", "prunable", "quantized"]:
+                percentage = (
+                    op_dict[param_type] * 100.0 / op_dict["total"]
+                    if op_dict["total"]
+                    else 0
+                )
+                if percentage:
+                    op_dict[f"{param_type}_percentage"] = f"{percentage:.2f} %"
+
+        sparse_param_count = defaultdict(int)
+        total_param_count = defaultdict(int)
+        parameterized_op_types = set()
+        non_parameterized_op_types = set()
+
+        # sparse and total param count per operation type
+        for node in self.nodes:
+            sparse_param_count[node.op_type] += node.parameter_summary.pruned
+            total_param_count[node.op_type] += node.parameter_summary.total
+            if node.parameterized_prunable:
+                parameterized_op_types.add(node.op_type)
+            else:
+                non_parameterized_op_types.add(node.op_type)
+
+        # sparsity and counts for parameterized ops
+        for node_type in parameterized_op_types:
+            sparsity = (
+                sparse_param_count[node_type] * 100.0 / total_param_count[node_type]
+                if total_param_count[node_type]
+                else 0
+            )
+            if sparsity:
+                parameterized_operations_summary[
+                    f"{node_type}_sparsity"
+                ] = f"{sparsity:.2f} %"
+            if self.node_counts[node_type]:
+                parameterized_operations_summary[
+                    f"{node_type}_count"
+                ] = self.node_counts[node_type]
+
+        # sparsity and counts for non-parameterized ops
+        for node_type in non_parameterized_op_types:
+            sparsity = (
+                sparse_param_count[node_type] * 1.0 / total_param_count[node_type]
+                if total_param_count[node_type]
+                else 0
+            )
+            if sparsity:
+                non_parameterized_operations_summary[
+                    f"{node_type}_sparsity"
+                ] = f"{sparsity:.2f} %"
+            if self.node_counts[node_type]:
+                non_parameterized_operations_summary[
+                    f"{node_type}_count"
+                ] = self.node_counts[node_type]
+
+        return dict(
+            number_of_parameters=parameter_count_summary,
+            parameterized_operations=parameterized_operations_summary,
+            non_parameterized_operations=non_parameterized_operations_summary,
         )
 
     @classmethod
