@@ -24,7 +24,7 @@ Usage: sparsezoo.analyze [OPTIONS] MODEL_PATH
 
   - Run model analysis on resnet
 
-      sparsezoo.analyze ~/models/resnet50
+      sparsezoo.analyze ~/models/resnet50.onnx
 
 Options:
   --save FILE  Path to a yaml file to write results to, note: file will be
@@ -43,15 +43,19 @@ Examples:
 """
 import logging
 import pprint as pp
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
 import click
 from sparsezoo import Model
 from sparsezoo.analysis import ModelAnalysis
+from sparsezoo.analysis.utils.models import ZeroNonZeroParams
 
 
 __all__ = ["main"]
+
+
 pp = pp.PrettyPrinter(indent=4, width=80, compact=True, sort_dicts=False)
 LOGGER = logging.getLogger()
 
@@ -89,7 +93,7 @@ def main(model_path: str, save: Optional[str]):
 
     - Run model analysis on resnet
 
-        sparsezoo.analyze ~/models/resnet50
+        sparsezoo.analyze ~/models/resnet50.onnx
     """
     logging.basicConfig(level=logging.INFO)
     model_file_path = _get_model_file_path(model_path=model_path)
@@ -98,17 +102,108 @@ def main(model_path: str, save: Optional[str]):
     analysis = ModelAnalysis.from_onnx(model_file_path)
     LOGGER.info("Analysis complete, collating results...")
 
-    summary = dict(
-        model_path=model_path,
-        number_of_params=analysis.node_counts,
-        parameterized_ops=analysis.parameterized.dict(),
-        non_parameterized_ops=analysis.non_parameterized.dict(),
-    )
+    summary = _get_analysis_summary(analysis=analysis)
+    summary["model_path"] = model_path
     pp.pprint(summary)
 
     if save:
         LOGGER.info(f"Writing results to {save}")
         analysis.yaml(file_path=save)
+
+
+def _get_analysis_summary(analysis):
+    def _get_count_dict(param_summary: "ZeroNonZeroParams"):
+        return dict(
+            total=param_summary.zero + param_summary.non_zero,
+            pruned=param_summary.zero,
+            pruned_percentage=f"{param_summary.sparsity * 100:.2f} %",
+        )
+
+    pruned_percentage = (
+        analysis.parameter_summary.pruned * 100.0 / analysis.parameter_summary.total
+    )
+    parameter_count_summary = dict(
+        total=analysis.parameter_summary.total,
+        pruned=analysis.parameter_summary.pruned,
+        pruned_percentage=f"{pruned_percentage:.2f} %",
+    )
+
+    # single, block, ...
+    for sparsity_type, params in analysis.parameter_summary.block_structure.items():
+        parameter_count_summary[sparsity_type] = _get_count_dict(param_summary=params)
+
+    # fp32, int8, ...
+    for param_type, params in analysis.parameter_summary.precision.items():
+        parameter_count_summary[param_type] = _get_count_dict(param_summary=params)
+
+    parameterized_operations_summary = analysis.parameterized.dict()
+    non_parameterized_operations_summary = analysis.non_parameterized.dict()
+
+    # basic parameterized and non parameterized ops summary
+    for op_dict in (
+        parameterized_operations_summary,
+        non_parameterized_operations_summary,
+    ):
+        for param_type in ["pruned", "prunable", "quantized"]:
+            percentage = (
+                op_dict[param_type] * 100.0 / op_dict["total"]
+                if op_dict["total"]
+                else 0
+            )
+            if percentage:
+                op_dict[f"{param_type}_percentage"] = f"{percentage:.2f} %"
+
+    sparse_param_count = defaultdict(int)
+    total_param_count = defaultdict(int)
+    parameterized_op_types = set()
+    non_parameterized_op_types = set()
+
+    # sparse and total param count per operation type
+    for node in analysis.nodes:
+        sparse_param_count[node.op_type] += node.parameter_summary.pruned
+        total_param_count[node.op_type] += node.parameter_summary.total
+        if node.parameterized_prunable:
+            parameterized_op_types.add(node.op_type)
+        else:
+            non_parameterized_op_types.add(node.op_type)
+
+    # sparsity and counts for parameterized ops
+    for node_type in parameterized_op_types:
+        sparsity = (
+            sparse_param_count[node_type] * 100.0 / total_param_count[node_type]
+            if total_param_count[node_type]
+            else 0
+        )
+        if sparsity:
+            parameterized_operations_summary[
+                f"{node_type}_sparsity"
+            ] = f"{sparsity:.2f} %"
+        if analysis.node_counts[node_type]:
+            parameterized_operations_summary[
+                f"{node_type}_count"
+            ] = analysis.node_counts[node_type]
+
+    # sparsity and counts for non-parameterized ops
+    for node_type in non_parameterized_op_types:
+        sparsity = (
+            sparse_param_count[node_type] * 1.0 / total_param_count[node_type]
+            if total_param_count[node_type]
+            else 0
+        )
+        if sparsity:
+            non_parameterized_operations_summary[
+                f"{node_type}_sparsity"
+            ] = f"{sparsity:.2f} %"
+        if analysis.node_counts[node_type]:
+            non_parameterized_operations_summary[
+                f"{node_type}_count"
+            ] = analysis.node_counts[node_type]
+
+    return dict(
+        number_of_parameters=parameter_count_summary,
+        parameterized_operations=parameterized_operations_summary,
+        non_parameterized_operations=non_parameterized_operations_summary,
+    )
 
 
 def _get_model_file_path(model_path: str):
