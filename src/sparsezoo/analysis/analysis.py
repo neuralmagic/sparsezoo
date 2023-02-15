@@ -61,7 +61,7 @@ from sparsezoo.utils import (
 __all__ = [
     "NodeInferenceResult",
     "ImposedSparsificationInfo",
-    "BenchmarkSetup",
+    "BenchmarkScenario",
     "BenchmarkResult",
     "NodeAnalysis",
     "ModelAnalysis",
@@ -132,7 +132,7 @@ class ImposedSparsificationInfo(YAMLSerializableBaseModel):
     )
 
 
-class BenchmarkSetup(YAMLSerializableBaseModel):
+class BenchmarkScenario(YAMLSerializableBaseModel):
     """
     Schema representing information for a benchmarking experiment
     """
@@ -191,7 +191,7 @@ class BenchmarkResult(YAMLSerializableBaseModel):
     Schema representing results from a benchmarking experiment
     """
 
-    setup: BenchmarkSetup = Field(
+    setup: BenchmarkScenario = Field(
         description="Information regarding hardware, cores, batch_size, scenario and "
         "other info needed to run benchmark"
     )
