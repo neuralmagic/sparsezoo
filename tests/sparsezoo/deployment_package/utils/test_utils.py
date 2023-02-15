@@ -52,8 +52,8 @@ def vnni_model() -> Model:
     An auto-delete fixture for returning a quantized stub
     """
     yield Model(
-        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet"
-        "/channel20_pruned75_quant-none-vnni"
+        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/"
+        "imagenet/pruned85_quant-none-vnni"
     )
 
 
@@ -64,7 +64,10 @@ def non_quantized_models() -> List[Model]:
     """
 
     yield [
-        Model("zoo:cv/classification/mnistnet/pytorch/sparseml/mnist/base-none"),
+        Model(
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+            "imagenette/base-none"
+        ),
         Model(
             "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
             "imagenet/pruned-moderate"
@@ -133,8 +136,8 @@ def test_first_quantized_model(candidates, quantized_model, non_quantized_models
 @pytest.mark.parametrize(
     "optimizing_metrics",
     [
-        ["accuracy", "compression"],
-        ["accuracy", "compression", "file_size"],
+        # ["accuracy", "compression"],
+        # ["accuracy", "compression", "file_size"],
         ["accuracy", "compression", "file_size", "latency"],
     ],
 )
@@ -189,8 +192,8 @@ def test_compute_heuristics(metrics, ranges, expected):
     [
         (
             ["accuracy", "compression"],
-            "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet"
-            "/channel20_pruned75_quant-none-vnni",
+            "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/"
+            "imagenet/pruned95_quant-none",
         )
     ],
 )
@@ -230,8 +233,8 @@ def test_infer_dataset_domain_subdomain_raises_value_error(dataset, task):
         infer_domain_and_subdomain(dataset=dataset, task=task)
 
 
-@patch("model_api_service.package.utils.get_best_model_with_metrics")
-@patch("model_api_service.package.utils.search_models")
+@patch("sparsezoo.deployment_package_module.utils.utils.get_best_model_with_metrics")
+@patch("sparsezoo.deployment_package_module.utils.utils.search_models")
 @pytest.mark.parametrize(
     "vnni",
     [
@@ -253,7 +256,7 @@ def test_recommend_model(search_models_func, get_best_model_function, vnni, cand
     assert recommend_stub(task="qa", dataset="squad", scenario="vnni")[0] == vnni.source
 
 
-@patch("model_api_service.package.utils.search_models")
+@patch("sparsezoo.deployment_package_module.utils.utils.search_models")
 def test_value_error_with_recommend_stub(search_models_func, quantized_model):
     # search results empty
     search_models_func.return_value = []

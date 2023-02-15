@@ -62,14 +62,14 @@ Examples:
         sparsezoo.deployment_package --task qa --dataset squad --optimizing_metric latency
     4) Fetch the smallest most performant Question Answering model trained on squad
         sparsezoo.deployment_package --task qa --dataset squad \
-            --optimizing_metric compression \
-            --optimizing_metric accuracy
+            --optimizing_metric "compression, accuracy"
 """
 import logging
 from typing import Any, Mapping
 
 import click
 from sparsezoo import Model, deployment_package
+from sparsezoo.deployment_package.docker.helpers import DEPLOYMENT_DOCKER_PATH
 from sparsezoo.utils import (
     DATASETS,
     DEFAULT_DEPLOYMENT_SCENARIO,
@@ -121,10 +121,11 @@ def _get_template(results: Mapping[str, Any]):
         if metrics
         else ""
     )
-    dockerfile_directory = "sparsezoo/src/deployment_package/docker"
+    dockerfile = DEPLOYMENT_DOCKER_PATH
+    dockerfile_directory = DEPLOYMENT_DOCKER_PATH.parent
     deployment_path = _download_deployment_directory(stub)
     download_instructions = f"""
-        Use the dockerfile in {dockerfile_directory}/Dockerfile to build deepsparse
+        Use the dockerfile in {dockerfile} to build deepsparse
         image and run the `deepsparse.server` container. 
 
         Run the following command inside `{dockerfile_directory}`
@@ -139,7 +140,12 @@ def _get_template(results: Mapping[str, Any]):
     return "".join((stub_info, metrics_info, download_instructions))
 
 
-@click.command(context_settings=dict(show_default=True))
+@click.command(
+    context_settings=dict(
+        token_normalize_func=lambda x: x.replace("-", "_"),
+        show_default=True,
+    )
+)
 @click.version_option(version=__version__)
 @click.argument(
     "directory",
@@ -159,7 +165,7 @@ def _get_template(results: Mapping[str, Any]):
 )
 @click.option(
     "--optimizing-metric",
-    "--optimizing_metric",
+    "-m",
     default=DEFAULT_OPTIMIZING_METRIC,
     type=str,
     help="The criterion to search model for, multiple metrics can be specified "
@@ -174,18 +180,18 @@ def _get_template(results: Mapping[str, Any]):
     show_default=True,
 )
 def main(**kwargs):
-    """
+    r"""
     Utility to fetch a deployment directory for a task based on specified
     optimizing-metric
 
     Example for using sparsezoo.deployment_package:
 
          1) `sparsezoo.deployment_package --task image_classification \
-            --optimizing_metric accuracy`
+                --optimizing_metric accuracy
 
          2) `sparsezoo.deployment_package --task ic \
-            --optimizing_metric "accuracy, compression" \
-            --target VNNI`
+                --optimizing_metric "accuracy, compression" \
+                --target VNNI`
     """
     if not (kwargs.get("task") or kwargs.get("dataset")):
         raise ValueError("At-least one of the `task` or `dataset` must be specified")

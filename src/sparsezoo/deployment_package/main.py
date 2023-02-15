@@ -29,7 +29,6 @@ def deployment_package(
     dataset: Optional[str] = None,
     scenario: Optional[str] = None,
     optimizing_metric: Optional[Union[Iterable[str], str]] = None,
-    **kwargs,
 ) -> Mapping[str, Any]:
     """
     A function that returns appropriate SparseZoo stub or deployment directory given
@@ -38,8 +37,8 @@ def deployment_package(
     :param task: str A supported task
     :param dataset: str The public dataset this model was trained for
     :param scenario: Optional[str] `VNNI` or `vnni for a VNNI compatible machine
-    :param optimizing_metric: Optional[List[str], str] representing different metrics
-        to prioritize for when searching for models
+    :param optimizing_metric: an optional string or list of strings
+        representing different metrics to prioritize for when searching for models
     :return: A dict type object with the relevant stub and model metrics
     """
     optimizing_metric = (

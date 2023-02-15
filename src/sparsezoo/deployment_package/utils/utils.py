@@ -77,10 +77,10 @@ def filter_candidates(
             extractor = EXTRACTORS[metric]
             try:
                 extractor(candidate)
-            except (AttributeError, ValueError, ZeroDivisionError):
+            except (AttributeError, ValueError, ZeroDivisionError) as exception:
                 _LOGGER.info(
                     f"{metric} information could not be extracted from "
-                    f"candidate stub {candidate.source}"
+                    f"candidate stub {candidate.source}, {exception}"
                 )
                 found_all_metrics = False
         if found_all_metrics:

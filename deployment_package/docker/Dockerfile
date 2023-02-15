@@ -12,7 +12,7 @@ RUN : \
 RUN python3.8 -m venv /venv
 ENV PATH="venv/bin:$PATH"
 
-RUN pip3 install --upgrade setuptools wheel
+RUN pip3 install --upgrade setuptools wheel pip3
 
 # Setup DeepSparse
 

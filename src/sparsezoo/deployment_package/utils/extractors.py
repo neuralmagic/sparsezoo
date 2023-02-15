@@ -73,7 +73,7 @@ def _accuracy(model: Model, metric_name=None) -> float:
         _LOGGER.info(f"metric name {metric_name} not found for model {model}")
 
     # fallback to if any accuracy metric found
-    accuracy_metrics = ["accuracy", "f1", "recall", "map"]
+    accuracy_metrics = ["accuracy", "f1", "recall", "map", "top1 accuracy"]
     for result in validation_results:
         if result.recorded_units.lower() in accuracy_metrics:
             return result.recorded_value
