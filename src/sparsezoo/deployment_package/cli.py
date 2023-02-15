@@ -65,7 +65,7 @@ Examples:
             --optimizing_metric "compression, accuracy"
 """
 import logging
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 import click
 from sparsezoo import Model, deployment_package
@@ -98,13 +98,13 @@ def _csv_callback(ctx, self, value):
     return current_metrics
 
 
-def _download_deployment_directory(stub: str) -> str:
+def _download_deployment_directory(stub: str, destination: Optional[str] = None) -> str:
     model = Model(stub)
-    model.deployment.download()
+    model.deployment.download(destination_path=destination)
     return model.deployment.path
 
 
-def _get_template(results: Mapping[str, Any]):
+def _get_template(results: Mapping[str, Any], destination: Optional[str] = None):
     stub = results.get("stub")
 
     if not stub:
@@ -123,7 +123,7 @@ def _get_template(results: Mapping[str, Any]):
     )
     dockerfile = DEPLOYMENT_DOCKER_PATH
     dockerfile_directory = DEPLOYMENT_DOCKER_PATH.parent
-    deployment_path = _download_deployment_directory(stub)
+    deployment_path = _download_deployment_directory(stub, destination=destination)
     download_instructions = f"""
         Use the dockerfile in {dockerfile} to build deepsparse
         image and run the `deepsparse.server` container. 
@@ -198,7 +198,7 @@ def main(**kwargs):
     _LOGGER.debug(f"{kwargs}")
     results = deployment_package(**kwargs)
 
-    print(_get_template(results=results))
+    print(_get_template(results=results, destination=kwargs.get("directory")))
 
 
 if __name__ == "__main__":

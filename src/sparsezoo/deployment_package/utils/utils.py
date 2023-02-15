@@ -249,6 +249,7 @@ def recommend_stub(
     dataset: Optional[str] = None,
     scenario: Optional[str] = None,
     optimizing_metrics: Optional[List[str]] = None,
+    **kwargs,
 ) -> Tuple[str, Dict[str, float]]:
     """
     A function that returns appropriate SparseZoo stub or deployment directory given
@@ -260,7 +261,7 @@ def recommend_stub(
     :param optimizing_metrics: Optional[List[str] representing different
         optimizing_metrics to prioritize for when searching for models
     :return: A tuple containing best stub based on specified arguments along
-        with it's model metrics, i.e (stub, metrics)
+        with its model metrics, i.e (stub, metrics)
     """
     domain, subdomain = infer_domain_and_subdomain(dataset=dataset, task=task)
 

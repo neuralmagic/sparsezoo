@@ -29,6 +29,7 @@ def deployment_package(
     dataset: Optional[str] = None,
     scenario: Optional[str] = None,
     optimizing_metric: Optional[Union[Iterable[str], str]] = None,
+    **kwargs,
 ) -> Mapping[str, Any]:
     """
     A function that returns appropriate SparseZoo stub or deployment directory given
