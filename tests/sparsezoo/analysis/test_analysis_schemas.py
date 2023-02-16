@@ -17,7 +17,7 @@ import yaml
 
 from sparsezoo.analysis import (
     BenchmarkResult,
-    BenchmarkSetup,
+    BenchmarkScenario,
     ImposedSparsificationInfo,
     NodeInferenceResult,
 )
@@ -55,11 +55,11 @@ def _node_inference_result_args():
     [
         (NodeInferenceResult, _node_inference_result_args()),
         (ImposedSparsificationInfo, _imposed_sparsification_args()),
-        (BenchmarkSetup, _benchmark_setup_args()),
+        (BenchmarkScenario, _benchmark_setup_args()),
         (
             BenchmarkResult,
             dict(
-                setup=BenchmarkSetup(**_benchmark_setup_args()),
+                setup=BenchmarkScenario(**_benchmark_setup_args()),
                 imposed_sparsification=ImposedSparsificationInfo(
                     **_imposed_sparsification_args(),
                 ),
