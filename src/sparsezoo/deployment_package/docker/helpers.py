@@ -18,11 +18,8 @@ from pathlib import Path
 
 
 def _get_dockerfile_path():
-    dir_distance = 5
-    top_level_dir = Path(__file__)
-    for _ in range(dir_distance):
-        top_level_dir = top_level_dir.parent
-    dockerfile_path = top_level_dir / "deployment_package" / "docker" / "Dockerfile"
+    top_level_dir = Path(__file__).parent
+    dockerfile_path = top_level_dir / "Dockerfile"
     return dockerfile_path.absolute()
 
 
