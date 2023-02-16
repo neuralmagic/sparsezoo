@@ -68,6 +68,25 @@ CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
 COMPRESSED_FILE_NAME = "model.onnx.tar.gz"
 
+STUB_V1_REGEX_EXPR = (
+    r"^(zoo:)?"
+    r"(?P<domain>[\.A-z0-9_]+)"
+    r"/(?P<sub_domain>[\.A-z0-9_]+)"
+    r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+    r"/(?P<framework>[\.A-z0-9_]+)"
+    r"/(?P<repo>[\.A-z0-9_]+)"
+    r"/(?P<dataset>[\.A-z0-9_]+)"
+    r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
+)
+
+STUB_V2_REGEX_EXPR = (
+    r"(?P<architecture>[\.A-z0-9_]+)"
+    r"(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+    r"-(?P<source_dataset>[\.A-z0-9_]+)"
+    r"(-(?P<training_dataset>[\.A-z0-9_]+))?"
+    r"-(?P<sparse_tag>[\.A-z0-9_]+)"
+)
+
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     """
@@ -120,31 +139,29 @@ def load_files_from_stub(
     models = api.fetch(
         operation_body="models",
         arguments=arguments,
-        fields=["modelId", "modelOnnxSizeCompressedBytes"],
+        fields=[
+            "model_id",
+            "model_onnx_size_compressed_bytes",
+            "files",
+            "benchmark_results",
+            "training_results",
+        ],
     )
 
     if len(models):
+
         model_id = models[0]["model_id"]
 
-        files = api.fetch(
-            operation_body="files",
-            arguments={"model_id": model_id},
-        )
+        files = models[0].get("files")
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
 
         if params is not None:
             files = filter_files(files=files, params=params)
 
-        training_results = api.fetch(
-            operation_body="training_results",
-            arguments={"model_id": model_id},
-        )
+        training_results = models[0].get("training_results")
 
-        benchmark_results = api.fetch(
-            operation_body="benchmark_results",
-            arguments={"model_id": model_id},
-        )
+        benchmark_results = models[0].get("benchmark_results")
 
         model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
 
@@ -562,29 +579,31 @@ def include_file_download_url(files: List[Dict]):
 
 
 def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
-    """
-    Return a dictionary of the model metadata from stub
-    """
+    """Return a dictionary of the model metadata from stub"""
 
-    stub_regex_expr = (
-        r"^(zoo:)?"
-        r"(?P<domain>[\.A-z0-9_]+)"
-        r"/(?P<sub_domain>[\.A-z0-9_]+)"
-        r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
-        r"/(?P<framework>[\.A-z0-9_]+)"
-        r"/(?P<repo>[\.A-z0-9_]+)"
-        r"/(?P<dataset>[\.A-z0-9_]+)"
-        r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
-    )
-    matches = re.match(stub_regex_expr, stub)
+    matches = re.match(STUB_V1_REGEX_EXPR, stub) or re.match(STUB_V2_REGEX_EXPR, stub)
+    if matches:
+        if "source_dataset" in matches.groupdict():
+            return {"repo_name": stub}
 
-    return {
-        "domain": matches.group("domain"),
-        "sub_domain": matches.group("sub_domain"),
-        "architecture": matches.group("architecture"),
-        "sub_architecture": matches.group("sub_architecture"),
-        "framework": matches.group("framework"),
-        "repo": matches.group("repo"),
-        "dataset": matches.group("dataset"),
-        "sparse_tag": matches.group("sparse_tag"),
-    }
+        if "dataset" in matches.groupdict():
+            return {
+                "domain": matches.group("domain"),
+                "sub_domain": matches.group("sub_domain"),
+                "architecture": matches.group("architecture"),
+                "sub_architecture": matches.group("sub_architecture"),
+                "framework": matches.group("framework"),
+                "repo": matches.group("repo"),
+                "dataset": matches.group("dataset"),
+                "sparse_tag": matches.group("sparse_tag"),
+            }
+
+    return {}
+
+
+def is_stub(candidate: str):
+    if candidate.startswith(ZOO_STUB_PREFIX):
+        return True
+    if bool(get_model_metadata_from_stub(candidate)):
+        return True
+    return False

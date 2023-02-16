@@ -82,6 +82,16 @@ files_yolo = copy.copy(files_ic)
             ("checkpoint", "postqat"),
             True,
         ),
+        (
+            "oberta-medium-mnli_wikipedia_bookcorpus-base_quantized",
+            ("deployment", "default"),
+            True,
+        ),
+        (
+            "resnet_v1-101_2xwidth-imagenet-base",
+            ("checkpoint", "preqat"),
+            True,
+        ),
     ],
     scope="function",
 )
@@ -139,6 +149,21 @@ class TestSetupModel:
         (
             "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
             True,
+            files_yolo,
+        ),
+        (
+            "mobilebert-squad_wikipedia_bookcorpus-14layer_pruned50.4block",  # noqa E501
+            False,
+            files_yolo,
+        ),
+        (
+            "yolov5-s-coco-pruned85_quantized",  # noqa E501
+            False,
+            files_yolo,
+        ),
+        (
+            "resnet_v1-50-imagenet-channel30_pruned91",  # noqa E501
+            False,
             files_yolo,
         ),
     ],

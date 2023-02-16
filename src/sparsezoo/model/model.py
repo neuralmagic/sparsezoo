@@ -24,6 +24,7 @@ from sparsezoo.model.result_utils import ModelResult
 from sparsezoo.model.utils import (
     SAVE_DIR,
     ZOO_STUB_PREFIX,
+    is_stub,
     load_files_from_directory,
     load_files_from_stub,
     save_outputs_to_tar,
@@ -77,7 +78,7 @@ class Model(Directory):
         self.source = source
         self._stub_params = {}
 
-        if self.source.startswith(ZOO_STUB_PREFIX):
+        if is_stub(self.source):
             # initializing the files and params from the stub
             _setup_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _setup_args
