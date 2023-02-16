@@ -186,6 +186,12 @@ def get_best_model_with_metrics(
         return first_quantized_model(candidates=candidates), {}
 
     filtered_candidates: List[Model] = filter_candidates(candidates, optimizing_metrics)
+    if not filtered_candidates:
+        raise ValueError(
+            f"No filtered candidates found based on specified metrics, "
+            f"{optimizing_metrics}"
+        )
+
     extracted_metrics_for_candidates: List[Dict[str, float]] = extract_metrics(
         filtered_candidates, optimizing_metrics
     )

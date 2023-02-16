@@ -136,8 +136,8 @@ def test_first_quantized_model(candidates, quantized_model, non_quantized_models
 @pytest.mark.parametrize(
     "optimizing_metrics",
     [
-        # ["accuracy", "compression"],
-        # ["accuracy", "compression", "file_size"],
+        ["accuracy", "compression"],
+        ["accuracy", "compression", "file_size"],
         ["accuracy", "compression", "file_size", "latency"],
     ],
 )
