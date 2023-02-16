@@ -199,7 +199,7 @@ def get_best_model_with_metrics(
     ]
 
     best_candidate_index = max(
-        range(len(candidates)), key=lambda index: heuristic_for_candidates[index]
+        range(len(filtered_candidates)), key=lambda index: heuristic_for_candidates[index]
     )
     return (
         candidates[best_candidate_index],
