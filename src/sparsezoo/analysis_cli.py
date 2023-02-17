@@ -41,12 +41,14 @@ Examples:
     sparsezoo.analyze ~/models/resnet50.onnx \
     --save resnet50-analysis.yaml
 """
+import copy
 import logging
 import pprint as pp
 from pathlib import Path
 from typing import Optional
 
 import click
+import pandas as pd
 from sparsezoo import Model
 from sparsezoo.analysis import ModelAnalysis
 
@@ -99,8 +101,9 @@ def main(model_path: str, save: Optional[str]):
     LOGGER.info("Analysis complete, collating results...")
 
     summary = analysis.summary()
-    summary["Model"] = model_path
-    pp.pprint(summary)
+
+    summary["MODEL"] = model_path
+    _display_summary_as_table(summary)
 
     if save:
         LOGGER.info(f"Writing results to {save}")
@@ -117,6 +120,20 @@ def _get_model_file_path(model_path: str):
     else:
         model_path = Path(model_path) / "model.onnx"
     return model_path
+
+
+def _display_summary_as_table(summary):
+    summary_copy = copy.copy(summary)
+    print(f"MODEL: {summary_copy.pop('MODEL')}", end="\n\n")
+    footer = summary_copy.pop("Summary")
+
+    for section_name, section_dict in summary_copy.items():
+        print(f"{section_name.upper()}:")
+        print(pd.DataFrame(section_dict).T.to_string(), end="\n\n")
+
+    print("SUMMARY:")
+    for footer_key, footer_value in footer.items():
+        print(f"{footer_key}: {footer_value}")
 
 
 if __name__ == "__main__":
