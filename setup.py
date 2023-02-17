@@ -92,6 +92,7 @@ def _setup_entry_points() -> Dict:
         "console_scripts": [
             "sparsezoo=sparsezoo.main:main",
             "sparsezoo.download=sparsezoo.download_main:main",
+            "sparsezoo.deployment_package=sparsezoo.deployment_package.cli:main",
         ]
     }
 

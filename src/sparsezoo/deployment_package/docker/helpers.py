@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
-# isort: skip_file
+__all__ = ["DEPLOYMENT_DOCKER_PATH"]
 
-from .inference import *
-from .model import *
-from .objects import *
-from .search import *
-from .utils import *
-from .validation import *
-from . import deployment_package as deployment_package_module
-from .deployment_package import *
+from pathlib import Path
+
+
+def _get_dockerfile_path():
+    top_level_dir = Path(__file__).parent
+    dockerfile_path = top_level_dir / "Dockerfile"
+    return dockerfile_path.absolute()
+
+
+DEPLOYMENT_DOCKER_PATH: Path = _get_dockerfile_path()
