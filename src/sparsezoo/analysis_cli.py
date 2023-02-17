@@ -50,7 +50,6 @@ import click
 from sparsezoo import Model
 from sparsezoo.analysis import ModelAnalysis
 
-
 __all__ = ["main"]
 
 
@@ -74,11 +73,9 @@ LOGGER = logging.getLogger()
 @click.option(
     "--save",
     default=None,
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True
-    ),
+    type=click.Path(file_okay=True, dir_okay=False, readable=True, resolve_path=True),
     help="Path to a yaml file to write results to, note: file will be "
-    "overwritten if exists",
+         "overwritten if exists",
 )
 def main(model_path: str, save: Optional[str]):
     """
@@ -101,7 +98,7 @@ def main(model_path: str, save: Optional[str]):
     LOGGER.info("Analysis complete, collating results...")
 
     summary = analysis.summary()
-    summary["model_path"] = model_path
+    summary["Model"] = model_path
     pp.pprint(summary)
 
     if save:
@@ -121,5 +118,5 @@ def _get_model_file_path(model_path: str):
     return model_path
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
