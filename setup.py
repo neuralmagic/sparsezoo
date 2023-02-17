@@ -48,6 +48,7 @@ _deps = [
     "pydantic>=1.8.2",
     "click>=7.1.2,!=8.0.0",  # latest version < 8.0 + blocked version with reported bug
     "protobuf>=3.12.2,<4",
+    "pandas>1.3",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
@@ -92,6 +93,7 @@ def _setup_entry_points() -> Dict:
         "console_scripts": [
             "sparsezoo=sparsezoo.main:main",
             "sparsezoo.download=sparsezoo.download_main:main",
+            "sparsezoo.analyze=sparsezoo.analysis_cli:main",
             "sparsezoo.deployment_package=sparsezoo.deployment_package.cli:main",
         ]
     }

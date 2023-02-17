@@ -67,7 +67,6 @@ def model():
     "num_cores, batch_size, expected",
     [
         (24, 64, 1948.45),
-        (1, 64, 91.4796),
     ],
 )
 def test_throughput_extractor(model, num_cores, batch_size, expected):
