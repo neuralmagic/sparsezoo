@@ -138,7 +138,7 @@ def test_first_quantized_model(candidates, quantized_model, non_quantized_models
     [
         ["accuracy", "compression"],
         ["accuracy", "compression", "file_size"],
-        ["accuracy", "compression", "file_size", "latency"],
+        ["accuracy", "compression", "file_size", "throughput"],
     ],
 )
 def test_extract_metrics(candidates, optimizing_metrics):
