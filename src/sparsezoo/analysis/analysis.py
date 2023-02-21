@@ -195,6 +195,12 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
         default=False, description="Flag to only run analysis; defaults is `False`"
     )
 
+    hardware_metadata: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Metadata information for the hardware current "
+        "benchmark is run on",
+    )
+
 
 class BenchmarkResult(YAMLSerializableBaseModel):
     """
