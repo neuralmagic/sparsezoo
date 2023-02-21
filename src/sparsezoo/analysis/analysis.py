@@ -17,6 +17,8 @@ analysis results
 """
 
 import copy
+from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import numpy
@@ -60,7 +62,7 @@ from sparsezoo.utils import (
 __all__ = [
     "NodeInferenceResult",
     "ImposedSparsificationInfo",
-    "BenchmarkSetup",
+    "BenchmarkScenario",
     "BenchmarkResult",
     "NodeAnalysis",
     "ModelAnalysis",
@@ -87,6 +89,15 @@ class YAMLSerializableBaseModel(BaseModel):
             file_stream.close()
 
         return ret
+
+
+@dataclass
+class _SparseItemCount:
+    name: str
+    total: int = 0
+    pruned: int = 0
+    dense: int = 0
+    quantized: int = 0
 
 
 class NodeInferenceResult(YAMLSerializableBaseModel):
@@ -131,7 +142,7 @@ class ImposedSparsificationInfo(YAMLSerializableBaseModel):
     )
 
 
-class BenchmarkSetup(YAMLSerializableBaseModel):
+class BenchmarkScenario(YAMLSerializableBaseModel):
     """
     Schema representing information for a benchmarking experiment
     """
@@ -190,7 +201,7 @@ class BenchmarkResult(YAMLSerializableBaseModel):
     Schema representing results from a benchmarking experiment
     """
 
-    setup: BenchmarkSetup = Field(
+    setup: BenchmarkScenario = Field(
         description="Information regarding hardware, cores, batch_size, scenario and "
         "other info needed to run benchmark"
     )
@@ -953,6 +964,126 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             nodes=node_analyses,
         )
 
+    def summary(self) -> Dict[str, Any]:
+        """
+        :return: A dict like object with summary of current analysis
+        """
+
+        # parameter summary
+
+        alias_to_item_count: Dict[str, _SparseItemCount] = {
+            name.lower(): _SparseItemCount(name=name) for name in ["Weight", "Bias"]
+        }
+
+        for node in self.nodes:
+            for parameter in node.parameters:
+                item_count = alias_to_item_count[parameter.alias]
+                parameter_summary = parameter.parameter_summary
+
+                item_count.total += parameter_summary.total
+                item_count.pruned += parameter_summary.pruned
+
+                if "float32" in parameter_summary.precision:
+                    item_count.dense += (
+                        parameter_summary.precision["float32"].zero
+                        + parameter_summary.precision["float32"].non_zero
+                    )
+
+        parameter_item_counts = list(alias_to_item_count.values())
+
+        # fill empty quantized counts
+
+        for item_count in parameter_item_counts:
+            item_count.quantized = item_count.total - item_count.dense
+
+        parameter_summary = {
+            "Parameters": _summary_from_sparse_item_counts(items=parameter_item_counts),
+        }
+
+        # ops summary
+
+        pruned_param_counts = defaultdict(int)
+        dense_param_counts = defaultdict(int)
+        total_param_counts = defaultdict(int)
+        parameterized_op_types = set()
+
+        sparse_node_counts = defaultdict(int)
+        dense_node_counts = defaultdict(int)
+        total_node_counts = defaultdict(int)
+        non_parameterized_op_types = set()
+
+        for node in self.nodes:
+            if node.parameterized_prunable:
+                parameterized_op_types.add(node.op_type)
+                pruned_param_counts[node.op_type] += node.parameter_summary.pruned
+                total_param_counts[node.op_type] += node.parameter_summary.total
+
+                if "float32" in node.parameter_summary.precision:
+                    dense_param_counts[node.op_type] += (
+                        node.parameter_summary.precision["float32"].zero
+                        + node.parameter_summary.precision["float32"].non_zero
+                    )
+
+            else:
+                non_parameterized_op_types.add(node.op_type)
+                total_node_counts[node.op_type] += 1
+                if node.sparse_node:
+                    sparse_node_counts[node.op_type] += 1
+                if not node.quantized_node:
+                    dense_node_counts[node.op_type] += 1
+
+        parameterized_item_counts = [
+            _SparseItemCount(
+                name=op_type,
+                total=total_param_counts[op_type],
+                pruned=pruned_param_counts[op_type],
+                dense=dense_param_counts[op_type],
+                quantized=total_param_counts[op_type] - dense_param_counts[op_type],
+            )
+            for op_type in parameterized_op_types
+        ]
+
+        non_parameterized_item_counts = [
+            _SparseItemCount(
+                name=op_type,
+                total=total_node_counts[op_type],
+                pruned=sparse_node_counts[op_type],
+                dense=dense_node_counts[op_type],
+                quantized=total_node_counts[op_type] - dense_node_counts[op_type],
+            )
+            for op_type in non_parameterized_op_types
+        ]
+
+        ops_summary = {
+            "Parameterized Ops": _summary_from_sparse_item_counts(
+                items=parameterized_item_counts,
+            ),
+            "Non Parameterized Ops": _summary_from_sparse_item_counts(
+                items=non_parameterized_item_counts,
+            ),
+        }
+
+        footer = {
+            "Summary": {
+                "Number of Parameters": parameter_summary["Parameters"]["Total"][
+                    "Total"
+                ],
+                "Number of Operations": sum(
+                    op_summary["Total"]["Total"] for op_summary in ops_summary.values()
+                ),
+                "Weight Sparsity %": parameter_summary["Parameters"]["Weight"][
+                    "Sparsity %"
+                ],
+                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
+                    "Total"
+                ]["INT8 Precision %"],
+                "Quantized Non-Parameterized Ops %": ops_summary[
+                    "Non Parameterized Ops"
+                ]["Total"]["INT8 Precision %"],
+            }
+        }
+        return {**parameter_summary, **ops_summary, **footer}
+
     @classmethod
     def parse_yaml_file(cls, file_path: str):
         """
@@ -991,3 +1122,35 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             nodes.append(node_analysis)
 
         return nodes
+
+
+def _summary_from_sparse_item_counts(items: List[_SparseItemCount], precision: int = 2):
+    """
+    :return: A dict like object with stats about each item type
+    """
+    total = sum(item.total for item in items)
+    num_sparse = sum(item.pruned for item in items)
+    num_fp32 = sum(item.dense for item in items)
+    num_int8 = sum(item.quantized for item in items)
+
+    summary = {
+        item.name: {
+            "Total": item.total,
+            "Percent Total %": round(item.total * 100.0 / total, precision),
+            "Sparsity %": round(item.pruned * 100.0 / item.total, precision),
+            "FP32 Precision %": round(item.dense * 100.0 / item.total, precision),
+            "INT8 Precision %": round(item.quantized * 100.0 / item.total, precision),
+        }
+        for item in items
+        if item.total
+    }
+
+    summary["Total"] = {
+        "Total": total,
+        "Percent Total %": round(total * 100.0 / total, precision),
+        "Sparsity %": round(num_sparse * 100.0 / total, precision),
+        "FP32 Precision %": round(num_fp32 * 100.0 / total, precision),
+        "INT8 Precision %": round(num_int8 * 100.0 / total, precision),
+    }
+
+    return summary
