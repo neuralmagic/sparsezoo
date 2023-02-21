@@ -71,6 +71,16 @@ class FeatureStatusTable(ABC, BaseModel):
             field for field in self.__fields__.values() if field.type_ is FeatureStatus
         ]
 
+    def yaml_str_lines(self, indentation: str = "") -> List[str]:
+        """
+        :param indentation: optional indentation to add to each
+        :return: list of lines for a line by line yaml representation of this table
+        """
+        return [
+            f"{indentation}{field.name}: {getattr(self, field.name)}"
+            for field in self.feature_status_fields
+        ]
+
     def markdown(self) -> str:
         """
         :return: markdown representation of this table with title. Headers will
