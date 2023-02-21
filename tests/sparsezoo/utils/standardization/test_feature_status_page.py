@@ -195,3 +195,30 @@ def test_feature_status_table_yaml_serialization():
     page_reloaded = FakeStatusPage.from_yaml(page_yaml_str)
 
     assert page_obj == page_reloaded
+
+
+_EXPECTED_TEMPLATE_YAML_STR = """
+###########################################################
+# Status Keys:
+# y: yes - implemented by NM
+# e: external - implemented by external integration
+# n: no - not implemented yet
+# q: question - not sure, not tested, or to be investigated
+###########################################################
+
+project_name: project name
+project_description: description
+
+table_1:
+  feature_1: n
+  feature_2: n
+
+table_2:
+  feature_3: n
+  feature_4: n
+"""
+
+
+def test_feature_status_table_template_yaml_str():
+    generated_template_yaml_str = FakeStatusPage.template_yaml_str()
+    assert generated_template_yaml_str.strip() == (_EXPECTED_TEMPLATE_YAML_STR.strip())
