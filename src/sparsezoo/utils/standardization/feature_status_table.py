@@ -163,3 +163,16 @@ class FeatureStatusTable(ABC, BaseModel):
             description=status_tables[0].description,
             table=table,
         )
+
+    @classmethod
+    def default(cls) -> "FeatureStatusTable":
+        """
+        :return: instance of this class with "n" for every field. for template
+            generation only
+        """
+        default_statuses = {
+            field_name: "n"  # default to 'n'
+            for field_name, field in cls.__fields__.items()
+            if field.type_ is FeatureStatus
+        }
+        return cls(**default_statuses)
