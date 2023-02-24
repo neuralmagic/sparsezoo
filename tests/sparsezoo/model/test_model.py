@@ -137,32 +137,44 @@ class TestSetupModel:
     "stub, clone_sample_outputs, expected_files",
     [
         (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+            (
+                "zoo:"
+                "cv/classification/mobilenet_v1-1.0/"
+                "pytorch/sparseml/imagenet/pruned-moderate"
+            ),
             True,
             files_ic,
         ),
         (
-            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
+            (
+                "zoo:"
+                "nlp/question_answering/distilbert-none/"
+                "pytorch/huggingface/squad/pruned80_quant-none-vnni"
+            ),
             False,
             files_nlp,
         ),
         (
-            "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
+            (
+                "zoo:"
+                "cv/detection/yolov5-s/"
+                "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
+            ),
             True,
             files_yolo,
         ),
         (
-            "mobilebert-squad_wikipedia_bookcorpus-14layer_pruned50.4block",  # noqa E501
+            "mobilebert-squad_wikipedia_bookcorpus-14layer_pruned50.4block",
             False,
             files_yolo,
         ),
         (
-            "yolov5-s-coco-pruned85_quantized",  # noqa E501
+            "yolov5-s-coco-pruned85_quantized",
             False,
             files_yolo,
         ),
         (
-            "resnet_v1-50-imagenet-channel30_pruned91",  # noqa E501
+            "resnet_v1-50-imagenet-channel30_pruned91",
             False,
             files_yolo,
         ),

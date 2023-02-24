@@ -75,11 +75,12 @@ STUB_V1_REGEX_EXPR = (
     r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
     r"/(?P<framework>[\.A-z0-9_]+)"
     r"/(?P<repo>[\.A-z0-9_]+)"
-    r"/(?P<dataset>[\.A-z0-9_]+)"
+    r"/(?P<dataset>[\.A-z0-9_]+)(-(?P<training_scheme>[\.A-z0-9_]+))?"
     r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
 )
 
 STUB_V2_REGEX_EXPR = (
+    r"^(zoo:)?"
     r"(?P<architecture>[\.A-z0-9_]+)"
     r"(-(?P<sub_architecture>[\.A-z0-9_]+))?"
     r"-(?P<source_dataset>[\.A-z0-9_]+)"
@@ -148,22 +149,35 @@ def load_files_from_stub(
         ],
     )
 
-    if len(models):
+    matching_models = len(models)
+    if matching_models == 0:
+        raise ValueError(
+            f"No matching models found with stub: {stub}." "Please try another stub"
+        )
+    if matching_models > 1:
+        logging.warning(
+            f"{len(models)} found from the stub: {stub}"
+            "Using the first model to obtain metadata."
+            "Proceed with caution"
+        )
 
-        model_id = models[0]["model_id"]
+    if matching_models:
+        model = models[0]
 
-        files = models[0].get("files")
+        model_id = model["model_id"]
+
+        files = model.get("files")
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
 
         if params is not None:
             files = filter_files(files=files, params=params)
 
-        training_results = models[0].get("training_results")
+        training_results = model.get("training_results")
 
-        benchmark_results = models[0].get("benchmark_results")
+        benchmark_results = model.get("benchmark_results")
 
-        model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
+        model_onnx_size_compressed_bytes = model["model_onnx_size_compressed_bytes"]
 
         throughput_results = _parse_results_metrics(
             results=benchmark_results, parser=ThroughputResults
@@ -601,9 +615,8 @@ def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
     return {}
 
 
-def is_stub(candidate: str):
-    if candidate.startswith(ZOO_STUB_PREFIX):
-        return True
-    if bool(get_model_metadata_from_stub(candidate)):
-        return True
-    return False
+def is_stub(candidate: str) -> bool:
+    return bool(
+        re.match(STUB_V1_REGEX_EXPR, candidate)
+        or re.match(STUB_V2_REGEX_EXPR, candidate)
+    )
