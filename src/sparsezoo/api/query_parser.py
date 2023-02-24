@@ -62,14 +62,14 @@ class QueryParser:
     def parse(self):
         """Parse to a string compatible with graphql requst body"""
 
-        self._parse_operation_body()
-        self._parse_arguments()
-        self._parse_fields()
+        self._operation_body = self._parse_operation_body()
+        self._arguments = self._parse_arguments()
+        self._fields = self._parse_fields()
 
-    def _parse_operation_body(self) -> None:
-        self._operation_body = to_camel_case(self._operation_body)
+    def _parse_operation_body(self) -> str:
+        return to_camel_case(self._operation_body)
 
-    def _parse_arguments(self) -> None:
+    def _parse_arguments(self) -> str:
         """Transform deprecated stub args and convert to camel case"""
         parsed_arguments = ""
         if self.arguments:
@@ -89,25 +89,20 @@ class QueryParser:
             if parsed_arguments:
                 parsed_arguments = "(" + parsed_arguments + ")"
 
-        self._arguments = parsed_arguments
+        return parsed_arguments
 
-    def _parse_fields(self) -> None:
+    def _parse_fields(self) -> str:
+
         fields = self.fields or DEFAULT_FIELDS.get(self.operation_body)
-        if isinstance(fields, List):
-            self.fields = self.parse_list_fields_to_string(fields)
-        elif isinstance(fields, Dict):
-            """
-            fields = {
-                "model_id": None,
-                "benchmarks": {
-                    benchmark_result_id: None,
-                    whatever: {
-                        ...
-                    }
-                }
-            }
-            """
-            self.fields = self.parse_dict_fields_to_string(fields)
+
+        field_parsers = {
+            List: self.parse_list_fields_to_string,
+            Dict: self.parse_dict_fields_to_string,
+        }
+
+        for fields_type, parser in field_parsers.items():
+            if isinstance(fields, fields_type):
+                return parser(fields)
 
     def parse_list_fields_to_string(self, fields: List[str]) -> str:
         parsed_fields = ""
@@ -115,13 +110,11 @@ class QueryParser:
             camel_case_field = to_camel_case(field)
             parsed_fields += f"{camel_case_field} "
             if camel_case_field in DEFAULT_FIELDS:
-                parsed_fields += (
-                    "{ "
-                    + self.parse_list_fields_to_string(
-                        DEFAULT_FIELDS.get(camel_case_field)
-                    )
-                    + "} "
+                stringified_fields = self.parse_list_fields_to_string(
+                    DEFAULT_FIELDS.get(camel_case_field)
                 )
+                parsed_fields += f"{{ {stringified_fields}}} "
+
         return parsed_fields
 
     def parse_dict_fields_to_string(self, fields: Dict[str, Optional[Dict]]) -> str:
@@ -134,22 +127,16 @@ class QueryParser:
                 )
 
                 parent_field = to_camel_case(field)
-                child_fields = (
-                    " { " + self.parse_dict_fields_to_string(field_dict) + "} "
-                )
+                child_fields = f" {{ {self.parse_dict_fields_to_string(field_dict)}}} "
                 parsed_fields += parent_field + child_fields
             else:
                 camel_case_field = to_camel_case(field)
                 parsed_fields += f"{camel_case_field} "
                 if camel_case_field in DEFAULT_FIELDS:
-                    parsed_fields += (
-                        "{ "
-                        + self.parse_list_fields_to_string(
-                            DEFAULT_FIELDS.get(camel_case_field)
-                        )
-                        + "} "
+                    fields_for_field = self.parse_list_fields_to_string(
+                        DEFAULT_FIELDS.get(camel_case_field)
                     )
-
+                    parsed_fields += f"{{ {fields_for_field}}} "
         return parsed_fields
 
     @property
