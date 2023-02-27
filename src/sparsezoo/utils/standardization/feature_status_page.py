@@ -48,7 +48,7 @@ class FeatureStatusPage(ABC, BaseModel):
     Base Pydantic model that represents a project status page as a series of feature
     status tables
 
-    Subclasses must define the name project type
+    Subclasses must define the project name
     """
 
     project_name: str = Field(description="name of this project")

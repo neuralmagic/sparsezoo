@@ -221,4 +221,4 @@ table_2:
 
 def test_feature_status_table_template_yaml_str():
     generated_template_yaml_str = FakeStatusPage.template_yaml_str()
-    assert generated_template_yaml_str.strip() == (_EXPECTED_TEMPLATE_YAML_STR.strip())
+    assert generated_template_yaml_str.strip() == _EXPECTED_TEMPLATE_YAML_STR.strip()
