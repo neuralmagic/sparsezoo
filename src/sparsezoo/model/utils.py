@@ -111,9 +111,7 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
-) -> Tuple[
-    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
-]:
+) -> Dict[str, Any]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
         may include string arguments)
@@ -143,6 +141,8 @@ def load_files_from_stub(
         fields=[
             "model_id",
             "model_onnx_size_compressed_bytes",
+            "repo_name",
+            "repo_namespace",
             "files",
             "benchmark_results",
             "training_results",
@@ -165,6 +165,8 @@ def load_files_from_stub(
         model = models[0]
 
         model_id = model["model_id"]
+        repo_namespace = model["repo_namespace"]
+        repo_name = model["repo_name"]
 
         files = model.get("files")
         include_file_download_url(files)
@@ -190,7 +192,15 @@ def load_files_from_stub(
         results["validation"] = validation_results
         results["throughput"] = throughput_results
 
-        return files, model_id, params, results, model_onnx_size_compressed_bytes
+        return {
+            "files": files,
+            "model_id": model_id,
+            "params": params,
+            "results": results,
+            "model_onnx_size_compressed_bytes": model_onnx_size_compressed_bytes,
+            "repo_name": repo_name,
+            "repo_namespace": repo_namespace,
+        }
 
     _LOGGER.warning(f"load_files_from_stub: No models found with the stub:{stub}")
 

@@ -24,7 +24,6 @@ from sparsezoo.model.result_utils import ModelResult
 from sparsezoo.model.utils import (
     SAVE_DIR,
     ZOO_STUB_PREFIX,
-    is_stub,
     load_files_from_directory,
     load_files_from_stub,
     save_outputs_to_tar,
@@ -78,7 +77,7 @@ class Model(Directory):
         self.source = source
         self._stub_params = {}
 
-        if is_stub(self.source):
+        if self.source.startswith(ZOO_STUB_PREFIX):
             # initializing the files and params from the stub
             _setup_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _setup_args
@@ -341,21 +340,30 @@ class Model(Directory):
             - validation results dict
             - compressed model size in bytes
         """
-        files, model_id, params, validation_results, size = load_files_from_stub(
+
+        files_from_stub = load_files_from_stub(
             stub=stub,
             valid_params=list(PARAM_DICT.keys()),
         )
+        params = files_from_stub.get("params")
+        repo_namespace = files_from_stub.get("repo_namespace")
+        repo_name = files_from_stub.get("repo_name")
+        files = files_from_stub.get("files")
+        validation_results = files_from_stub.get("validation_results")
+        model_onnx_size_compressed_bytes = files_from_stub.get(
+            "model_onnx_size_compressed_bytes"
+        )
+
         if params:
             self._validate_params(params=params)
             self._stub_params.update(params)
 
-        path = os.path.join(SAVE_DIR, model_id)
+        path = os.path.join(SAVE_DIR, repo_namespace, repo_name)
+
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
-
         url = os.path.dirname(files[0].get("url"))
-
-        return files, path, url, validation_results, size
+        return files, path, url, validation_results, model_onnx_size_compressed_bytes
 
     @staticmethod
     def initialize_model_from_directory(
@@ -546,7 +554,7 @@ class Model(Directory):
         elif len(files_found) == 1:
             return files_found[0]
 
-        elif display_name == "model.onnx":
+        elif display_name == "model.onnx" and len(files_found) == 2:
             # `model.onnx` file may be found twice:
             #   - directly in the root directory
             #   - inside `deployment` directory
