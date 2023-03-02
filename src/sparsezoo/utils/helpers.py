@@ -14,6 +14,7 @@
 
 import glob
 import os
+from types import MappingProxyType
 from typing import Any
 
 
@@ -23,13 +24,34 @@ __all__ = [
     "clean_path",
     "remove_tar_duplicates",
     "convert_to_bool",
+    "strtobool",
 ]
+
+# Read only mapping
+_STR_TO_BOOL_MAP: MappingProxyType = MappingProxyType(
+    {
+        "y": True,
+        "yes": True,
+        "t": True,
+        "true": True,
+        "on": True,
+        "1": True,
+        "n": False,
+        "no": False,
+        "f": False,
+        "false": False,
+        "off": False,
+        "0": False,
+    }
+)
 
 
 def convert_to_bool(val: Any):
     """
     :param val: a value
     :return: False if value is a Falsy value e.g. 0, f, false, None, otherwise True.
+        Note, use `sparsezoo.utils.strtobool` function for stricter checking of
+        Truthy values.
     """
     return (
         bool(val)
@@ -87,3 +109,17 @@ def clean_path(path: str) -> str:
     :return: a cleaned version that expands the user path and creates an absolute path
     """
     return os.path.abspath(os.path.expanduser(path))
+
+
+def strtobool(value: str) -> bool:
+    """
+    Emulation of distutils.strtobool since it is deprecated and will be removed
+    by Python3.12
+
+    :param value: a str value to be converted to bool
+    :returns: a bool representation of the value
+    """
+    try:
+        return _STR_TO_BOOL_MAP[value.lower()]
+    except KeyError:
+        raise ValueError('"{}" is not a valid bool value'.format(value))
