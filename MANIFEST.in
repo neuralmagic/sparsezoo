@@ -1,1 +1,2 @@
 include LICENSE
+include src/sparsezoo/deployment_package/docker/*

@@ -12,7 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import List
 
-from .analysis import *
-from .utils.chart import *
+import pytest
+
+from click.testing import CliRunner
+from sparsezoo.analysis_cli import main
+
+
+def _run_with_cli_runner(args: List[str]):
+    runner = CliRunner()
+    result = runner.invoke(main, args=args)
+    return result
+
+
+@pytest.mark.parametrize(
+    "cli_args",
+    [
+        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned95-none",
+        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet"
+        "/pruned95_quant-none",
+    ],
+)
+def test_valid_invocation(cli_args):
+    result = _run_with_cli_runner(cli_args.split())
+    assert result.exit_code == 0

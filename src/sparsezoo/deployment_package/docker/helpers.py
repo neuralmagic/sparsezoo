@@ -12,7 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+__all__ = ["DEPLOYMENT_DOCKER_PATH"]
 
-from .analysis import *
-from .utils.chart import *
+from pathlib import Path
+
+
+def _get_dockerfile_path():
+    top_level_dir = Path(__file__).parent
+    dockerfile_path = top_level_dir / "Dockerfile"
+    return dockerfile_path.absolute()
+
+
+DEPLOYMENT_DOCKER_PATH: Path = _get_dockerfile_path()
