@@ -34,7 +34,7 @@ from sparsezoo import QueryParser
             {
                 "operation_body": "models",
                 "arguments": '(domain: "nlp",task: "question_answering",)',
-                "fields": "modelId stub ",
+                "fields": "modelId stub",
             },
         ),
         (
@@ -65,7 +65,7 @@ from sparsezoo import QueryParser
                     '"pytorch",repo: "huggingface",sourceDataset: '
                     '"bc2gm",sparseTag: "pruned90-none",)'
                 ),
-                "fields": "modelId modelOnnxSizeCompressedBytes stub sparseTag ",
+                "fields": "modelId modelOnnxSizeCompressedBytes stub sparseTag",
             },
         ),
         (
@@ -77,7 +77,7 @@ from sparsezoo import QueryParser
             {
                 "operation_body": "models",
                 "arguments": "",
-                "fields": "modelId stub ",
+                "fields": "modelId stub",
             },
         ),
     ],
@@ -86,12 +86,12 @@ def test_query_parser(
     raw: Dict[str, Any],
     parsed: Dict[str, Any],
 ) -> None:
+
     parser = QueryParser(
         operation_body=raw["operation_body"],
         arguments=raw["arguments"],
         fields=raw["fields"],
     )
-    parser.parse()
 
     assert parser.operation_body == parsed["operation_body"]
     assert parser.arguments == parsed["arguments"]

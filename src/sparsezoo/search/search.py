@@ -88,13 +88,21 @@ def search_models(
         "repo": repo,
         "dataset": dataset,
         "training_scheme": training_scheme,
-        "sparse_tag": "-".join(
-            component for component in sparse_tag_components if component
-        ),
+        # "sparse_tag": "-".join(
+        #     component for component in sparse_tag_components if component
+        # ),
         "release_version": release_version,
     }
+    if any(sparse_tag_components):
+        args.update(
+            {
+                "sparse_tag": "-".join(
+                    component for component in sparse_tag_components if component
+                )
+            }
+        )
 
-    arguments = {key: value for key, value in args.items() if value}
+    arguments = {key: value for key, value in args.items() if value is not None}
 
     logging.debug(f"Search_models: searching models with args {args}")
 
