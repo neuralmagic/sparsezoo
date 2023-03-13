@@ -88,9 +88,6 @@ def search_models(
         "repo": repo,
         "dataset": dataset,
         "training_scheme": training_scheme,
-        # "sparse_tag": "-".join(
-        #     component for component in sparse_tag_components if component
-        # ),
         "release_version": release_version,
     }
     if any(sparse_tag_components):

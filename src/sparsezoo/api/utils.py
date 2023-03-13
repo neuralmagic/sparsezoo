@@ -16,7 +16,7 @@ from typing import Callable, Dict
 
 
 def to_camel_case(string: str):
-    "Concert string to snake case"
+    "Convert string to camel case"
     components = string.split("_")
     return components[0] + "".join(word.title() for word in components[1:])
 

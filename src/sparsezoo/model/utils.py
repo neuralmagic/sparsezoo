@@ -89,8 +89,8 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
-) -> Tuple[
-    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
+) -> Optional[
+    Tuple[List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int]
 ]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
@@ -146,16 +146,10 @@ def load_files_from_stub(
 
         model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
 
-        # throughput_results = _parse_results_metrics(
-        #     results=benchmark_results, parser=ThroughputResults
-        # )
         throughput_results = [
             ThroughputResults(**benchmark_result)
             for benchmark_result in benchmark_results
         ]
-        # validation_results = _parse_results_metrics(
-        #     results=training_results, parser=ValidationResult
-        # )
         validation_results = [
             ValidationResult(**training_result) for training_result in training_results
         ]
