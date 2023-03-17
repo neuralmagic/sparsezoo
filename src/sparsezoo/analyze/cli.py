@@ -62,13 +62,3 @@ def analyze_options(command: callable):
         return command(*args, **kwargs)
 
     return wrap_common_options
-
-
-@click.command()
-@analyze_options
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
