@@ -15,7 +15,7 @@
 import pytest
 import yaml
 
-from sparsezoo.analysis import (
+from sparsezoo.analyze import (
     BenchmarkResult,
     BenchmarkScenario,
     ImposedSparsificationInfo,

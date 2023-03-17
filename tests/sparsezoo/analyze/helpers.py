@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Helper fixtures and functions for testing sparsezoo.analysis
+Helper fixtures and functions for testing sparsezoo.analyze
 """
 
 import os
@@ -22,7 +22,7 @@ import onnx
 import pytest
 
 from sparsezoo import Model
-from sparsezoo.analysis import ModelAnalysis
+from sparsezoo.analyze import ModelAnalysis
 from sparsezoo.utils.graph_editor import ONNXGraph
 
 
