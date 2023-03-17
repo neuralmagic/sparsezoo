@@ -35,7 +35,7 @@ from sparsezoo.utils import (
     is_quantized_layer,
     is_sparse_layer,
 )
-from tests.sparsezoo.analysis.helpers import (
+from tests.sparsezoo.analyze.helpers import (
     get_expected_analysis,
     get_generated_analysis,
     get_model_graph,
