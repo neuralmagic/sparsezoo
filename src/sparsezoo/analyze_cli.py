@@ -43,43 +43,25 @@ Examples:
 """
 import copy
 import logging
-import pprint as pp
 from pathlib import Path
 from typing import Optional
 
 import click
 import pandas as pd
 from sparsezoo import Model
-from sparsezoo.analysis import ModelAnalysis
+from sparsezoo.analyze import ModelAnalysis
 
 
 __all__ = ["main"]
 
+from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 
-pp = pp.PrettyPrinter(indent=4, width=80, compact=True, sort_dicts=False)
+
 LOGGER = logging.getLogger()
 
 
-@click.command(
-    context_settings=dict(
-        token_normalize_func=lambda x: x.replace("-", "_"),
-        show_default=True,
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    )
-)
-@click.argument(
-    "model_path",
-    type=str,
-    required=True,
-)
-@click.option(
-    "--save",
-    default=None,
-    type=click.Path(file_okay=True, dir_okay=False, readable=True, resolve_path=True),
-    help="Path to a yaml file to write results to, note: file will be "
-    "overwritten if exists",
-)
+@click.command(context_settings=CONTEXT_SETTINGS)
+@analyze_options
 def main(model_path: str, save: Optional[str]):
     """
     Model analysis for ONNX models.
