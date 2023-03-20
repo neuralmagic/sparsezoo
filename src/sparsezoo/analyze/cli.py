@@ -117,6 +117,22 @@ def analyze_performance_options(command: click.Command):
         help="The batch size to run latency benchmarks at",
     )
     @click.option(
+        "--impose",
+        default=None,
+        type=str,
+        help="The sparsification options to impose on the model and run as a "
+        "comparison; this is a multi arg list of any of the following, "
+        "`sparse` or `pruned` to set the sparsity for all prunable layers to 85%,"
+        " #.## a float [0,1] to set the sparsity for all prunable layers to, "
+        "`quant` or `quantized` to enable quantization with int8 activations "
+        "and weights for all quantizable layers, {precision} to enable "
+        "quantization with {precision: int16, int8, int4, int2} activations and "
+        "weights for all quantizable layers w_{precision} to enable quantization"
+        " with {precision: int16, int8, int4, int2} weights for all quantizable "
+        "layers a_{precision} to enable quantization with {precision: int16, "
+        "int8, int4, int2} activations for all quantizable layers",
+    )
+    @click.option(
         "--batch-size-throughput",
         default=1,
         type=int,
