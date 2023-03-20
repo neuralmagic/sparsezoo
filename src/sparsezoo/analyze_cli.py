@@ -101,11 +101,9 @@ def main(model_path: str, save: Optional[str], **kwargs):
                 f"--{unimplemented_feat} has not been implemented yet"
             )
 
-    model_file_path = _get_model_file_path(model_path=model_path)
-
     LOGGER.info("Starting Analysis ...")
-    analysis = ModelAnalysis.from_onnx(model_file_path)
-    LOGGER.info("Analysis complete, collating results...")
+    analysis = ModelAnalysis.create(model_path)
+    LOGGER.info("Analysis complete, collating ~results...")
 
     summary = analysis.summary()
 
@@ -115,18 +113,6 @@ def main(model_path: str, save: Optional[str], **kwargs):
     if save:
         LOGGER.info(f"Writing results to {save}")
         analysis.yaml(file_path=save)
-
-
-def _get_model_file_path(model_path: str):
-    if model_path.startswith("zoo:"):
-        LOGGER.info(f"Downloading files from SparseZoo: '{model_path}'")
-        model = Model(model_path)
-        model_path = Path(model.deployment.get_file("model.onnx").path)
-    elif Path(model_path).is_file():
-        model_path = model_path
-    else:
-        model_path = Path(model_path) / "model.onnx"
-    return model_path
 
 
 def _display_summary_as_table(summary):
