@@ -102,7 +102,7 @@ class QueryParser:
             parsed_arguments = "(" + parsed_arguments + ")"
         self._arguments = parsed_arguments
 
-    def _parse_fields(self) -> str:
+    def _parse_fields(self) -> None:
         fields = self.fields or DEFAULT_FIELDS.get(self.operation_body)
 
         field_parsers = {

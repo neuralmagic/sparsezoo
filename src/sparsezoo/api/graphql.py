@@ -71,7 +71,6 @@ class GraphQLAPI:
         query = QueryParser(
             operation_body=operation_body, arguments=arguments, fields=fields
         )
-        print(query.query_body)
 
         response = requests.post(
             url=url or f"{BASE_API_URL}/v2/graphql", json={"query": query.query_body}
