@@ -17,8 +17,7 @@ import tempfile
 
 import pytest
 
-from sparsezoo.model import Model, restructure_request_json, setup_model
-from sparsezoo.utils import download_get_request
+from sparsezoo.model import Model, load_files_from_stub, setup_model
 
 
 EXPECTED_IC_FILES = {
@@ -84,18 +83,26 @@ EXPECTED_YOLO_FILES = {
     ],
     scope="function",
 )
-def test_restructure_request_json(stub, expected_files):
+def test_load_files_from_stub(stub, expected_files):
     if stub.startswith("zoo:"):
         stub = stub[len("zoo:") :]
-    request_json = download_get_request(args=stub)
-    request_json = restructure_request_json(request_json["model"]["files"])
+
+    (
+        files,
+        model_id,
+        params,
+        results,
+        model_onnx_size_compressed_bytes,
+    ) = load_files_from_stub(stub=stub)
     for file_type, file_names_expected in expected_files.items():
         file_names = set(
-            file["display_name"]
-            for file in request_json
-            if file["file_type"] == file_type
+            file["display_name"] for file in files if file["file_type"] == file_type
         )
         assert not file_names_expected.difference(file_names)
+    assert model_id is not None
+    assert params.__eq__({})
+    assert results is not None
+    assert model_onnx_size_compressed_bytes > 0
 
 
 @pytest.mark.parametrize(

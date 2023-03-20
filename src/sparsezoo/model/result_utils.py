@@ -23,10 +23,6 @@ class ModelResult(BaseModel):
     Base class to store common result information
     """
 
-    result_type: str = Field(
-        description="A string representing the type of "
-        "result ex `training`, `inference`, etc"
-    )
     recorded_value: float = Field(description="The float value of the result")
     recorded_units: str = Field(description="The unit in which result is specified")
 
@@ -35,6 +31,12 @@ class ValidationResult(ModelResult):
     """
     A class holding information for validation results
     """
+
+    result_type: str = Field(
+        description="A string representing the type of "
+        "result ex `training`, `inference`, etc",
+        default="inference",
+    )
 
     dataset_type: str = Field(
         description="A string representing the type of "
@@ -49,6 +51,12 @@ class ThroughputResults(ModelResult):
     """
     A class holding information for throughput based results
     """
+
+    result_type: str = Field(
+        description="A string representing the type of "
+        "result ex `training`, `inference`, etc",
+        default="training",
+    )
 
     device_info: str = Field(description="The device current result was measured on")
     num_cores: int = Field(

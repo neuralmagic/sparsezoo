@@ -351,7 +351,9 @@ class Model(Directory):
         path = os.path.join(SAVE_DIR, model_id)
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
+
         url = os.path.dirname(files[0].get("url"))
+
         return files, path, url, validation_results, size
 
     @staticmethod
@@ -543,7 +545,7 @@ class Model(Directory):
         elif len(files_found) == 1:
             return files_found[0]
 
-        elif display_name == "model.onnx" and len(files_found) == 2:
+        elif display_name == "model.onnx":
             # `model.onnx` file may be found twice:
             #   - directly in the root directory
             #   - inside `deployment` directory

@@ -15,6 +15,7 @@
 # flake8: noqa
 # isort: skip_file
 
+from .api import *
 from .inference import *
 from .model import *
 from .objects import *

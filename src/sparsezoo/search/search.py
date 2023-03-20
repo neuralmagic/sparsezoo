@@ -16,7 +16,7 @@ import logging
 from typing import List, Union
 
 from sparsezoo import Model
-from sparsezoo.utils import search_model_get_request
+from sparsezoo.api.graphql import GraphQLAPI
 
 
 __all__ = ["search_models", "model_args_to_stub"]
@@ -77,6 +77,8 @@ def search_models(
         instead of retrieving full info for each found model. Default False
     :return: The requested list of Model instances
     """
+    sparse_tag_components = [sparse_name, sparse_category, sparse_target]
+
     args = {
         "domain": domain,
         "sub_domain": sub_domain,
@@ -86,23 +88,27 @@ def search_models(
         "repo": repo,
         "dataset": dataset,
         "training_scheme": training_scheme,
-        "sparse_name": sparse_name,
-        "sparse_category": sparse_category,
-        "sparse_target": sparse_target,
         "release_version": release_version,
     }
+    if any(sparse_tag_components):
+        args.update(
+            {
+                "sparse_tag": "-".join(
+                    component for component in sparse_tag_components if component
+                )
+            }
+        )
 
-    args = {k: v for k, v in args.items() if v is not None}
+    arguments = {key: value for key, value in args.items() if value is not None}
 
     logging.debug(f"Search_models: searching models with args {args}")
-    response_json = search_model_get_request(
-        args=args,
-        page=page,
-        page_length=page_length,
-        force_token_refresh=force_token_refresh,
+
+    response_json = GraphQLAPI().fetch(
+        operation_body="models",
+        arguments=arguments,
     )
 
-    stubs = [model_args_to_stub(**model_dict) for model_dict in response_json["models"]]
+    stubs = [model_dict["stub"] for model_dict in response_json]
 
     if return_stubs:
         return stubs

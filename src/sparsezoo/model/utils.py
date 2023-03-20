@@ -12,22 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import copy
 import logging
 import os
+import re
 import shutil
 import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
+from sparsezoo.api.graphql import GraphQLAPI
 from sparsezoo.model.result_utils import (
     ModelResult,
     ThroughputResults,
     ValidationResult,
 )
 from sparsezoo.objects import Directory, File, NumpyDirectory
-from sparsezoo.utils import download_get_request, save_numpy
+from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
 
 
 __all__ = [
@@ -39,6 +42,7 @@ __all__ = [
     "ZOO_STUB_PREFIX",
     "SAVE_DIR",
     "COMPRESSED_FILE_NAME",
+    "get_model_metadata_from_stub",
 ]
 
 ALLOWED_FILE_TYPES = {
@@ -82,28 +86,11 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     return files
 
 
-def _get_compressed_size(files: List[Dict[str, Any]]) -> Optional[int]:
-    """
-    Utility method to return compressed file size in bytes, if the size cannot
-    be inferred `None` is returned
-
-    :param files: List of file dictionaries
-    :return: `None` if file size cannot be determined, else an int representing
-        compressed size of the model in bytes
-    """
-    for file in files:
-        if file.get("display_name") == COMPRESSED_FILE_NAME:
-            return file.get("file_size")
-
-    _LOGGER.info("Compressed file-size not found!")
-
-
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
-    force_token_refresh: bool = False,
-) -> Tuple[
-    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
+) -> Optional[
+    Tuple[List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int]
 ]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
@@ -122,24 +109,58 @@ def load_files_from_stub(
     params = None
     if isinstance(stub, str):
         stub, params = parse_zoo_stub(stub=stub, valid_params=valid_params)
-    _LOGGER.debug(f"load_files_from_stub: loading files from {stub}")
-    response = download_get_request(
-        args=stub,
-        force_token_refresh=force_token_refresh,
+    _LOGGER.debug(f"load_files_from_stub: calling  files from {stub}")
+
+    arguments = get_model_metadata_from_stub(stub)
+
+    api = GraphQLAPI()
+
+    models = api.fetch(
+        operation_body="models",
+        arguments=arguments,
+        fields=["modelId", "modelOnnxSizeCompressedBytes"],
     )
 
-    # piece of code required for backwards compatibility
-    model_response = response.get("model", {})
-    files = model_response.get("files", [])
-    files = restructure_request_json(request_json=files)
-    compressed_file_size = _get_compressed_size(files=files)
-    model_id = model_response.get("model_id")
-    if params is not None:
-        files = filter_files(files=files, params=params)
+    if len(models):
+        model_id = models[0]["model_id"]
 
-    model_results = model_response.get("results")
-    validation_results = _parse_validation_metrics(model_results_response=model_results)
-    return files, model_id, params, validation_results, compressed_file_size
+        files = api.fetch(
+            operation_body="files",
+            arguments={"model_id": model_id},
+        )
+        include_file_download_url(files)
+        files = restructure_request_json(request_json=files)
+
+        if params is not None:
+            files = filter_files(files=files, params=params)
+
+        training_results = api.fetch(
+            operation_body="training_results",
+            arguments={"model_id": model_id},
+        )
+
+        benchmark_results = api.fetch(
+            operation_body="benchmark_results",
+            arguments={"model_id": model_id},
+        )
+
+        model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
+
+        throughput_results = [
+            ThroughputResults(**benchmark_result)
+            for benchmark_result in benchmark_results
+        ]
+        validation_results = [
+            ValidationResult(**training_result) for training_result in training_results
+        ]
+
+        results: Dict[str, List[ModelResult]] = defaultdict(list)
+        results["validation"] = validation_results
+        results["throughput"] = throughput_results
+
+        return files, model_id, params, results, model_onnx_size_compressed_bytes
+
+    _LOGGER.warning(f"load_files_from_stub: No models found with the stub:{stub}")
 
 
 def filter_files(
@@ -176,17 +197,17 @@ def filter_files(
         raise ValueError("No files found - the list of files is empty!")
 
     if num_recipe_file_dicts >= 2:
-        recipe_names = [
-            file_dict["display_name"]
-            for file_dict in files_filtered
-            if file_dict["file_type"] == "recipe"
-        ]
-        raise ValueError(
-            f"Found multiple recipes: {recipe_names}, "
-            f"for the string argument {expected_recipe_name}"
-        )
-    else:
-        return files_filtered
+        recipe_names = set()
+        for file_dict in files_filtered:
+            if file_dict["file_type"] == "recipe":
+                recipe_names.add(file_dict["display_name"])
+        if len(recipe_names) > 1:
+            raise ValueError(
+                f"Found multiple recipes: {recipe_names}, "
+                f"for the string argument {expected_recipe_name}"
+            )
+
+    return files_filtered
 
 
 def parse_zoo_stub(
@@ -288,6 +309,7 @@ def restructure_request_json(
     onnx_model_dict_list = fetch_from_request_json(
         request_json, "display_name", "model.onnx"
     )
+    onnx_model_dict_list = [onnx_model_dict_list[0]]
     assert len(onnx_model_dict_list) == 1
     _, onnx_model_file_dict = copy.copy(onnx_model_dict_list[0])
     onnx_model_file_dict["file_type"] = "deployment"
@@ -524,33 +546,52 @@ def _copy_and_overwrite(from_path, to_path, func):
     func(from_path, to_path)
 
 
-def _parse_validation_metrics(
-    model_results_response: List[Dict[str, Union[str, float, int]]]
-) -> Dict[str, List[ModelResult]]:
-    results: Dict[str, List[ModelResult]] = defaultdict(list)
-    for result in model_results_response:
-        recorded_units = result.get("recorded_units").lower()
-        if recorded_units in ["items/seconds", "items/second"]:
-            key = "throughput"
-            current_result = ThroughputResults(
-                result_type=result.get("result_type"),
-                recorded_value=result.get("recorded_value"),
-                recorded_units=result.get("recorded_units"),
-                device_info=result.get("device_info"),
-                num_cores=result.get("num_cores"),
-                batch_size=result.get("batch_size"),
-            )
+def include_file_download_url(files: List[Dict]):
+    for file in files:
+        file["url"] = get_file_download_url(
+            model_id=file["model_id"], file_name=file["display_name"]
+        )
 
-        else:
-            current_result = ValidationResult(
-                result_type=result.get("result_type"),
-                recorded_value=result.get("recorded_value"),
-                recorded_units=recorded_units,
-                dataset_name=result.get("dataset_name"),
-                dataset_type=result.get("dataset_type"),
-            )
-            key = "validation"
 
-        results[key].append(current_result)
+def get_file_download_url(
+    model_id: str,
+    file_name: str,
+    base_url: str = BASE_API_URL,
+):
+    """Url to download a file"""
+    download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
 
-    return results
+    # important, do not remove
+    if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
+        download_url += "?increment_download=False"
+
+    return download_url
+
+
+def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
+    """
+    Return a dictionary of the model metadata from stub
+    """
+
+    stub_regex_expr = (
+        r"^(zoo:)?"
+        r"(?P<domain>[\.A-z0-9_]+)"
+        r"/(?P<sub_domain>[\.A-z0-9_]+)"
+        r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+        r"/(?P<framework>[\.A-z0-9_]+)"
+        r"/(?P<repo>[\.A-z0-9_]+)"
+        r"/(?P<dataset>[\.A-z0-9_]+)"
+        r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
+    )
+    matches = re.match(stub_regex_expr, stub)
+
+    return {
+        "domain": matches.group("domain"),
+        "sub_domain": matches.group("sub_domain"),
+        "architecture": matches.group("architecture"),
+        "sub_architecture": matches.group("sub_architecture"),
+        "framework": matches.group("framework"),
+        "repo": matches.group("repo"),
+        "dataset": matches.group("dataset"),
+        "sparse_tag": matches.group("sparse_tag"),
+    }
