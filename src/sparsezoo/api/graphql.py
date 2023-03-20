@@ -13,25 +13,14 @@
 # limitations under the License.
 
 
-import os
 from typing import Any, Dict, List, Optional
 
 import requests
 
-from sparsezoo.utils import BASE_API_URL, convert_to_bool
+from sparsezoo.utils import BASE_API_URL
 
 from .query_parser import QueryParser
 from .utils import map_keys, to_snake_case
-
-
-QUERY_BODY = """
-    {{
-        {operation_body} {arguments}
-            {{
-               {fields}
-            }}
-    }}
-"""
 
 
 class GraphQLAPI:
@@ -79,53 +68,16 @@ class GraphQLAPI:
         Raw response's keys are in camelCase, not snake_case
         """
 
-        query = self.parse_query(
+        query = QueryParser(
             operation_body=operation_body, arguments=arguments, fields=fields
         )
+        print(query.query_body)
 
         response = requests.post(
-            url=url or f"{BASE_API_URL}/v2/graphql",
-            json={
-                "query": QUERY_BODY.format(
-                    operation_body=query.operation_body,
-                    arguments=query.arguments,
-                    fields=query.fields,
-                )
-            },
+            url=url or f"{BASE_API_URL}/v2/graphql", json={"query": query.query_body}
         )
 
         response.raise_for_status()
         response_json = response.json()
 
         return response_json["data"][query.operation_body]
-
-    def parse_query(
-        self,
-        operation_body: str,
-        arguments: Optional[Dict[str, str]] = None,
-        fields: Optional[List[str]] = None,
-    ):
-        """
-        Parse the input arguments to a graphql appropriate format for a post request
-        """
-        query = QueryParser(
-            operation_body=operation_body, arguments=arguments, fields=fields
-        )
-        query.parse()
-
-        return query
-
-    @staticmethod
-    def get_file_download_url(
-        model_id: str,
-        file_name: str,
-        base_url: str = BASE_API_URL,
-    ):
-        """Url to download a file"""
-        download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
-
-        # important, do not remove
-        if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
-            download_url += "?increment_download=False"
-
-        return download_url

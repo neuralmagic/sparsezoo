@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # flake8: noqa
+# isort: skip_file
 
 from .api import *
 from .inference import *
@@ -21,3 +22,5 @@ from .objects import *
 from .search import *
 from .utils import *
 from .validation import *
+from . import deployment_package as deployment_package_module
+from .deployment_package import *

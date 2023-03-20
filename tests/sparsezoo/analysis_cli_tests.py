@@ -12,29 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
-# isort: skip_file
+from typing import List
 
-import os
+import pytest
 
-from sparsezoo.utils.helpers import convert_to_bool
+from click.testing import CliRunner
+from sparsezoo.analysis_cli import main
 
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
+
+def _run_with_cli_runner(args: List[str]):
+    runner = CliRunner()
+    result = runner.invoke(main, args=args)
+    return result
+
+
+@pytest.mark.parametrize(
+    "cli_args",
+    [
+        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned95-none",
+        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet"
+        "/pruned95_quant-none",
+    ],
 )
-MODELS_API_URL = f"{BASE_API_URL}/v2/models"
-LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
-
-from .authentication import *
-from .graph_editor import *
-from .onnx import *
-from .calculate_ops import *
-from .data import *
-from .download import *
-from .helpers import *
-from .node_inference import *
-from .numpy import *
-from .task_name import *
-from .constants import *
+def test_valid_invocation(cli_args):
+    result = _run_with_cli_runner(cli_args.split())
+    assert result.exit_code == 0

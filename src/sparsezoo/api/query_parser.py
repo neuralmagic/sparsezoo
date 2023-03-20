@@ -45,6 +45,15 @@ DEFAULT_FIELDS = {
     "benchmarkResults": DEFAULT_BENCHMARK_RESULTS_FIELDS,
 }
 
+QUERY_BODY = """
+    {{
+        {operation_body} {arguments}
+            {{
+               {fields}
+            }}
+    }}
+"""
+
 
 class QueryParser:
     """Parse the class input arg fields to be used for graphql post requests"""
@@ -58,41 +67,42 @@ class QueryParser:
         self._operation_body = operation_body
         self._arguments = arguments
         self._fields = fields
+        self._query_body = None
 
-    def parse(self):
+        self._parse()
+
+    def _parse(self):
         """Parse to a string compatible with graphql requst body"""
 
-        self._operation_body = self._parse_operation_body()
-        self._arguments = self._parse_arguments()
-        self._fields = self._parse_fields()
+        self._parse_operation_body()
+        self._parse_arguments()
+        self._parse_fields()
+        self._build_query_body()
 
-    def _parse_operation_body(self) -> str:
-        return to_camel_case(self._operation_body)
+    def _parse_operation_body(self) -> None:
+        self._operation_body = to_camel_case(self._operation_body)
 
-    def _parse_arguments(self) -> str:
+    def _parse_arguments(self) -> None:
         """Transform deprecated stub args and convert to camel case"""
         parsed_arguments = ""
-        if self.arguments:
-            for argument, value in self.arguments.items():
-                if value is not None:
-                    contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(
-                        argument, argument
-                    )
-                    camel_case_key = to_camel_case(contemporary_key)
+        arguments = self.arguments or {}
 
-                    # single, double quotes matters
-                    if isinstance(value, str):
-                        parsed_arguments += f'{camel_case_key}: "{value}",'
-                    else:
-                        parsed_arguments += f"{camel_case_key}: {value},"
+        for argument, value in arguments.items():
+            if value is not None:
+                contemporary_key = DEPRECATED_STUB_ARGS_MAPPER.get(argument, argument)
+                camel_case_key = to_camel_case(contemporary_key)
 
-            if parsed_arguments:
-                parsed_arguments = "(" + parsed_arguments + ")"
+                # single, double quotes matters
+                if isinstance(value, str):
+                    parsed_arguments += f'{camel_case_key}: "{value}",'
+                else:
+                    parsed_arguments += f"{camel_case_key}: {value},"
 
-        return parsed_arguments
+        if parsed_arguments:
+            parsed_arguments = "(" + parsed_arguments + ")"
+        self._arguments = parsed_arguments
 
     def _parse_fields(self) -> str:
-
         fields = self.fields or DEFAULT_FIELDS.get(self.operation_body)
 
         field_parsers = {
@@ -102,7 +112,8 @@ class QueryParser:
 
         for fields_type, parser in field_parsers.items():
             if isinstance(fields, fields_type):
-                return parser(fields)
+                self.fields = parser(fields)
+                break
 
     def parse_list_fields_to_string(self, fields: List[str]) -> str:
         parsed_fields = ""
@@ -139,6 +150,13 @@ class QueryParser:
                     parsed_fields += f"{{ {fields_for_field}}} "
         return parsed_fields
 
+    def _build_query_body(self) -> None:
+        self.query_body = QUERY_BODY.format(
+            operation_body=self.operation_body,
+            arguments=self.arguments,
+            fields=self.fields,
+        )
+
     @property
     def operation_body(self) -> str:
         """Return the query operation body"""
@@ -165,3 +183,12 @@ class QueryParser:
     @fields.setter
     def fields(self, fields: str) -> None:
         self._fields = fields
+
+    @property
+    def query_body(self) -> str:
+        """Return the query body"""
+        return self._query_body
+
+    @query_body.setter
+    def query_body(self, query_body: str) -> None:
+        self._query_body = query_body

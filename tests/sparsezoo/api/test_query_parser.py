@@ -163,7 +163,6 @@ def test_query_parser(
         arguments=raw["arguments"],
         fields=raw["fields"],
     )
-    parser.parse()
 
     assert parser.operation_body == parsed["operation_body"]
     assert parser.arguments == parsed["arguments"]
