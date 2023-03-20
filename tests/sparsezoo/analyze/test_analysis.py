@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: F811
+# flake8: noqa
 
 import pytest
 
