@@ -62,7 +62,7 @@ LOGGER = logging.getLogger()
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
-def main(model_path: str, save: Optional[str]):
+def main(model_path: str, save: Optional[str], **kwargs):
     """
     Model analysis for ONNX models.
 
@@ -76,6 +76,13 @@ def main(model_path: str, save: Optional[str]):
         sparsezoo.analyze ~/models/resnet50.onnx
     """
     logging.basicConfig(level=logging.INFO)
+
+    for unimplemented_feat in ("compare", "by_layer", "by_types", "save_graphs"):
+        if kwargs.get(unimplemented_feat):
+            raise NotImplementedError(
+                f"--{unimplemented_feat} has not been implemented yet"
+            )
+
     model_file_path = _get_model_file_path(model_path=model_path)
 
     LOGGER.info("Starting Analysis ...")
