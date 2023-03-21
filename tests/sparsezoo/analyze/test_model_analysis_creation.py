@@ -16,7 +16,6 @@ from pathlib import Path
 
 import onnx
 import pytest
-import yaml
 
 from sparsezoo import Model
 from sparsezoo.analyze import ModelAnalysis
@@ -41,14 +40,6 @@ def onnx_model():
     return onnx.load(onnx_local_path())
 
 
-def yaml_file():
-    return str(Path(__file__).parent / "quantized_resnet.yaml")
-
-
-def yaml_raw_str():
-    return yaml.safe_load(yaml_file())
-
-
 @pytest.mark.parametrize(
     "file_path, should_error",
     [
@@ -56,8 +47,6 @@ def yaml_raw_str():
         (onnx_deployment_dir(), False),
         (onnx_local_path(), False),
         (onnx_model(), False),
-        # (yaml_file(), False),  # TODO: Failing, need to check creation from yaml
-        # (yaml_raw_str(), False),  # TODO: Failing, need to check re-creation from yaml
         (1, True),
     ],
 )
@@ -68,3 +57,20 @@ def test_create(file_path, should_error):
     else:
         analysis = ModelAnalysis.create(file_path)
         assert isinstance(analysis, ModelAnalysis)
+
+
+@pytest.mark.parametrize(
+    "model_path",
+    [
+        onnx_local_path(),
+    ],
+)
+def test_yaml_serialization(model_path, tmp_path):
+    analysis = ModelAnalysis.create(file_path=model_path)
+
+    yaml_file = str(tmp_path / "quantized-resnet.yaml")
+    analysis.yaml(file_path=yaml_file)
+
+    analysis_from_yaml = ModelAnalysis.create(file_path=yaml_file)
+
+    assert analysis.yaml() == analysis_from_yaml.yaml()
