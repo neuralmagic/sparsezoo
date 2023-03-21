@@ -101,7 +101,7 @@ def main(model_path: str, save: Optional[str], **kwargs):
 
     LOGGER.info("Starting Analysis ...")
     analysis = ModelAnalysis.create(model_path)
-    LOGGER.info("Analysis complete, collating ~results...")
+    LOGGER.info("Analysis complete, collating results...")
 
     summary = analysis.summary()
 
