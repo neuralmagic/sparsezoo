@@ -27,10 +27,28 @@ Usage: sparsezoo.analyze [OPTIONS] MODEL_PATH
       sparsezoo.analyze ~/models/resnet50.onnx
 
 Options:
-  --save FILE  Path to a yaml file to write results to, note: file will be
-               overwritten if exists
-  --help       Show this message and exit.
-
+  --compare TEXT      A multi-arg comma separated list of model paths to
+                      compare against; can accept local path to an onnx model,
+                      a path to deployment folder containing a onnx model, a
+                      SparseZoo stub, or a previously run analysis yaml file.
+                      No comparision is run if omitted
+  --save TEXT         File path or directory to save the results as yaml to
+                      Note: file will be overwritten if exists, if a directory
+                      path is passed results will be stored under the
+                      directory as `analysis.yaml`, if set to True the file
+                      will be saved under CWD as `analysis.yaml`
+  --save-graphs TEXT  Directory to save the generated graphs to. if not
+                      specified (default) no files will be saved. If set or
+                      boolean string, saves the graphs in the CWD under
+                      `analysis-graphs`; If set as directory path, graphs are
+                      saved in the specified directory
+  --by-types TEXT     A flag to enable analysis results by operator type. If
+                      set or boolean string, generates and records the results
+                      by operator type
+  --by-layer TEXT     A flag to enable analysis results by layer type. If set
+                      or boolean string, generates and records the results
+                      across all layers
+  --help              Show this message and exit.
 ##########
 Examples:
 1) Model Analysis on Resnet50
@@ -62,7 +80,7 @@ LOGGER = logging.getLogger()
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
-def main(model_path: str, save: Optional[str]):
+def main(model_path: str, save: Optional[str], **kwargs):
     """
     Model analysis for ONNX models.
 
@@ -76,6 +94,13 @@ def main(model_path: str, save: Optional[str]):
         sparsezoo.analyze ~/models/resnet50.onnx
     """
     logging.basicConfig(level=logging.INFO)
+
+    for unimplemented_feat in ("compare", "by_layer", "by_types", "save_graphs"):
+        if kwargs.get(unimplemented_feat):
+            raise NotImplementedError(
+                f"--{unimplemented_feat} has not been implemented yet"
+            )
+
     model_file_path = _get_model_file_path(model_path=model_path)
 
     LOGGER.info("Starting Analysis ...")
