@@ -30,7 +30,7 @@ class GraphQLAPI:
         arguments: Optional[Dict[str, str]] = None,
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
         Fetch data for models via api. Uses graphql convention of post,
             not get for requests.
