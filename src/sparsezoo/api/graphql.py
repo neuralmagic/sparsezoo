@@ -27,7 +27,7 @@ class GraphQLAPI:
     def fetch(
         self,
         operation_body: str,
-        arguments: Optional[Dict[str, str]] = None,
+        arguments: Optional[Dict[str, Any]] = None,
         fields: Optional[Union[List[str], Dict[str, Union[Dict, None]]]] = None,
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
