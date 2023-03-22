@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa: F811
+# flake8: noqa
 
 import pytest
 
-from sparsezoo.analysis import (
+from sparsezoo.analyze import (
     ModelAnalysis,
     draw_operation_chart,
     draw_parameter_chart,
     draw_parameter_operation_combined_chart,
     draw_sparsity_by_layer_chart,
 )
-from tests.sparsezoo.analysis.helpers import (
+from tests.sparsezoo.analyze.helpers import (
     get_expected_analysis,
     get_generated_analysis,
     get_test_model_names,
