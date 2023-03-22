@@ -17,6 +17,7 @@ analysis results
 """
 
 import copy
+import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,6 +70,8 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
+
+_LOGGER = logging.getLogger()
 
 
 class YAMLSerializableBaseModel(BaseModel):
@@ -985,7 +988,9 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 f"ModelAnalysis.create(...)"
             )
 
-        if isinstance(file_path, ModelProto) or Path(file_path).suffix == ".onnx":
+        if isinstance(file_path, ModelProto) or (
+            Path(file_path).suffix == ".onnx" and Path(file_path).is_file()
+        ):
             return ModelAnalysis.from_onnx(onnx_file_path=file_path)
 
         if file_path.startswith("zoo:"):
@@ -993,6 +998,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 Model(file_path).deployment.get_file("model.onnx").path
             )
         if Path(file_path).is_dir():
+            _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
             return ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
 
         if Path(file_path).is_file() and Path(file_path).suffix == ".yaml":
