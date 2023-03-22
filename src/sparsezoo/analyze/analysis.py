@@ -27,7 +27,7 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
-from sparsezoo.analysis.utils.models import (
+from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
     NodeCounts,
     NodeIO,

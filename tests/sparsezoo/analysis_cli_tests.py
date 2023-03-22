@@ -17,7 +17,7 @@ from typing import List
 import pytest
 
 from click.testing import CliRunner
-from sparsezoo.analysis_cli import main
+from sparsezoo.analyze_cli import main
 
 
 def _run_with_cli_runner(args: List[str]):
