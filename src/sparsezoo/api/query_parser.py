@@ -104,7 +104,51 @@ class QueryParser:
 
     def _parse_fields(self) -> None:
         fields = self.fields or DEFAULT_FIELDS.get(self.operation_body)
-        self.fields = " ".join(map(to_camel_case, fields))
+
+        field_parsers = {
+            List: self.parse_list_fields_to_string,
+            Dict: self.parse_dict_fields_to_string,
+        }
+
+        for fields_type, parser in field_parsers.items():
+            if isinstance(fields, fields_type):
+                self.fields = parser(fields)
+                break
+
+    def parse_list_fields_to_string(self, fields: List[str]) -> str:
+        parsed_fields = ""
+        for field in fields:
+            camel_case_field = to_camel_case(field)
+            parsed_fields += f"{camel_case_field} "
+            if camel_case_field in DEFAULT_FIELDS:
+                stringified_fields = self.parse_list_fields_to_string(
+                    DEFAULT_FIELDS.get(camel_case_field)
+                )
+                parsed_fields += f"{{ {stringified_fields}}} "
+
+        return parsed_fields
+
+    def parse_dict_fields_to_string(self, fields: Dict[str, Optional[Dict]]) -> str:
+        parsed_fields = ""
+        for field, field_dict in fields.items():
+            if field_dict:
+                assert isinstance(field_dict, Dict), (
+                    "QueryParser fields must be either dict where ",
+                    "values are a dict or None",
+                )
+
+                parent_field = to_camel_case(field)
+                child_fields = f" {{ {self.parse_dict_fields_to_string(field_dict)}}} "
+                parsed_fields += parent_field + child_fields
+            else:
+                camel_case_field = to_camel_case(field)
+                parsed_fields += f"{camel_case_field} "
+                if camel_case_field in DEFAULT_FIELDS:
+                    fields_for_field = self.parse_list_fields_to_string(
+                        DEFAULT_FIELDS.get(camel_case_field)
+                    )
+                    parsed_fields += f"{{ {fields_for_field}}} "
+        return parsed_fields
 
     def _build_query_body(self) -> None:
         self.query_body = QUERY_BODY.format(
