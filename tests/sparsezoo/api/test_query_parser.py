@@ -34,7 +34,7 @@ from sparsezoo import QueryParser
             {
                 "operation_body": "models",
                 "arguments": '(domain: "nlp",task: "question_answering",)',
-                "fields": "modelId stub",
+                "fields": "modelId stub ",
             },
         ),
         (
@@ -65,7 +65,7 @@ from sparsezoo import QueryParser
                     '"pytorch",repo: "huggingface",sourceDataset: '
                     '"bc2gm",sparseTag: "pruned90-none",)'
                 ),
-                "fields": "modelId modelOnnxSizeCompressedBytes stub sparseTag",
+                "fields": "modelId modelOnnxSizeCompressedBytes stub sparseTag ",
             },
         ),
         (
@@ -77,7 +77,79 @@ from sparsezoo import QueryParser
             {
                 "operation_body": "models",
                 "arguments": "",
-                "fields": "modelId stub",
+                "fields": "modelId stub ",
+            },
+        ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": None,
+                "fields": {"model_id": None, "display_name": None},
+            },
+            {
+                "operation_body": "models",
+                "arguments": "",
+                "fields": "modelId displayName ",
+            },
+        ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": None,
+                "fields": {
+                    "model_id": None,
+                    "display_name": None,
+                    "benchmark_results": {
+                        "benchmark_result_id": None,
+                        "scenario": None,
+                    },
+                    "files": {"checkpoint": None},
+                },
+            },
+            {
+                "operation_body": "models",
+                "arguments": "",
+                "fields": (
+                    "modelId displayName benchmarkResults "
+                    "{ benchmarkResultId scenario } files { checkpoint } "
+                ),
+            },
+        ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": None,
+                "fields": {
+                    "model_id": None,
+                    "display_name": None,
+                    "benchmark_results": None,
+                    "files": {"checkpoint": None},
+                },
+            },
+            {
+                "operation_body": "models",
+                "arguments": "",
+                "fields": (
+                    "modelId displayName benchmarkResults "
+                    "{ batchSize deviceInfo numCores recordedUnits recordedValue } "
+                    "files { checkpoint } "
+                ),
+            },
+        ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": None,
+                "fields": ["model_id", "display_name", "benchmark_results", "files"],
+            },
+            {
+                "operation_body": "models",
+                "arguments": "",
+                "fields": (
+                    "modelId displayName benchmarkResults "
+                    "{ batchSize deviceInfo numCores recordedUnits recordedValue } "
+                    "files { displayName fileSize modelId fileType } "
+                ),
             },
         ),
     ],
@@ -86,7 +158,6 @@ def test_query_parser(
     raw: Dict[str, Any],
     parsed: Dict[str, Any],
 ) -> None:
-
     parser = QueryParser(
         operation_body=raw["operation_body"],
         arguments=raw["arguments"],

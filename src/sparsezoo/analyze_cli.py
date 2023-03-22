@@ -61,10 +61,12 @@ Examples:
 """
 import copy
 import logging
+from pathlib import Path
 from typing import Optional
 
 import click
 import pandas as pd
+from sparsezoo import Model
 from sparsezoo.analyze import ModelAnalysis
 
 
