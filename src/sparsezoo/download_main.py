@@ -50,7 +50,7 @@ from sparsezoo import Model
 
 __all__ = ["main"]
 
-LOGGER = logging.getLogger()
+LOGGER = logging.getLogger(__name__)
 
 
 def parse_args():

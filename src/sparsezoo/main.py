@@ -178,7 +178,7 @@ __all__ = ["main"]
 DOWNLOAD_COMMAND = "download"
 SEARCH_COMMAND = "search"
 
-LOGGER = logging.getLogger()
+LOGGER = logging.getLogger(__name__)
 
 
 def add_model_arguments(parser, download_required=False):

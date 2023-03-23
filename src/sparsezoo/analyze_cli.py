@@ -75,7 +75,7 @@ __all__ = ["main"]
 from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 
 
-LOGGER = logging.getLogger()
+LOGGER = logging.getLogger(__name__)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
