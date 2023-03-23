@@ -28,7 +28,7 @@ class GraphQLAPI:
         self,
         operation_body: str,
         arguments: Optional[Dict[str, Any]] = None,
-        fields: Optional[Union[List[str], Dict[str, Union[Dict, None]]]] = None,
+        fields: Optional[Union[List[str], Dict[str, Optional[Dict]]]] = None,
         url: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
