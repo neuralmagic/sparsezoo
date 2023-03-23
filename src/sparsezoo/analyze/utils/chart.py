@@ -17,7 +17,7 @@ from typing import Optional, Tuple
 import numpy
 
 import matplotlib.pyplot as plt
-from sparsezoo.analyze import ModelAnalysis, NodeAnalysis
+from sparsezoo.analyze.analysis import ModelAnalysis, NodeAnalysis
 
 
 __all__ = [
