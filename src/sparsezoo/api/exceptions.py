@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class InvalidQueryValueError(Exception):
-    def __init__(self, message: Optional[str] = None, *args, **kwargs):
-        error_message = f"{message}" if message else message
+    def __init__(self, error_message: Optional[str] = None, *args, **kwargs):
         super().__init__(
             error_message,
             *args,
@@ -53,4 +52,6 @@ def validate_graphql_response(response: Response, query_body: str) -> None:
     response_json = response.json()
 
     if response_json.get("data") is None and "errors" in response_json:
-        raise InvalidQueryValueError(message=f"{response_json['errors']}\n{query_body}")
+        raise InvalidQueryValueError(
+            error_message=f"{response_json['errors']}\n{query_body}"
+        )
