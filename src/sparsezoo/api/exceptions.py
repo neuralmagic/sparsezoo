@@ -14,22 +14,16 @@
 
 import logging
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable
 
-from requests.exceptions import HTTPError
 from requests.models import Response
 
 
 logger = logging.getLogger(__name__)
 
 
-class InvalidQueryValueError(Exception):
-    def __init__(self, error_message: Optional[str] = None, *args, **kwargs):
-        super().__init__(
-            error_message,
-            *args,
-            **kwargs,
-        )
+class InvalidQueryException(Exception):
+    pass
 
 
 def graphqlapi_exception_handler(fn: Callable) -> Callable:
@@ -38,11 +32,8 @@ def graphqlapi_exception_handler(fn: Callable) -> Callable:
         try:
             return fn(*args, **kwargs)
 
-        except HTTPError as _err:
-            logger.error(f"request exception: {_err}")
-
-        except InvalidQueryValueError as _err:
-            logger.error(f"InvalidQueryValueError: {_err}")
+        except InvalidQueryException:
+            raise
 
     return inner_function
 
@@ -52,6 +43,4 @@ def validate_graphql_response(response: Response, query_body: str) -> None:
     response_json = response.json()
 
     if response_json.get("data") is None and "errors" in response_json:
-        raise InvalidQueryValueError(
-            error_message=f"{response_json['errors']}\n{query_body}"
-        )
+        raise InvalidQueryException(f"{response_json['errors']}\n{query_body}")
