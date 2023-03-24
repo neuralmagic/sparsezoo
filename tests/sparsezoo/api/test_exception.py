@@ -20,27 +20,6 @@ import pytest
 from sparsezoo.api.exceptions import InvalidQueryException, validate_graphql_response
 
 
-@pytest.fixture
-def test_invalid_query_exception():
-    return {
-        "data": [
-            {
-                "message": "Cannot query field 'blah' on type 'Query'.",
-                "locations": [{"line": 3, "column": 9}],
-            }
-        ],
-        "camel_case_list": [
-            "sparseTag",
-            "subDomain",
-            "tokenClassification",
-            "baseCased",
-            "modelId",
-            "displayName",
-            "modelOnnxSizeCompressedBytes",
-        ],
-    }
-
-
 @pytest.mark.parametrize(
     "should_raise_invalid_query_exception,response",
     [
