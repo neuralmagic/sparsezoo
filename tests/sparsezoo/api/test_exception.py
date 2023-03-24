@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+from unittest.mock import MagicMock
+
 import pytest
 
 from sparsezoo.api.exceptions import InvalidQueryException, validate_graphql_response
@@ -38,33 +41,43 @@ def test_invalid_query_exception():
     }
 
 
-@pytest.mark.xfail(raises=InvalidQueryException)
 @pytest.mark.parametrize(
-    "response",
-    {
-        "ddata": [
+    "should_raise_invalid_query_exception,response",
+    [
+        (
+            True,
             {
-                "message": "Cannot query field 'blah' on type 'Query'.",
-                "locations": [{"line": 3, "column": 9}],
-            }
-        ],
-    },
-    {
-        "ddata": [
+                "data": None,
+                "errors": {
+                    "message": "Cannot query field 'blah' on type 'Query'.",
+                    "locations": [{"line": 3, "column": 9}],
+                },
+            },
+        ),
+        (
+            True,
             {
-                "message": "Cannot query field 'blah' on type 'Query'.",
-                "locations": [{"line": 3, "column": 9}],
-            }
-        ],
-    },
-    {
-        "ddata": [
+                "data": None,
+                "errors": {
+                    "message": "Cannot query field 'foo' on type 'Query'.",
+                    "locations": [{"line": 5, "column": 9}],
+                },
+            },
+        ),
+        (
+            False,
             {
-                "message": "Cannot query field 'blah' on type 'Query'.",
-                "locations": [{"line": 3, "column": 9}],
-            }
-        ],
-    },
+                "data": "foo",
+            },
+        ),
+    ],
 )
-def test_whatever(response):
-    validate_graphql_response(response)
+def test_whatever(should_raise_invalid_query_exception: bool, response: Dict):
+    mock_response = MagicMock()
+    mock_response.json.return_value = response
+
+    if should_raise_invalid_query_exception:
+        with pytest.raises(InvalidQueryException):
+            validate_graphql_response(mock_response, "")
+    else:
+        validate_graphql_response(mock_response, "")
