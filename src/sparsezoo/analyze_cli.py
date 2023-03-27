@@ -59,18 +59,15 @@ Examples:
     sparsezoo.analyze ~/models/resnet50.onnx \
     --save resnet50-analysis.yaml
 """
-import copy
 import logging
 from typing import Optional
 
 import click
-import pandas as pd
 from sparsezoo.analyze import ModelAnalysis
+from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 
 
 __all__ = ["main"]
-
-from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 
 
 LOGGER = logging.getLogger()
@@ -103,28 +100,12 @@ def main(model_path: str, save: Optional[str], **kwargs):
     analysis = ModelAnalysis.create(model_path)
     LOGGER.info("Analysis complete, collating results...")
 
-    summary = analysis.summary()
-
-    summary["MODEL"] = model_path
-    _display_summary_as_table(summary)
+    print(f"MODEL: {model_path}", end="\n\n")
+    analysis.pretty_print_summary()
 
     if save:
         LOGGER.info(f"Writing results to {save}")
         analysis.yaml(file_path=save)
-
-
-def _display_summary_as_table(summary):
-    summary_copy = copy.copy(summary)
-    print(f"MODEL: {summary_copy.pop('MODEL')}", end="\n\n")
-    footer = summary_copy.pop("Summary")
-
-    for section_name, section_dict in summary_copy.items():
-        print(f"{section_name.upper()}:")
-        print(pd.DataFrame(section_dict).T.to_string(), end="\n\n")
-
-    print("SUMMARY:")
-    for footer_key, footer_value in footer.items():
-        print(f"{footer_key}: {footer_value}")
 
 
 if __name__ == "__main__":

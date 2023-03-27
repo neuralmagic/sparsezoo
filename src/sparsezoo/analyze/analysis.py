@@ -29,6 +29,7 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
+import pandas
 from sparsezoo import Model
 from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
@@ -1170,6 +1171,23 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             }
             for idx, benchmark_result in enumerate(self.benchmark_results)
         }
+
+    def pretty_print_summary(self):
+        """
+        Pretty print analysis summary
+        """
+        summary = self.summary()
+        summary_copy = copy.copy(summary)
+        footer = summary_copy.pop("Summary")
+
+        # relies on pandas for pretty printing as of now
+        for section_name, section_dict in summary_copy.items():
+            print(f"{section_name.upper()}:")
+            print(pandas.DataFrame(section_dict).T.to_string(), end="\n\n")
+
+        print("SUMMARY:")
+        for footer_key, footer_value in footer.items():
+            print(f"{footer_key}: {footer_value}")
 
     @classmethod
     def parse_yaml_file(cls, file_path: str):
