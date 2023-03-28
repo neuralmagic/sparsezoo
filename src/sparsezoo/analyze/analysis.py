@@ -17,8 +17,10 @@ analysis results
 """
 
 import copy
+import logging
 from collections import defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import numpy
@@ -27,6 +29,7 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
+from sparsezoo import Model
 from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
     NodeCounts,
@@ -67,6 +70,8 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
+
+_LOGGER = logging.getLogger()
 
 
 class YAMLSerializableBaseModel(BaseModel):
@@ -962,6 +967,50 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             parameter_summary=parameter_summary,
             operation_summary=operation_summary,
             nodes=node_analyses,
+        )
+
+    @classmethod
+    def create(cls, file_path: Union[str, ModelProto]) -> "ModelAnalysis":
+        """
+        Factory method to create a model analysis object from an onnx filepath,
+        sparsezoo stub, deployment directory, or a yaml file/raw string representing
+        a `ModelAnalysis` object
+
+        :param file_path: An instantiated ModelProto object, or path to an onnx
+            model, or SparseZoo stub, or path to a deployment directory, or path
+            to a yaml file or a raw yaml string representing a `ModelAnalysis`
+            object. This is used to create a new ModelAnalysis object
+        :returns: The created ModelAnalysis object
+        """
+        if not isinstance(file_path, (str, ModelProto, Path)):
+            raise ValueError(
+                f"Invalid file_path type {type(file_path)} passed to "
+                f"ModelAnalysis.create(...)"
+            )
+
+        if isinstance(file_path, ModelProto):
+            return ModelAnalysis.from_onnx(onnx_file_path=file_path)
+
+        if Path(file_path).is_file():
+            return (
+                ModelAnalysis.parse_yaml_file(file_path=file_path)
+                if Path(file_path).suffix == ".yaml"
+                else ModelAnalysis.from_onnx(onnx_file_path=file_path)
+            )
+        if Path(file_path).is_dir():
+            _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
+            return ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
+
+        if file_path.startswith("zoo:"):
+            return ModelAnalysis.from_onnx(
+                Model(file_path).deployment.get_file("model.onnx").path
+            )
+
+        if isinstance(file_path, str):
+            return ModelAnalysis.parse_yaml_raw(yaml_raw=file_path)
+
+        raise ValueError(
+            f"Invalid argument file_path {file_path} to create ModelAnalysis"
         )
 
     def summary(self) -> Dict[str, Any]:
