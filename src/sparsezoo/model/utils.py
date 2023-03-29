@@ -614,6 +614,7 @@ def is_stub(candidate: str) -> bool:
         or re.match(STUB_V2_REGEX_EXPR, candidate)
     )
 
+
 def get_file_download_url(
     model_id: str,
     file_name: str,
