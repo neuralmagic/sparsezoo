@@ -21,6 +21,7 @@ from typing import Dict, Optional
 
 import aiohttp
 import machineid
+
 from sparsezoo.utils.gdpr import is_gdpr_country
 from sparsezoo.version import version as sparsezoo_version
 

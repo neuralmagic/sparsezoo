@@ -14,9 +14,8 @@
 
 from typing import Optional
 
-import requests
-
 import geocoder
+import requests
 
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
