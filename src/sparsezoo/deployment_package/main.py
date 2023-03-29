@@ -21,9 +21,11 @@ __all__ = [
 
 from typing import Any, Iterable, Mapping, Optional, Union
 
+from sparsezoo import sparsezoo_analytics
 from sparsezoo.deployment_package.utils.utils import recommend_stub
 
 
+@sparsezoo_analytics.send_event_decorator("cli.package")
 def deployment_package(
     task: Optional[str] = None,
     dataset: Optional[str] = None,

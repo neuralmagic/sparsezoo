@@ -45,7 +45,7 @@ sparsezoo.download \
 import argparse
 import logging
 
-from sparsezoo import Model
+from sparsezoo import Model, sparsezoo_analytics
 
 
 __all__ = ["main"]
@@ -76,6 +76,7 @@ def parse_args():
     return parser.parse_args()
 
 
+@sparsezoo_analytics.send_event_decorator("cli.download")
 def main():
     args = parse_args()
     logging.basicConfig(level=logging.INFO)

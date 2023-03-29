@@ -170,7 +170,7 @@ sparsezoo download --domain cv --sub-domain classification --architecture mobile
 import argparse
 import logging
 
-from sparsezoo import Model, model_args_to_stub, search_models
+from sparsezoo import Model, model_args_to_stub, search_models, sparsezoo_analytics
 
 
 __all__ = ["main"]
@@ -365,6 +365,7 @@ def search(args):
         print("-------------------------")
 
 
+@sparsezoo_analytics.send_event_decorator("cli.main")
 def main():
     args = parse_args()
     logging.basicConfig(level=logging.INFO)
