@@ -45,7 +45,8 @@ sparsezoo.download \
 import argparse
 import logging
 
-from sparsezoo import Model, sparsezoo_analytics
+from sparsezoo import Model
+from sparsezoo.analytics import sparsezoo_analytics
 
 
 __all__ = ["main"]

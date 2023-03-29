@@ -21,7 +21,7 @@ __all__ = [
 
 from typing import Any, Iterable, Mapping, Optional, Union
 
-from sparsezoo import sparsezoo_analytics
+from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.deployment_package.utils.utils import recommend_stub
 
 

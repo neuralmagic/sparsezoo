@@ -63,7 +63,7 @@ import logging
 from typing import Optional
 
 import click
-from sparsezoo import sparsezoo_analytics
+from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.analyze import ModelAnalysis
 from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 

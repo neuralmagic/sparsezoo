@@ -24,6 +24,6 @@ from .utils import *
 from .validation import *
 from . import deployment_package as deployment_package_module
 from .deployment_package import *
-from .analytics import sparsezoo_analytics
+from .analytics import sparsezoo_analytics as _analytics
 
-sparsezoo_analytics.send_event("import")
+_analytics.send_event("python.init")
