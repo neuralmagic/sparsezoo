@@ -170,4 +170,5 @@ class GoogleAnalytics:
                 raise err
 
 
+# analytics client for sparsezoo, to disable set NM_DISABLE_ANALYTICS=1
 sparsezoo_analytics = GoogleAnalytics("sparsezoo", sparsezoo_version)
