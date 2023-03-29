@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Callable, Dict, List
+from typing import Callable, Dict, Any, List
 
 
 def to_camel_case(string: str):
-    "Concert string to snake case"
+    "Convert string to camel case"
     components = string.split("_")
     return components[0] + "".join(word.title() for word in components[1:])
 

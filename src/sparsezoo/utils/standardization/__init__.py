@@ -12,29 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Helper functions for generating and maintaining standardization tables for various
+neuralmagic integrations
+"""
+
 # flake8: noqa
 # isort: skip_file
 
-import os
-
-from sparsezoo.utils.helpers import convert_to_bool
-
-BASE_API_URL = (
-    os.getenv("SPARSEZOO_API_URL")
-    if os.getenv("SPARSEZOO_API_URL")
-    else "https://api.neuralmagic.com"
-)
-MODELS_API_URL = f"{BASE_API_URL}/v2/models"
-LATEST_PACKAGE_VERSION_URL = f"{BASE_API_URL}/packages/check-latest"
-
-from .authentication import *
-from .graph_editor import *
-from .onnx import *
-from .calculate_ops import *
-from .data import *
-from .download import *
-from .helpers import *
-from .node_inference import *
-from .numpy import *
-from .task_name import *
-from .constants import *
+from .markdown_utils import *
+from .feature_status import *
+from .feature_status_table import *
+from .feature_status_page import *
+from .write_status_pages import *

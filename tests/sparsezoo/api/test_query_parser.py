@@ -152,6 +152,26 @@ from sparsezoo import QueryParser
                 ),
             },
         ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": {"is_publicly_visible": False},
+                "fields": {
+                    "model_id": None,
+                    "similar_models_repo_names": {
+                        "display_name": None,
+                        "repo_namespace": None,
+                    },
+                },
+            },
+            {
+                "operation_body": "models",
+                "arguments": "(isPubliclyVisible: false,)",
+                "fields": (
+                    "modelId similarModelsRepoNames { displayName repoNamespace } "
+                ),
+            },
+        ),
     ],
 )
 def test_query_parser(
@@ -163,7 +183,6 @@ def test_query_parser(
         arguments=raw["arguments"],
         fields=raw["fields"],
     )
-    parser.parse()
 
     assert parser.operation_body == parsed["operation_body"]
     assert parser.arguments == parsed["arguments"]

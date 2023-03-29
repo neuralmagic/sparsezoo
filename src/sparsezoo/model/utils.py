@@ -23,8 +23,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-import pydantic
-
 from sparsezoo.api.graphql import GraphQLAPI
 from sparsezoo.model.result_utils import (
     ModelResult,
@@ -32,7 +30,7 @@ from sparsezoo.model.result_utils import (
     ValidationResult,
 )
 from sparsezoo.objects import Directory, File, NumpyDirectory
-from sparsezoo.utils import save_numpy
+from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
 
 
 __all__ = [
@@ -111,8 +109,8 @@ def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
 def load_files_from_stub(
     stub: str,
     valid_params: Optional[List[str]] = None,
-) -> Tuple[
-    List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int
+) -> Optional[
+    Tuple[List[Dict[str, Any]], str, Dict[str, str], Dict[str, List[ModelResult]], int]
 ]:
     """
     :param stub: the SparseZoo stub path to the model (optionally
@@ -177,14 +175,16 @@ def load_files_from_stub(
 
         benchmark_results = model.get("benchmark_results")
 
-        model_onnx_size_compressed_bytes = model["model_onnx_size_compressed_bytes"]
+        model_onnx_size_compressed_bytes = model.get("model_onnx_size_compressed_bytes")
+        print(model_onnx_size_compressed_bytes)
 
-        throughput_results = _parse_results_metrics(
-            results=benchmark_results, parser=ThroughputResults
-        )
-        validation_results = _parse_results_metrics(
-            results=training_results, parser=ValidationResult
-        )
+        throughput_results = [
+            ThroughputResults(**benchmark_result)
+            for benchmark_result in benchmark_results
+        ]
+        validation_results = [
+            ValidationResult(**training_result) for training_result in training_results
+        ]
 
         results: Dict[str, List[ModelResult]] = defaultdict(list)
         results["validation"] = validation_results
@@ -578,16 +578,9 @@ def _copy_and_overwrite(from_path, to_path, func):
     func(from_path, to_path)
 
 
-def _parse_results_metrics(
-    results: Dict[str, str],
-    parser: Callable[[Dict[str, str]], List[pydantic.BaseModel]],
-):
-    return [parser(**result) for result in results]
-
-
 def include_file_download_url(files: List[Dict]):
     for file in files:
-        file["url"] = GraphQLAPI.get_file_download_url(
+        file["url"] = get_file_download_url(
             model_id=file["model_id"], file_name=file["display_name"]
         )
 
@@ -620,3 +613,17 @@ def is_stub(candidate: str) -> bool:
         re.match(STUB_V1_REGEX_EXPR, candidate)
         or re.match(STUB_V2_REGEX_EXPR, candidate)
     )
+
+def get_file_download_url(
+    model_id: str,
+    file_name: str,
+    base_url: str = BASE_API_URL,
+):
+    """Url to download a file"""
+    download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
+
+    # important, do not remove
+    if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
+        download_url += "?increment_download=False"
+
+    return download_url

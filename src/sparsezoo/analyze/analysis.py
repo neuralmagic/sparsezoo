@@ -11,17 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+A module that contains schema definitions for benchmarking and/or performance
+analysis results
+"""
 
 import copy
-from typing import Dict, List, Optional, Union
+import logging
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 import onnx
 import yaml
 from onnx import ModelProto, NodeProto
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
-from sparsezoo.analysis.utils.models import (
+import pandas
+from sparsezoo import Model
+from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
     NodeCounts,
     NodeIO,
@@ -54,12 +64,175 @@ from sparsezoo.utils import (
 
 
 __all__ = [
+    "NodeInferenceResult",
+    "ImposedSparsificationInfo",
+    "BenchmarkScenario",
+    "BenchmarkResult",
     "NodeAnalysis",
     "ModelAnalysis",
 ]
 
+_LOGGER = logging.getLogger()
 
-class NodeAnalysis(BaseModel):
+
+class YAMLSerializableBaseModel(BaseModel):
+    """
+    A BaseModel that adds a .yaml(...) function to all child classes
+    """
+
+    def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
+        """
+        :param file_path: optional file path to save yaml to
+        :return: if file_path is not given, the state of the analysis model
+            as a yaml string, otherwise None
+        """
+        file_stream = None if file_path is None else open(file_path, "w")
+        ret = yaml.dump(
+            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+        )
+
+        if file_stream is not None:
+            file_stream.close()
+
+        return ret
+
+
+@dataclass
+class _SparseItemCount:
+    name: str
+    total: int = 0
+    pruned: int = 0
+    dense: int = 0
+    quantized: int = 0
+
+
+class NodeInferenceResult(YAMLSerializableBaseModel):
+    """
+    Schema representing node level information from a benchmarking experiment
+    """
+
+    name: str = Field(description="The node's name")
+    avg_run_time: PositiveFloat = Field(
+        description="Average run time for current node in milli-secs",
+    )
+    extras: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Extra arguments for DeepSparse specific results",
+    )
+
+
+class ImposedSparsificationInfo(YAMLSerializableBaseModel):
+    """
+    Schema definition for applied sparsification techniques
+    """
+
+    sparsity: Optional[PositiveFloat] = Field(
+        default=None,
+        description="Globally imposed sparsity level, should be " "within (0, 1.0]",
+    )
+
+    sparsity_block_structure: Optional[str] = Field(
+        default=None,
+        description="The sparsity block structure applied to the onnx model;"
+        " ex 2:4, 4",
+    )
+
+    quantization: bool = Field(
+        default=False,
+        description="Flag to ascertain if quantization should be applied or not",
+    )
+
+    recipe: Optional[str] = Field(
+        default=None,
+        description="The recipe to be applied",
+    )
+
+
+class BenchmarkScenario(YAMLSerializableBaseModel):
+    """
+    Schema representing information for a benchmarking experiment
+    """
+
+    batch_size: PositiveInt = Field(
+        description="The batch size to use for benchmarking",
+    )
+
+    num_cores: Optional[int] = Field(
+        description="The number of cores to use for benchmarking, can also take "
+        "in a `None` value, which represents all cores",
+    )
+
+    engine: str = Field(
+        default="deepsparse",
+        description="The engine to use for benchmarking, can be `deepsparse`"
+        "or `onnxruntime`; defaults to `deepsparse`",
+    )
+
+    scenario: str = Field(
+        default="sync",
+        description="The scenario to use for benchmarking, could be `sync` or "
+        "`async`; defaults to `sync`",
+    )
+
+    num_streams: Optional[int] = Field(
+        default=None, description="Number of streams to use for benchmarking"
+    )
+
+    duration: int = Field(
+        default=10,
+        description="Number of seconds/steps the benchmark should run for, will use "
+        "steps instead of seconds if `duration_in_steps` is `True`; "
+        "defaults to 10",
+    )
+
+    warmup_duration: int = Field(
+        default=10,
+        description="Number of seconds/steps the benchmark warmup should run for, "
+        "will use steps instead of seconds if `duration_in_steps` is "
+        "`True`; defaults to 10 secs or steps",
+    )
+
+    instructions: Optional[str] = Field(
+        default=None,
+        description="Max supported instruction set available during benchmark",
+    )
+
+    analysis_only: bool = Field(
+        default=False, description="Flag to only run analysis; defaults is `False`"
+    )
+
+
+class BenchmarkResult(YAMLSerializableBaseModel):
+    """
+    Schema representing results from a benchmarking experiment
+    """
+
+    setup: BenchmarkScenario = Field(
+        description="Information regarding hardware, cores, batch_size, scenario and "
+        "other info needed to run benchmark"
+    )
+
+    imposed_sparsification: Optional[ImposedSparsificationInfo] = Field(
+        default=None,
+        description="Information on sparsification techniques used for benchmarking "
+        "if any",
+    )
+
+    items_per_second: float = Field(
+        default=0.0, description="Number of items processed per second"
+    )
+
+    average_latency: float = Field(
+        default=float("inf"), description="Average time taken per item in milli-seconds"
+    )
+
+    node_timings: Optional[List[NodeInferenceResult]] = Field(
+        default=None,
+        description="Node level inference results",
+    )
+
+
+class NodeAnalysis(YAMLSerializableBaseModel):
     """
     Pydantic model for the analysis of a node within a model
     """
@@ -394,7 +567,7 @@ class NodeAnalysis(BaseModel):
         )
 
 
-class ModelAnalysis(BaseModel):
+class ModelAnalysis(YAMLSerializableBaseModel):
     """
     Pydantic model for analysis of a model
     """
@@ -421,6 +594,11 @@ class ModelAnalysis(BaseModel):
 
     nodes: List[NodeAnalysis] = Field(
         description="List of analyses for each node in the model graph", default=[]
+    )
+
+    benchmark_results: List[BenchmarkResult] = Field(
+        default=[],
+        description="A list of different benchmarking results for the onnx model",
     )
 
     @classmethod
@@ -793,6 +971,227 @@ class ModelAnalysis(BaseModel):
         )
 
     @classmethod
+    def create(cls, file_path: Union[str, ModelProto]) -> "ModelAnalysis":
+        """
+        Factory method to create a model analysis object from an onnx filepath,
+        sparsezoo stub, deployment directory, or a yaml file/raw string representing
+        a `ModelAnalysis` object
+
+        :param file_path: An instantiated ModelProto object, or path to an onnx
+            model, or SparseZoo stub, or path to a deployment directory, or path
+            to a yaml file or a raw yaml string representing a `ModelAnalysis`
+            object. This is used to create a new ModelAnalysis object
+        :returns: The created ModelAnalysis object
+        """
+        if not isinstance(file_path, (str, ModelProto, Path)):
+            raise ValueError(
+                f"Invalid file_path type {type(file_path)} passed to "
+                f"ModelAnalysis.create(...)"
+            )
+
+        if isinstance(file_path, ModelProto):
+            return ModelAnalysis.from_onnx(onnx_file_path=file_path)
+
+        if Path(file_path).is_file():
+            return (
+                ModelAnalysis.parse_yaml_file(file_path=file_path)
+                if Path(file_path).suffix == ".yaml"
+                else ModelAnalysis.from_onnx(onnx_file_path=file_path)
+            )
+        if Path(file_path).is_dir():
+            _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
+            return ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
+
+        if file_path.startswith("zoo:"):
+            return ModelAnalysis.from_onnx(
+                Model(file_path).deployment.get_file("model.onnx").path
+            )
+
+        if isinstance(file_path, str):
+            return ModelAnalysis.parse_yaml_raw(yaml_raw=file_path)
+
+        raise ValueError(
+            f"Invalid argument file_path {file_path} to create ModelAnalysis"
+        )
+
+    def summary(self) -> Dict[str, Any]:
+        """
+        :return: A dict like object with summary of current analysis
+        """
+
+        # parameter summary
+
+        alias_to_item_count: Dict[str, _SparseItemCount] = {
+            name.lower(): _SparseItemCount(name=name) for name in ["Weight", "Bias"]
+        }
+
+        for node in self.nodes:
+            for parameter in node.parameters:
+                item_count = alias_to_item_count[parameter.alias]
+                parameter_summary = parameter.parameter_summary
+
+                item_count.total += parameter_summary.total
+                item_count.pruned += parameter_summary.pruned
+
+                if "float32" in parameter_summary.precision:
+                    item_count.dense += (
+                        parameter_summary.precision["float32"].zero
+                        + parameter_summary.precision["float32"].non_zero
+                    )
+
+        parameter_item_counts = list(alias_to_item_count.values())
+
+        # fill empty quantized counts
+
+        for item_count in parameter_item_counts:
+            item_count.quantized = item_count.total - item_count.dense
+
+        parameter_summary = {
+            "Parameters": _summary_from_sparse_item_counts(items=parameter_item_counts),
+        }
+
+        # ops summary
+
+        pruned_param_counts = defaultdict(int)
+        dense_param_counts = defaultdict(int)
+        total_param_counts = defaultdict(int)
+        parameterized_op_types = set()
+
+        sparse_node_counts = defaultdict(int)
+        dense_node_counts = defaultdict(int)
+        total_node_counts = defaultdict(int)
+        non_parameterized_op_types = set()
+
+        for node in self.nodes:
+            if node.parameterized_prunable:
+                parameterized_op_types.add(node.op_type)
+                pruned_param_counts[node.op_type] += node.parameter_summary.pruned
+                total_param_counts[node.op_type] += node.parameter_summary.total
+
+                if "float32" in node.parameter_summary.precision:
+                    dense_param_counts[node.op_type] += (
+                        node.parameter_summary.precision["float32"].zero
+                        + node.parameter_summary.precision["float32"].non_zero
+                    )
+
+            else:
+                non_parameterized_op_types.add(node.op_type)
+                total_node_counts[node.op_type] += 1
+                if node.sparse_node:
+                    sparse_node_counts[node.op_type] += 1
+                if not node.quantized_node:
+                    dense_node_counts[node.op_type] += 1
+
+        parameterized_item_counts = [
+            _SparseItemCount(
+                name=op_type,
+                total=total_param_counts[op_type],
+                pruned=pruned_param_counts[op_type],
+                dense=dense_param_counts[op_type],
+                quantized=total_param_counts[op_type] - dense_param_counts[op_type],
+            )
+            for op_type in parameterized_op_types
+        ]
+
+        non_parameterized_item_counts = [
+            _SparseItemCount(
+                name=op_type,
+                total=total_node_counts[op_type],
+                pruned=sparse_node_counts[op_type],
+                dense=dense_node_counts[op_type],
+                quantized=total_node_counts[op_type] - dense_node_counts[op_type],
+            )
+            for op_type in non_parameterized_op_types
+        ]
+
+        ops_summary = {
+            "Parameterized Ops": _summary_from_sparse_item_counts(
+                items=parameterized_item_counts,
+            ),
+            "Non Parameterized Ops": _summary_from_sparse_item_counts(
+                items=non_parameterized_item_counts,
+            ),
+        }
+
+        footer = {
+            "Summary": {
+                "Number of Parameters": parameter_summary["Parameters"]["Total"][
+                    "Total"
+                ],
+                "Number of Operations": sum(
+                    op_summary["Total"]["Total"] for op_summary in ops_summary.values()
+                ),
+                "Weight Sparsity %": parameter_summary["Parameters"]["Weight"][
+                    "Sparsity %"
+                ],
+                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
+                    "Total"
+                ]["INT8 Precision %"],
+                "Quantized Non-Parameterized Ops %": ops_summary[
+                    "Non Parameterized Ops"
+                ]["Total"]["INT8 Precision %"],
+            }
+        }
+
+        # performance summary
+
+        performance_summary = {}
+        if self.benchmark_results:
+            performance_summary = {
+                "OVERALL": self._get_benchmark_summary(
+                    ops_summary=ops_summary,
+                    parameter_summary=parameter_summary,
+                )
+            }
+
+        return {
+            **parameter_summary,
+            **ops_summary,
+            **performance_summary,
+            **footer,
+        }
+
+    def _get_benchmark_summary(self, ops_summary, parameter_summary):
+        if not self.benchmark_results:
+            return {}
+
+        return {
+            f"Benchmark {idx + 1}": {
+                "Latency(ms)": benchmark_result.average_latency,
+                "Throughput(itm/sec)": benchmark_result.items_per_second,
+                "Supported Graph %": "",
+                "Sparsity %": (
+                    benchmark_result.imposed_sparsification.sparsity
+                    or parameter_summary["Parameters"]["Weight"]["Sparsity %"]
+                ),
+                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
+                    "Total"
+                ]["INT8 Precision %"],
+                "Quantized Non-Parameterized Ops %": ops_summary[
+                    "Non Parameterized Ops"
+                ]["Total"]["INT8 Precision %"],
+            }
+            for idx, benchmark_result in enumerate(self.benchmark_results)
+        }
+
+    def pretty_print_summary(self):
+        """
+        Pretty print analysis summary
+        """
+        summary = self.summary()
+        summary_copy = copy.copy(summary)
+        footer = summary_copy.pop("Summary")
+
+        # relies on pandas for pretty printing as of now
+        for section_name, section_dict in summary_copy.items():
+            print(f"{section_name.upper()}:")
+            print(pandas.DataFrame(section_dict).T.to_string(), end="\n\n")
+
+        print("SUMMARY:")
+        for footer_key, footer_value in footer.items():
+            print(f"{footer_key}: {footer_value}")
+
+    @classmethod
     def parse_yaml_file(cls, file_path: str):
         """
         :param file_path: path to yaml file containing model analysis data
@@ -831,18 +1230,34 @@ class ModelAnalysis(BaseModel):
 
         return nodes
 
-    def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
-        """
-        :param file_path: optional file path to save yaml to
-        :return: if file_path is not given, the state of the analysis model
-            as a yaml string, otherwise None
-        """
-        file_stream = None if file_path is None else open(file_path, "w")
-        ret = yaml.dump(
-            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
-        )
 
-        if file_stream is not None:
-            file_stream.close()
+def _summary_from_sparse_item_counts(items: List[_SparseItemCount], precision: int = 2):
+    """
+    :return: A dict like object with stats about each item type
+    """
+    total = sum(item.total for item in items)
+    num_sparse = sum(item.pruned for item in items)
+    num_fp32 = sum(item.dense for item in items)
+    num_int8 = sum(item.quantized for item in items)
 
-        return ret
+    summary = {
+        item.name: {
+            "Total": item.total,
+            "Percent Total %": round(item.total * 100.0 / total, precision),
+            "Sparsity %": round(item.pruned * 100.0 / item.total, precision),
+            "FP32 Precision %": round(item.dense * 100.0 / item.total, precision),
+            "INT8 Precision %": round(item.quantized * 100.0 / item.total, precision),
+        }
+        for item in items
+        if item.total
+    }
+
+    summary["Total"] = {
+        "Total": total,
+        "Percent Total %": round(total * 100.0 / total, precision),
+        "Sparsity %": round(num_sparse * 100.0 / total, precision),
+        "FP32 Precision %": round(num_fp32 * 100.0 / total, precision),
+        "INT8 Precision %": round(num_int8 * 100.0 / total, precision),
+    }
+
+    return summary
