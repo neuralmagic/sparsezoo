@@ -17,7 +17,6 @@ Schema for generating model analysis summary
 """
 from typing import List, Union
 
-import yaml
 from pydantic import BaseModel
 
 from sparsezoo.analyze.analysis import YAMLSerializableBaseModel
