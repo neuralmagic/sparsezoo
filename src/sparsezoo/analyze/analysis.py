@@ -96,6 +96,25 @@ class YAMLSerializableBaseModel(BaseModel):
 
         return ret
 
+    @classmethod
+    def parse_yaml_file(cls, file_path: str):
+        """
+        :param file_path: path to yaml file containing model analysis data
+        :return: instance of ModelAnalysis class
+        """
+        with open(file_path, "r") as file:
+            dict_obj = yaml.safe_load(file)
+        return cls.parse_obj(dict_obj)
+
+    @classmethod
+    def parse_yaml_raw(cls, yaml_raw: str):
+        """
+        :param yaml_raw: string containing model analysis data
+        :return: instance of ModelAnalysis class
+        """
+        dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
+        return cls.parse_obj(dict_obj)
+
 
 @dataclass
 class _SparseItemCount:
@@ -1190,25 +1209,6 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         print("SUMMARY:")
         for footer_key, footer_value in footer.items():
             print(f"{footer_key}: {footer_value}")
-
-    @classmethod
-    def parse_yaml_file(cls, file_path: str):
-        """
-        :param file_path: path to yaml file containing model analysis data
-        :return: instance of ModelAnalysis class
-        """
-        with open(file_path, "r") as file:
-            dict_obj = yaml.safe_load(file)
-        return cls.parse_obj(dict_obj)
-
-    @classmethod
-    def parse_yaml_raw(cls, yaml_raw: str):
-        """
-        :param yaml_raw: string containing model analysis data
-        :return: instance of ModelAnalysis class
-        """
-        dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
-        return cls.parse_obj(dict_obj)
 
     @staticmethod
     def analyze_nodes(model_graph: ONNXGraph) -> List[NodeAnalysis]:
