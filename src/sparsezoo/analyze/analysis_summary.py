@@ -22,7 +22,11 @@ from pydantic import BaseModel
 from sparsezoo.analyze.analysis import YAMLSerializableBaseModel
 
 
-class SubstractableBaseModel(BaseModel):
+class _SubtractBaseModel(BaseModel):
+    """
+    A BaseModel with subtraction support
+    """
+
     def __sub__(self, other):
         my_fields = self.__fields__
         other_fields = other.__fields__
@@ -30,11 +34,16 @@ class SubstractableBaseModel(BaseModel):
         assert list(my_fields) == list(other_fields)
         new_fields = {}
         for field in my_fields:
+            if field.startswith("_"):
+                # ignore private fields
+                continue
             my_value = getattr(self, field)
             other_value = getattr(other, field)
 
             assert type(my_value) == type(other_value)
-            if isinstance(my_value, str):
+            if field == "section_name":
+                new_fields[field] = my_value
+            elif isinstance(my_value, str):
                 new_fields[field] = f"{my_value} - {other_value}"
             elif isinstance(my_value, list):
                 new_fields[field] = [
@@ -46,34 +55,108 @@ class SubstractableBaseModel(BaseModel):
         return self.__class__(**new_fields)
 
 
-class Entry(SubstractableBaseModel):
+class Entry(_SubtractBaseModel):
+    """
+    The BaseModel representing a row entry
+
+    :param sparsity: A float between 0-100 representing sparsity percentage
+    :param quantized: A float between 0-100 representing quantized percentage
+    """
+
     sparsity: float
     quantized: float
 
+    _print_order = ["sparsity", "quantized"]
+
+    def pretty_print(self, headers: bool = False):
+        field_names = self._print_order
+        field_values = []
+        for field_name in field_names:
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, float):
+                field_value = f"{field_value:.2f}"
+            field_values.append(field_value)
+
+        fmt_string = "{:>20} " * len(field_names)
+
+        if headers:
+            print(
+                fmt_string.format(*(field_name.upper() for field_name in field_names))
+            )
+
+        print(fmt_string.format(*field_values))
+
 
 class NamedEntry(Entry):
+    """
+    Entry with additional info like name, total and size
+    """
+
     name: str
     total: float
     size: int
 
+    _print_order = ["name", "total", "size"] + Entry._print_order
+
 
 class TypedEntry(Entry):
+    """
+    Entry with additional info like type and size
+    """
+
     type: str
     size: int
 
+    _print_order = ["type", "size"] + Entry._print_order
+
 
 class ModelEntry(Entry):
+    """
+    Entry which includes name of the model
+    """
+
     model: str
+    _print_order = ["model"] + Entry._print_order
 
 
 class SizedModelEntry(ModelEntry):
+    """
+    A ModelEntry with additional info like count and size
+    """
+
     count: int
     size: int
+    _print_order = ModelEntry._print_order + ["count", "size"]
 
 
-class Section(SubstractableBaseModel):
+class Section(_SubtractBaseModel):
+    """
+    Represents a list of Entries with an optional name
+    """
+
     entries: List[Union[NamedEntry, TypedEntry, SizedModelEntry, ModelEntry, Entry]]
 
+    section_name: str = ""
 
-class ModelAnalysisSummary(SubstractableBaseModel, YAMLSerializableBaseModel):
+    def pretty_print(self):
+        if self.section_name:
+            print(f"{self.section_name}:")
+
+        for idx, entry in enumerate(self.entries):
+            if idx == 0:
+                entry.pretty_print(headers=True)
+            else:
+                entry.pretty_print(headers=False)
+        print()
+
+
+class ModelAnalysisSummary(_SubtractBaseModel, YAMLSerializableBaseModel):
     sections: List[Section]
+
+    def pretty_print(self):
+        """
+        Convenience function to pretty print ModelAnalysisSummary(...) objects
+        """
+
+        for section in self.sections:
+            section.pretty_print()
