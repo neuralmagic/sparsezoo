@@ -1,0 +1,15 @@
+Params:
+               MODEL             SPARSITY            QUANTIZED                COUNT                 SIZE
+        model_1.onnx                90.45                20.10                 1234                 4321
+        model_2.onnx                90.45                20.10                 1234                 4321
+        model_3.onnx                90.45                20.10                 1234                 4321
+
+Ops:
+               MODEL             SPARSITY            QUANTIZED                COUNT                 SIZE
+        model_1.onnx                90.45                20.10                 1234                 4321
+        model_2.onnx                90.45                20.10                 1234                 4321
+        model_3.onnx                90.45                20.10                 1234                 4321
+
+Overall:
+               MODEL             SPARSITY            QUANTIZED
+        model_1.onnx                90.45                20.10
