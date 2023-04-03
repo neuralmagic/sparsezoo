@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from numbers import Number
+from pathlib import Path
 
 import pytest
 
@@ -91,7 +92,8 @@ def summary_object():
 
 @pytest.fixture
 def summary_object_with_expected_pretty_print(summary_object: ModelAnalysisSummary):
-    with open("./analysis_summary.txt") as f:
+    file_path = Path(__file__).parent / "analysis_summary.txt"
+    with open(file_path) as f:
         expected_pretty_print = "\n".join(line.strip() for line in f if line.strip())
 
     return summary_object, expected_pretty_print
