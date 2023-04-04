@@ -102,8 +102,8 @@ def main(model_path: str, save: Optional[str], **kwargs):
     analysis = ModelAnalysis.create(model_path)
     LOGGER.info("Analysis complete, collating results...")
 
-    print(f"MODEL: {model_path}", end="\n\n")
-    analysis.pretty_print_summary()
+    summary = ModelAnalysis.summary()
+    summary.pretty_print()
 
     if save:
         LOGGER.info(f"Writing results to {save}")
