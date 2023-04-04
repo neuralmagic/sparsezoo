@@ -77,7 +77,7 @@ def parse_args():
     return parser.parse_args()
 
 
-@sparsezoo_analytics.send_event_decorator("cli.download")
+@sparsezoo_analytics.send_event_decorator("cli__download")
 def main():
     args = parse_args()
     logging.basicConfig(level=logging.INFO)

@@ -18,8 +18,9 @@ import os
 import uuid
 from functools import wraps
 from typing import Dict, Optional
+import threading
 
-import aiohttp
+import requests
 import machineid
 
 from sparsezoo.utils.gdpr import is_gdpr_country
@@ -114,60 +115,40 @@ class GoogleAnalytics:
         :param event_params: optional dictionary of parameters to send with the event
         :param raise_errors: True to raise any errors that occur, False otherwise
         """
-        _LOOP.run_until_complete(
-            self.send_event_async(event_name, event_params, raise_errors)
-        )
-
-    async def send_event_async(
-        self,
-        event_name: str,
-        event_params: Optional[Dict[str, str]] = None,
-        raise_errors: bool = False,
-    ):
-        """
-        Send an event asynchronously
-
-        :param event_name: the name of the event to send
-        :param event_params: optional dictionary of parameters to send with the event
-        :param raise_errors: True to raise any errors that occur, False otherwise
-        """
         if self._disabled:
             return
 
         if not event_params:
             event_params = {}
 
-        event_params.update(self._package_params)
-        event_params["package"] = self._package
-        event_params["version"] = self._version
-        payload = {
-            "client_id": self._client_id,
-            "events": [{"name": event_name, "params": event_params}],
-        }
+        def _send_request():
+            event_params.update(self._package_params)
+            event_params["package"] = self._package
+            event_params["version"] = self._version
+            payload = {
+                "client_id": self._client_id,
+                "events": [{"name": event_name, "params": event_params}],
+            }
+            headers = {
+                "Content-Type": "application/json",
+            }
+            data = json.dumps(payload)
 
-        try:
-            async with aiohttp.ClientSession() as session:
-                response = await session.post(
-                    self._url,
-                    headers={
-                        "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) "
-                        "Gecko/20100101 Firefox/91.0",
-                    },
-                    data=json.dumps(payload),
-                )
+            try:
+                response = requests.post(self._url, headers=headers, data=data)
                 response.raise_for_status()
-                body = await response.read()
+                body = response.content
                 if _DEBUG:
                     print(body)
+            except Exception as err:
+                if _DEBUG:
+                    print(err)
 
-                return body
-        except Exception as err:
-            if _DEBUG:
-                print(err)
+                if raise_errors:
+                    raise err
 
-            if raise_errors:
-                raise err
+        thread = threading.Thread(target=_send_request)
+        thread.start()
 
 
 # analytics client for sparsezoo, to disable set NM_DISABLE_ANALYTICS=1

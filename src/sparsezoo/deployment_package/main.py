@@ -25,7 +25,7 @@ from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.deployment_package.utils.utils import recommend_stub
 
 
-@sparsezoo_analytics.send_event_decorator("cli.package")
+@sparsezoo_analytics.send_event_decorator("cli__package")
 def deployment_package(
     task: Optional[str] = None,
     dataset: Optional[str] = None,
