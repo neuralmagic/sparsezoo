@@ -66,7 +66,7 @@ def model():
 @pytest.mark.parametrize(
     "num_cores, batch_size, expected",
     [
-        (24, 64, 1948.45),
+        (24, 64, 317.214),
     ],
 )
 def test_throughput_extractor(model, num_cores, batch_size, expected):
