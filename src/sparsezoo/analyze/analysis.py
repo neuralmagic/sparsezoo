@@ -33,12 +33,17 @@ import pandas
 from sparsezoo import Model
 from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
+    Entry,
+    ModelEntry,
     NodeCounts,
     NodeIO,
     OperationSummary,
     OpsSummary,
     ParameterComponent,
     ParameterSummary,
+    PerformanceEntry,
+    Section,
+    SizedModelEntry,
     ZeroNonZeroParams,
 )
 from sparsezoo.utils import (
@@ -586,6 +591,146 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         )
 
 
+class CountSummary(BaseModel):
+    items: List[_SparseItemCount]
+    _precision: int = 2
+
+    @property
+    def total(self):
+        return sum(item.total for item in self.items)
+
+    @property
+    def sparse_count(self):
+        return sum(item.pruned for item in self.items)
+
+    @property
+    def dense_count(self):
+        return sum(item.dense for item in self.items)
+
+    @property
+    def quant_count(self):
+        return sum(item.quantized for item in self.items)
+
+    @property
+    def sparsity(self):
+        return round(self.sparse_count * 100.0 / self.total, self._precision)
+
+    @property
+    def quantized(self):
+        return round(self.quant_count * 100.0 / self.total, self._precision)
+
+    @property
+    def size(self):
+        """
+        :return: size in bits ignoring zeros
+        """
+        return self.quant_count * 8 + self.dense_count * 32
+
+    def __add__(self, other):
+        new_items = self.items + other.items
+        return self.__class__(items=new_items)
+
+
+class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
+    sections: List[Section]
+
+    def pretty_print(self):
+        """
+        Convenience function to pretty print ModelAnalysisSummary(...) objects
+        """
+
+        for section in self.sections:
+            section.pretty_print()
+
+    @classmethod
+    def from_model_analysis(
+        cls, analysis: "ModelAnalysis", by_types: bool = False, by_layers: bool = False
+    ) -> "ModelAnalysisSummary":
+        """
+        Factory method to generate a ModelAnalysisSummary object from a
+        sparsezoo.ModelAnalysis object
+
+        :param analysis: The ModelAnalysis object which the newly created
+            ModelAnalysisSummary object will summarize
+        :param by_types: flag to summarize analysis information by param and
+            op type
+        :param by_layers: flag to summarize analysis information by layers
+        """
+        sections = []
+
+        if by_types:
+            # TODO: Add analysis by_types section
+            _LOGGER.info("analysis `by_types` is not implemented yet, will be ignored")
+
+        if by_layers:
+            # TODO: Add analysis by_layers section
+            _LOGGER.info("analysis `by_layer` is not implemented yet, will be ignored")
+
+        # Add Param analysis section
+        param_count_summary: CountSummary = _get_param_count_summary(analysis=analysis)
+        param_section = Section(
+            section_name="Params",
+            entries=[
+                SizedModelEntry(
+                    model=analysis.model_name,
+                    count=param_count_summary.total,
+                    size=param_count_summary.size,
+                    sparsity=param_count_summary.sparsity,
+                    quantized=param_count_summary.quantized,
+                ),
+            ],
+        )
+
+        # Add Ops analysis section
+        ops_count_summary: CountSummary = _get_ops_count_summary(analysis=analysis)
+        ops_section = Section(
+            section_name="Ops",
+            entries=[
+                SizedModelEntry(
+                    model=analysis.model_name,
+                    count=ops_count_summary.total,
+                    size=ops_count_summary.size,
+                    sparsity=ops_count_summary.sparsity,
+                    quantized=ops_count_summary.quantized,
+                ),
+            ],
+        )
+
+        # Add Overall model analysis section
+        overall_count_summary: CountSummary = param_count_summary + ops_count_summary
+        if not analysis.benchmark_results:
+
+            overall_section = Section(
+                section_name="Overall",
+                entries=[
+                    ModelEntry(
+                        model=analysis.model_name,
+                        sparsity=overall_count_summary.sparsity,
+                        quantized=overall_count_summary.quantized,
+                    )
+                ],
+            )
+
+        else:
+            overall_section = Section(
+                section_name="Overall",
+                entries=[
+                    PerformanceEntry(
+                        model=idx,
+                        sparsity=overall_count_summary.sparsity,
+                        quantized=overall_count_summary.quantized,
+                        latency=benchmark_result.average_latency,
+                        throughput=benchmark_result.items_per_second,
+                        supported_graph=0.0,  # TODO: fill in correct value
+                    )
+                    for idx, benchmark_result in enumerate(analysis.benchmark_results)
+                ],
+            )
+
+        sections = [param_section, ops_section, overall_section]
+        return cls(sections=sections)
+
+
 class ModelAnalysis(YAMLSerializableBaseModel):
     """
     Pydantic model for analysis of a model
@@ -635,12 +780,6 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             analyze
         :return: instance of cls
         """
-        model_onnx = (
-            onnx_file_path
-            if isinstance(onnx_file_path, ModelProto)
-            else onnx.load(onnx_file_path)
-        )
-
         if isinstance(onnx_file_path, ModelProto):
             model_onnx = onnx_file_path
             model_name = ""
@@ -1023,189 +1162,39 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             )
 
         if isinstance(file_path, ModelProto):
-            return ModelAnalysis.from_onnx(onnx_file_path=file_path)
+            result = ModelAnalysis.from_onnx(onnx_file_path=file_path)
 
-        if Path(file_path).is_file():
-            return (
+        elif Path(file_path).is_file():
+            result = (
                 ModelAnalysis.parse_yaml_file(file_path=file_path)
                 if Path(file_path).suffix == ".yaml"
                 else ModelAnalysis.from_onnx(onnx_file_path=file_path)
             )
-        if Path(file_path).is_dir():
+        elif Path(file_path).is_dir():
             _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
-            return ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
+            result = ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
 
-        if file_path.startswith("zoo:"):
-            return ModelAnalysis.from_onnx(
+        elif file_path.startswith("zoo:"):
+            result = ModelAnalysis.from_onnx(
                 Model(file_path).deployment.get_file("model.onnx").path
             )
 
-        if isinstance(file_path, str):
-            return ModelAnalysis.parse_yaml_raw(yaml_raw=file_path)
-
-        raise ValueError(
-            f"Invalid argument file_path {file_path} to create ModelAnalysis"
-        )
-
-    def summary(self) -> Dict[str, Any]:
-        """
-        :return: A dict like object with summary of current analysis
-        """
-
-        # parameter summary
-
-        alias_to_item_count: Dict[str, _SparseItemCount] = {
-            name.lower(): _SparseItemCount(name=name) for name in ["Weight", "Bias"]
-        }
-
-        for node in self.nodes:
-            for parameter in node.parameters:
-                item_count = alias_to_item_count[parameter.alias]
-                parameter_summary = parameter.parameter_summary
-
-                item_count.total += parameter_summary.total
-                item_count.pruned += parameter_summary.pruned
-
-                if "float32" in parameter_summary.precision:
-                    item_count.dense += (
-                        parameter_summary.precision["float32"].zero
-                        + parameter_summary.precision["float32"].non_zero
-                    )
-
-        parameter_item_counts = list(alias_to_item_count.values())
-
-        # fill empty quantized counts
-
-        for item_count in parameter_item_counts:
-            item_count.quantized = item_count.total - item_count.dense
-
-        parameter_summary = {
-            "Parameters": _summary_from_sparse_item_counts(items=parameter_item_counts),
-        }
-
-        # ops summary
-
-        pruned_param_counts = defaultdict(int)
-        dense_param_counts = defaultdict(int)
-        total_param_counts = defaultdict(int)
-        parameterized_op_types = set()
-
-        sparse_node_counts = defaultdict(int)
-        dense_node_counts = defaultdict(int)
-        total_node_counts = defaultdict(int)
-        non_parameterized_op_types = set()
-
-        for node in self.nodes:
-            if node.parameterized_prunable:
-                parameterized_op_types.add(node.op_type)
-                pruned_param_counts[node.op_type] += node.parameter_summary.pruned
-                total_param_counts[node.op_type] += node.parameter_summary.total
-
-                if "float32" in node.parameter_summary.precision:
-                    dense_param_counts[node.op_type] += (
-                        node.parameter_summary.precision["float32"].zero
-                        + node.parameter_summary.precision["float32"].non_zero
-                    )
-
-            else:
-                non_parameterized_op_types.add(node.op_type)
-                total_node_counts[node.op_type] += 1
-                if node.sparse_node:
-                    sparse_node_counts[node.op_type] += 1
-                if not node.quantized_node:
-                    dense_node_counts[node.op_type] += 1
-
-        parameterized_item_counts = [
-            _SparseItemCount(
-                name=op_type,
-                total=total_param_counts[op_type],
-                pruned=pruned_param_counts[op_type],
-                dense=dense_param_counts[op_type],
-                quantized=total_param_counts[op_type] - dense_param_counts[op_type],
+        elif isinstance(file_path, str):
+            result = ModelAnalysis.parse_yaml_raw(yaml_raw=file_path)
+        else:
+            raise ValueError(
+                f"Invalid argument file_path {file_path} to create ModelAnalysis"
             )
-            for op_type in parameterized_op_types
-        ]
 
-        non_parameterized_item_counts = [
-            _SparseItemCount(
-                name=op_type,
-                total=total_node_counts[op_type],
-                pruned=sparse_node_counts[op_type],
-                dense=dense_node_counts[op_type],
-                quantized=total_node_counts[op_type] - dense_node_counts[op_type],
-            )
-            for op_type in non_parameterized_op_types
-        ]
+        result.model_name = file_path
+        return result
 
-        ops_summary = {
-            "Parameterized Ops": _summary_from_sparse_item_counts(
-                items=parameterized_item_counts,
-            ),
-            "Non Parameterized Ops": _summary_from_sparse_item_counts(
-                items=non_parameterized_item_counts,
-            ),
-        }
-
-        footer = {
-            "Summary": {
-                "Number of Parameters": parameter_summary["Parameters"]["Total"][
-                    "Total"
-                ],
-                "Number of Operations": sum(
-                    op_summary["Total"]["Total"] for op_summary in ops_summary.values()
-                ),
-                "Weight Sparsity %": parameter_summary["Parameters"]["Weight"][
-                    "Sparsity %"
-                ],
-                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
-                    "Total"
-                ]["INT8 Precision %"],
-                "Quantized Non-Parameterized Ops %": ops_summary[
-                    "Non Parameterized Ops"
-                ]["Total"]["INT8 Precision %"],
-            }
-        }
-
-        # performance summary
-
-        performance_summary = {}
-        if self.benchmark_results:
-            performance_summary = {
-                "OVERALL": self._get_benchmark_summary(
-                    ops_summary=ops_summary,
-                    parameter_summary=parameter_summary,
-                )
-            }
-
-        return {
-            **parameter_summary,
-            **ops_summary,
-            **performance_summary,
-            **footer,
-        }
-
-    def _get_benchmark_summary(self, ops_summary, parameter_summary):
-        if not self.benchmark_results:
-            return {}
-
-        return {
-            f"Benchmark {idx + 1}": {
-                "Latency(ms)": benchmark_result.average_latency,
-                "Throughput(itm/sec)": benchmark_result.items_per_second,
-                "Supported Graph %": "",
-                "Sparsity %": (
-                    benchmark_result.imposed_sparsification.sparsity
-                    or parameter_summary["Parameters"]["Weight"]["Sparsity %"]
-                ),
-                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
-                    "Total"
-                ]["INT8 Precision %"],
-                "Quantized Non-Parameterized Ops %": ops_summary[
-                    "Non Parameterized Ops"
-                ]["Total"]["INT8 Precision %"],
-            }
-            for idx, benchmark_result in enumerate(self.benchmark_results)
-        }
+    def summary(self) -> ModelAnalysisSummary:
+        """
+        :return: A ModelAnalysisSummary object that represents summary of
+            current analyses
+        """
+        return ModelAnalysisSummary.from_model_analysis(analysis=self)
 
     def pretty_print_summary(self):
         """
@@ -1245,33 +1234,90 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         return nodes
 
 
-def _summary_from_sparse_item_counts(items: List[_SparseItemCount], precision: int = 2):
-    """
-    :return: A dict like object with stats about each item type
-    """
-    total = sum(item.total for item in items)
-    num_sparse = sum(item.pruned for item in items)
-    num_fp32 = sum(item.dense for item in items)
-    num_int8 = sum(item.quantized for item in items)
-
-    summary = {
-        item.name: {
-            "Total": item.total,
-            "Percent Total %": round(item.total * 100.0 / total, precision),
-            "Sparsity %": round(item.pruned * 100.0 / item.total, precision),
-            "FP32 Precision %": round(item.dense * 100.0 / item.total, precision),
-            "INT8 Precision %": round(item.quantized * 100.0 / item.total, precision),
-        }
-        for item in items
-        if item.total
+def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:
+    alias_to_item_count: Dict[str, _SparseItemCount] = {
+        name.lower(): _SparseItemCount(name=name) for name in ["Weight", "Bias"]
     }
 
-    summary["Total"] = {
-        "Total": total,
-        "Percent Total %": round(total * 100.0 / total, precision),
-        "Sparsity %": round(num_sparse * 100.0 / total, precision),
-        "FP32 Precision %": round(num_fp32 * 100.0 / total, precision),
-        "INT8 Precision %": round(num_int8 * 100.0 / total, precision),
-    }
+    for node in analysis.nodes:
+        for parameter in node.parameters:
+            item_count = alias_to_item_count[parameter.alias]
+            parameter_summary = parameter.parameter_summary
 
-    return summary
+            item_count.total += parameter_summary.total
+            item_count.pruned += parameter_summary.pruned
+
+            if "float32" in parameter_summary.precision:
+                item_count.dense += (
+                    parameter_summary.precision["float32"].zero
+                    + parameter_summary.precision["float32"].non_zero
+                )
+
+    parameter_item_counts = list(alias_to_item_count.values())
+
+    # fill empty quantized counts
+
+    for item_count in parameter_item_counts:
+        item_count.quantized = item_count.total - item_count.dense
+
+    return CountSummary(items=parameter_item_counts)
+
+
+def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
+    # ops summary
+
+    pruned_param_counts = defaultdict(int)
+    dense_param_counts = defaultdict(int)
+    total_param_counts = defaultdict(int)
+    parameterized_op_types = set()
+
+    sparse_node_counts = defaultdict(int)
+    dense_node_counts = defaultdict(int)
+    total_node_counts = defaultdict(int)
+    non_parameterized_op_types = set()
+
+    for node in analysis.nodes:
+        if node.parameterized_prunable:
+            parameterized_op_types.add(node.op_type)
+            pruned_param_counts[node.op_type] += node.parameter_summary.pruned
+            total_param_counts[node.op_type] += node.parameter_summary.total
+
+            if "float32" in node.parameter_summary.precision:
+                dense_param_counts[node.op_type] += (
+                    node.parameter_summary.precision["float32"].zero
+                    + node.parameter_summary.precision["float32"].non_zero
+                )
+
+        else:
+            non_parameterized_op_types.add(node.op_type)
+            total_node_counts[node.op_type] += 1
+            if node.sparse_node:
+                sparse_node_counts[node.op_type] += 1
+            if not node.quantized_node:
+                dense_node_counts[node.op_type] += 1
+
+    parameterized_item_counts = [
+        _SparseItemCount(
+            name=op_type,
+            total=total_param_counts[op_type],
+            pruned=pruned_param_counts[op_type],
+            dense=dense_param_counts[op_type],
+            quantized=total_param_counts[op_type] - dense_param_counts[op_type],
+        )
+        for op_type in parameterized_op_types
+    ]
+
+    non_parameterized_item_counts = [
+        _SparseItemCount(
+            name=op_type,
+            total=total_node_counts[op_type],
+            pruned=sparse_node_counts[op_type],
+            dense=dense_node_counts[op_type],
+            quantized=total_node_counts[op_type] - dense_node_counts[op_type],
+        )
+        for op_type in non_parameterized_op_types
+    ]
+
+    return CountSummary(
+        items=[*parameterized_item_counts, *non_parameterized_item_counts]
+    )

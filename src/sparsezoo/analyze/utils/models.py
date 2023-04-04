@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
@@ -27,6 +27,8 @@ __all__ = [
     "OperationSummary",
     "ParameterComponent",
 ]
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PropertyBaseModel(BaseModel):
@@ -221,3 +223,155 @@ class ParameterComponent(BaseModel):
         description="A summary of the parameter"
     )
     dtype: str = Field(description="The data type of the parameter")
+
+
+class Entry(BaseModel):
+    """
+    A BaseModel with subtraction and pretty_print support
+    """
+
+    _print_order: List[str] = []
+
+    def __sub__(self, other):
+        my_fields = self.__fields__
+        other_fields = other.__fields__
+
+        assert list(my_fields) == list(other_fields)
+        new_fields = {}
+        for field in my_fields:
+            if field.startswith("_"):
+                # ignore private fields
+                continue
+            my_value = getattr(self, field)
+            other_value = getattr(other, field)
+
+            assert type(my_value) == type(other_value)
+            if field == "section_name":
+                new_fields[field] = my_value
+            elif isinstance(my_value, str):
+                new_fields[field] = f"{my_value} - {other_value}"
+            elif isinstance(my_value, list):
+                new_fields[field] = [
+                    item_a - item_b for item_a, item_b in zip(my_value, other_value)
+                ]
+            else:
+                new_fields[field] = my_value - other_value
+
+        return self.__class__(**new_fields)
+
+    def pretty_print(self, headers: bool = False):
+        column_width = 15
+        field_names = self._print_order
+        field_values = []
+        for field_name in field_names:
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, float):
+                field_value = f"{field_value:.2f}"
+            if field_name == "model":
+                field_value = field_value[-40:]
+            field_values.append(field_value)
+
+        column_fmt = "{{:>{0}}} ".format(column_width)
+        fmt_string = "{:>40}" + (column_fmt * (len(field_names) - 1))
+
+        if headers:
+            print(
+                fmt_string.format(*(field_name.upper() for field_name in field_names))
+            )
+
+        print(fmt_string.format(*field_values))
+
+
+class BaseEntry(Entry):
+    """
+    The BaseModel representing a row entry
+
+    :param sparsity: A float between 0-100 representing sparsity percentage
+    :param quantized: A float between 0-100 representing quantized percentage
+    """
+
+    sparsity: float
+    quantized: float
+
+    _print_order = ["sparsity", "quantized"]
+
+
+class NamedEntry(BaseEntry):
+    """
+    BaseEntry with additional info like name, total and size
+    """
+
+    name: str
+    total: float
+    size: int
+
+    _print_order = ["name", "total", "size"] + BaseEntry._print_order
+
+
+class TypedEntry(BaseEntry):
+    """
+    BaseEntry with additional info like type and size
+    """
+
+    type: str
+    size: int
+
+    _print_order = ["type", "size"] + BaseEntry._print_order
+
+
+class ModelEntry(BaseEntry):
+    """
+    BaseEntry which includes name of the model
+    """
+
+    model: str
+    _print_order = ["model"] + BaseEntry._print_order
+
+
+class SizedModelEntry(ModelEntry):
+    """
+    A ModelEntry with additional info like count and size
+    """
+
+    count: int
+    size: int
+    _print_order = ModelEntry._print_order + ["count", "size"]
+
+
+class PerformanceEntry(BaseEntry):
+    """
+    A BaseEntry with additional performance info
+    """
+
+    model: str
+    latency: float
+    throughput: float
+    supported_graph: float
+
+    _print_order = [
+        "model",
+        "latency",
+        "throughput",
+        "supported_graph",
+    ] + BaseEntry._print_order
+
+
+class Section(Entry):
+    """
+    Represents a list of Entries with an optional name
+    """
+
+    entries: List[Union[NamedEntry, TypedEntry, SizedModelEntry, ModelEntry, BaseEntry]]
+
+    section_name: str = ""
+
+    def pretty_print(self):
+        if self.section_name:
+            print(f"{self.section_name}:")
+
+        for idx, entry in enumerate(self.entries):
+            if idx == 0:
+                entry.pretty_print(headers=True)
+            else:
+                entry.pretty_print(headers=False)
+        print()
