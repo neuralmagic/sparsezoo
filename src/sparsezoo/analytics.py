@@ -15,13 +15,13 @@
 import asyncio
 import json
 import os
+import threading
 import uuid
 from functools import wraps
 from typing import Dict, Optional
-import threading
 
-import requests
 import machineid
+import requests
 
 from sparsezoo.utils.gdpr import is_gdpr_country
 from sparsezoo.version import version as sparsezoo_version
