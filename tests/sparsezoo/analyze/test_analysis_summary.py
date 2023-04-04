@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pytest
 
+from sparsezoo.analyze import ModelAnalysis
 from sparsezoo.analyze.analysis_summary import (
     ModelAnalysisSummary,
     ModelEntry,
@@ -89,6 +90,10 @@ def summary_object():
         ]
     )
 
+@pytest.fixture
+def analysis():
+    # TODO: replace with SparseZoo stub
+    return ModelAnalysis.create(file_path="/home/rahul/models/resnet50-dense.onnx")
 
 @pytest.fixture
 def summary_object_with_expected_pretty_print(summary_object: ModelAnalysisSummary):
@@ -134,3 +139,9 @@ def test_subtraction(summary_object: ModelAnalysisSummary):
             for field, value in entry.__fields__.items():
                 if isinstance(value, Number):
                     assert 0 == value
+
+
+def test_from_model_analysis(analysis):
+    summary = ModelAnalysisSummary.from_model_analysis(analysis=analysis)
+    assert isinstance(summary, ModelAnalysisSummary)
+    summary.pretty_print()

@@ -15,11 +15,16 @@
 """
 Schema for generating model analysis summary
 """
+import logging
+import textwrap
 from typing import List, Union
 
 from pydantic import BaseModel
 
-from sparsezoo.analyze.analysis import YAMLSerializableBaseModel
+from sparsezoo.analyze.analysis import ModelAnalysis, YAMLSerializableBaseModel
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class _SubtractBaseModel(BaseModel):
@@ -69,15 +74,16 @@ class Entry(_SubtractBaseModel):
     _print_order = ["sparsity", "quantized"]
 
     def pretty_print(self, headers: bool = False):
+        column_width = 40
         field_names = self._print_order
         field_values = []
         for field_name in field_names:
             field_value = getattr(self, field_name)
             if isinstance(field_value, float):
                 field_value = f"{field_value:.2f}"
-            field_values.append(field_value)
-
-        fmt_string = "{:>20} " * len(field_names)
+            field_values.append(textwrap.shorten(str(field_value), width=column_width))
+        column_fmt = "{{:>{0}}} ".format(column_width)
+        fmt_string = column_fmt * len(field_names)
 
         if headers:
             print(
@@ -160,3 +166,77 @@ class ModelAnalysisSummary(_SubtractBaseModel, YAMLSerializableBaseModel):
 
         for section in self.sections:
             section.pretty_print()
+
+    @classmethod
+    def from_model_analysis(
+        cls, analysis: ModelAnalysis, by_types: bool = False, by_layers: bool = False
+    ) -> "ModelAnalysisSummary":
+        """
+        Factory method to generate a ModelAnalysisSummary object from a
+        sparsezoo.ModelAnalysis object
+
+        :param analysis: The ModelAnalysis object which the newly created
+            ModelAnalysisSummary object will summarize
+        :param by_types: flag to summarize analysis information by param and
+            op type
+        :param by_layers: flag to summarize analysis information by layers
+        """
+        sections = []
+
+        if by_types:
+            # TODO: Add analysis by_types section
+            _LOGGER.info("analysis `by_types` is not implemented yet, will be ignored")
+
+        if by_layers:
+            # TODO: Add analysis by_layers section
+            _LOGGER.info("analysis `by_layer` is not implemented yet, will be ignored")
+
+        # Add Param analysis section
+        param_section = Section(
+            section_name="Params",
+            entries=[
+                SizedModelEntry(
+                    model=analysis.model_name,
+                    count=1234,
+                    size=4321,
+                    sparsity=90.453,
+                    quantized=20.1,
+                ),
+            ],
+        )
+
+        # Add Ops analysis section
+        ops_section = Section(
+            section_name="Ops",
+            entries=[
+                SizedModelEntry(
+                    model=analysis.model_name,
+                    count=1234,
+                    size=4321,
+                    sparsity=90.453,
+                    quantized=20.1,
+                ),
+            ],
+        )
+
+        # Add Overall model analysis section
+        overall_section = Section(
+            section_name="Overall",
+            entries=[
+                ModelEntry(
+                    model=analysis.model_name,
+                    sparsity=90.453,
+                    quantized=20.1,
+                )
+            ],
+        )
+
+        sections = [param_section, ops_section, overall_section]
+        return cls(sections=sections)
+
+
+# local test
+
+analysis = ModelAnalysis.create("/home/rahul/models/resnet50-dense.onnx")
+summary = ModelAnalysisSummary.from_model_analysis(analysis)
+summary.pretty_print()

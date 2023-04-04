@@ -611,6 +611,11 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         description="A summary of all the operations in the model"
     )
 
+    model_name: str = Field(
+        description="Optional model name, defaults to empty string",
+        default="",
+    )
+
     nodes: List[NodeAnalysis] = Field(
         description="List of analyses for each node in the model graph", default=[]
     )
@@ -635,6 +640,14 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             if isinstance(onnx_file_path, ModelProto)
             else onnx.load(onnx_file_path)
         )
+
+        if isinstance(onnx_file_path, ModelProto):
+            model_onnx = onnx_file_path
+            model_name = ""
+        else:
+            model_onnx = onnx.load(onnx_file_path)
+            model_name = str(onnx_file_path)
+
         model_graph = ONNXGraph(model_onnx)
 
         node_analyses = cls.analyze_nodes(model_graph)
@@ -643,8 +656,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         layer_counts.update(op_counts)
         node_counts = layer_counts.copy()
 
-        # these could be done with node-wise computation rather than feature-wise
-        # to reduce run time
+        # these could be done with node-wise computation rather than
+        # feature-wise to reduce run time
 
         all_nodes = NodeCounts(
             total=len(node_analyses),
@@ -980,6 +993,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         )
 
         return cls(
+            model_name=model_name,
             node_counts=node_counts,
             all_nodes=all_nodes,
             parameterized=parameterized,
