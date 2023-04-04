@@ -26,4 +26,4 @@ from . import deployment_package as deployment_package_module
 from .deployment_package import *
 from .analytics import sparsezoo_analytics as _analytics
 
-_analytics.send_event("python.init")
+_analytics.send_event("python__init")
