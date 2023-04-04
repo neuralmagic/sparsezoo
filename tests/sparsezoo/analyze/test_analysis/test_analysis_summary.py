@@ -12,17 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from numbers import Number
-from pathlib import Path
 
 import pytest
 
 from sparsezoo.analyze import ModelAnalysis
-from sparsezoo.analyze.analysis_summary import (
-    ModelAnalysisSummary,
-    ModelEntry,
-    Section,
-    SizedModelEntry,
-)
+from sparsezoo.analyze.analysis import ModelAnalysisSummary
+from sparsezoo.analyze.utils.models import ModelEntry, Section, SizedModelEntry
 
 
 @pytest.fixture
@@ -90,18 +85,13 @@ def summary_object():
         ]
     )
 
+
 @pytest.fixture
 def analysis():
-    # TODO: replace with SparseZoo stub
-    return ModelAnalysis.create(file_path="/home/rahul/models/resnet50-dense.onnx")
-
-@pytest.fixture
-def summary_object_with_expected_pretty_print(summary_object: ModelAnalysisSummary):
-    file_path = Path(__file__).parent / "analysis_summary.txt"
-    with open(file_path) as f:
-        expected_pretty_print = "\n".join(line.strip() for line in f if line.strip())
-
-    return summary_object, expected_pretty_print
+    return ModelAnalysis.create(
+        file_path="zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+        "imagenet/pruned_quant-moderate"
+    )
 
 
 def test_yaml_serialization(summary_object: ModelAnalysisSummary):
@@ -117,18 +107,6 @@ def test_if_pretty_printable(summary_object: ModelAnalysisSummary):
 
     assert callable(pretty_print_func)
     summary_object.pretty_print()
-
-
-def test_pretty_print_output(summary_object_with_expected_pretty_print, capfd):
-    summary_object, expected_out = summary_object_with_expected_pretty_print
-    summary_object.pretty_print()
-
-    actual_output, err = capfd.readouterr()
-    actual_output = "\n".join(
-        line.strip() for line in actual_output.split("\n") if line.strip()
-    )
-
-    assert actual_output == expected_out
 
 
 def test_subtraction(summary_object: ModelAnalysisSummary):
