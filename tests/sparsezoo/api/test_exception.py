@@ -51,7 +51,9 @@ from sparsezoo.api.exceptions import InvalidQueryException, validate_graphql_res
         ),
     ],
 )
-def test_whatever(should_raise_invalid_query_exception: bool, response: Dict):
+def test_graphql_error_response(
+    should_raise_invalid_query_exception: bool, response: Dict
+):
     mock_response = MagicMock()
     mock_response.json.return_value = response
 
