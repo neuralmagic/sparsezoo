@@ -176,7 +176,6 @@ def load_files_from_stub(
         benchmark_results = model.get("benchmark_results")
 
         model_onnx_size_compressed_bytes = model.get("model_onnx_size_compressed_bytes")
-        print(model_onnx_size_compressed_bytes)
 
         throughput_results = [
             ThroughputResults(**benchmark_result)
