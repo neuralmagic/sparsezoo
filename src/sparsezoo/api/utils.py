@@ -36,8 +36,9 @@ def map_keys(
 ) -> Dict[str, str]:
     """
     Given a dictionary, update its keys to a given mapper callable.
-        If the value of the dict is a List of Dict or Dict of Dict,
-        recursively map its keys
+
+    If the value of the dict is a List of Dict or Dict of Dict, recursively map
+    its keys
     """
     mapped_dict = {}
     for key, value in dictionary.items():
