@@ -588,21 +588,23 @@ def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
     """Return a dictionary of the model metadata from stub"""
 
     matches = re.match(STUB_V1_REGEX_EXPR, stub) or re.match(STUB_V2_REGEX_EXPR, stub)
-    if matches:
-        if "source_dataset" in matches.groupdict():
-            return {"repo_name": stub}
+    if not matches:
+        return {}
 
-        if "dataset" in matches.groupdict():
-            return {
-                "domain": matches.group("domain"),
-                "sub_domain": matches.group("sub_domain"),
-                "architecture": matches.group("architecture"),
-                "sub_architecture": matches.group("sub_architecture"),
-                "framework": matches.group("framework"),
-                "repo": matches.group("repo"),
-                "dataset": matches.group("dataset"),
-                "sparse_tag": matches.group("sparse_tag"),
-            }
+    if "source_dataset" in matches.groupdict():
+        return {"repo_name": stub}
+
+    if "dataset" in matches.groupdict():
+        return {
+            "domain": matches.group("domain"),
+            "sub_domain": matches.group("sub_domain"),
+            "architecture": matches.group("architecture"),
+            "sub_architecture": matches.group("sub_architecture"),
+            "framework": matches.group("framework"),
+            "repo": matches.group("repo"),
+            "dataset": matches.group("dataset"),
+            "sparse_tag": matches.group("sparse_tag"),
+        }
 
     return {}
 
