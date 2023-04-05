@@ -102,7 +102,7 @@ def main(model_path: str, save: Optional[str], **kwargs):
     analysis = ModelAnalysis.create(model_path)
     LOGGER.info("Analysis complete, collating results...")
 
-    summary = ModelAnalysis.summary()
+    summary = analysis.summary()
     summary.pretty_print()
 
     if save:
