@@ -13,13 +13,12 @@
 # limitations under the License.
 
 from typing import Optional
+import contextlib
 
 import geocoder
 import requests
 
-
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
-
 
 _GDPR_COUNTRY_CODES = [
     "AT",
@@ -56,26 +55,30 @@ def get_external_ip() -> Optional[str]:
     """
     :return: the external ip of the machine, None if unable to get
     """
-    try:
-        response = requests.get("https://ident.me")
-        external_ip = response.text.strip()
+    with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stderr(None):
+            try:
+                response = requests.get("https://ident.me")
+                external_ip = response.text.strip()
 
-        return external_ip
-    except Exception:
-        return None
+                return external_ip
+            except Exception:
+                return None
 
 
 def get_country_code() -> Optional[str]:
     """
     :return: the country code of the machine, None if unable to get
     """
-    try:
-        ip = get_external_ip()
-        geo = geocoder.ip(ip)
+    with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stderr(None):
+            try:
+                ip = get_external_ip()
+                geo = geocoder.ip(ip)
 
-        return geo.country
-    except Exception:
-        return None
+                return geo.country
+            except Exception:
+                return None
 
 
 def is_gdpr_country() -> bool:
