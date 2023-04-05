@@ -106,6 +106,7 @@ class GoogleAnalytics:
         event_name: str,
         event_params: Optional[Dict[str, str]] = None,
         raise_errors: bool = False,
+        _await_response: bool = False,
     ):
         """
         Send an event
@@ -113,8 +114,14 @@ class GoogleAnalytics:
         :param event_name: the name of the event to send
         :param event_params: optional dictionary of parameters to send with the event
         :param raise_errors: True to raise any errors that occur, False otherwise
+        :param _await_response: (testing only) True to wait for analytics request
+            thread to complete before returning. Default False
         """
         if self._disabled:
+            if _await_response:
+                raise ValueError(
+                    "_await_response cannot be set to True when analytics is disabled"
+                )
             return
 
         if not event_params:
@@ -148,6 +155,9 @@ class GoogleAnalytics:
 
         thread = threading.Thread(target=_send_request)
         thread.start()
+
+        if _await_response:
+            thread.join()
 
 
 # analytics client for sparsezoo, to disable set NM_DISABLE_ANALYTICS=1

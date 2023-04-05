@@ -53,7 +53,7 @@ style:
 # run tests for the repo
 test:
 	@echo "Running python tests";
-	SPARSEZOO_TEST_MODE="true" pytest tests $(PYTEST_ARGS);
+	SPARSEZOO_TEST_MODE="true" NM_DISABLE_ANALYTICS="true" pytest tests $(PYTEST_ARGS);
 
 # create docs
 docs:
