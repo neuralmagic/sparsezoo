@@ -76,7 +76,7 @@ LOGGER = logging.getLogger()
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
-@sparsezoo_analytics.send_event_decorator("cli.main")
+@sparsezoo_analytics.send_event_decorator("cli__main")
 def main(model_path: str, save: Optional[str], **kwargs):
     """
     Model analysis for ONNX models.

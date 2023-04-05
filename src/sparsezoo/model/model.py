@@ -74,7 +74,7 @@ class Model(Directory):
     """
 
     def __init__(self, source: str, download_path: Optional[str] = None):
-        sparsezoo_analytics.send_event("python.model.init")
+        sparsezoo_analytics.send_event("python__model__init")
         self.source = source
         self._stub_params = {}
 
