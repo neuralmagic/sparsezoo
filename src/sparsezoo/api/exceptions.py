@@ -42,5 +42,5 @@ def validate_graphql_response(response: Response, query_body: str) -> None:
     response.raise_for_status()
     response_json = response.json()
 
-    if response_json.get("data") is None and "errors" in response_json:
+    if "errors" in response_json:
         raise InvalidQueryException(f"{response_json['errors']}\n{query_body}")
