@@ -44,6 +44,7 @@ from sparsezoo.analyze.utils.models import (
     PerformanceEntry,
     Section,
     SizedModelEntry,
+    TypedEntry,
     ZeroNonZeroParams,
 )
 from sparsezoo.utils import (
@@ -66,7 +67,6 @@ from sparsezoo.utils import (
     is_quantized_layer,
     is_sparse_layer,
 )
-
 
 __all__ = [
     "NodeInferenceResult",
@@ -158,7 +158,7 @@ class ImposedSparsificationInfo(YAMLSerializableBaseModel):
     sparsity_block_structure: Optional[str] = Field(
         default=None,
         description="The sparsity block structure applied to the onnx model;"
-        " ex 2:4, 4",
+                    " ex 2:4, 4",
     )
 
     quantization: bool = Field(
@@ -183,19 +183,19 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
 
     num_cores: Optional[int] = Field(
         description="The number of cores to use for benchmarking, can also take "
-        "in a `None` value, which represents all cores",
+                    "in a `None` value, which represents all cores",
     )
 
     engine: str = Field(
         default="deepsparse",
         description="The engine to use for benchmarking, can be `deepsparse`"
-        "or `onnxruntime`; defaults to `deepsparse`",
+                    "or `onnxruntime`; defaults to `deepsparse`",
     )
 
     scenario: str = Field(
         default="sync",
         description="The scenario to use for benchmarking, could be `sync` or "
-        "`async`; defaults to `sync`",
+                    "`async`; defaults to `sync`",
     )
 
     num_streams: Optional[int] = Field(
@@ -205,15 +205,15 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
     duration: int = Field(
         default=10,
         description="Number of seconds/steps the benchmark should run for, will use "
-        "steps instead of seconds if `duration_in_steps` is `True`; "
-        "defaults to 10",
+                    "steps instead of seconds if `duration_in_steps` is `True`; "
+                    "defaults to 10",
     )
 
     warmup_duration: int = Field(
         default=10,
         description="Number of seconds/steps the benchmark warmup should run for, "
-        "will use steps instead of seconds if `duration_in_steps` is "
-        "`True`; defaults to 10 secs or steps",
+                    "will use steps instead of seconds if `duration_in_steps` is "
+                    "`True`; defaults to 10 secs or steps",
     )
 
     instructions: Optional[str] = Field(
@@ -222,7 +222,8 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
     )
 
     analysis_only: bool = Field(
-        default=False, description="Flag to only run analysis; defaults is `False`"
+        default=False,
+        description="Flag to only run analysis; defaults is `False`"
     )
 
 
@@ -233,13 +234,13 @@ class BenchmarkResult(YAMLSerializableBaseModel):
 
     setup: BenchmarkScenario = Field(
         description="Information regarding hardware, cores, batch_size, scenario and "
-        "other info needed to run benchmark"
+                    "other info needed to run benchmark"
     )
 
     imposed_sparsification: Optional[ImposedSparsificationInfo] = Field(
         default=None,
         description="Information on sparsification techniques used for benchmarking "
-        "if any",
+                    "if any",
     )
 
     items_per_second: float = Field(
@@ -247,7 +248,8 @@ class BenchmarkResult(YAMLSerializableBaseModel):
     )
 
     average_latency: float = Field(
-        default=float("inf"), description="Average time taken per item in milli-seconds"
+        default=float("inf"),
+        description="Average time taken per item in milli-seconds"
     )
 
     node_timings: Optional[List[NodeInferenceResult]] = Field(
@@ -262,18 +264,21 @@ class NodeAnalysis(YAMLSerializableBaseModel):
     """
 
     name: str = Field(description="The node's name")
-    node_id: str = Field(description="The node's id (the name of its first output)")
+    node_id: str = Field(
+        description="The node's id (the name of its first output)")
     op_type: str = Field(description="The node's op type")
 
-    inputs: List[NodeIO] = Field(description="The node's inputs in the onnx graph")
-    outputs: List[NodeIO] = Field(description="The node's outputs in the onnx graph")
+    inputs: List[NodeIO] = Field(
+        description="The node's inputs in the onnx graph")
+    outputs: List[NodeIO] = Field(
+        description="The node's outputs in the onnx graph")
 
     parameter_summary: ParameterSummary = Field(
         description="The node's total number of parameters (excluding bias parameters)"
     )
     operation_summary: OperationSummary = Field(
         description="The node's total number of operations (including bias ops and "
-        "other op types such as max pool)"
+                    "other op types such as max pool)"
     )
 
     parameters: List[ParameterComponent] = Field(
@@ -284,18 +289,19 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         description="Does the node have a parameterized and prunable weight"
     )
     sparse_node: bool = Field(description="Does the node have sparse weights")
-    quantized_node: bool = Field(description="Does the node have quantized weights")
+    quantized_node: bool = Field(
+        description="Does the node have quantized weights")
     zero_point: int = Field(
         description="Node zero point for quantization, default zero"
     )
 
     @classmethod
     def from_node(
-        cls,
-        model_graph: ONNXGraph,
-        node: NodeProto,
-        node_shape: Union[NodeShape, None],
-        node_dtype: Union[NodeDataType, None],
+            cls,
+            model_graph: ONNXGraph,
+            node: NodeProto,
+            node_shape: Union[NodeShape, None],
+            node_dtype: Union[NodeDataType, None],
     ):
         """
         Node Analysis
@@ -310,24 +316,24 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         node_id = extract_node_id(node)
 
         has_input_shapes = (
-            node_shape is not None and node_shape.input_shapes is not None
+                node_shape is not None and node_shape.input_shapes is not None
         )
         has_input_dtypes = (
-            node_dtype is not None and node_dtype.input_dtypes is not None
+                node_dtype is not None and node_dtype.input_dtypes is not None
         )
         has_output_shapes = (
-            node_shape is not None and node_shape.output_shapes is not None
+                node_shape is not None and node_shape.output_shapes is not None
         )
         has_output_dtypes = (
-            node_dtype is not None and node_dtype.output_dtypes is not None
+                node_dtype is not None and node_dtype.output_dtypes is not None
         )
 
         inputs = (
             [
                 NodeIO(name=name, shape=shape, dtype=str(dtype))
                 for name, shape, dtype in zip(
-                    node.input, node_shape.input_shapes, node_dtype.input_dtypes
-                )
+                node.input, node_shape.input_shapes, node_dtype.input_dtypes
+            )
             ]
             if has_input_shapes and has_input_dtypes
             else []
@@ -336,8 +342,8 @@ class NodeAnalysis(YAMLSerializableBaseModel):
             [
                 NodeIO(name=name, shape=shape, dtype=str(dtype))
                 for name, shape, dtype in zip(
-                    node.output, node_shape.output_shapes, node_dtype.output_dtypes
-                )
+                node.output, node_shape.output_shapes, node_dtype.output_dtypes
+            )
             ]
             if has_output_shapes and has_output_dtypes
             else []
@@ -350,7 +356,8 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         node_bias = get_node_bias(model_graph, node)
         node_bias_size = node_bias.size if node_bias is not None else 0
         param_dtypes = [
-            str(param.dtype) for param in [node_weight, node_bias] if param is not None
+            str(param.dtype) for param in [node_weight, node_bias] if
+            param is not None
         ]
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_graph, node
@@ -375,25 +382,29 @@ class NodeAnalysis(YAMLSerializableBaseModel):
             precision={
                 dtype: ZeroNonZeroParams(
                     zero=(
-                        num_sparse_parameters
-                        if node_weight is not None and str(node_weight.dtype) == dtype
-                        else 0
-                    )
-                    + (
-                        node_bias_size - numpy.count_nonzero(node_bias)
-                        if node_bias is not None and str(node_bias.dtype) == dtype
-                        else 0
-                    ),
+                             num_sparse_parameters
+                             if node_weight is not None and str(
+                                 node_weight.dtype) == dtype
+                             else 0
+                         )
+                         + (
+                             node_bias_size - numpy.count_nonzero(node_bias)
+                             if node_bias is not None and str(
+                                 node_bias.dtype) == dtype
+                             else 0
+                         ),
                     non_zero=(
-                        num_parameters - num_sparse_parameters
-                        if node_weight is not None and str(node_weight.dtype) == dtype
-                        else 0
-                    )
-                    + (
-                        numpy.count_nonzero(node_bias)
-                        if node_bias is not None and str(node_bias.dtype) == dtype
-                        else 0
-                    ),
+                                 num_parameters - num_sparse_parameters
+                                 if node_weight is not None and str(
+                                     node_weight.dtype) == dtype
+                                 else 0
+                             )
+                             + (
+                                 numpy.count_nonzero(node_bias)
+                                 if node_bias is not None and str(
+                                     node_bias.dtype) == dtype
+                                 else 0
+                             ),
                 )
                 for dtype in param_dtypes
             },
@@ -418,66 +429,70 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         first_output = next(iter(outputs), None)
         other_op_dtype = first_output.dtype if first_output is not None else "unknown"
         if (
-            true_ops_dict["other"]["num_dense_ops"]
-            + true_ops_dict["other"]["num_sparse_ops"]
-            != 0
+                true_ops_dict["other"]["num_dense_ops"]
+                + true_ops_dict["other"]["num_sparse_ops"]
+                != 0
         ):
             operation_dtypes.append(other_op_dtype)
 
         operation_summary = OperationSummary(
             ops=OpsSummary(
                 total=_sum_across_keys(true_ops_dict, "num_dense_ops")
-                + _sum_across_keys(true_ops_dict, "num_sparse_ops"),
+                      + _sum_across_keys(true_ops_dict, "num_sparse_ops"),
                 pruned=_sum_across_keys(true_ops_dict, "num_sparse_ops"),
                 block_structure={
                     "single": DenseSparseOps(
-                        dense=_sum_across_keys(single_ops_dict, "num_dense_ops"),
-                        sparse=_sum_across_keys(single_ops_dict, "num_sparse_ops"),
+                        dense=_sum_across_keys(single_ops_dict,
+                                               "num_dense_ops"),
+                        sparse=_sum_across_keys(single_ops_dict,
+                                                "num_sparse_ops"),
                     ),
                     "block4": DenseSparseOps(
-                        dense=_sum_across_keys(four_block_ops_dict, "num_dense_ops"),
-                        sparse=_sum_across_keys(four_block_ops_dict, "num_sparse_ops"),
+                        dense=_sum_across_keys(four_block_ops_dict,
+                                               "num_dense_ops"),
+                        sparse=_sum_across_keys(four_block_ops_dict,
+                                                "num_sparse_ops"),
                     ),
                 },
                 precision={
                     dtype: DenseSparseOps(
                         dense=(
-                            (
-                                true_ops_dict["weight"]["num_dense_ops"]
-                                if node_weight is not None
-                                and str(node_weight.dtype) == dtype
-                                else 0
-                            )
-                            + (
-                                true_ops_dict["bias"]["num_dense_ops"]
-                                if node_bias is not None
-                                and str(node_bias.dtype) == dtype
-                                else 0
-                            )
-                            + (
-                                true_ops_dict["other"]["num_dense_ops"]
-                                if other_op_dtype == dtype
-                                else 0
-                            )
+                                (
+                                    true_ops_dict["weight"]["num_dense_ops"]
+                                    if node_weight is not None
+                                       and str(node_weight.dtype) == dtype
+                                    else 0
+                                )
+                                + (
+                                    true_ops_dict["bias"]["num_dense_ops"]
+                                    if node_bias is not None
+                                       and str(node_bias.dtype) == dtype
+                                    else 0
+                                )
+                                + (
+                                    true_ops_dict["other"]["num_dense_ops"]
+                                    if other_op_dtype == dtype
+                                    else 0
+                                )
                         ),
                         sparse=(
-                            (
-                                true_ops_dict["weight"]["num_sparse_ops"]
-                                if node_weight is not None
-                                and str(node_weight.dtype) == dtype
-                                else 0
-                            )
-                            + (
-                                true_ops_dict["bias"]["num_sparse_ops"]
-                                if node_bias is not None
-                                and str(node_bias.dtype) == dtype
-                                else 0
-                            )
-                            + (
-                                true_ops_dict["other"]["num_sparse_ops"]
-                                if other_op_dtype == dtype
-                                else 0
-                            )
+                                (
+                                    true_ops_dict["weight"]["num_sparse_ops"]
+                                    if node_weight is not None
+                                       and str(node_weight.dtype) == dtype
+                                    else 0
+                                )
+                                + (
+                                    true_ops_dict["bias"]["num_sparse_ops"]
+                                    if node_bias is not None
+                                       and str(node_bias.dtype) == dtype
+                                    else 0
+                                )
+                                + (
+                                    true_ops_dict["other"]["num_sparse_ops"]
+                                    if other_op_dtype == dtype
+                                    else 0
+                                )
                         ),
                     )
                     for dtype in operation_dtypes
@@ -485,10 +500,10 @@ class NodeAnalysis(YAMLSerializableBaseModel):
             ),
             macs=OpsSummary(
                 total=(
-                    true_ops_dict["weight"]["num_dense_ops"]
-                    + true_ops_dict["weight"]["num_sparse_ops"]
-                )
-                // 2,
+                              true_ops_dict["weight"]["num_dense_ops"]
+                              + true_ops_dict["weight"]["num_sparse_ops"]
+                      )
+                      // 2,
                 pruned=true_ops_dict["weight"]["num_sparse_ops"] // 2,
                 block_structure={
                     "single": DenseSparseOps(
@@ -496,8 +511,10 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                         sparse=single_ops_dict["weight"]["num_sparse_ops"] // 2,
                     ),
                     "block4": DenseSparseOps(
-                        dense=four_block_ops_dict["weight"]["num_dense_ops"] // 2,
-                        sparse=four_block_ops_dict["weight"]["num_sparse_ops"] // 2,
+                        dense=four_block_ops_dict["weight"][
+                                  "num_dense_ops"] // 2,
+                        sparse=four_block_ops_dict["weight"][
+                                   "num_sparse_ops"] // 2,
                     ),
                 },
                 precision={
@@ -554,7 +571,8 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                         pruned=0,
                         block_structure={
                             "single": ZeroNonZeroParams(
-                                zero=node_bias_size - numpy.count_nonzero(node_bias),
+                                zero=node_bias_size - numpy.count_nonzero(
+                                    node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             ),
                             "block4": ZeroNonZeroParams(
@@ -564,7 +582,8 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                         },
                         precision={
                             str(node_bias.dtype): ZeroNonZeroParams(
-                                zero=node_bias_size - numpy.count_nonzero(node_bias),
+                                zero=node_bias_size - numpy.count_nonzero(
+                                    node_bias),
                                 non_zero=numpy.count_nonzero(node_bias),
                             )
                         }
@@ -584,7 +603,8 @@ class NodeAnalysis(YAMLSerializableBaseModel):
             parameter_summary=parameter_summary,
             operation_summary=operation_summary,
             parameters=parameters,
-            parameterized_prunable=is_parameterized_prunable_layer(model_graph, node),
+            parameterized_prunable=is_parameterized_prunable_layer(model_graph,
+                                                                   node),
             sparse_node=sparse_node,
             quantized_node=quantized_node,
             zero_point=get_zero_point(model_graph, node),
@@ -644,7 +664,11 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
     @classmethod
     def from_model_analysis(
-        cls, analysis: "ModelAnalysis", by_types: bool = False, by_layers: bool = False
+            cls,
+            analysis: "ModelAnalysis",
+            by_types: bool = False,
+            by_layers: bool = False,
+            **kwargs,
     ) -> "ModelAnalysisSummary":
         """
         Factory method to generate a ModelAnalysisSummary object from a
@@ -656,18 +680,17 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
             op type
         :param by_layers: flag to summarize analysis information by layers
         """
-        sections = []
 
-        if by_types:
-            # TODO: Add analysis by_types section
-            _LOGGER.info("analysis `by_types` is not implemented yet, will be ignored")
+        sections = []
 
         if by_layers:
             # TODO: Add analysis by_layers section
-            _LOGGER.info("analysis `by_layer` is not implemented yet, will be ignored")
+            _LOGGER.info(
+                "analysis `by_layer` is not implemented yet, will be ignored")
 
         # Add Param analysis section
-        param_count_summary: CountSummary = _get_param_count_summary(analysis=analysis)
+        param_count_summary: CountSummary = _get_param_count_summary(
+            analysis=analysis)
         param_section = Section(
             section_name="Params",
             entries=[
@@ -682,7 +705,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
         )
 
         # Add Ops analysis section
-        ops_count_summary: CountSummary = _get_ops_count_summary(analysis=analysis)
+        ops_count_summary: CountSummary = _get_ops_count_summary(
+            analysis=analysis)
         ops_section = Section(
             section_name="Ops",
             entries=[
@@ -695,6 +719,58 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 ),
             ],
         )
+        if by_types:
+            _LOGGER.info("running analysis `by_types`")
+
+            entries = []
+            for item in param_count_summary.items:
+                item_count_summary = CountSummary(items=[item])
+                entry = TypedEntry(
+                    type=item.name,
+                    size=item_count_summary.size,
+                    sparsity=item_count_summary.sparsity,
+                    quantized=item_count_summary.quantized,
+                )
+                entries.append(entry)
+
+            entries.append(
+                TypedEntry(
+                    type="Total",
+                    size=param_count_summary.size,
+                    sparsity=param_count_summary.sparsity,
+                    quantized=param_count_summary.quantized,
+                )
+            )
+
+            type_param_section = Section(
+                section_name="Parameters by types",
+                entries=entries,
+            )
+
+            sections.append(type_param_section)
+            entries = []
+            for item in ops_count_summary.items:
+                item_count_summary = CountSummary(items=[item])
+                entry = TypedEntry(
+                    type=item.name,
+                    size=item_count_summary.size,
+                    sparsity=item_count_summary.sparsity,
+                    quantized=item_count_summary.quantized,
+                )
+                entries.append(entry)
+
+            entries.append(
+                TypedEntry(
+                    type="Total",
+                    size=ops_count_summary.size,
+                    sparsity=ops_count_summary.sparsity,
+                    quantized=ops_count_summary.quantized,
+                )
+            )
+            type_ops_section = Section(section_name="Ops by types",
+                                       entries=entries)
+
+            sections.append(type_ops_section)
 
         # Add Overall model analysis section
         overall_count_summary: CountSummary = param_count_summary + ops_count_summary
@@ -723,11 +799,12 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                         throughput=benchmark_result.items_per_second,
                         supported_graph=0.0,  # TODO: fill in correct value
                     )
-                    for idx, benchmark_result in enumerate(analysis.benchmark_results)
+                    for idx, benchmark_result in
+                    enumerate(analysis.benchmark_results)
                 ],
             )
 
-        sections = [param_section, ops_section, overall_section]
+        sections.extend([param_section, ops_section, overall_section])
         return cls(sections=sections)
 
 
@@ -736,17 +813,18 @@ class ModelAnalysis(YAMLSerializableBaseModel):
     Pydantic model for analysis of a model
     """
 
-    node_counts: Dict[str, int] = Field(description="The number of each node op type")
+    node_counts: Dict[str, int] = Field(
+        description="The number of each node op type")
     all_nodes: NodeCounts = Field(
         description="The number of nodes grouped by their attributes"
     )
     parameterized: NodeCounts = Field(
         description="The number of nodes which are parameterized grouped by their "
-        "attributes"
+                    "attributes"
     )
     non_parameterized: NodeCounts = Field(
         description="The number of nodes which are not parameterized grouped by "
-        "their attributes"
+                    "their attributes"
     )
 
     parameter_summary: ParameterSummary = Field(
@@ -762,7 +840,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
     )
 
     nodes: List[NodeAnalysis] = Field(
-        description="List of analyses for each node in the model graph", default=[]
+        description="List of analyses for each node in the model graph",
+        default=[]
     )
 
     benchmark_results: List[BenchmarkResult] = Field(
@@ -801,11 +880,13 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         all_nodes = NodeCounts(
             total=len(node_analyses),
             quantized=len(
-                [1 for node_analysis in node_analyses if node_analysis.quantized_node]
+                [1 for node_analysis in node_analyses if
+                 node_analysis.quantized_node]
             ),
             # quantizable
             pruned=len(
-                [1 for node_analysis in node_analyses if node_analysis.sparse_node]
+                [1 for node_analysis in node_analyses if
+                 node_analysis.sparse_node]
             ),
             prunable=len(
                 [
@@ -829,7 +910,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                     1
                     for node_analysis in node_analyses
                     if node_analysis.parameterized_prunable
-                    and node_analysis.quantized_node
+                       and node_analysis.quantized_node
                 ]
             ),
             # quantizable
@@ -838,7 +919,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                     1
                     for node_analysis in node_analyses
                     if node_analysis.parameterized_prunable
-                    and node_analysis.sparse_node
+                       and node_analysis.sparse_node
                 ]
             ),
             prunable=len(
@@ -863,7 +944,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                     1
                     for node_analysis in node_analyses
                     if not node_analysis.parameterized_prunable
-                    and node_analysis.quantized_node
+                       and node_analysis.quantized_node
                 ]
             ),
             # quantizable
@@ -872,7 +953,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                     1
                     for node_analysis in node_analyses
                     if not node_analysis.parameterized_prunable
-                    and node_analysis.sparse_node
+                       and node_analysis.sparse_node
                 ]
             ),
             prunable=len(
@@ -957,16 +1038,20 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 dtype: ZeroNonZeroParams(
                     zero=sum(
                         [
-                            node_analysis.parameter_summary.precision[dtype].zero
+                            node_analysis.parameter_summary.precision[
+                                dtype].zero
                             for node_analysis in node_analyses
-                            if dtype in node_analysis.parameter_summary.precision
+                            if
+                            dtype in node_analysis.parameter_summary.precision
                         ]
                     ),
                     non_zero=sum(
                         [
-                            node_analysis.parameter_summary.precision[dtype].non_zero
+                            node_analysis.parameter_summary.precision[
+                                dtype].non_zero
                             for node_analysis in node_analyses
-                            if dtype in node_analysis.parameter_summary.precision
+                            if
+                            dtype in node_analysis.parameter_summary.precision
                         ]
                     ),
                 )
@@ -1035,7 +1120,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                                 ].dense
                                 for node_analysis in node_analyses
                                 if dtype
-                                in node_analysis.operation_summary.ops.precision
+                                   in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                         sparse=sum(
@@ -1045,7 +1130,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                                 ].sparse
                                 for node_analysis in node_analyses
                                 if dtype
-                                in node_analysis.operation_summary.ops.precision
+                                   in node_analysis.operation_summary.ops.precision
                             ]
                         ),
                     )
@@ -1112,7 +1197,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                                 ].dense
                                 for node_analysis in node_analyses
                                 if dtype
-                                in node_analysis.operation_summary.macs.precision
+                                   in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                         sparse=sum(
@@ -1122,7 +1207,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                                 ].sparse
                                 for node_analysis in node_analyses
                                 if dtype
-                                in node_analysis.operation_summary.macs.precision
+                                   in node_analysis.operation_summary.macs.precision
                             ]
                         ),
                     )
@@ -1171,7 +1256,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 else ModelAnalysis.from_onnx(onnx_file_path=file_path)
             )
         elif Path(file_path).is_dir():
-            _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
+            _LOGGER.info(
+                f"Loading `model.onnx` from deployment directory {file_path}")
             result = ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
 
         elif file_path.startswith("zoo:"):
@@ -1189,12 +1275,12 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         result.model_name = file_path
         return result
 
-    def summary(self) -> ModelAnalysisSummary:
+    def summary(self, **kwargs) -> ModelAnalysisSummary:
         """
         :return: A ModelAnalysisSummary object that represents summary of
             current analyses
         """
-        return ModelAnalysisSummary.from_model_analysis(analysis=self)
+        return ModelAnalysisSummary.from_model_analysis(analysis=self, **kwargs)
 
     def pretty_print_summary(self):
         """
@@ -1219,7 +1305,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         :param: model that contains the nodes to be analyzed
         :return: list of node analyses from model graph
         """
-        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(
+            model_graph.model)
 
         nodes = []
         for node in model_graph.nodes:
@@ -1249,8 +1336,8 @@ def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:
 
             if "float32" in parameter_summary.precision:
                 item_count.dense += (
-                    parameter_summary.precision["float32"].zero
-                    + parameter_summary.precision["float32"].non_zero
+                        parameter_summary.precision["float32"].zero
+                        + parameter_summary.precision["float32"].non_zero
                 )
 
     parameter_item_counts = list(alias_to_item_count.values())
@@ -1260,7 +1347,9 @@ def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:
     for item_count in parameter_item_counts:
         item_count.quantized = item_count.total - item_count.dense
 
-    return CountSummary(items=parameter_item_counts)
+    count_summary = CountSummary(items=parameter_item_counts)
+
+    return count_summary
 
 
 def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
@@ -1284,8 +1373,8 @@ def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
 
             if "float32" in node.parameter_summary.precision:
                 dense_param_counts[node.op_type] += (
-                    node.parameter_summary.precision["float32"].zero
-                    + node.parameter_summary.precision["float32"].non_zero
+                        node.parameter_summary.precision["float32"].zero
+                        + node.parameter_summary.precision["float32"].non_zero
                 )
 
         else:
