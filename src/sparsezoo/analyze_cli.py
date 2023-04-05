@@ -63,6 +63,7 @@ import logging
 from typing import Optional
 
 import click
+from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.analyze import ModelAnalysis
 from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 
@@ -75,6 +76,7 @@ LOGGER = logging.getLogger()
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
+@sparsezoo_analytics.send_event_decorator("cli__main")
 def main(model_path: str, save: Optional[str], **kwargs):
     """
     Model analysis for ONNX models.

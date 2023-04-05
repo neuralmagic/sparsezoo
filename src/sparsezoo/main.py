@@ -171,6 +171,7 @@ import argparse
 import logging
 
 from sparsezoo import Model, model_args_to_stub, search_models
+from sparsezoo.analytics import sparsezoo_analytics
 
 
 __all__ = ["main"]
@@ -365,6 +366,7 @@ def search(args):
         print("-------------------------")
 
 
+@sparsezoo_analytics.send_event_decorator("cli__main")
 def main():
     args = parse_args()
     logging.basicConfig(level=logging.INFO)
