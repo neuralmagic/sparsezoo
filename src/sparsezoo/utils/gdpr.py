@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 import contextlib
+from typing import Optional
 
 import geocoder
 import requests
+
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
 
