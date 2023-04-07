@@ -18,6 +18,7 @@ A file containing extractors for different optimizing metrics
 
 import logging
 from types import MappingProxyType
+from typing import Optional
 
 from sparsezoo import Model
 
@@ -32,7 +33,12 @@ def _size(model: Model) -> float:
     return size
 
 
-def _throughput(model: Model, num_cores: int = 24, batch_size: int = 64) -> float:
+def _throughput(
+    model: Model,
+    num_cores: int = 24,
+    batch_size: int = 64,
+    device_info: Optional[str] = None,
+) -> float:
     # num_cores : 24, batch_size: 64 are standard defaults in sparsezoo
     throughput_results = getattr(model, "validation_results", {}).get("throughput", [])
 
@@ -40,6 +46,7 @@ def _throughput(model: Model, num_cores: int = 24, batch_size: int = 64) -> floa
         if (
             throughput_result.batch_size == batch_size
             and throughput_result.num_cores == num_cores
+            and (device_info is None or (throughput_result.device_info == device_info))
         ):
             return throughput_result.recorded_value
 

@@ -38,10 +38,9 @@ def analytics_disabled():
     """
     :return: True if analytics should be disabled, False otherwise
     """
-    gdpr = is_gdpr_country()
     env_disabled = os.getenv("NM_DISABLE_ANALYTICS")
 
-    return gdpr or env_disabled
+    return env_disabled or is_gdpr_country()
 
 
 class GoogleAnalytics:
