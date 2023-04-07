@@ -49,6 +49,8 @@ _deps = [
     "click>=7.1.2,!=8.0.0",  # latest version < 8.0 + blocked version with reported bug
     "protobuf>=3.12.2,<4",
     "pandas>1.3",
+    "py-machineid>=0.3.0",
+    "geocoder>=1.38.0",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 

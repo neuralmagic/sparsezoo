@@ -95,6 +95,9 @@ class QueryParser:
                 # single, double quotes matters
                 if isinstance(value, str):
                     parsed_arguments += f'{camel_case_key}: "{value}",'
+                elif isinstance(value, bool):
+                    value = str(value).lower()
+                    parsed_arguments += f"{camel_case_key}: {value},"
                 else:
                     parsed_arguments += f"{camel_case_key}: {value},"
 

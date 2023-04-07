@@ -17,8 +17,10 @@ analysis results
 """
 
 import copy
+import logging
 from collections import defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import numpy
@@ -27,6 +29,8 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
+import pandas
+from sparsezoo import Model
 from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
     NodeCounts,
@@ -67,6 +71,8 @@ __all__ = [
     "NodeAnalysis",
     "ModelAnalysis",
 ]
+
+_LOGGER = logging.getLogger()
 
 
 class YAMLSerializableBaseModel(BaseModel):
@@ -964,6 +970,50 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             nodes=node_analyses,
         )
 
+    @classmethod
+    def create(cls, file_path: Union[str, ModelProto]) -> "ModelAnalysis":
+        """
+        Factory method to create a model analysis object from an onnx filepath,
+        sparsezoo stub, deployment directory, or a yaml file/raw string representing
+        a `ModelAnalysis` object
+
+        :param file_path: An instantiated ModelProto object, or path to an onnx
+            model, or SparseZoo stub, or path to a deployment directory, or path
+            to a yaml file or a raw yaml string representing a `ModelAnalysis`
+            object. This is used to create a new ModelAnalysis object
+        :returns: The created ModelAnalysis object
+        """
+        if not isinstance(file_path, (str, ModelProto, Path)):
+            raise ValueError(
+                f"Invalid file_path type {type(file_path)} passed to "
+                f"ModelAnalysis.create(...)"
+            )
+
+        if isinstance(file_path, ModelProto):
+            return ModelAnalysis.from_onnx(onnx_file_path=file_path)
+
+        if Path(file_path).is_file():
+            return (
+                ModelAnalysis.parse_yaml_file(file_path=file_path)
+                if Path(file_path).suffix == ".yaml"
+                else ModelAnalysis.from_onnx(onnx_file_path=file_path)
+            )
+        if Path(file_path).is_dir():
+            _LOGGER.info(f"Loading `model.onnx` from deployment directory {file_path}")
+            return ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
+
+        if file_path.startswith("zoo:"):
+            return ModelAnalysis.from_onnx(
+                Model(file_path).deployment.get_file("model.onnx").path
+            )
+
+        if isinstance(file_path, str):
+            return ModelAnalysis.parse_yaml_raw(yaml_raw=file_path)
+
+        raise ValueError(
+            f"Invalid argument file_path {file_path} to create ModelAnalysis"
+        )
+
     def summary(self) -> Dict[str, Any]:
         """
         :return: A dict like object with summary of current analysis
@@ -1082,7 +1132,64 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 ]["Total"]["INT8 Precision %"],
             }
         }
-        return {**parameter_summary, **ops_summary, **footer}
+
+        # performance summary
+
+        performance_summary = {}
+        if self.benchmark_results:
+            performance_summary = {
+                "OVERALL": self._get_benchmark_summary(
+                    ops_summary=ops_summary,
+                    parameter_summary=parameter_summary,
+                )
+            }
+
+        return {
+            **parameter_summary,
+            **ops_summary,
+            **performance_summary,
+            **footer,
+        }
+
+    def _get_benchmark_summary(self, ops_summary, parameter_summary):
+        if not self.benchmark_results:
+            return {}
+
+        return {
+            f"Benchmark {idx + 1}": {
+                "Latency(ms)": benchmark_result.average_latency,
+                "Throughput(itm/sec)": benchmark_result.items_per_second,
+                "Supported Graph %": "",
+                "Sparsity %": (
+                    benchmark_result.imposed_sparsification.sparsity
+                    or parameter_summary["Parameters"]["Weight"]["Sparsity %"]
+                ),
+                "Quantized Parameterized Ops %": ops_summary["Parameterized Ops"][
+                    "Total"
+                ]["INT8 Precision %"],
+                "Quantized Non-Parameterized Ops %": ops_summary[
+                    "Non Parameterized Ops"
+                ]["Total"]["INT8 Precision %"],
+            }
+            for idx, benchmark_result in enumerate(self.benchmark_results)
+        }
+
+    def pretty_print_summary(self):
+        """
+        Pretty print analysis summary
+        """
+        summary = self.summary()
+        summary_copy = copy.copy(summary)
+        footer = summary_copy.pop("Summary")
+
+        # relies on pandas for pretty printing as of now
+        for section_name, section_dict in summary_copy.items():
+            print(f"{section_name.upper()}:")
+            print(pandas.DataFrame(section_dict).T.to_string(), end="\n\n")
+
+        print("SUMMARY:")
+        for footer_key, footer_value in footer.items():
+            print(f"{footer_key}: {footer_value}")
 
     @classmethod
     def parse_yaml_file(cls, file_path: str):
