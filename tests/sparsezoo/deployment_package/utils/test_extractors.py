@@ -64,16 +64,17 @@ def model():
 
 
 @pytest.mark.parametrize(
-    "num_cores, batch_size, expected",
+    "num_cores,batch_size,device_info,expected",
     [
-        (24, 64, 1948.45),
+        (24, 64, "c6i.12xlarge", 1948.45),
     ],
 )
-def test_throughput_extractor(model, num_cores, batch_size, expected):
+def test_throughput_extractor(model, num_cores, batch_size, device_info, expected):
     actual_throughput = _throughput(
         model=model,
         num_cores=num_cores,
         batch_size=batch_size,
+        device_info=device_info,
     )
     assert actual_throughput == expected
 
