@@ -63,7 +63,6 @@ import logging
 from typing import Optional
 
 import click
-
 from sparsezoo import convert_to_bool
 from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.analyze import ModelAnalysis
@@ -79,7 +78,7 @@ LOGGER = logging.getLogger()
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
 @sparsezoo_analytics.send_event_decorator("cli__main")
-def main(model_path: str, save: Optional[str], by_types: Optional[str],**kwargs):
+def main(model_path: str, save: Optional[str], by_types: Optional[str], **kwargs):
     """
     Model analysis for ONNX models.
 
