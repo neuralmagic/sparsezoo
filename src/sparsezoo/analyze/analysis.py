@@ -740,8 +740,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                     quantized=ops_count_summary.quantized,
                 )
             )
-            type_ops_section = Section(section_name="Ops by types",
-                                       entries=entries)
+            type_ops_section = Section(section_name="Ops by types", entries=entries)
 
             sections.append(type_ops_section)
 
