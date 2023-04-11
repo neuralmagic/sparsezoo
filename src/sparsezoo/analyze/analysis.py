@@ -44,6 +44,7 @@ from sparsezoo.analyze.utils.models import (
     PerformanceEntry,
     Section,
     SizedModelEntry,
+    TypedEntry,
     ZeroNonZeroParams,
 )
 from sparsezoo.utils import (
@@ -658,10 +659,6 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
         """
         sections = []
 
-        if by_types:
-            # TODO: Add analysis by_types section
-            _LOGGER.info("analysis `by_types` is not implemented yet, will be ignored")
-
         if by_layers:
             # TODO: Add analysis by_layers section
             _LOGGER.info("analysis `by_layer` is not implemented yet, will be ignored")
@@ -695,6 +692,58 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 ),
             ],
         )
+        if by_types:
+            _LOGGER.info("running analysis `by_types`")
+
+            entries = []
+            for item in param_count_summary.items:
+                item_count_summary = CountSummary(items=[item])
+                entry = TypedEntry(
+                    type=item.name,
+                    size=item_count_summary.size,
+                    sparsity=item_count_summary.sparsity,
+                    quantized=item_count_summary.quantized,
+                )
+                entries.append(entry)
+
+            entries.append(
+                TypedEntry(
+                    type="Total",
+                    size=param_count_summary.size,
+                    sparsity=param_count_summary.sparsity,
+                    quantized=param_count_summary.quantized,
+                )
+            )
+
+            type_param_section = Section(
+                section_name="Parameters by types",
+                entries=entries,
+            )
+
+            sections.append(type_param_section)
+            entries = []
+            for item in ops_count_summary.items:
+                item_count_summary = CountSummary(items=[item])
+                entry = TypedEntry(
+                    type=item.name,
+                    size=item_count_summary.size,
+                    sparsity=item_count_summary.sparsity,
+                    quantized=item_count_summary.quantized,
+                )
+                entries.append(entry)
+
+            entries.append(
+                TypedEntry(
+                    type="Total",
+                    size=ops_count_summary.size,
+                    sparsity=ops_count_summary.sparsity,
+                    quantized=ops_count_summary.quantized,
+                )
+            )
+            type_ops_section = Section(section_name="Ops by types",
+                                       entries=entries)
+
+            sections.append(type_ops_section)
 
         # Add Overall model analysis section
         overall_count_summary: CountSummary = param_count_summary + ops_count_summary
@@ -727,7 +776,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 ],
             )
 
-        sections = [param_section, ops_section, overall_section]
+        sections.extend([param_section, ops_section, overall_section])
         return cls(sections=sections)
 
 
@@ -1189,12 +1238,12 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         result.model_name = file_path
         return result
 
-    def summary(self) -> ModelAnalysisSummary:
+    def summary(self, **kwargs) -> ModelAnalysisSummary:
         """
         :return: A ModelAnalysisSummary object that represents summary of
             current analyses
         """
-        return ModelAnalysisSummary.from_model_analysis(analysis=self)
+        return ModelAnalysisSummary.from_model_analysis(analysis=self, **kwargs)
 
     def pretty_print_summary(self):
         """
