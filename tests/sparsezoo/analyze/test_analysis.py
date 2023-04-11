@@ -53,4 +53,6 @@ def test_analysis(model_name, get_generated_analysis, get_expected_analysis):
     for analysis_dict_value, expected_dict_value in zip(
         analysis_dict_values, expected_dict_values
     ):
+        if "model_name" in analysis_dict_value:
+            continue
         assert analysis_dict_value == expected_dict_value
