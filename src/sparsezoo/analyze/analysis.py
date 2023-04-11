@@ -645,7 +645,11 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
     @classmethod
     def from_model_analysis(
-        cls, analysis: "ModelAnalysis", by_types: bool = False, by_layers: bool = False
+        cls,
+        analysis: "ModelAnalysis",
+        by_types: bool = False,
+        by_layers: bool = False,
+        **kwargs,
     ) -> "ModelAnalysisSummary":
         """
         Factory method to generate a ModelAnalysisSummary object from a
