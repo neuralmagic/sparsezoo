@@ -84,7 +84,7 @@ def analyze_options(command: click.Command):
         "boolean string, generates and records the results by operator type",
     )
     @click.option(
-        "--by-layer",
+        "--by-layers",
         default=None,
         type=str,
         help="A flag to enable analysis results by layer type. If set or "
