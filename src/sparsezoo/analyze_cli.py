@@ -78,7 +78,13 @@ LOGGER = logging.getLogger()
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
 @sparsezoo_analytics.send_event_decorator("cli__main")
-def main(model_path: str, save: Optional[str], by_types: Optional[str], **kwargs):
+def main(
+    model_path: str,
+    compare: Optional[str],
+    save: Optional[str],
+    by_types: Optional[str],
+    **kwargs,
+):
     """
     Model analysis for ONNX models.
 
@@ -93,7 +99,7 @@ def main(model_path: str, save: Optional[str], by_types: Optional[str], **kwargs
     """
     logging.basicConfig(level=logging.INFO)
 
-    for unimplemented_feat in ("compare", "by_layers", "save_graphs"):
+    for unimplemented_feat in ("by_layers", "save_graphs"):
         if kwargs.get(unimplemented_feat):
             raise NotImplementedError(
                 f"--{unimplemented_feat} has not been implemented yet"
@@ -107,6 +113,21 @@ def main(model_path: str, save: Optional[str], by_types: Optional[str], **kwargs
         by_types=convert_to_bool(by_types),
     )
     summary.pretty_print()
+
+    if compare is not None:
+        if "," in compare:
+            compare = compare.split(",")
+        else:
+            compare = [compare]
+
+        print("Comparision Results")
+        for model_to_compare in compare:
+            compare_model_analysis = ModelAnalysis.create(model_to_compare)
+            summary_comparison_model = compare_model_analysis.summary(
+                by_types=convert_to_bool(by_types)
+            )
+            comparison = summary - summary_comparison_model
+            comparison.pretty_print()
 
     if save:
         LOGGER.info(f"Writing results to {save}")
