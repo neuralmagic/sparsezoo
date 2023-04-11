@@ -70,7 +70,11 @@ def test_yaml_serialization(model_path, tmp_path):
 
     yaml_file = str(tmp_path / "quantized-resnet.yaml")
     analysis.yaml(file_path=yaml_file)
+    analysis.model_name = ""
 
     analysis_from_yaml = ModelAnalysis.create(file_path=yaml_file)
+    analysis_from_yaml.model_name = ""
 
-    assert analysis.yaml() == analysis_from_yaml.yaml()
+    expected = analysis.yaml()
+    actual = analysis_from_yaml.yaml()
+    assert actual == expected

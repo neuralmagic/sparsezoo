@@ -93,7 +93,7 @@ def main(model_path: str, save: Optional[str], by_types: Optional[str], **kwargs
     """
     logging.basicConfig(level=logging.INFO)
 
-    for unimplemented_feat in ("compare", "by_layer", "save_graphs"):
+    for unimplemented_feat in ("compare", "by_layers", "save_graphs"):
         if kwargs.get(unimplemented_feat):
             raise NotImplementedError(
                 f"--{unimplemented_feat} has not been implemented yet"
