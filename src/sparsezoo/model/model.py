@@ -352,6 +352,7 @@ class Model(Directory):
         repo_name = files_from_stub.get("repo_name")
         files = files_from_stub.get("files")
         validation_results = files_from_stub.get("validation_results")
+        model_id = files_from_stub.get("model_id")
         model_onnx_size_compressed_bytes = files_from_stub.get(
             "model_onnx_size_compressed_bytes"
         )
@@ -360,11 +361,16 @@ class Model(Directory):
             self._validate_params(params=params)
             self._stub_params.update(params)
 
-        path = os.path.join(SAVE_DIR, repo_namespace, repo_name)
+        if repo_name and repo_namespace:
+            path = os.path.join(SAVE_DIR, repo_namespace, repo_name)
+        else:
+            path = os.path.join(SAVE_DIR, model_id)
 
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
+
         url = os.path.dirname(files[0].get("url"))
+
         return files, path, url, validation_results, model_onnx_size_compressed_bytes
 
     @staticmethod

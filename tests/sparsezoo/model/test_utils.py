@@ -87,13 +87,13 @@ def test_load_files_from_stub(stub, expected_files):
     if stub.startswith("zoo:"):
         stub = stub[len("zoo:") :]
 
-    (
-        files,
-        model_id,
-        params,
-        results,
-        model_onnx_size_compressed_bytes,
-    ) = load_files_from_stub(stub=stub)
+    files_from_stub = load_files_from_stub(stub=stub)
+    files = files_from_stub.get("files")
+    model_id = files_from_stub.get("model_id")
+    params = files_from_stub.get("params")
+    results = files_from_stub.get("results")
+    model_onnx_size_compressed_bytes = files_from_stub.get("model_onnx_size_compressed_bytes")
+
     for file_type, file_names_expected in expected_files.items():
         file_names = set(
             file["display_name"] for file in files if file["file_type"] == file_type
