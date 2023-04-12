@@ -80,7 +80,7 @@ __all__ = [
 ]
 
 _LOGGER = logging.getLogger()
-LINEAR_OP_TYPES = {
+TARGETED_LINEAR_OP_TYPES = {
     "Conv",
     "ConvInteger",
     "ConvTranspose",
@@ -681,7 +681,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
             _LOGGER.info("Running analysis `by_layers`")
             by_layers_entries = []
             for node in analysis.nodes:
-                if node.op_type not in LINEAR_OP_TYPES:
+                if node.op_type not in TARGETED_LINEAR_OP_TYPES:
+                    # do not include in layer-wise analysis
                     continue
                 precision_dict = node.parameter_summary.precision
                 dense = 0
