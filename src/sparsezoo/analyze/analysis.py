@@ -18,6 +18,7 @@ analysis results
 
 import copy
 import logging
+import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,7 +30,6 @@ import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
-import pandas
 from sparsezoo import Model
 from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
@@ -1251,7 +1251,19 @@ class ModelAnalysis(YAMLSerializableBaseModel):
     def pretty_print_summary(self):
         """
         Pretty print analysis summary
+        Note: pretty_print_summary() method will be deprecated from
+        `ModelAnalysis` class in a future version, use
+        `self.summary(...).pretty_print()` instead, where `self` is an object
+        of `ModelAnalysis` class
         """
+        warnings.warn(
+            "my_regrettable_function will be retired in version 1.0, please "
+            "use my_awesome_function instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        import pandas
+
         summary = self.summary()
         summary_copy = copy.copy(summary)
         footer = summary_copy.pop("Summary")
