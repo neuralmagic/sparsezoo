@@ -19,6 +19,7 @@ import requests
 
 from sparsezoo.utils import BASE_API_URL
 
+from .exceptions import graphqlapi_exception_handler, validate_graphql_response
 from .query_parser import QueryParser
 from .utils import map_keys, to_snake_case
 
@@ -55,6 +56,7 @@ class GraphQLAPI:
             for response_object in response_objects
         ]
 
+    @graphqlapi_exception_handler
     def make_request(
         self,
         operation_body: str,
@@ -76,7 +78,7 @@ class GraphQLAPI:
             url=url or f"{BASE_API_URL}/v2/graphql", json={"query": query.query_body}
         )
 
-        response.raise_for_status()
+        validate_graphql_response(response=response, query_body=query.query_body)
         response_json = response.json()
 
         return response_json["data"][query.operation_body]
