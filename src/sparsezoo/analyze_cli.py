@@ -128,7 +128,10 @@ def main(
         print("Comparision Results")
         for model_to_compare in compare:
             compare_model_analysis = ModelAnalysis.create(model_to_compare)
-            summary_comparison_model = compare_model_analysis.summary(by_types=by_types)
+            summary_comparison_model = compare_model_analysis.summary(
+                by_types=by_types,
+                by_layers=by_layers,
+            )
             comparison = summary - summary_comparison_model
             comparison.pretty_print()
 
