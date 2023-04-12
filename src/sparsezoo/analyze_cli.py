@@ -82,6 +82,7 @@ def main(
     model_path: str,
     compare: Optional[str],
     save: Optional[str],
+    by_layers: Optional[str],
     by_types: Optional[str],
     **kwargs,
 ):
@@ -99,7 +100,7 @@ def main(
     """
     logging.basicConfig(level=logging.INFO)
 
-    for unimplemented_feat in ("by_layers", "save_graphs"):
+    for unimplemented_feat in ("save_graphs",):
         if kwargs.get(unimplemented_feat):
             raise NotImplementedError(
                 f"--{unimplemented_feat} has not been implemented yet"
@@ -109,8 +110,12 @@ def main(
     analysis = ModelAnalysis.create(model_path)
     LOGGER.info("Analysis complete, collating results...")
 
+    by_types: bool = convert_to_bool(by_types)
+    by_layers: bool = convert_to_bool(by_layers)
+
     summary = analysis.summary(
-        by_types=convert_to_bool(by_types),
+        by_types=by_types,
+        by_layers=by_layers,
     )
     summary.pretty_print()
 
@@ -123,9 +128,7 @@ def main(
         print("Comparision Results")
         for model_to_compare in compare:
             compare_model_analysis = ModelAnalysis.create(model_to_compare)
-            summary_comparison_model = compare_model_analysis.summary(
-                by_types=convert_to_bool(by_types)
-            )
+            summary_comparison_model = compare_model_analysis.summary(by_types=by_types)
             comparison = summary - summary_comparison_model
             comparison.pretty_print()
 
