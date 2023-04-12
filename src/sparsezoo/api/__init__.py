@@ -14,6 +14,7 @@
 
 # flake8: noqa
 
+from .exceptions import *
 from .graphql import *
 from .query_parser import *
 from .utils import *
