@@ -1366,20 +1366,15 @@ def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:
             item_count.total += parameter_summary.total
             item_count.pruned += parameter_summary.pruned
 
-            if "float32" in parameter_summary.precision:
-                item_count.dense += (
-                    parameter_summary.precision["float32"].zero
-                    + parameter_summary.precision["float32"].non_zero
-                )
+            for precision, count in parameter_summary.precision.items():
+                if "32" in precision:
+                    # fp32 and int32
+                    item_count.dense += count.total
+                else:
+                    # TODO: Add support for other precisions
+                    item_count.quantized += count.total
 
-    parameter_item_counts = list(alias_to_item_count.values())
-
-    # fill empty quantized counts
-
-    for item_count in parameter_item_counts:
-        item_count.quantized = item_count.total - item_count.dense
-
-    return CountSummary(items=parameter_item_counts)
+    return CountSummary(items=list(alias_to_item_count.values()))
 
 
 def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
