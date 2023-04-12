@@ -35,6 +35,7 @@ from sparsezoo.analyze.utils.models import (
     DenseSparseOps,
     Entry,
     ModelEntry,
+    NamedEntry,
     NodeCounts,
     NodeIO,
     OperationSummary,
@@ -79,6 +80,17 @@ __all__ = [
 ]
 
 _LOGGER = logging.getLogger()
+LINEAR_OP_TYPES = {
+    "Conv",
+    "ConvInteger",
+    "ConvTranspose",
+    "DeformConv",
+    "QLinearConv",
+    "MatMul",
+    "MatMulInteger",
+    "QLinearMatMul",
+    "Gemm",
+}
 
 
 class YAMLSerializableBaseModel(BaseModel):
@@ -660,12 +672,54 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
         :param by_types: flag to summarize analysis information by param and
             op type
         :param by_layers: flag to summarize analysis information by layers
+        :returns: A ModelAnalysisSummary that summarizes current analysis based
+            on specified arguments
         """
         sections = []
 
         if by_layers:
-            # TODO: Add analysis by_layers section
-            _LOGGER.info("analysis `by_layer` is not implemented yet, will be ignored")
+            _LOGGER.info("Running analysis `by_layers`")
+            by_layers_entries = []
+            for node in analysis.nodes:
+                if node.op_type not in LINEAR_OP_TYPES:
+                    continue
+                precision_dict = node.parameter_summary.precision
+                dense = 0
+                quantized = 0
+                for precision, counts in precision_dict.items():
+                    if "32" in precision:
+                        # include float32, int32
+                        dense += counts.total
+                    else:
+                        # TODO: Add support for different precisions
+                        quantized += counts.total
+
+                node_count_summary = CountSummary(
+                    items=[
+                        _SparseItemCount(
+                            name=node.name,
+                            total=node.parameter_summary.total,
+                            pruned=node.parameter_summary.pruned,
+                            dense=dense,
+                            quantized=quantized,
+                        )
+                    ]
+                )
+                entry = NamedEntry(
+                    name=node.name,
+                    total=node_count_summary.total,
+                    size=node_count_summary.size,
+                    sparsity=node_count_summary.sparsity,
+                    quantized=node_count_summary.quantized,
+                )
+                by_layers_entries.append(entry)
+            if by_layers_entries:
+                sections.append(
+                    Section(
+                        section_name="Analysis by Layers",
+                        entries=by_layers_entries,
+                    )
+                )
 
         # Add Param analysis section
         param_count_summary: CountSummary = _get_param_count_summary(analysis=analysis)
@@ -697,7 +751,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
             ],
         )
         if by_types:
-            _LOGGER.info("running analysis `by_types`")
+            _LOGGER.info("Running analysis `by_types`")
 
             entries = []
             for item in param_count_summary.items:
