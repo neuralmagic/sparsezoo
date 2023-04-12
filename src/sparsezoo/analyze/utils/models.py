@@ -379,3 +379,56 @@ class Section(Entry):
             else:
                 entry.pretty_print(headers=False)
         print()
+
+    def __sub__(self, other):
+        """
+        A method that allows us to subtract two Section objects,
+        If the section includes `NamedEntry` or `TypedEntry` then we only compare
+        the entries which have the same name or type (and others will be ignored),
+        Subtraction of other Entry types is delegated to their own implementation
+        This function also assumes that a Section has entries of the same type
+        """
+        section_name = self.section_name or ""
+        self_entries, other_entries = self._get_entries_to_compare(other)
+
+        compared_entries = [
+            self_entry - other_entry
+            for self_entry, other_entry in zip(self_entries, other_entries)
+        ]
+
+        return Section(
+            section_name=section_name,
+            entries=compared_entries,
+        )
+
+    def _get_entries_to_compare(self, other):
+
+        assert self.entries
+        entry_type_to_comparator = {
+            "NamedEntry": lambda obj: obj.name,
+            "TypedEntry": lambda obj: obj.type,
+        }
+
+        self_entry_dict = {
+            entry_type_to_comparator[entry.__class__.__name__](entry): entry
+            for entry in self.entries
+            if entry.__class__.__name__ in entry_type_to_comparator
+        }
+        other_entry_dict = {
+            entry_type_to_comparator[entry.__class__.__name__](entry): entry
+            for entry in self.entries
+            if entry.__class__.__name__ in entry_type_to_comparator
+        }
+
+        self_comparable_entries = []
+        other_comparable_entries = []
+
+        for key, value in self_entry_dict.items():
+            if key in other_entry_dict:
+                self_comparable_entries.append(value)
+                other_comparable_entries.append(other_entry_dict[key])
+
+        if self_comparable_entries:
+            return self_comparable_entries, other_comparable_entries
+
+        return self.entries, other.entries
