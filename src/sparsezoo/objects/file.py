@@ -168,9 +168,7 @@ class File:
                 logging.error(err)
                 logging.error(traceback.format_exc())
                 time.sleep(retry_sleep_sec)
-            logging.error(
-                f"Trying attempt {attempt + 1} of {retries}.", attempt + 1, retries
-            )
+            logging.error(f"Trying attempt {attempt + 1} of {retries}.")
         logging.error("Download retry failed...")
         raise Exception("Exceed max retry attempts: {} failed".format(retries))
 

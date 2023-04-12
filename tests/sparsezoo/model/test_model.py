@@ -83,12 +83,12 @@ files_yolo = copy.copy(files_ic)
             True,
         ),
         (
-            "oberta-medium-mnli_wikipedia_bookcorpus-base_quantized",
+            "biobert-base_cased-jnlpba_pubmed-pruned80.4block_quantized",
             ("deployment", "default"),
             True,
         ),
         (
-            "resnet_v1-101_2xwidth-imagenet-base",
+            "resnet_v1-50-imagenet-pruned95",
             ("checkpoint", "preqat"),
             True,
         ),
@@ -164,17 +164,17 @@ class TestSetupModel:
             files_yolo,
         ),
         (
-            "mobilebert-squad_wikipedia_bookcorpus-14layer_pruned50.4block",
+            "yolov5-x-coco-pruned70.4block_quantized",
             False,
             files_yolo,
         ),
         (
-            "yolov5-s-coco-pruned85_quantized",
+            "yolov5-n6-voc_coco-pruned55",
             False,
             files_yolo,
         ),
         (
-            "resnet_v1-50-imagenet-channel30_pruned91",
+            "resnet_v1-50-imagenet-channel30_pruned90_quantized",
             False,
             files_yolo,
         ),

@@ -19,6 +19,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
 
+from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.inference import ENGINES, InferenceRunner
 from sparsezoo.model.result_utils import ModelResult
 from sparsezoo.model.utils import (
@@ -74,7 +75,7 @@ class Model(Directory):
     """
 
     def __init__(self, source: str, download_path: Optional[str] = None):
-
+        sparsezoo_analytics.send_event("python__model__init")
         self.source = source
         self._stub_params = {}
 
