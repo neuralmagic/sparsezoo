@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from sparsezoo.api import DEFAULT_FIELDS, GraphQLAPI
+from sparsezoo.api import DEFAULT_FIELDS, GraphQLAPI, to_camel_case, to_snake_case
 
 
 class TestGraphQLAPI(GraphQLAPI):
@@ -27,17 +27,17 @@ class TestGraphQLAPI(GraphQLAPI):
         fields: Optional[List[str]] = None,
         url: Optional[str] = None,
     ) -> None:
+        operation_body = to_camel_case(operation_body)
         fields = fields or DEFAULT_FIELDS[operation_body]
 
         reponse_objects = super().fetch(
             operation_body=operation_body,
             arguments=arguments,
-            fields=fields or DEFAULT_FIELDS[operation_body],
+            fields=fields,
             url=url,
         )
-
         for reponse_object in reponse_objects:
-            assert all(field in reponse_object for field in fields)
+            assert all(to_snake_case(field) in reponse_object for field in fields)
 
 
 @pytest.mark.parametrize(
@@ -124,4 +124,4 @@ class TestGraphQLAPI(GraphQLAPI):
     ],
 )
 def test_graphql_api_response(query_args: Dict[str, Any]):
-    TestGraphQLAPI().make_request(**query_args)
+    TestGraphQLAPI().fetch(**query_args)
