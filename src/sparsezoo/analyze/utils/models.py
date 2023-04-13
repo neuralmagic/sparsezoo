@@ -402,7 +402,7 @@ class Section(Entry):
             )
 
         section_name = self.section_name or ""
-        self_entries, other_entries = self._get_entries_to_compare(other)
+        self_entries, other_entries = self._get_comparable_entries(other)
 
         compared_entries = [
             self_entry - other_entry
@@ -414,7 +414,7 @@ class Section(Entry):
             entries=compared_entries,
         )
 
-    def _get_entries_to_compare(self, other: "Section"):
+    def _get_comparable_entries(self, other: "Section"):
         assert self.entries
         entry_type_to_extractor = {
             "NamedEntry": lambda entry: entry.name,
