@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -237,6 +237,11 @@ class Entry(BaseModel):
     _print_order: List[str] = []
 
     def __sub__(self, other):
+        """
+        Allows base functionality for all inheriting classes to be subtract-able,
+        subtracts the fields of self with other while providing some additional
+        support for string and unrolling list type fields
+        """
         my_fields = self.__fields__
         other_fields = other.__fields__
 
@@ -268,6 +273,9 @@ class Entry(BaseModel):
         return self.__class__(**new_fields)
 
     def pretty_print(self, headers: bool = False):
+        """
+        pretty print current Entry object with all it's fields
+        """
         column_width = 15
         field_names = self._print_order
         field_values = []
@@ -374,6 +382,9 @@ class Section(Entry):
     section_name: str = ""
 
     def pretty_print(self):
+        """
+        pretty print current section, with its entries
+        """
         if self.section_name:
             if not self.entries:
                 print(f"No entries found in: {self.section_name}")
@@ -402,7 +413,7 @@ class Section(Entry):
             )
 
         section_name = self.section_name or ""
-        self_entries, other_entries = self._get_comparable_entries(other)
+        self_entries, other_entries = self.get_comparable_entries(other)
 
         compared_entries = [
             self_entry - other_entry
@@ -414,7 +425,14 @@ class Section(Entry):
             entries=compared_entries,
         )
 
-    def _get_comparable_entries(self, other: "Section"):
+    def get_comparable_entries(self, other: "Section")-> Tuple[List[Entry], ...]:
+        """
+        Get comparable entries by same name or type if they belong to
+        `NamedEntry` or `TypedEntry`, else return all entries
+
+        :return: A tuple composed of two lists, containing comparable entries
+            in correct order from current and other Section objects
+        """
         assert self.entries
         entry_type_to_extractor = {
             "NamedEntry": lambda entry: entry.name,
