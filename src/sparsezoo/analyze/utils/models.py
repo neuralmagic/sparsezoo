@@ -374,7 +374,16 @@ class Section(Entry):
     Represents a list of Entries with an optional name
     """
 
-    entries: List[Union[NamedEntry, TypedEntry, SizedModelEntry, ModelEntry, BaseEntry]]
+    entries: List[
+        Union[
+            PerformanceEntry,
+            NamedEntry,
+            TypedEntry,
+            SizedModelEntry,
+            ModelEntry,
+            BaseEntry,
+        ]
+    ]
 
     section_name: str = ""
 

@@ -825,7 +825,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 section_name="Overall",
                 entries=[
                     PerformanceEntry(
-                        model=idx,
+                        model=analysis.model_name,
                         sparsity=overall_count_summary.sparsity_percent,
                         quantized=overall_count_summary.quantized_percent,
                         latency=benchmark_result.average_latency,
