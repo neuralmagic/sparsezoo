@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SPARSEZOO_TEST_MODE: "true"
+      NM_DISABLE_ANALYTICS: "true"
     needs: test-setup
     if: ${{needs.test-setup.outputs.python-diff == 1}}
     steps:
@@ -46,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SPARSEZOO_TEST_MODE: "true"
+      NM_DISABLE_ANALYTICS: "true"
     needs: test-setup
     if: ${{needs.test-setup.outputs.full-check == 1}}
     steps:

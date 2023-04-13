@@ -66,6 +66,26 @@ CACHE_DIR = os.path.expanduser(os.path.join("~", ".cache", "sparsezoo"))
 SAVE_DIR = os.getenv("SPARSEZOO_MODELS_PATH", CACHE_DIR)
 COMPRESSED_FILE_NAME = "model.onnx.tar.gz"
 
+STUB_V1_REGEX_EXPR = (
+    r"^(zoo:)?"
+    r"(?P<domain>[\.A-z0-9_]+)"
+    r"/(?P<sub_domain>[\.A-z0-9_]+)"
+    r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+    r"/(?P<framework>[\.A-z0-9_]+)"
+    r"/(?P<repo>[\.A-z0-9_]+)"
+    r"/(?P<dataset>[\.A-z0-9_]+)(-(?P<training_scheme>[\.A-z0-9_]+))?"
+    r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
+)
+
+STUB_V2_REGEX_EXPR = (
+    r"^(zoo:)?"
+    r"(?P<architecture>[\.A-z0-9_]+)"
+    r"(-(?P<sub_architecture>[\.A-z0-9_]+))?"
+    r"-(?P<source_dataset>[\.A-z0-9_]+)"
+    r"(-(?P<training_dataset>[\.A-z0-9_]+))?"
+    r"-(?P<sparse_tag>[\.A-z0-9_]+)"
+)
+
 
 def load_files_from_directory(directory_path: str) -> List[Dict[str, Any]]:
     """
@@ -118,33 +138,44 @@ def load_files_from_stub(
     models = api.fetch(
         operation_body="models",
         arguments=arguments,
-        fields=["modelId", "modelOnnxSizeCompressedBytes"],
+        fields=[
+            "model_id",
+            "model_onnx_size_compressed_bytes",
+            "files",
+            "benchmark_results",
+            "training_results",
+        ],
     )
 
-    if len(models):
-        model_id = models[0]["model_id"]
-
-        files = api.fetch(
-            operation_body="files",
-            arguments={"model_id": model_id},
+    matching_models = len(models)
+    if matching_models == 0:
+        raise ValueError(
+            f"No matching models found with stub: {stub}." "Please try another stub"
         )
+    if matching_models > 1:
+        logging.warning(
+            f"{len(models)} found from the stub: {stub}"
+            "Using the first model to obtain metadata."
+            "Proceed with caution"
+        )
+
+    if matching_models:
+        model = models[0]
+
+        model_id = model["model_id"]
+
+        files = model.get("files")
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
 
         if params is not None:
             files = filter_files(files=files, params=params)
 
-        training_results = api.fetch(
-            operation_body="training_results",
-            arguments={"model_id": model_id},
-        )
+        training_results = model.get("training_results")
 
-        benchmark_results = api.fetch(
-            operation_body="benchmark_results",
-            arguments={"model_id": model_id},
-        )
+        benchmark_results = model.get("benchmark_results")
 
-        model_onnx_size_compressed_bytes = models[0]["model_onnx_size_compressed_bytes"]
+        model_onnx_size_compressed_bytes = model.get("model_onnx_size_compressed_bytes")
 
         throughput_results = [
             ThroughputResults(**benchmark_result)
@@ -553,6 +584,38 @@ def include_file_download_url(files: List[Dict]):
         )
 
 
+def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
+    """Return a dictionary of the model metadata from stub"""
+
+    matches = re.match(STUB_V1_REGEX_EXPR, stub) or re.match(STUB_V2_REGEX_EXPR, stub)
+    if not matches:
+        return {}
+
+    if "source_dataset" in matches.groupdict():
+        return {"repo_name": stub}
+
+    if "dataset" in matches.groupdict():
+        return {
+            "domain": matches.group("domain"),
+            "sub_domain": matches.group("sub_domain"),
+            "architecture": matches.group("architecture"),
+            "sub_architecture": matches.group("sub_architecture"),
+            "framework": matches.group("framework"),
+            "repo": matches.group("repo"),
+            "dataset": matches.group("dataset"),
+            "sparse_tag": matches.group("sparse_tag"),
+        }
+
+    return {}
+
+
+def is_stub(candidate: str) -> bool:
+    return bool(
+        re.match(STUB_V1_REGEX_EXPR, candidate)
+        or re.match(STUB_V2_REGEX_EXPR, candidate)
+    )
+
+
 def get_file_download_url(
     model_id: str,
     file_name: str,
@@ -566,32 +629,3 @@ def get_file_download_url(
         download_url += "?increment_download=False"
 
     return download_url
-
-
-def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
-    """
-    Return a dictionary of the model metadata from stub
-    """
-
-    stub_regex_expr = (
-        r"^(zoo:)?"
-        r"(?P<domain>[\.A-z0-9_]+)"
-        r"/(?P<sub_domain>[\.A-z0-9_]+)"
-        r"/(?P<architecture>[\.A-z0-9_]+)(-(?P<sub_architecture>[\.A-z0-9_]+))?"
-        r"/(?P<framework>[\.A-z0-9_]+)"
-        r"/(?P<repo>[\.A-z0-9_]+)"
-        r"/(?P<dataset>[\.A-z0-9_]+)"
-        r"/(?P<sparse_tag>[\.A-z0-9_-]+)"
-    )
-    matches = re.match(stub_regex_expr, stub)
-
-    return {
-        "domain": matches.group("domain"),
-        "sub_domain": matches.group("sub_domain"),
-        "architecture": matches.group("architecture"),
-        "sub_architecture": matches.group("sub_architecture"),
-        "framework": matches.group("framework"),
-        "repo": matches.group("repo"),
-        "dataset": matches.group("dataset"),
-        "sparse_tag": matches.group("sparse_tag"),
-    }
