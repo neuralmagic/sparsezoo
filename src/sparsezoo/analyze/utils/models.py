@@ -126,11 +126,15 @@ class ZeroNonZeroParams(PropertyBaseModel):
 
     @property
     def sparsity(self):
-        total_values = self.non_zero + self.zero
+        total_values = self.total
         if total_values > 0:
             return self.zero / total_values
         else:
             return 0
+
+    @property
+    def total(self):
+        return self.non_zero + self.zero
 
 
 class DenseSparseOps(PropertyBaseModel):
