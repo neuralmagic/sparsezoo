@@ -72,7 +72,7 @@ from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 __all__ = ["main"]
 
 
-LOGGER = logging.getLogger()
+_LOGGER = logging.getLogger(__name__)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -106,9 +106,9 @@ def main(
                 f"--{unimplemented_feat} has not been implemented yet"
             )
 
-    LOGGER.info("Starting Analysis ...")
+    _LOGGER.info("Starting Analysis ...")
     analysis = ModelAnalysis.create(model_path)
-    LOGGER.info("Analysis complete, collating results...")
+    _LOGGER.info("Analysis complete, collating results...")
 
     by_types: bool = convert_to_bool(by_types)
     by_layers: bool = convert_to_bool(by_layers)
@@ -125,18 +125,20 @@ def main(
         else:
             compare = [compare]
 
-        print("Comparision Results")
+        print("Comparison Analysis!!!")
         for model_to_compare in compare:
             compare_model_analysis = ModelAnalysis.create(model_to_compare)
             summary_comparison_model = compare_model_analysis.summary(
                 by_types=by_types,
                 by_layers=by_layers,
             )
+            print(f"Comparing {model_path} with {model_to_compare}")
+            print("Note: comparison analysis displays differences b/w models")
             comparison = summary - summary_comparison_model
             comparison.pretty_print()
 
     if save:
-        LOGGER.info(f"Writing results to {save}")
+        _LOGGER.info(f"Writing results to {save}")
         analysis.yaml(file_path=save)
 
 

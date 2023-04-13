@@ -253,7 +253,11 @@ class Entry(BaseModel):
             if field == "section_name":
                 new_fields[field] = my_value
             elif isinstance(my_value, str):
-                new_fields[field] = f"{my_value} - {other_value}"
+                new_fields[field] = (
+                    my_value
+                    if my_value == other_value
+                    else f"{my_value} - {other_value}"
+                )
             elif isinstance(my_value, list):
                 new_fields[field] = [
                     item_a - item_b for item_a, item_b in zip(my_value, other_value)
@@ -371,7 +375,10 @@ class Section(Entry):
 
     def pretty_print(self):
         if self.section_name:
-            print(f"{self.section_name}:")
+            if not self.entries:
+                print(f"No entries found in: {self.section_name}")
+            else:
+                print(f"{self.section_name}:")
 
         for idx, entry in enumerate(self.entries):
             if idx == 0:
@@ -380,7 +387,7 @@ class Section(Entry):
                 entry.pretty_print(headers=False)
         print()
 
-    def __sub__(self, other):
+    def __sub__(self, other: "Section"):
         """
         A method that allows us to subtract two Section objects,
         If the section includes `NamedEntry` or `TypedEntry` then we only compare
@@ -388,6 +395,12 @@ class Section(Entry):
         Subtraction of other Entry types is delegated to their own implementation
         This function also assumes that a Section has entries of the same type
         """
+
+        if not isinstance(other, Section):
+            raise TypeError(
+                f"unsupported operand type(s) for -: {type(self)} and {type(other)}"
+            )
+
         section_name = self.section_name or ""
         self_entries, other_entries = self._get_entries_to_compare(other)
 
@@ -401,24 +414,20 @@ class Section(Entry):
             entries=compared_entries,
         )
 
-    def _get_entries_to_compare(self, other):
-
+    def _get_entries_to_compare(self, other: "Section"):
         assert self.entries
-        entry_type_to_comparator = {
-            "NamedEntry": lambda obj: obj.name,
-            "TypedEntry": lambda obj: obj.type,
+        entry_type_to_extractor = {
+            "NamedEntry": lambda entry: entry.name,
+            "TypedEntry": lambda entry: entry.type,
         }
+        entry_type = self.entries[0].__class__.__name__
 
-        self_entry_dict = {
-            entry_type_to_comparator[entry.__class__.__name__](entry): entry
-            for entry in self.entries
-            if entry.__class__.__name__ in entry_type_to_comparator
-        }
-        other_entry_dict = {
-            entry_type_to_comparator[entry.__class__.__name__](entry): entry
-            for entry in self.entries
-            if entry.__class__.__name__ in entry_type_to_comparator
-        }
+        if entry_type not in entry_type_to_extractor:
+            return self.entries, other.entries
+
+        key_extractor = entry_type_to_extractor[entry_type]
+        self_entry_dict = {key_extractor(entry): entry for entry in self.entries}
+        other_entry_dict = {key_extractor(entry): entry for entry in other.entries}
 
         self_comparable_entries = []
         other_comparable_entries = []
@@ -428,7 +437,9 @@ class Section(Entry):
                 self_comparable_entries.append(value)
                 other_comparable_entries.append(other_entry_dict[key])
 
-        if self_comparable_entries:
-            return self_comparable_entries, other_comparable_entries
-
-        return self.entries, other.entries
+        if len(self_comparable_entries) != len(self_entry_dict):
+            _LOGGER.info(
+                "Found mismatching entries, these will be ignored during "
+                f"comparison in Section: {self.section_name}"
+            )
+        return self_comparable_entries, other_comparable_entries
