@@ -268,6 +268,11 @@ class BenchmarkResult(YAMLSerializableBaseModel):
         description="Node level inference results",
     )
 
+    supported_graph_percentage: Optional[float] = Field(
+        default=None,
+        description="Percentage of model graph supported by the runtime engine"
+    )
+
 
 class NodeAnalysis(YAMLSerializableBaseModel):
     """
@@ -830,7 +835,10 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                         quantized=overall_count_summary.quantized_percent,
                         latency=benchmark_result.average_latency,
                         throughput=benchmark_result.items_per_second,
-                        supported_graph=0.0,  # TODO: fill in correct value
+                        supported_graph=(
+                                benchmark_result.supported_graph_percentage
+                                or 0.0
+                        ),
                     )
                     for idx, benchmark_result in enumerate(analysis.benchmark_results)
                 ],
