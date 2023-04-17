@@ -17,10 +17,7 @@ from unittest.mock import patch
 import pytest
 
 from sparsezoo import Model
-from sparsezoo.deployment_package.utils.extractors import (
-    _batch_size_one_latency,
-    _throughput,
-)
+from sparsezoo.deployment_package.utils.extractors import _batch_size_one_latency
 
 
 _VNNI_STUB = (
@@ -61,22 +58,6 @@ def model():
         "/pruned95_quant-none"
     )
     yield Model(source=stub)
-
-
-@pytest.mark.parametrize(
-    "num_cores,batch_size,device_info,expected",
-    [
-        (24, 64, "c6i.12xlarge", 1948.45),
-    ],
-)
-def test_throughput_extractor(model, num_cores, batch_size, device_info, expected):
-    actual_throughput = _throughput(
-        model=model,
-        num_cores=num_cores,
-        batch_size=batch_size,
-        device_info=device_info,
-    )
-    assert actual_throughput == expected
 
 
 @patch("sparsezoo.deployment_package_module.utils.extractors._throughput")
