@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, List
 
 
 def to_camel_case(string: str):
@@ -32,7 +32,22 @@ def to_snake_case(string: str):
 
 
 def map_keys(
-    dictionary: Dict[str, str], mapper: Callable[[str], str]
+    dictionary: Dict[str, Any], mapper: Callable[[str], str]
 ) -> Dict[str, str]:
-    """Given a dictionary, update its key to a given mapper callable"""
-    return {mapper(key): value for key, value in dictionary.items()}
+    """
+    Given a dictionary, update its keys to a given mapper callable.
+
+    If the value of the dict is a List of Dict or Dict of Dict, recursively map
+    its keys
+    """
+    mapped_dict = {}
+    for key, value in dictionary.items():
+        if isinstance(value, List) or isinstance(value, Dict):
+            value_type = type(value)
+            mapped_dict[mapper(key)] = value_type(
+                map_keys(dictionary=sub_dict, mapper=mapper) for sub_dict in value
+            )
+        else:
+            mapped_dict[mapper(key)] = value
+
+    return mapped_dict
