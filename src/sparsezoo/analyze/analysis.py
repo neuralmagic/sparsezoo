@@ -38,6 +38,7 @@ from sparsezoo.analyze.utils.models import (
     NamedEntry,
     NodeCounts,
     NodeIO,
+    NodeTimingEntry,
     OperationSummary,
     OpsSummary,
     ParameterComponent,
@@ -266,6 +267,11 @@ class BenchmarkResult(YAMLSerializableBaseModel):
     node_timings: Optional[List[NodeInferenceResult]] = Field(
         default=None,
         description="Node level inference results",
+    )
+
+    supported_graph_percentage: Optional[float] = Field(
+        default=None,
+        description="Percentage of model graph supported by the runtime engine",
     )
 
 
@@ -825,16 +831,31 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 section_name="Overall",
                 entries=[
                     PerformanceEntry(
-                        model=idx,
+                        model=analysis.model_name,
                         sparsity=overall_count_summary.sparsity_percent,
                         quantized=overall_count_summary.quantized_percent,
                         latency=benchmark_result.average_latency,
                         throughput=benchmark_result.items_per_second,
-                        supported_graph=0.0,  # TODO: fill in correct value
+                        supported_graph=(
+                            benchmark_result.supported_graph_percentage or 0.0
+                        ),
                     )
                     for idx, benchmark_result in enumerate(analysis.benchmark_results)
                 ],
             )
+
+            for idx, benchmark_result in enumerate(analysis.benchmark_results):
+                node_timing_section = Section(
+                    section_name=f"Node Timings for Benchmark # {idx+1}",
+                    entries=[
+                        NodeTimingEntry(
+                            node_name=node_timing.name,
+                            avg_runtime=node_timing.avg_run_time,
+                        )
+                        for node_timing in benchmark_result.node_timings
+                    ],
+                )
+                sections.append(node_timing_section)
 
         sections.extend([param_section, ops_section, overall_section])
         return cls(sections=sections)

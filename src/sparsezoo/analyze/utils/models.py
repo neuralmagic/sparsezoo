@@ -369,12 +369,36 @@ class PerformanceEntry(BaseEntry):
     ] + BaseEntry._print_order
 
 
+class NodeTimingEntry(Entry):
+    """
+    A BaseEntry with additional performance info
+    """
+
+    node_name: str
+    avg_runtime: float
+
+    _print_order = [
+        "node_name",
+        "avg_runtime",
+    ] + Entry._print_order
+
+
 class Section(Entry):
     """
     Represents a list of Entries with an optional name
     """
 
-    entries: List[Union[NamedEntry, TypedEntry, SizedModelEntry, ModelEntry, BaseEntry]]
+    entries: List[
+        Union[
+            NodeTimingEntry,
+            PerformanceEntry,
+            NamedEntry,
+            TypedEntry,
+            SizedModelEntry,
+            ModelEntry,
+            BaseEntry,
+        ]
+    ]
 
     section_name: str = ""
 
@@ -425,7 +449,7 @@ class Section(Entry):
     def get_comparable_entries(self, other: "Section") -> Tuple[List[Entry], ...]:
         """
         Get comparable entries by same name or type if they belong to
-        `NamedEntry` or `TypedEntry`, else return all entries
+        `NamedEntry`, `TypedEntry`, or `NodeTimingEntry`, else return all entries
 
         :return: A tuple composed of two lists, containing comparable entries
             in correct order from current and other Section objects
@@ -434,6 +458,7 @@ class Section(Entry):
         entry_type_to_extractor = {
             "NamedEntry": lambda entry: entry.name,
             "TypedEntry": lambda entry: entry.type,
+            "NodeTimingEntry": lambda entry: entry.node_name,
         }
         entry_type = self.entries[0].__class__.__name__
 
