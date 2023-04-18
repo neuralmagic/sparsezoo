@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Dict, List, Optional, Union, Tuple
+import textwrap
+from typing import Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -272,30 +273,26 @@ class Entry(BaseModel):
 
         return self.__class__(**new_fields)
 
-    def pretty_print(self, headers: bool = False):
+    def pretty_print(self, headers: bool = False, column_width=30):
         """
         pretty print current Entry object with all it's fields
         """
-        column_width = 15
         field_names = self._print_order
         field_values = []
         for field_name in field_names:
             field_value = getattr(self, field_name)
             if isinstance(field_value, float):
                 field_value = f"{field_value:.2f}"
-            if field_name == "model":
-                field_value = field_value[-40:]
             field_values.append(field_value)
-
-        column_fmt = "{{:>{0}}} ".format(column_width)
-        fmt_string = "{:>40}" + (column_fmt * (len(field_names) - 1))
 
         if headers:
             print(
-                fmt_string.format(*(field_name.upper() for field_name in field_names))
+                multiline_pretty_print(
+                    row=[field_name.upper() for field_name in field_names],
+                    column_width=column_width,
+                )
             )
-
-        print(fmt_string.format(*field_values))
+        print(multiline_pretty_print(row=field_values, column_width=column_width))
 
 
 class BaseEntry(Entry):
@@ -425,7 +422,7 @@ class Section(Entry):
             entries=compared_entries,
         )
 
-    def get_comparable_entries(self, other: "Section")-> Tuple[List[Entry], ...]:
+    def get_comparable_entries(self, other: "Section") -> Tuple[List[Entry], ...]:
         """
         Get comparable entries by same name or type if they belong to
         `NamedEntry` or `TypedEntry`, else return all entries
@@ -461,3 +458,33 @@ class Section(Entry):
                 f"comparison in Section: {self.section_name}"
             )
         return self_comparable_entries, other_comparable_entries
+
+
+def multiline_pretty_print(row: List[str], column_width=20) -> str:
+    """
+    Formats the contents of the specified row into a multiline string which
+    each column is wrapped into a multiline string if its length is greater
+    than the specified column_width
+
+    :param row: A list of strings to be formatted into a multiline row
+    :param column_width: The max width of each column for formatting, default is 20
+    :returns: A multiline formatted string representing the row,
+    """
+    row = [str(column) for column in row]
+    result_string = ""
+    col_delim = " "
+    wrapped_row = [textwrap.wrap(col, column_width) for col in row]
+    max_lines_needed = max(len(col) for col in wrapped_row)
+
+    for line_idx in range(max_lines_needed):
+        result_string += col_delim
+        for column in wrapped_row:
+            if line_idx < len(column):
+                result_string += column[line_idx].ljust(column_width)
+            else:
+                result_string += " " * column_width
+            result_string += col_delim
+        if line_idx < max_lines_needed - 1:
+            result_string += "\n"
+    return result_string
+    
