@@ -487,3 +487,4 @@ def multiline_pretty_print(row: List[str], column_width=20) -> str:
         if line_idx < max_lines_needed - 1:
             result_string += "\n"
     return result_string
+    
