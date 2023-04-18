@@ -625,11 +625,11 @@ class CountSummary(BaseModel):
         return sum(item.quantized for item in self.items)
 
     @property
-    def sparsity(self):
+    def sparsity_percent(self):
         return round(self.sparse_count * 100.0 / self.total, self._precision)
 
     @property
-    def quantized(self):
+    def quantized_percent(self):
         return round(self.quant_count * 100.0 / self.total, self._precision)
 
     @property
@@ -637,7 +637,9 @@ class CountSummary(BaseModel):
         """
         :return: size in bits ignoring zeros
         """
-        return self.quant_count * 8 + self.dense_count * 32
+        return (self.quant_count * 8 + self.dense_count * 32) * (
+            1 - self.sparsity_percent / 100.0
+        )
 
     def __add__(self, other):
         new_items = self.items + other.items
@@ -710,8 +712,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                     name=node.name,
                     total=node_count_summary.total,
                     size=node_count_summary.size,
-                    sparsity=node_count_summary.sparsity,
-                    quantized=node_count_summary.quantized,
+                    sparsity=node_count_summary.sparsity_percent,
+                    quantized=node_count_summary.quantized_percent,
                 )
                 by_layers_entries.append(entry)
             if by_layers_entries:
@@ -731,8 +733,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                     model=analysis.model_name,
                     count=param_count_summary.total,
                     size=param_count_summary.size,
-                    sparsity=param_count_summary.sparsity,
-                    quantized=param_count_summary.quantized,
+                    sparsity=param_count_summary.sparsity_percent,
+                    quantized=param_count_summary.quantized_percent,
                 ),
             ],
         )
@@ -746,8 +748,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                     model=analysis.model_name,
                     count=ops_count_summary.total,
                     size=ops_count_summary.size,
-                    sparsity=ops_count_summary.sparsity,
-                    quantized=ops_count_summary.quantized,
+                    sparsity=ops_count_summary.sparsity_percent,
+                    quantized=ops_count_summary.quantized_percent,
                 ),
             ],
         )
@@ -760,8 +762,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 entry = TypedEntry(
                     type=item.name,
                     size=item_count_summary.size,
-                    sparsity=item_count_summary.sparsity,
-                    quantized=item_count_summary.quantized,
+                    sparsity=item_count_summary.sparsity_percent,
+                    quantized=item_count_summary.quantized_percent,
                 )
                 entries.append(entry)
 
@@ -769,8 +771,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 TypedEntry(
                     type="Total",
                     size=param_count_summary.size,
-                    sparsity=param_count_summary.sparsity,
-                    quantized=param_count_summary.quantized,
+                    sparsity=param_count_summary.sparsity_percent,
+                    quantized=param_count_summary.quantized_percent,
                 )
             )
 
@@ -786,8 +788,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 entry = TypedEntry(
                     type=item.name,
                     size=item_count_summary.size,
-                    sparsity=item_count_summary.sparsity,
-                    quantized=item_count_summary.quantized,
+                    sparsity=item_count_summary.sparsity_percent,
+                    quantized=item_count_summary.quantized_percent,
                 )
                 entries.append(entry)
 
@@ -795,8 +797,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 TypedEntry(
                     type="Total",
                     size=ops_count_summary.size,
-                    sparsity=ops_count_summary.sparsity,
-                    quantized=ops_count_summary.quantized,
+                    sparsity=ops_count_summary.sparsity_percent,
+                    quantized=ops_count_summary.quantized_percent,
                 )
             )
             type_ops_section = Section(section_name="Ops by types", entries=entries)
@@ -812,8 +814,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 entries=[
                     ModelEntry(
                         model=analysis.model_name,
-                        sparsity=overall_count_summary.sparsity,
-                        quantized=overall_count_summary.quantized,
+                        sparsity=overall_count_summary.sparsity_percent,
+                        quantized=overall_count_summary.quantized_percent,
                     )
                 ],
             )
@@ -824,8 +826,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 entries=[
                     PerformanceEntry(
                         model=idx,
-                        sparsity=overall_count_summary.sparsity,
-                        quantized=overall_count_summary.quantized,
+                        sparsity=overall_count_summary.sparsity_percent,
+                        quantized=overall_count_summary.quantized_percent,
                         latency=benchmark_result.average_latency,
                         throughput=benchmark_result.items_per_second,
                         supported_graph=0.0,  # TODO: fill in correct value

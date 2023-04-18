@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -237,6 +237,11 @@ class Entry(BaseModel):
     _print_order: List[str] = []
 
     def __sub__(self, other):
+        """
+        Allows base functionality for all inheriting classes to be subtract-able,
+        subtracts the fields of self with other while providing some additional
+        support for string and unrolling list type fields
+        """
         my_fields = self.__fields__
         other_fields = other.__fields__
 
@@ -253,7 +258,11 @@ class Entry(BaseModel):
             if field == "section_name":
                 new_fields[field] = my_value
             elif isinstance(my_value, str):
-                new_fields[field] = f"{my_value} - {other_value}"
+                new_fields[field] = (
+                    my_value
+                    if my_value == other_value
+                    else f"{my_value} - {other_value}"
+                )
             elif isinstance(my_value, list):
                 new_fields[field] = [
                     item_a - item_b for item_a, item_b in zip(my_value, other_value)
@@ -264,6 +273,9 @@ class Entry(BaseModel):
         return self.__class__(**new_fields)
 
     def pretty_print(self, headers: bool = False):
+        """
+        pretty print current Entry object with all it's fields
+        """
         column_width = 15
         field_names = self._print_order
         field_values = []
@@ -370,8 +382,14 @@ class Section(Entry):
     section_name: str = ""
 
     def pretty_print(self):
+        """
+        pretty print current section, with its entries
+        """
         if self.section_name:
-            print(f"{self.section_name}:")
+            if not self.entries:
+                print(f"No entries found in: {self.section_name}")
+            else:
+                print(f"{self.section_name}:")
 
         for idx, entry in enumerate(self.entries):
             if idx == 0:
@@ -379,3 +397,67 @@ class Section(Entry):
             else:
                 entry.pretty_print(headers=False)
         print()
+
+    def __sub__(self, other: "Section"):
+        """
+        A method that allows us to subtract two Section objects,
+        If the section includes `NamedEntry` or `TypedEntry` then we only compare
+        the entries which have the same name or type (and others will be ignored),
+        Subtraction of other Entry types is delegated to their own implementation
+        This function also assumes that a Section has entries of the same type
+        """
+
+        if not isinstance(other, Section):
+            raise TypeError(
+                f"unsupported operand type(s) for -: {type(self)} and {type(other)}"
+            )
+
+        section_name = self.section_name or ""
+        self_entries, other_entries = self.get_comparable_entries(other)
+
+        compared_entries = [
+            self_entry - other_entry
+            for self_entry, other_entry in zip(self_entries, other_entries)
+        ]
+
+        return Section(
+            section_name=section_name,
+            entries=compared_entries,
+        )
+
+    def get_comparable_entries(self, other: "Section")-> Tuple[List[Entry], ...]:
+        """
+        Get comparable entries by same name or type if they belong to
+        `NamedEntry` or `TypedEntry`, else return all entries
+
+        :return: A tuple composed of two lists, containing comparable entries
+            in correct order from current and other Section objects
+        """
+        assert self.entries
+        entry_type_to_extractor = {
+            "NamedEntry": lambda entry: entry.name,
+            "TypedEntry": lambda entry: entry.type,
+        }
+        entry_type = self.entries[0].__class__.__name__
+
+        if entry_type not in entry_type_to_extractor:
+            return self.entries, other.entries
+
+        key_extractor = entry_type_to_extractor[entry_type]
+        self_entry_dict = {key_extractor(entry): entry for entry in self.entries}
+        other_entry_dict = {key_extractor(entry): entry for entry in other.entries}
+
+        self_comparable_entries = []
+        other_comparable_entries = []
+
+        for key, value in self_entry_dict.items():
+            if key in other_entry_dict:
+                self_comparable_entries.append(value)
+                other_comparable_entries.append(other_entry_dict[key])
+
+        if len(self_comparable_entries) != len(self_entry_dict):
+            _LOGGER.info(
+                "Found mismatching entries, these will be ignored during "
+                f"comparison in Section: {self.section_name}"
+            )
+        return self_comparable_entries, other_comparable_entries
