@@ -63,6 +63,7 @@ import logging
 from typing import Optional
 
 import click
+from sparsezoo import convert_to_bool
 from sparsezoo.analytics import sparsezoo_analytics
 from sparsezoo.analyze import ModelAnalysis
 from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
@@ -71,13 +72,20 @@ from sparsezoo.analyze.cli import CONTEXT_SETTINGS, analyze_options
 __all__ = ["main"]
 
 
-LOGGER = logging.getLogger()
+_LOGGER = logging.getLogger(__name__)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @analyze_options
 @sparsezoo_analytics.send_event_decorator("cli__main")
-def main(model_path: str, save: Optional[str], **kwargs):
+def main(
+    model_path: str,
+    compare: Optional[str],
+    save: Optional[str],
+    by_layers: Optional[str],
+    by_types: Optional[str],
+    **kwargs,
+):
     """
     Model analysis for ONNX models.
 
@@ -92,21 +100,45 @@ def main(model_path: str, save: Optional[str], **kwargs):
     """
     logging.basicConfig(level=logging.INFO)
 
-    for unimplemented_feat in ("compare", "by_layer", "by_types", "save_graphs"):
+    for unimplemented_feat in ("save_graphs",):
         if kwargs.get(unimplemented_feat):
             raise NotImplementedError(
                 f"--{unimplemented_feat} has not been implemented yet"
             )
 
-    LOGGER.info("Starting Analysis ...")
+    _LOGGER.info("Starting Analysis ...")
     analysis = ModelAnalysis.create(model_path)
-    LOGGER.info("Analysis complete, collating results...")
+    _LOGGER.info("Analysis complete, collating results...")
 
-    print(f"MODEL: {model_path}", end="\n\n")
-    analysis.pretty_print_summary()
+    by_types: bool = convert_to_bool(by_types)
+    by_layers: bool = convert_to_bool(by_layers)
+
+    summary = analysis.summary(
+        by_types=by_types,
+        by_layers=by_layers,
+    )
+    summary.pretty_print()
+
+    if compare is not None:
+        if "," in compare:
+            compare = compare.split(",")
+        else:
+            compare = [compare]
+
+        print("Comparison Analysis!!!")
+        for model_to_compare in compare:
+            compare_model_analysis = ModelAnalysis.create(model_to_compare)
+            summary_comparison_model = compare_model_analysis.summary(
+                by_types=by_types,
+                by_layers=by_layers,
+            )
+            print(f"Comparing {model_path} with {model_to_compare}")
+            print("Note: comparison analysis displays differences b/w models")
+            comparison = summary - summary_comparison_model
+            comparison.pretty_print()
 
     if save:
-        LOGGER.info(f"Writing results to {save}")
+        _LOGGER.info(f"Writing results to {save}")
         analysis.yaml(file_path=save)
 
 
