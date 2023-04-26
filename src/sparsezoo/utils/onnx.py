@@ -21,7 +21,8 @@ import onnx
 from onnx import ModelProto, NodeProto, numpy_helper
 from onnx.helper import get_attribute_value
 
-from sparsezoo.utils import ONNXGraph, clean_path
+from sparsezoo.utils import ONNXGraph
+from sparsezoo.utils.helpers import clean_path
 
 
 _LOGGER = logging.getLogger(__name__)
