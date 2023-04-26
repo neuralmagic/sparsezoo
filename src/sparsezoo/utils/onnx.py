@@ -94,11 +94,11 @@ def save_onnx(
                 all_tensors_to_one_file=True,
                 location=external_data_file,
             )
-        _LOGGER.info(
-            f"Saving the ONNX model {model_path} "
-            f"with external data to {external_data_file}"
-        )
-        return True
+            _LOGGER.info(
+                f"Saving the ONNX model {model_path} "
+                f"with external data to {external_data_file}"
+            )
+            return True
     onnx.save(model, model_path)
     return False
 
