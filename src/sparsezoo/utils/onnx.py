@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-import os
 from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy
@@ -30,7 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 __all__ = [
     "save_onnx",
     "validate_onnx",
-    "check_load_model",
+    "load_model",
     "get_layer_and_op_counts",
     "get_node_four_block_sparsity",
     "get_node_num_four_block_zeros_and_size",
@@ -59,8 +58,6 @@ def save_onnx(
 
     If the model's size is larger than the maximum protobuf size:
         -   it will be saved with external data
-        -   if 'external_data_file' is not specified, it will be created
-            from the name of the model (e.g. 'model.onnx' -> 'model.data').
     If the model's size is smaller than the maximum protobuf size:
         -   and the user nevertheless specifies 'external_data_file',
             the model will be saved with external data.
@@ -69,14 +66,8 @@ def save_onnx(
     :param external_data_file: The optional name save the external data to.
     :return True if the model was saved with external data, False otherwise.
     """
-    if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
-        external_data_file = (
-            external_data_file or os.path.basename(model_path).replace("onnx", "data"),
-        )
-        _LOGGER.info(
-            "The ONNX model is too large to be saved as a single protobuf. "
-            f"Saving with external data: {external_data_file}"
-        )
+    if external_data_file is not None:
+        _LOGGER.info(f"Saving with external data: {external_data_file}")
         onnx.save(
             model,
             model_path,
@@ -85,20 +76,23 @@ def save_onnx(
             location=external_data_file,
         )
         return True
-    else:
-        if external_data_file is not None:
-            onnx.save(
-                model,
-                model_path,
-                save_as_external_data=True,
-                all_tensors_to_one_file=True,
-                location=external_data_file,
-            )
-            _LOGGER.info(
-                f"Saving the ONNX model {model_path} "
-                f"with external data to {external_data_file}"
-            )
-            return True
+
+    if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
+        _LOGGER.info(
+            "The ONNX model is too large to be saved as a single protobuf."
+            "Saving with external data... "
+        )
+
+        _LOGGER.info(f"Saving with external data: {external_data_file}")
+        onnx.save(
+            model,
+            model_path,
+            save_as_external_data=True,
+            all_tensors_to_one_file=True,
+            location=external_data_file,
+        )
+        return True
+
     onnx.save(model, model_path)
     return False
 
@@ -112,19 +106,18 @@ def validate_onnx(model: Union[str, ModelProto]):
         ONNX file to check for validation
     """
     try:
-        onnx_model = check_load_model(model)
-
-        if (
-            isinstance(onnx_model, ModelProto)
-            and onnx_model.ByteSize() < onnx.checker.MAXIMUM_PROTOBUF
-        ):
-            _LOGGER.warning(
-                "Attempting to validate an in-memory ONNX model with "
-                f"size > {onnx.checker.MAXIMUM_PROTOBUF} bytes."
-                "`validate_onnx` skipped, as large ONNX models cannot "
-                "be validated in-memory. To validate this model, save "
-                "it to disk and call `validate_onnx` on the file path."
-            )
+        onnx_model = load_model(model)
+        if onnx_model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
+            if isinstance(model, str):
+                onnx.checker.check_model(model)
+            else:
+                _LOGGER.warning(
+                    "Attempting to validate an in-memory ONNX model with "
+                    f"size > {onnx.checker.MAXIMUM_PROTOBUF} bytes."
+                    "`validate_onnx` skipped, as large ONNX models cannot "
+                    "be validated in-memory. To validate this model, save "
+                    "it to disk and call `validate_onnx` on the file path."
+                )
             return
         onnx.checker.check_model(onnx_model)
         if not onnx_model.opset_import:
@@ -134,7 +127,7 @@ def validate_onnx(model: Union[str, ModelProto]):
         raise ValueError(f"Invalid onnx model: {err}")
 
 
-def check_load_model(model: Union[str, ModelProto]) -> ModelProto:
+def load_model(model: Union[str, ModelProto]) -> ModelProto:
     """
     Load an ONNX model from an onnx model file path. If a ModelProto
     is given, then it is returned.
