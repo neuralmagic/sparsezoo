@@ -61,6 +61,7 @@ def save_onnx(
     If the model's size is smaller than the maximum protobuf size:
         -   and the user nevertheless specifies 'external_data_file',
             the model will be saved with external data.
+    
     :param model: The model to save.
     :param model_path: The path to save the model to.
     :param external_data_file: The optional name save the external data to.
@@ -89,7 +90,6 @@ def save_onnx(
             model_path,
             save_as_external_data=True,
             all_tensors_to_one_file=True,
-            location=external_data_file,
         )
         return True
 
