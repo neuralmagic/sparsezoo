@@ -90,7 +90,6 @@ def save_onnx(
             model_path,
             save_as_external_data=True,
             all_tensors_to_one_file=True,
-            location=external_data_file,
         )
         return True
 
