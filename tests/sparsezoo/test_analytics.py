@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from copy import deepcopy
 
-from .exceptions import *
-from .graphql import *
-from .query_parser import *
-from .utils import *
+from sparsezoo.analytics import sparsezoo_analytics
+
+
+def test_send_event_success():
+    test_analytics = deepcopy(sparsezoo_analytics)
+    test_analytics._disabled = False
+
+    test_analytics.send_event(
+        "tests__analytics__test_send_event_success",
+        raise_errors=True,
+        _await_response=True,
+    )

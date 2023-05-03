@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Dict, List, Optional, Union
+import logging
+import textwrap
+from typing import Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -27,6 +28,8 @@ __all__ = [
     "OperationSummary",
     "ParameterComponent",
 ]
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PropertyBaseModel(BaseModel):
@@ -124,11 +127,15 @@ class ZeroNonZeroParams(PropertyBaseModel):
 
     @property
     def sparsity(self):
-        total_values = self.non_zero + self.zero
+        total_values = self.total
         if total_values > 0:
             return self.zero / total_values
         else:
             return 0
+
+    @property
+    def total(self):
+        return self.non_zero + self.zero
 
 
 class DenseSparseOps(PropertyBaseModel):
@@ -221,3 +228,287 @@ class ParameterComponent(BaseModel):
         description="A summary of the parameter"
     )
     dtype: str = Field(description="The data type of the parameter")
+
+
+class Entry(BaseModel):
+    """
+    A BaseModel with subtraction and pretty_print support
+    """
+
+    _print_order: List[str] = []
+
+    def __sub__(self, other):
+        """
+        Allows base functionality for all inheriting classes to be subtract-able,
+        subtracts the fields of self with other while providing some additional
+        support for string and unrolling list type fields
+        """
+        my_fields = self.__fields__
+        other_fields = other.__fields__
+
+        assert list(my_fields) == list(other_fields)
+        new_fields = {}
+        for field in my_fields:
+            if field.startswith("_"):
+                # ignore private fields
+                continue
+            my_value = getattr(self, field)
+            other_value = getattr(other, field)
+
+            assert type(my_value) == type(other_value)
+            if field == "section_name":
+                new_fields[field] = my_value
+            elif isinstance(my_value, str):
+                new_fields[field] = (
+                    my_value
+                    if my_value == other_value
+                    else f"{my_value} - {other_value}"
+                )
+            elif isinstance(my_value, list):
+                new_fields[field] = [
+                    item_a - item_b for item_a, item_b in zip(my_value, other_value)
+                ]
+            else:
+                new_fields[field] = my_value - other_value
+
+        return self.__class__(**new_fields)
+
+    def pretty_print(self, headers: bool = False, column_width=30):
+        """
+        pretty print current Entry object with all it's fields
+        """
+        field_names = self._print_order
+        field_values = []
+        for field_name in field_names:
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, float):
+                field_value = f"{field_value:.2f}"
+            field_values.append(field_value)
+
+        if headers:
+            print(
+                multiline_pretty_print(
+                    row=[field_name.upper() for field_name in field_names],
+                    column_width=column_width,
+                )
+            )
+        print(multiline_pretty_print(row=field_values, column_width=column_width))
+
+
+class BaseEntry(Entry):
+    """
+    The BaseModel representing a row entry
+
+    :param sparsity: A float between 0-100 representing sparsity percentage
+    :param quantized: A float between 0-100 representing quantized percentage
+    """
+
+    sparsity: float
+    quantized: float
+
+    _print_order = ["sparsity", "quantized"]
+
+
+class NamedEntry(BaseEntry):
+    """
+    BaseEntry with additional info like name, total and size
+    """
+
+    name: str
+    total: float
+    size: int
+
+    _print_order = ["name", "total", "size"] + BaseEntry._print_order
+
+
+class TypedEntry(BaseEntry):
+    """
+    BaseEntry with additional info like type and size
+    """
+
+    type: str
+    size: int
+
+    _print_order = ["type", "size"] + BaseEntry._print_order
+
+
+class ModelEntry(BaseEntry):
+    """
+    BaseEntry which includes name of the model
+    """
+
+    model: str
+    _print_order = ["model"] + BaseEntry._print_order
+
+
+class SizedModelEntry(ModelEntry):
+    """
+    A ModelEntry with additional info like count and size
+    """
+
+    count: int
+    size: int
+    _print_order = ModelEntry._print_order + ["count", "size"]
+
+
+class PerformanceEntry(BaseEntry):
+    """
+    A BaseEntry with additional performance info
+    """
+
+    model: str
+    latency: float
+    throughput: float
+    supported_graph: float
+
+    _print_order = [
+        "model",
+        "latency",
+        "throughput",
+        "supported_graph",
+    ] + BaseEntry._print_order
+
+
+class NodeTimingEntry(Entry):
+    """
+    A BaseEntry with additional performance info
+    """
+
+    node_name: str
+    avg_runtime: float
+
+    _print_order = [
+        "node_name",
+        "avg_runtime",
+    ] + Entry._print_order
+
+
+class Section(Entry):
+    """
+    Represents a list of Entries with an optional name
+    """
+
+    entries: List[
+        Union[
+            NodeTimingEntry,
+            PerformanceEntry,
+            NamedEntry,
+            TypedEntry,
+            SizedModelEntry,
+            ModelEntry,
+            BaseEntry,
+        ]
+    ]
+
+    section_name: str = ""
+
+    def pretty_print(self):
+        """
+        pretty print current section, with its entries
+        """
+        if self.section_name:
+            if not self.entries:
+                print(f"No entries found in: {self.section_name}")
+            else:
+                print(f"{self.section_name}:")
+
+        for idx, entry in enumerate(self.entries):
+            if idx == 0:
+                entry.pretty_print(headers=True)
+            else:
+                entry.pretty_print(headers=False)
+        print()
+
+    def __sub__(self, other: "Section"):
+        """
+        A method that allows us to subtract two Section objects,
+        If the section includes `NamedEntry` or `TypedEntry` then we only compare
+        the entries which have the same name or type (and others will be ignored),
+        Subtraction of other Entry types is delegated to their own implementation
+        This function also assumes that a Section has entries of the same type
+        """
+
+        if not isinstance(other, Section):
+            raise TypeError(
+                f"unsupported operand type(s) for -: {type(self)} and {type(other)}"
+            )
+
+        section_name = self.section_name or ""
+        self_entries, other_entries = self.get_comparable_entries(other)
+
+        compared_entries = [
+            self_entry - other_entry
+            for self_entry, other_entry in zip(self_entries, other_entries)
+        ]
+
+        return Section(
+            section_name=section_name,
+            entries=compared_entries,
+        )
+
+    def get_comparable_entries(self, other: "Section") -> Tuple[List[Entry], ...]:
+        """
+        Get comparable entries by same name or type if they belong to
+        `NamedEntry`, `TypedEntry`, or `NodeTimingEntry`, else return all entries
+
+        :return: A tuple composed of two lists, containing comparable entries
+            in correct order from current and other Section objects
+        """
+        assert self.entries
+        entry_type_to_extractor = {
+            "NamedEntry": lambda entry: entry.name,
+            "TypedEntry": lambda entry: entry.type,
+            "NodeTimingEntry": lambda entry: entry.node_name,
+        }
+        entry_type = self.entries[0].__class__.__name__
+
+        if entry_type not in entry_type_to_extractor:
+            return self.entries, other.entries
+
+        key_extractor = entry_type_to_extractor[entry_type]
+        self_entry_dict = {key_extractor(entry): entry for entry in self.entries}
+        other_entry_dict = {key_extractor(entry): entry for entry in other.entries}
+
+        self_comparable_entries = []
+        other_comparable_entries = []
+
+        for key, value in self_entry_dict.items():
+            if key in other_entry_dict:
+                self_comparable_entries.append(value)
+                other_comparable_entries.append(other_entry_dict[key])
+
+        if len(self_comparable_entries) != len(self_entry_dict):
+            _LOGGER.info(
+                "Found mismatching entries, these will be ignored during "
+                f"comparison in Section: {self.section_name}"
+            )
+        return self_comparable_entries, other_comparable_entries
+
+
+def multiline_pretty_print(row: List[str], column_width=20) -> str:
+    """
+    Formats the contents of the specified row into a multiline string which
+    each column is wrapped into a multiline string if its length is greater
+    than the specified column_width
+
+    :param row: A list of strings to be formatted into a multiline row
+    :param column_width: The max width of each column for formatting, default is 20
+    :returns: A multiline formatted string representing the row,
+    """
+    row = [str(column) for column in row]
+    result_string = ""
+    col_delim = " "
+    wrapped_row = [textwrap.wrap(col, column_width) for col in row]
+    max_lines_needed = max(len(col) for col in wrapped_row)
+
+    for line_idx in range(max_lines_needed):
+        result_string += col_delim
+        for column in wrapped_row:
+            if line_idx < len(column):
+                result_string += column[line_idx].ljust(column_width)
+            else:
+                result_string += " " * column_width
+            result_string += col_delim
+        if line_idx < max_lines_needed - 1:
+            result_string += "\n"
+    return result_string

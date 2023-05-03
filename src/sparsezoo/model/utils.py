@@ -167,7 +167,6 @@ def load_files_from_stub(
         model_id = model["model_id"]
         repo_namespace = model["repo_namespace"]
         repo_name = model["repo_name"]
-
         files = model.get("files")
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
