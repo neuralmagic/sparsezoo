@@ -72,7 +72,7 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Installation
 
-This repository is tested on Python 3.7-3.9, and Linux/Debian systems.
+This repository is tested on Python 3.7-3.10, and Linux/Debian systems.
 It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
 Install with pip using:
@@ -420,7 +420,7 @@ We appreciate contributions to the code, examples, integrations, and documentati
 
 ### Join
 
-For user help or questions about SparseZoo, sign up or log in to our [**Deep Sparse Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
+For user help or questions about SparseZoo, sign up or log in to our [**Neural Magic Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 
