@@ -84,7 +84,6 @@ def save_onnx(
             "Saving with external data... "
         )
 
-        _LOGGER.info(f"Saving with external data: {external_data_file}")
         onnx.save(
             model,
             model_path,
