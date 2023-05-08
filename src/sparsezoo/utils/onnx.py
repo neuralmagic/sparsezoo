@@ -68,7 +68,7 @@ def save_onnx(
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
-        _LOGGER.info(f"Saving with external data: {external_data_file}")
+        _LOGGER.debug(f"Saving with external data: {external_data_file}")
         onnx.save(
             model,
             model_path,
@@ -79,7 +79,7 @@ def save_onnx(
         return True
 
     if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
-        _LOGGER.info(
+        _LOGGER.warning(
             "The ONNX model is too large to be saved as a single protobuf."
             "Saving with external data... "
         )
@@ -119,9 +119,6 @@ def validate_onnx(model: Union[str, ModelProto]):
                 )
             return
         onnx.checker.check_model(onnx_model)
-        if not onnx_model.opset_import:
-            raise ValueError("could not parse opset_import")
-        return
     except Exception as err:
         raise ValueError(f"Invalid onnx model: {err}")
 
