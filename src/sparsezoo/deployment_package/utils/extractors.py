@@ -18,7 +18,7 @@ A file containing extractors for different optimizing metrics
 
 import logging
 from types import MappingProxyType
-from typing import Optional
+from typing import List, Optional, Union
 
 from sparsezoo import Model
 
@@ -75,19 +75,39 @@ def _accuracy(model: Model, metric_name=None) -> float:
 
     if metric_name is not None:
         for result in validation_results:
-            if metric_name in result.recorded_units.lower():
+            if _metric_name_matches(metric_name, result.recorded_units.lower()):
                 return result.recorded_value
         _LOGGER.info(f"metric name {metric_name} not found for model {model}")
 
     # fallback to if any accuracy metric found
     accuracy_metrics = ["accuracy", "f1", "recall", "map", "top1 accuracy"]
     for result in validation_results:
-        if result.recorded_units.lower() in accuracy_metrics:
+        if _metric_name_matches(result.recorded_units.lower(), accuracy_metrics):
             return result.recorded_value
 
     raise ValueError(
         f"Could not find any accuracy metric {accuracy_metrics} for model {model}"
     )
+
+
+def _metric_name_matches(
+    metric_name: str, target_metrics: Union[str, List[str]]
+) -> bool:
+    # returns true if metric name is included in the target metrics
+    if isinstance(target_metrics, str):
+        target_metrics = [target_metrics]
+    return any(
+        _standardized_str_eq(metric_name, target_metric)
+        for target_metric in target_metrics
+    )
+
+
+def _standardized_str_eq(str_1: str, str_2: str) -> bool:
+    # strings are equal if lowercase, striped of spaces, -, and _ are equal
+    def _standardize(string):
+        return string.lower().replace(" ", "").replace("-", "").replace("_", "")
+
+    return _standardize(str_1) == _standardize(str_2)
 
 
 EXTRACTORS = MappingProxyType(
