@@ -25,7 +25,7 @@ from onnx.helper import make_graph, make_model, make_node, make_tensor_value_inf
 
 import matplotlib.pyplot as plt
 from sparsezoo.objects import File
-from sparsezoo.utils import save_numpy
+from sparsezoo.utils import save_numpy, save_onnx, validate_onnx
 
 
 MODEL_CARD = """
@@ -70,8 +70,8 @@ def _create_onnx_file(file_path):
         [make_tensor_value_info("output", onnx.TensorProto.FLOAT, (1, 1))],
     )
     model = make_model(graph)
-    onnx.checker.check_model(model)
-    onnx.save_model(model, file_path)
+    validate_onnx(model)
+    save_onnx(model, file_path)
 
 
 def _create_md_file(file_path):
