@@ -15,10 +15,13 @@
 from typing import Optional, Tuple
 
 import numpy
+
+
 try:
     import matplotlib.pyplot as plt
+
     matplotlib_available = True
-except ImportError as import_error:
+except ImportError:
     plt = None
     matplotlib_available = False
 
@@ -35,7 +38,7 @@ __all__ = [
 
 def check_matplotlib_installed() -> None:
     """
-    Checks if matplotlib is installed and 
+    Checks if matplotlib is installed and
     raises an ImportError if not
     """
     if not matplotlib_available:
@@ -43,6 +46,7 @@ def check_matplotlib_installed() -> None:
             "matplotlib is required to use this function, "
             "please install it with `pip install matplotlib`"
         )
+
 
 def draw_sparsity_by_layer_chart(
     model_analysis: ModelAnalysis,
@@ -109,6 +113,7 @@ def draw_sparsity_by_layer_chart(
     # Save to file
     if out_path:
         plt.savefig(out_path)
+
 
 def draw_parameter_chart(
     model_analysis: ModelAnalysis,
@@ -197,6 +202,7 @@ def draw_parameter_chart(
     if out_path:
         plt.savefig(out_path)
 
+
 def draw_operation_chart(
     model_analysis: ModelAnalysis,
     out_path: Optional[str] = None,
@@ -282,6 +288,7 @@ def draw_operation_chart(
     # Save to file
     if out_path:
         plt.savefig(out_path)
+
 
 def draw_parameter_operation_combined_chart(
     model_analysis: ModelAnalysis,
