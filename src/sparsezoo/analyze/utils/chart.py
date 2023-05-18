@@ -15,8 +15,13 @@
 from typing import Optional, Tuple
 
 import numpy
+try:
+    import matplotlib.pyplot as plt
+    matplotlib_available = True
+except ImportError as import_error:
+    plt = None
+    matplotlib_available = False
 
-import matplotlib.pyplot as plt
 from sparsezoo.analyze.analysis import ModelAnalysis, NodeAnalysis
 
 
@@ -27,6 +32,17 @@ __all__ = [
     "draw_parameter_operation_combined_chart",
 ]
 
+
+def check_matplotlib_installed() -> None:
+    """
+    Checks if matplotlib is installed and 
+    raises an ImportError if not
+    """
+    if not matplotlib_available:
+        raise ImportError(
+            "matplotlib is required to use this function, "
+            "please install it with `pip install matplotlib`"
+        )
 
 def draw_sparsity_by_layer_chart(
     model_analysis: ModelAnalysis,
@@ -45,6 +61,7 @@ def draw_sparsity_by_layer_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -93,7 +110,6 @@ def draw_sparsity_by_layer_chart(
     if out_path:
         plt.savefig(out_path)
 
-
 def draw_parameter_chart(
     model_analysis: ModelAnalysis,
     out_path: Optional[str] = None,
@@ -113,6 +129,7 @@ def draw_parameter_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, param_axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -180,7 +197,6 @@ def draw_parameter_chart(
     if out_path:
         plt.savefig(out_path)
 
-
 def draw_operation_chart(
     model_analysis: ModelAnalysis,
     out_path: Optional[str] = None,
@@ -200,6 +216,7 @@ def draw_operation_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, ops_axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -266,7 +283,6 @@ def draw_operation_chart(
     if out_path:
         plt.savefig(out_path)
 
-
 def draw_parameter_operation_combined_chart(
     model_analysis: ModelAnalysis,
     out_path: Optional[str] = None,
@@ -286,6 +302,7 @@ def draw_parameter_operation_combined_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, param_axes = plt.subplots(figsize=figsize)
     ops_axes = param_axes.twinx()
 
