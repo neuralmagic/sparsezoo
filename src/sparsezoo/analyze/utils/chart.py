@@ -44,7 +44,7 @@ def check_matplotlib_installed() -> None:
     if not matplotlib_available:
         raise ImportError(
             "matplotlib is required to use this function, "
-            "please install it with `pip install matplotlib`"
+            "please install it with `pip install matplotlib>=3.0.0`"
         )
 
 
