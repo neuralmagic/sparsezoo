@@ -16,7 +16,15 @@ from typing import Optional, Tuple
 
 import numpy
 
-import matplotlib.pyplot as plt
+
+try:
+    import matplotlib.pyplot as plt
+
+    matplotlib_available = True
+except ImportError:
+    plt = None
+    matplotlib_available = False
+
 from sparsezoo.analyze.analysis import ModelAnalysis, NodeAnalysis
 
 
@@ -26,6 +34,18 @@ __all__ = [
     "draw_operation_chart",
     "draw_parameter_operation_combined_chart",
 ]
+
+
+def check_matplotlib_installed() -> None:
+    """
+    Checks if matplotlib is installed and
+    raises an ImportError if not
+    """
+    if not matplotlib_available:
+        raise ImportError(
+            "matplotlib is required to use this function, "
+            "please install it with `pip install matplotlib>=3.0.0`"
+        )
 
 
 def draw_sparsity_by_layer_chart(
@@ -45,6 +65,7 @@ def draw_sparsity_by_layer_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -113,6 +134,7 @@ def draw_parameter_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, param_axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -200,6 +222,7 @@ def draw_operation_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, ops_axes = plt.subplots(figsize=figsize)
 
     # Set title
@@ -286,6 +309,7 @@ def draw_parameter_operation_combined_chart(
     :param figsize: keyword argument to pass to matplotlib figure
     :return: None
     """
+    check_matplotlib_installed()
     figure, param_axes = plt.subplots(figsize=figsize)
     ops_axes = param_axes.twinx()
 
