@@ -342,7 +342,15 @@ class Model(Directory):
             - validation results dict
             - compressed model size in bytes
         """
-        files, model_id, params, validation_results, size = load_files_from_stub(
+        (
+            files,
+            model_id,
+            params,
+            validation_results,
+            size,
+            repo_name,
+            repo_namespace,
+        ) = load_files_from_stub(
             stub=stub,
             valid_params=list(PARAM_DICT.keys()),
         )
@@ -350,7 +358,11 @@ class Model(Directory):
             self._validate_params(params=params)
             self._stub_params.update(params)
 
-        path = os.path.join(SAVE_DIR, model_id)
+        if repo_name and repo_namespace:
+            path = os.path.join(SAVE_DIR, repo_namespace, repo_name)
+        else:
+            path = os.path.join(SAVE_DIR, model_id)
+
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
 

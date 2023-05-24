@@ -106,7 +106,7 @@ def save_onnx(
     if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
         _LOGGER.warning(
             "The ONNX model is too large to be saved as a single protobuf."
-            "Saving with external data... "
+            "Saving with external data: 'model.data'"
         )
 
         onnx.save(
@@ -114,6 +114,7 @@ def save_onnx(
             model_path,
             save_as_external_data=True,
             all_tensors_to_one_file=True,
+            location="model.data",
         )
         return True
 

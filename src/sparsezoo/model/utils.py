@@ -144,6 +144,8 @@ def load_files_from_stub(
             "files",
             "benchmark_results",
             "training_results",
+            "repo_name",
+            "repo_namespace",
         ],
     )
 
@@ -177,6 +179,9 @@ def load_files_from_stub(
 
         model_onnx_size_compressed_bytes = model.get("model_onnx_size_compressed_bytes")
 
+        repo_namespace = model.get("repo_namespace")
+        repo_name = model.get("repo_name")
+
         throughput_results = [
             ThroughputResults(**benchmark_result)
             for benchmark_result in benchmark_results
@@ -189,7 +194,15 @@ def load_files_from_stub(
         results["validation"] = validation_results
         results["throughput"] = throughput_results
 
-        return files, model_id, params, results, model_onnx_size_compressed_bytes
+        return (
+            files,
+            model_id,
+            params,
+            results,
+            model_onnx_size_compressed_bytes,
+            repo_name,
+            repo_namespace,
+        )
 
     _LOGGER.warning(f"load_files_from_stub: No models found with the stub:{stub}")
 
