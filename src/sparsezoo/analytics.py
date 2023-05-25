@@ -129,7 +129,7 @@ class GoogleAnalytics:
             event_params = {}
 
         def _send_request():
-            with suppress_stdout_stderr(suppress=not raise_errors):
+            with suppress_stdout_stderr(suppress=not _DEBUG):
                 event_params.update(self._package_params)
                 event_params["package"] = self._package
                 event_params["version"] = self._version
