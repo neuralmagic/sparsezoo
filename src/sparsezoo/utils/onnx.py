@@ -27,6 +27,7 @@ from sparsezoo.utils.helpers import clean_path
 _LOGGER = logging.getLogger(__name__)
 
 __all__ = [
+    "onnx_includes_external_data",
     "save_onnx",
     "validate_onnx",
     "load_model",
@@ -48,6 +49,29 @@ __all__ = [
     "extract_node_id",
     "get_node_attributes",
 ]
+
+
+def onnx_includes_external_data(model: ModelProto) -> bool:
+    """
+    Check whether the ModelProto in memory includes the external
+    data or not.
+
+    If the model.onnx does not contain the external data, then the
+    initializers of the model are pointing to the external data file
+    (they are not empty)
+
+    :param model: the ModelProto to check
+    :return True if the model was loaded with external data, False otherwise.
+    """
+
+    initializers = model.graph.initializer
+
+    is_data_saved_to_disk = any(
+        initializer.external_data for initializer in initializers
+    )
+    is_data_included_in_model = not is_data_saved_to_disk
+
+    return is_data_included_in_model
 
 
 def save_onnx(
@@ -121,6 +145,14 @@ def validate_onnx(model: Union[str, ModelProto]):
             return
         onnx.checker.check_model(onnx_model)
     except Exception as err:
+        if not onnx_includes_external_data(model):
+            _LOGGER.warning(
+                "Attempting to validate an in-memory ONNX model "
+                "that has been loaded without external data. "
+                "This is currently not supported by the ONNX checker. "
+                "The validation will be skipped."
+            )
+            return
         raise ValueError(f"Invalid onnx model: {err}")
 
 
