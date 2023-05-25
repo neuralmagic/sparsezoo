@@ -66,13 +66,12 @@ def onnx_includes_external_data(model: ModelProto) -> bool:
 
     initializers = model.graph.initializer
 
-    data_saved_to_disk = any(
-        [initializer.external_data for initializer in initializers]
+    is_data_saved_to_disk = any(
+        initializer.external_data for initializer in initializers
     )
+    is_data_included_in_model = not is_data_saved_to_disk
 
-    data_included_in_model = not data_saved_to_disk
-
-    return data_included_in_model
+    return is_data_included_in_model
 
 
 def save_onnx(
