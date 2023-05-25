@@ -17,6 +17,8 @@ from typing import Optional
 import geocoder
 import requests
 
+from sparsezoo.utils.suppress import suppress_stdout_stderr
+
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
 
@@ -56,26 +58,28 @@ def get_external_ip() -> Optional[str]:
     """
     :return: the external ip of the machine, None if unable to get
     """
-    try:
-        response = requests.get("https://ident.me")
-        external_ip = response.text.strip()
+    with suppress_stdout_stderr():
+        try:
+            response = requests.get("https://ident.me")
+            external_ip = response.text.strip()
 
-        return external_ip
-    except Exception:
-        return None
+            return external_ip
+        except Exception:
+            return None
 
 
 def get_country_code() -> Optional[str]:
     """
     :return: the country code of the machine, None if unable to get
     """
-    try:
-        ip = get_external_ip()
-        geo = geocoder.ip(ip)
+    with suppress_stdout_stderr():
+        try:
+            ip = get_external_ip()
+            geo = geocoder.ip(ip)
 
-        return geo.country
-    except Exception:
-        return None
+            return geo.country
+        except Exception:
+            return None
 
 
 def is_gdpr_country() -> bool:
