@@ -95,7 +95,6 @@ def save_onnx(
 
     :param model: The model to save.
     :param model_path: The path to save the model to.
-    :param external_data_file: The optional name save the external data to.
     :param large_model_external_data_file: The default name to save the external
         data to if the model is too large to be saved as a single protobuf.
         If:
@@ -103,6 +102,7 @@ def save_onnx(
          -  `external_data_file` is specified,
         then the external data of the model will be saved to `external_data_file`
         instead of `large_model_external_data_name`.
+    :param external_data_file: The optional name save the external data to.
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
