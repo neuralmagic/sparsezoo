@@ -588,10 +588,13 @@ def _get_node_input(
 
 
 def _check_for_old_external_data(model_path: str, external_data_file: str):
-    old_external_data_file = os.path.join(model_path, external_data_file)
+    old_external_data_file = os.path.join(
+        os.path.dirname(model_path), external_data_file
+    )
     if os.path.exists(old_external_data_file):
         _LOGGER.warning(
-            f"Attempting to save external data to a directory: {model_path} "
+            f"Attempting to save external data for a model: {model_path} "
+            f"to a directory:{os.path.dirname(model_path)} "
             f"that already contains external data file: {external_data_file}. "
             "The external data file will be overwritten."
         )
