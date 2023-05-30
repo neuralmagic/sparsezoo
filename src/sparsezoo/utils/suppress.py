@@ -15,13 +15,13 @@
 import sys
 from contextlib import contextmanager
 
-
 __all__ = ["suppress_stdout_stderr", "NullDevice"]
 
 
 class NullDevice():
     def write(self, s):
         pass
+
     def flush(self):
         pass
 
