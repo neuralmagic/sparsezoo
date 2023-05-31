@@ -16,6 +16,7 @@ from typing import Optional
 
 import geocoder
 import requests
+from requests import HTTPError
 
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
@@ -74,7 +75,7 @@ def get_country_code() -> Optional[str]:
         geo = geocoder.ip(ip)
 
         return geo.country
-    except Exception:
+    except HTTPError:
         return None
 
 
