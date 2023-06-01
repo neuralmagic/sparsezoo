@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 from typing import Optional
 
 import geocoder
 import requests
+from requests import HTTPError
 
-from sparsezoo.utils.suppress import suppress_stdout_stderr
+from sparsezoo.utils.helpers import disable_request_logs
 
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
@@ -58,28 +60,27 @@ def get_external_ip() -> Optional[str]:
     """
     :return: the external ip of the machine, None if unable to get
     """
-    with suppress_stdout_stderr():
-        try:
+    try:
+        with disable_request_logs():
             response = requests.get("https://ident.me")
-            external_ip = response.text.strip()
+        external_ip = response.text.strip()
 
-            return external_ip
-        except Exception:
-            return None
+        return external_ip
+    except Exception:
+        return None
 
 
 def get_country_code() -> Optional[str]:
     """
     :return: the country code of the machine, None if unable to get
     """
-    with suppress_stdout_stderr():
-        try:
-            ip = get_external_ip()
-            geo = geocoder.ip(ip)
+    try:
+        ip = get_external_ip()
+        geo = geocoder.ip(ip)
 
-            return geo.country
-        except Exception:
-            return None
+        return geo.country
+    except HTTPError:
+        return None
 
 
 def is_gdpr_country() -> bool:
@@ -87,6 +88,8 @@ def is_gdpr_country() -> bool:
     :return: True if the country code of the machine is in the GDPR list,
              False otherwise
     """
-    country_code = get_country_code()
+    with contextlib.redirect_stderr(None):
+        # suppress geocoder error logging
+        country_code = get_country_code()
 
     return country_code is None or country_code in _GDPR_COUNTRY_CODES

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import json
 import os
 import threading
@@ -22,16 +21,16 @@ from typing import Dict, Optional
 
 import machineid
 import requests
+from requests import HTTPError
 
 from sparsezoo.utils.gdpr import is_gdpr_country
-from sparsezoo.utils.suppress import suppress_stdout_stderr
+from sparsezoo.utils.helpers import disable_request_logs
 from sparsezoo.version import version as sparsezoo_version
 
 
 __all__ = ["GoogleAnalytics", "analytics_disabled", "sparsezoo_analytics"]
 
 
-_LOOP = asyncio.get_event_loop()
 _DEBUG = os.getenv("NM_DEBUG_ANALYTICS")
 
 
@@ -129,31 +128,30 @@ class GoogleAnalytics:
             event_params = {}
 
         def _send_request():
-            with suppress_stdout_stderr(suppress=not _DEBUG):
-                event_params.update(self._package_params)
-                event_params["package"] = self._package
-                event_params["version"] = self._version
-                payload = {
-                    "client_id": self._client_id,
-                    "events": [{"name": event_name, "params": event_params}],
-                }
-                headers = {
-                    "Content-Type": "application/json",
-                }
-                data = json.dumps(payload)
-
+            event_params.update(self._package_params)
+            event_params["package"] = self._package
+            event_params["version"] = self._version
+            payload = {
+                "client_id": self._client_id,
+                "events": [{"name": event_name, "params": event_params}],
+            }
+            headers = {
+                "Content-Type": "application/json",
+            }
+            data = json.dumps(payload)
+            with disable_request_logs():
                 try:
                     response = requests.post(self._url, headers=headers, data=data)
                     response.raise_for_status()
                     body = response.content
                     if _DEBUG:
                         print(body)
-                except Exception as err:
+                except HTTPError as http_error:
                     if _DEBUG:
-                        print(err)
+                        print(http_error)
 
                     if raise_errors:
-                        raise err
+                        raise http_error
 
         thread = threading.Thread(target=_send_request)
         thread.start()
