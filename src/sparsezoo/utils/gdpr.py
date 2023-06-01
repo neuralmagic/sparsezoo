@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 from typing import Optional
 
 import geocoder
@@ -84,6 +85,8 @@ def is_gdpr_country() -> bool:
     :return: True if the country code of the machine is in the GDPR list,
              False otherwise
     """
-    country_code = get_country_code()
+    with contextlib.redirect_stderr(None):
+        # suppress geocoder error logging
+        country_code = get_country_code()
 
     return country_code is None or country_code in _GDPR_COUNTRY_CODES
