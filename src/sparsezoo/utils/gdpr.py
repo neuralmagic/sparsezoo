@@ -19,6 +19,8 @@ import geocoder
 import requests
 from requests import HTTPError
 
+from sparsezoo.utils.helpers import disable_request_logs
+
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
 
@@ -59,7 +61,8 @@ def get_external_ip() -> Optional[str]:
     :return: the external ip of the machine, None if unable to get
     """
     try:
-        response = requests.get("https://ident.me")
+        with disable_request_logs():
+            response = requests.get("https://ident.me")
         external_ip = response.text.strip()
 
         return external_ip
