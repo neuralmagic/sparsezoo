@@ -21,7 +21,6 @@ from typing import Dict, Optional
 
 import machineid
 import requests
-from requests import HTTPError
 
 from sparsezoo.utils.gdpr import is_gdpr_country
 from sparsezoo.utils.helpers import disable_request_logs
@@ -146,12 +145,12 @@ class GoogleAnalytics:
                     body = response.content
                     if _DEBUG:
                         print(body)
-                except HTTPError as http_error:
+                except Exception as exception:
                     if _DEBUG:
-                        print(http_error)
+                        print(exception)
 
                     if raise_errors:
-                        raise http_error
+                        raise exception
 
         thread = threading.Thread(target=_send_request)
         thread.start()
