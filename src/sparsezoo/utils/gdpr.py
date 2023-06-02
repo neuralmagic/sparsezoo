@@ -17,7 +17,6 @@ from typing import Optional
 
 import geocoder
 import requests
-from requests import HTTPError
 
 from sparsezoo.utils.helpers import disable_request_logs
 
@@ -79,7 +78,7 @@ def get_country_code() -> Optional[str]:
         geo = geocoder.ip(ip)
 
         return geo.country
-    except HTTPError:
+    except Exception:
         return None
 
 
