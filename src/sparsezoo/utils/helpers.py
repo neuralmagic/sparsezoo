@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import glob
+import logging
 import os
+from contextlib import contextmanager
 from typing import Any
 
 
@@ -23,6 +25,7 @@ __all__ = [
     "clean_path",
     "remove_tar_duplicates",
     "convert_to_bool",
+    "disable_request_logs",
 ]
 
 
@@ -87,3 +90,20 @@ def clean_path(path: str) -> str:
     :return: a cleaned version that expands the user path and creates an absolute path
     """
     return os.path.abspath(os.path.expanduser(path))
+
+
+@contextmanager
+def disable_request_logs():
+    """
+    Context manager for disabling logs for a requests session
+    """
+    loggers = [logging.getLogger("requests"), logging.getLogger("urllib3")]
+
+    original_disabled_states = [logger.disabled for logger in loggers]
+    for logger in loggers:
+        logger.disabled = True
+
+    yield
+
+    for logger, original_disabled_state in zip(loggers, original_disabled_states):
+        logger.disabled = original_disabled_state
