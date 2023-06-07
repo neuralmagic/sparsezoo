@@ -155,7 +155,7 @@ def load_files_from_stub(
             f"No matching models found with stub: {stub}." "Please try another stub"
         )
     if matching_models > 1:
-        logging.warning(
+        _LOGGER.warning(
             f"{len(models)} found from the stub: {stub}"
             "Using the first model to obtain metadata."
             "Proceed with caution"
@@ -507,7 +507,7 @@ def setup_model(
     # iterate over the arguments (files)
     for name, file in files_dict.items():
         if file is None:
-            logging.debug(f"File {name} not provided. It will be omitted.")
+            _LOGGER.debug(f"File {name} not provided. It will be omitted.")
         else:
             if isinstance(file, str):
                 # if file is a string, convert it to

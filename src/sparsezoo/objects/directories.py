@@ -31,6 +31,8 @@ from sparsezoo.utils import DataLoader, Dataset, load_numpy_list
 
 __all__ = ["NumpyDirectory", "SelectDirectory"]
 
+_LOGGER = logging.getLogger(__name__)
+
 NUMPY_DIRECTORY_NAMES = ["sample_inputs", "sample_outputs"]
 
 
@@ -86,7 +88,7 @@ class NumpyDirectory(Directory):
 
         if model:
             if not self._validate_model(model):
-                logging.warning(
+                _LOGGER.warning(
                     "Could not validate an NumpyDirectory given the provided onnx model."  # noqa: E501
                 )
                 return False
