@@ -43,6 +43,8 @@ from sparsezoo.validation import IntegrationValidator
 
 __all__ = ["Model"]
 
+_LOGGER = logging.getLogger(__name__)
+
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_DEPLOYMENT_VALUES = {"default"}
 
@@ -280,7 +282,7 @@ class Model(Directory):
                         )
 
                     else:
-                        logging.debug(
+                        _LOGGER.debug(
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
@@ -307,7 +309,7 @@ class Model(Directory):
 
         if validate_onnxruntime:
             if not self.inference_runner.validate_with_onnx_runtime():
-                logging.warning(
+                _LOGGER.warning(
                     "Failed to validate the compatibility of "
                     "`sample_inputs` files with the `model.onnx` model."
                 )
@@ -465,7 +467,7 @@ class Model(Directory):
                 )
 
         if not match:
-            logging.debug(
+            _LOGGER.debug(
                 "Could not find a directory with "
                 f"display_name / regex_pattern: {display_name}"
             )
@@ -529,7 +531,7 @@ class Model(Directory):
                         match = False
 
         if not match:
-            logging.debug(
+            _LOGGER.debug(
                 "Could not find a file with "
                 f"display_name / regex_pattern: {display_name}"
             )
@@ -641,7 +643,7 @@ class Model(Directory):
                 file.download(destination_path=directory_path)
                 return True
             else:
-                logging.warning(
+                _LOGGER.warning(
                     f"Failed to download file {file.name}. The url of the file is None."
                 )
                 return False
