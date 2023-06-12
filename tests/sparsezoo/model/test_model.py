@@ -97,18 +97,14 @@ files_yolo = copy.copy(files_ic)
 )
 class TestSetupModel:
     @pytest.fixture()
-    def setup(self, stub, args, should_pass):
-        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    def setup(self, stub, args, should_pass, tmpdir):
+        yield stub, args, should_pass, tmpdir
 
-        yield stub, args, should_pass
-
-        shutil.rmtree(temp_dir.name)
-
-    def test_model_from_stub(self, stub, args, should_pass):
-        temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    def test_model_from_stub(self, setup):
+        stub, args, should_pass, tmpdir = setup
         path = stub + "?" + args[0] + "=" + args[1]
         if should_pass:
-            model = Model(path, temp_dir.name)
+            model = Model(path, tmpdir)
             self._assert_correct_files_downloaded(model, args)
             self._assert_validation_results_exist(model)
             assert model.compressed_size
