@@ -35,7 +35,9 @@ jobs:
              aws s3 cp dist/*nightly*.whl s3://nm-github-actions/sparsezoo/
              aws s3 cp log_${GITHUB_REF_NAME}_nightly_${GITHUB_SHA:0:7} s3://nm-github-actions/sparsezoo/
              oldDate=`date --date='-2 month' +%Y%m%d`
+             echo "old date: ${oldDate}"
              oldWhl=`aws s3 ls s3://nm-github-actions/sparsezoo/ | grep nightly | grep "${oldDate}"`
+             echo "old build: ${oldWhl}"
              if [ ! -z "${oldWhl}" ]; then
                  echo "Remove old build ${oldWhl}"
                  aws s3 rm s3://nm-github-actions/sparsezoo/${oldWhl}
