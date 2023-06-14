@@ -31,7 +31,8 @@ jobs:
              deactivate
              ls dist/
              aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
-             date +%Y%m%d-%k%M%S | tee log_${GITHUB_REF_NAME}_nightly_${GITHUB_SHA:0:7}
+             todaytime=`date +%Y%m%d`
+             date +%Y%m%d-%k%M%S | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
              aws s3 cp log_${GITHUB_REF_NAME}_nightly_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
              oldDate=`date --date='-2 month' +%Y%m%d`
              oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
