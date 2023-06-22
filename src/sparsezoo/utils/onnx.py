@@ -102,7 +102,8 @@ def save_onnx(
          -  `external_data_file` is specified,
         then the external data of the model will be saved to `external_data_file`
         instead of `large_model_external_data_name`.
-    :param external_data_file: The optional name save the external data to.
+    :param external_data_file: The optional name save the external data to. Must be
+        relative to the directory `model` is saved to.
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
