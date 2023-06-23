@@ -98,7 +98,7 @@ def save_onnx(
         relative to the directory `model` is saved to. If the model is too
         large to be saved as a single protobuf, and this argument is None,
         the external data file will be coerced to take the default name
-        specified  in the variable EXTERNAL_ONNX_DATA_NAME
+        specified in the variable EXTERNAL_ONNX_DATA_NAME
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
