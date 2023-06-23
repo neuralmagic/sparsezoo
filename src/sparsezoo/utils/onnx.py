@@ -81,7 +81,6 @@ def onnx_includes_external_data(model: ModelProto) -> bool:
 def save_onnx(
     model: ModelProto,
     model_path: str,
-    large_model_external_data_file: str = EXTERNAL_ONNX_DATA_NAME,
     external_data_file: Optional[str] = None,
 ) -> bool:
     """
@@ -95,15 +94,11 @@ def save_onnx(
 
     :param model: The model to save.
     :param model_path: The path to save the model to.
-    :param large_model_external_data_file: The default name to save the external
-        data to if the model is too large to be saved as a single protobuf.
-        If:
-         -  the model is too large to be saved as a single protobuf, AND
-         -  `external_data_file` is specified,
-        then the external data of the model will be saved to `external_data_file`
-        instead of `large_model_external_data_name`.
     :param external_data_file: The optional name save the external data to. Must be
-        relative to the directory `model` is saved to.
+        relative to the directory `model` is saved to. If the model is too
+        large to be saved as a single protobuf, and this argument is None,
+        the external data file will be coerced to take the default name
+        specified  in the variable EXTERNAL_ONNX_DATA_NAME
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
@@ -121,19 +116,20 @@ def save_onnx(
         return True
 
     if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
+        external_data_file = external_data_file or EXTERNAL_ONNX_DATA_NAME
         _LOGGER.warning(
             "The ONNX model is too large to be saved as a single protobuf. "
-            f"Saving with external data: {large_model_external_data_file}"
+            f"Saving with external data: {external_data_file}"
         )
         _check_for_old_external_data(
-            model_path=model_path, external_data_file=large_model_external_data_file
+            model_path=model_path, external_data_file=external_data_file
         )
         onnx.save(
             model,
             model_path,
             save_as_external_data=True,
             all_tensors_to_one_file=True,
-            location=large_model_external_data_file,
+            location=external_data_file,
         )
         return True
 
