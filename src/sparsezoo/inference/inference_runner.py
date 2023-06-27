@@ -133,7 +133,9 @@ class InferenceRunner:
                 f"onnxruntime install not detected for sample inference: {err}"
             )
 
-        ort_sess = onnxruntime.InferenceSession(self.onnx_file.path)
+        ort_sess = onnxruntime.InferenceSession(
+            self.onnx_file.path, providers=["CPUExecutionProvider"]
+        )
         model = onnx.load(self.onnx_file.path)
         input_names = [inp.name for inp in model.graph.input]
 
