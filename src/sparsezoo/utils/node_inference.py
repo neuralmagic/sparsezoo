@@ -81,7 +81,9 @@ def extract_nodes_shapes_and_dtypes_ort(
 
     sess_options = onnxruntime.SessionOptions()
     sess_options.log_severity_level = 3
-    sess = onnxruntime.InferenceSession(model_copy.SerializeToString(), sess_options)
+    sess = onnxruntime.InferenceSession(
+        model_copy.SerializeToString(), sess_options, providers=["CPUExecutionProvider"]
+    )
 
     input_value_dict = {}
     for input in model_copy.graph.input:
