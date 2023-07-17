@@ -302,6 +302,9 @@ def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndar
     else:
         input_channel_dim = 0
 
+    if array.ndim == 0:
+        array = numpy.array([array], dtype=array.dtype)
+
     transpose_arg = list(range(array.ndim))
     del transpose_arg[input_channel_dim]
     transpose_arg.append(input_channel_dim)
