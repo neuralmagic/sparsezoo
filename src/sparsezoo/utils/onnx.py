@@ -296,6 +296,9 @@ def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndar
     :param pad_value: value to pad remainder block with
     :return: array grouped into blocks with shape [-1, 4]
     """
+    if array.ndim == 0:
+        array = numpy.array([array], dtype=array.dtype)
+
     # Transpose so input channels are last
     if array.ndim > 2:
         input_channel_dim = 1
