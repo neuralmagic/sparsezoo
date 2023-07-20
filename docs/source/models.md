@@ -58,18 +58,3 @@ The contents of each model are made up of the following:
 - `sample_labels`: The labels that classify the sample inputs.
 - `sample_originals`: The unedited data that can be used as inputs to a training pipeline (images, text files, numpy arrays, etc).
 
-### Image Classification
-
-<div>
-    <iframe src="https://sparsezoo.neuralmagic.com/tables/models/cv/classification" title="Image Classification Models" width="100%" height="500px"></iframe>
-</div>
-
-Image classification table not loading? View full table [here](https://sparsezoo.neuralmagic.com/tables/models/cv/classification). 
-
-### Object Detection
-
-<div>
-    <iframe src="https://sparsezoo.neuralmagic.com/tables/models/cv/detection" title="Object Detect Models" width="100%" height="500px"></iframe>
-</div>
-
-Object detection table not loading? View full table [here](https://sparsezoo.neuralmagic.com/tables/models/cv/detection). 
