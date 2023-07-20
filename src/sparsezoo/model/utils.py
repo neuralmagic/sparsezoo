@@ -152,7 +152,7 @@ def load_files_from_stub(
     matching_models = len(models)
     if matching_models == 0:
         raise ValueError(
-            f"No matching models found with stub: {stub}." "Please try another stub"
+            f"No matching models found with stub: {stub}. Please try another stub"
         )
     if matching_models > 1:
         _LOGGER.warning(
