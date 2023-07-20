@@ -43,6 +43,8 @@ from sparsezoo.validation import IntegrationValidator
 
 __all__ = ["Model"]
 
+_LOGGER = logging.getLogger(__name__)
+
 ALLOWED_CHECKPOINT_VALUES = {"prepruning", "postpruning", "preqat", "postqat"}
 ALLOWED_DEPLOYMENT_VALUES = {"default"}
 
@@ -280,7 +282,7 @@ class Model(Directory):
                         )
 
                     else:
-                        logging.debug(
+                        _LOGGER.debug(
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
@@ -307,7 +309,7 @@ class Model(Directory):
 
         if validate_onnxruntime:
             if not self.inference_runner.validate_with_onnx_runtime():
-                logging.warning(
+                _LOGGER.warning(
                     "Failed to validate the compatibility of "
                     "`sample_inputs` files with the `model.onnx` model."
                 )
@@ -342,7 +344,15 @@ class Model(Directory):
             - validation results dict
             - compressed model size in bytes
         """
-        files, model_id, params, validation_results, size = load_files_from_stub(
+        (
+            files,
+            model_id,
+            params,
+            validation_results,
+            size,
+            repo_name,
+            repo_namespace,
+        ) = load_files_from_stub(
             stub=stub,
             valid_params=list(PARAM_DICT.keys()),
         )
@@ -350,7 +360,11 @@ class Model(Directory):
             self._validate_params(params=params)
             self._stub_params.update(params)
 
-        path = os.path.join(SAVE_DIR, model_id)
+        if repo_name and repo_namespace:
+            path = os.path.join(SAVE_DIR, repo_namespace, repo_name)
+        else:
+            path = os.path.join(SAVE_DIR, model_id)
+
         if not files:
             raise ValueError(f"No files found for given stub {stub}")
 
@@ -453,7 +467,7 @@ class Model(Directory):
                 )
 
         if not match:
-            logging.debug(
+            _LOGGER.debug(
                 "Could not find a directory with "
                 f"display_name / regex_pattern: {display_name}"
             )
@@ -517,7 +531,7 @@ class Model(Directory):
                         match = False
 
         if not match:
-            logging.debug(
+            _LOGGER.debug(
                 "Could not find a file with "
                 f"display_name / regex_pattern: {display_name}"
             )
@@ -629,7 +643,7 @@ class Model(Directory):
                 file.download(destination_path=directory_path)
                 return True
             else:
-                logging.warning(
+                _LOGGER.warning(
                     f"Failed to download file {file.name}. The url of the file is None."
                 )
                 return False

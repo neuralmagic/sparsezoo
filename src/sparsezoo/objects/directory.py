@@ -27,6 +27,8 @@ from .file import File
 
 __all__ = ["Directory", "is_directory"]
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class Directory(File):
     """
@@ -131,7 +133,7 @@ class Directory(File):
         if is_valid:
             return True
         else:
-            logging.warning(
+            _LOGGER.warning(
                 "Following files: "
                 f"{[key for key, value in validations.items() if not value]} "
                 "were not successfully validated."
@@ -178,11 +180,11 @@ class Directory(File):
                     return
 
                 except Exception as err:
-                    logging.error(err)
-                    logging.error(traceback.format_exc())
+                    _LOGGER.error(err)
+                    _LOGGER.error(traceback.format_exc())
                     time.sleep(retry_sleep_sec)
-                logging.error(f"Trying attempt {attempt + 1} of {retries}.")
-            logging.error("Download retry failed...")
+                _LOGGER.error(f"Trying attempt {attempt + 1} of {retries}.")
+            _LOGGER.error("Download retry failed...")
             raise Exception("Exceed max retry attempts: {} failed".format(retries))
 
         # Directory can represent a folder or directory.

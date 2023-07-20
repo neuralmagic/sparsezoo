@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 from typing import Optional
 
 import geocoder
 import requests
+
+from sparsezoo.utils.helpers import disable_request_logs
 
 
 __all__ = ["get_external_ip", "get_country_code", "is_gdpr_country"]
@@ -57,7 +60,8 @@ def get_external_ip() -> Optional[str]:
     :return: the external ip of the machine, None if unable to get
     """
     try:
-        response = requests.get("https://ident.me")
+        with disable_request_logs():
+            response = requests.get("https://ident.me")
         external_ip = response.text.strip()
 
         return external_ip
@@ -83,6 +87,8 @@ def is_gdpr_country() -> bool:
     :return: True if the country code of the machine is in the GDPR list,
              False otherwise
     """
-    country_code = get_country_code()
+    with contextlib.redirect_stderr(None):
+        # suppress geocoder error logging
+        country_code = get_country_code()
 
     return country_code is None or country_code in _GDPR_COUNTRY_CODES

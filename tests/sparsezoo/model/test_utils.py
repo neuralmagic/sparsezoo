@@ -93,6 +93,8 @@ def test_load_files_from_stub(stub, expected_files):
         params,
         results,
         model_onnx_size_compressed_bytes,
+        repo_name,
+        repo_namespace,
     ) = load_files_from_stub(stub=stub)
     for file_type, file_names_expected in expected_files.items():
         file_names = set(
@@ -103,6 +105,8 @@ def test_load_files_from_stub(stub, expected_files):
     assert params.__eq__({})
     assert results is not None
     assert model_onnx_size_compressed_bytes > 0
+    assert repo_name is not None
+    assert repo_namespace is not None
 
 
 @pytest.mark.parametrize(

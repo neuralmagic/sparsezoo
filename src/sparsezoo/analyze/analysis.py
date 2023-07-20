@@ -632,11 +632,11 @@ class CountSummary(BaseModel):
 
     @property
     def sparsity_percent(self):
-        return round(self.sparse_count * 100.0 / self.total, self._precision)
+        return round(self.sparse_count * 100.0 / max(1, self.total), self._precision)
 
     @property
     def quantized_percent(self):
-        return round(self.quant_count * 100.0 / self.total, self._precision)
+        return round(self.quant_count * 100.0 / max(1, self.total), self._precision)
 
     @property
     def size(self):

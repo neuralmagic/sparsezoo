@@ -21,6 +21,8 @@ from sparsezoo.api.graphql import GraphQLAPI
 
 __all__ = ["search_models", "model_args_to_stub"]
 
+_LOGGER = logging.getLogger(__name__)
+
 
 def search_models(
     domain: str,
@@ -101,7 +103,7 @@ def search_models(
 
     arguments = {key: value for key, value in args.items() if value is not None}
 
-    logging.debug(f"Search_models: searching models with args {args}")
+    _LOGGER.debug(f"Search_models: searching models with args {args}")
 
     response_json = GraphQLAPI().fetch(
         operation_body="models",

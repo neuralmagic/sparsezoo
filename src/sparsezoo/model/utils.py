@@ -144,6 +144,8 @@ def load_files_from_stub(
             "files",
             "benchmark_results",
             "training_results",
+            "repo_name",
+            "repo_namespace",
         ],
     )
 
@@ -153,7 +155,7 @@ def load_files_from_stub(
             f"No matching models found with stub: {stub}." "Please try another stub"
         )
     if matching_models > 1:
-        logging.warning(
+        _LOGGER.warning(
             f"{len(models)} found from the stub: {stub}"
             "Using the first model to obtain metadata."
             "Proceed with caution"
@@ -177,6 +179,9 @@ def load_files_from_stub(
 
         model_onnx_size_compressed_bytes = model.get("model_onnx_size_compressed_bytes")
 
+        repo_namespace = model.get("repo_namespace")
+        repo_name = model.get("repo_name")
+
         throughput_results = [
             ThroughputResults(**benchmark_result)
             for benchmark_result in benchmark_results
@@ -189,7 +194,15 @@ def load_files_from_stub(
         results["validation"] = validation_results
         results["throughput"] = throughput_results
 
-        return files, model_id, params, results, model_onnx_size_compressed_bytes
+        return (
+            files,
+            model_id,
+            params,
+            results,
+            model_onnx_size_compressed_bytes,
+            repo_name,
+            repo_namespace,
+        )
 
     _LOGGER.warning(f"load_files_from_stub: No models found with the stub:{stub}")
 
@@ -494,7 +507,7 @@ def setup_model(
     # iterate over the arguments (files)
     for name, file in files_dict.items():
         if file is None:
-            logging.debug(f"File {name} not provided. It will be omitted.")
+            _LOGGER.debug(f"File {name} not provided. It will be omitted.")
         else:
             if isinstance(file, str):
                 # if file is a string, convert it to
