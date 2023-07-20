@@ -205,7 +205,7 @@ def download_file(
         ):
             bar = tqdm_auto(
                 total=progress.content_length,  # the total iteration
-                desc=progress_title if progress_title else "downloading...",
+                desc=progress_title if progress_title else f"Downloading (…){dest_path[-20:]}: ",
                 unit="B",  # unit string to be displayed
                 unit_scale=True,  # let tqdm to determine the scale in kilo, mega, etc.
                 unit_divisor=1024,  # is used when unit_scale is true
