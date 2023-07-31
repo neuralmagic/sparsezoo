@@ -32,5 +32,5 @@ jobs:
              ls dist/
              aws s3 cp dist/*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              todaytime=`date +%Y%m%d`
-             date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_release_${todaytime}_${GITHUB_SHA:0:7}
-             aws s3 cp log_${GITHUB_REF_NAME}_release_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
+             date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME/\//-}_release_${todaytime}_${GITHUB_SHA:0:7}
+             aws s3 cp log_${GITHUB_REF_NAME/\//-}_release_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
