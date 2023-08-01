@@ -57,7 +57,7 @@ limitations under the License.
 It simplifies and accelerates your time-to-value in building performant deep learning models with a collection of inference-optimized models and recipes to prototype from. 
 Read [more about sparsification](https://docs.neuralmagic.com/user-guides/sparsification).
 
-Available via API and hosted in the cloud, the SparseZoo contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
+SparseZoo has two components: a cloud-hosted model repository and a Python API. The SparseZoo model repository contains both baseline and models sparsified to different degrees of inference performance vs. baseline loss recovery. 
 Recipe-driven approaches built around sparsification algorithms allow you to use the models as given, transfer-learn from the models onto private datasets, or transfer the recipes to your architectures.
 
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
