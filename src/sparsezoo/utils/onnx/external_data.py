@@ -175,7 +175,9 @@ def load_model(model: Union[str, ModelProto]) -> ModelProto:
 
 
 def split_external_data(
-    model_path: str, max_file_size: int, allow_large_tensors: bool = True
+    model_path: str,
+    max_file_size: int = 16e9,
+    allow_large_tensors: bool = True,
 ):
     """
     Splits the external_data_path file into multiple files of size no larger than
@@ -184,7 +186,8 @@ def split_external_data(
 
     :param model_path: path to ONNX model file who has external data writen
         to a single file in the same directory
-    :param max_file_size: maximum file size in bytes of a single split out file
+    :param max_file_size: maximum file size in bytes of a single split out file.
+        defaults to 16000000000 (16e9 = 16GB)
     :param allow_large_tensors: if False, will raise an exception if any model tensor
         is larger than max_file_size. If True, will write the large tensor to a single
         file regardless of max_file_size. Default True
