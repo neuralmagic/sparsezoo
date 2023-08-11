@@ -34,6 +34,7 @@ from sparsezoo.objects import (
     Directory,
     File,
     NumpyDirectory,
+    OnnxGz,
     SelectDirectory,
     is_directory,
 )
@@ -156,7 +157,14 @@ class Model(Directory):
             stub_params=self.stub_params,
         )
 
-        self.onnx_model: File = self._file_from_files(files, display_name="model.onnx")
+        self._onnx_gz: Directory = self._directory_from_files(
+            files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
+        )
+        self.onnx_model: File = (
+            self._file_from_files(files, display_name="model.onnx.")
+            if self._onnx_gz is None
+            else self._onnx_gz  # if onnx.model.tar.gz present defer to that file
+        )
 
         self.analysis: File = self._file_from_files(files, display_name="analysis.yaml")
         self.benchmarks: File = self._file_from_files(
