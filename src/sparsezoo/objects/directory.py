@@ -256,7 +256,7 @@ class Directory(File):
         self._path = tar_file_path
         self.is_archive = True
 
-    def unzip(self, extract_directory: Optional[str] = None, force: bool = False):
+    def unzip(self, extract_directory: Optional[str] = None, force: bool = True):
         """
         Extracts a tar archive Directory.
         The extracted files would be saved in the parent directory of
