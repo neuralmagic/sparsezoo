@@ -41,6 +41,8 @@ class Directory(File):
     :param path: path of the Directory
     :param url: url of the Directory
     :param parent_directory: path of the parent Directory
+    :param force: boolean flag; True to force unzipping of archive files.
+        Default is False.
     """
 
     def __init__(
@@ -50,6 +52,7 @@ class Directory(File):
         path: Optional[str] = None,
         url: Optional[str] = None,
         parent_directory: Optional[str] = None,
+        force: bool = False,
     ):
 
         self.files = (
@@ -63,7 +66,7 @@ class Directory(File):
         )
 
         if self._unpack():
-            self.unzip()
+            self.unzip(force=force)
 
     @classmethod
     def from_file(cls, file: File) -> "Directory":
@@ -256,7 +259,7 @@ class Directory(File):
         self._path = tar_file_path
         self.is_archive = True
 
-    def unzip(self, extract_directory: Optional[str] = None, force: bool = True):
+    def unzip(self, extract_directory: Optional[str] = None, force: bool = False):
         """
         Extracts a tar archive Directory.
         The extracted files would be saved in the parent directory of
@@ -265,7 +268,7 @@ class Directory(File):
         :param extract_directory: the local path to create
             folder Directory at (default = None)
         :param force: if True, will always unzip, even if the target directory
-            already exists. Default True
+            already exists. Default False
         """
         if self._path is None:
             # use path property to download so path exists

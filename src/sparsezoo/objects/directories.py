@@ -287,7 +287,7 @@ class OnnxGz(Directory):
 
     @property
     def path(self):
-        super().path()  # call self.path to download initial file if not already
+        _ = super().path  # call self.path to download initial file if not already
         if self.is_archive:
             self.unzip()
         if os.path.isdir(self._path) and "model.onnx" in os.listdir(self._path):

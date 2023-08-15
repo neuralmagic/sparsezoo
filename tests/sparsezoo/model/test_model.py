@@ -30,6 +30,7 @@ files_ic = {
     "logs",
     "onnx",
     "model.onnx",
+    "model.onnx.tar.gz",
     "recipe",
     "sample_inputs.tar.gz",
     "sample_originals.tar.gz",
@@ -198,6 +199,7 @@ class TestModel:
                 "sample_outputs_deepsparse",
             ]:
                 expected_files.update({file_name, file_name + ".tar.gz"})
+
         assert not set(os.listdir(temp_dir.name)).difference(expected_files)
 
     def test_validate(self, setup):
@@ -223,7 +225,7 @@ class TestModel:
         os.makedirs(onnx_folder_dir)
         for opset in range(1, 3):
             shutil.copyfile(
-                os.path.join(directory_path, "model.onnx"),
+                os.path.join(directory_path, "deployment", "model.onnx"),
                 os.path.join(onnx_folder_dir, f"model.{opset}.onnx"),
             )
 
