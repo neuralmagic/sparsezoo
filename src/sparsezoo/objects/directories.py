@@ -280,7 +280,7 @@ class OnnxGz(Directory):
     """
     Special class to handle onnx.model.tar.gz files.
     Desired behavior is that all information about files included in the tarball are
-    available however, when the file's `path` property is accessed, it will point only
+    available however, when the `path` property is accessed, it will point only
     to the `model.onnx` as this is the expected behavior for loading an onnx model
     with or without external data.
     """
