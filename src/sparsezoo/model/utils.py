@@ -29,7 +29,7 @@ from sparsezoo.model.result_utils import (
     ThroughputResults,
     ValidationResult,
 )
-from sparsezoo.objects import Directory, File, NumpyDirectory
+from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz
 from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
 
 
@@ -575,6 +575,12 @@ def _copy_file_contents(
             for _file in file:
                 copy_path = os.path.join(output_dir, os.path.basename(_file.path))
                 _copy_and_overwrite(_file.path, copy_path, shutil.copyfile)
+        elif isinstance(file, OnnxGz):
+            # copy all contents of unzipped onnx.tar.gz file to top level of output
+            onnx_gz_path = (
+                os.path.dirname(file.path) if os.path.isfile(file.path) else file.path
+            )
+            shutil.copytree(onnx_gz_path, output_dir, dirs_exist_ok=True)
         elif isinstance(file, Directory):
             copy_path = os.path.join(output_dir, os.path.basename(file.path))
             _copy_and_overwrite(file.path, copy_path, shutil.copytree)

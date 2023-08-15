@@ -255,7 +255,7 @@ class Entry(BaseModel):
             my_value = getattr(self, field)
             other_value = getattr(other, field)
 
-            assert type(my_value) == type(other_value)
+            assert type(my_value) is type(other_value)
             if field == "section_name":
                 new_fields[field] = my_value
             elif isinstance(my_value, str):

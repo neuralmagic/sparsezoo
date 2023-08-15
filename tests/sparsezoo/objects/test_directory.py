@@ -112,7 +112,7 @@ class TestDirectory:
         ) = setup
         directory = Directory(name=name, files=files, path=path)
         directory.gzip()
-        new_directory = Directory(name=directory.name, path=directory.path)
+        new_directory = Directory(name=directory.name, path=directory.path, force=True)
         assert os.path.isdir(new_directory.path)
         assert new_directory.path == directory.path.replace(".tar.gz", "")
         assert new_directory.files
