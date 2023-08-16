@@ -18,8 +18,8 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
-import os.path
 from collections import OrderedDict
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import numpy
@@ -283,14 +283,56 @@ class OnnxGz(Directory):
     available however, when the `path` property is accessed, it will point only
     to the `model.onnx` as this is the expected behavior for loading an onnx model
     with or without external data.
+
+    Class Invariants:
+        - `self.name` attribute of this class will point to the name of the tarball
+        - `self._path` and `self.path` will point to the path of the extracted
+            onnx model
     """
+
+    def __init__(self, *args, **kwargs):
+        name = kwargs.get("name")
+        super().__init__(*args, **kwargs)
+        self.name = name
+
+    def __repr__(self):
+        return f"OnnxGz(name={self.name}, path={self._path})"
 
     @property
     def path(self):
-        _ = super().path  # call self.path to download initial file if not already
+        """
+        Assumptions:
+            - the tarball contains only one onnx model, with the
+                name `model.onnx`
+            - the tarball will be extracted to the same directory as the tarball
+
+        :post-condition: self._path will point to the path of the extrated
+            onnx model, and it exists
+        :return: path to the onnx model
+        """
+        expected_path: Path = (
+            Path(self._path)
+            if self._path is not None
+            else Path(self.parent_directory) / self.name
+        )
+        # point _path to model.onnx.tar.gz if first time else
+        #  model.onnx
+        self._path = str(expected_path)
+
+        if not expected_path.exists():
+            self.download()
+
         if self.is_archive:
+            # if the tarball is not extracted, extract it
             self.unzip()
-        if os.path.isdir(self._path) and "model.onnx" in os.listdir(self._path):
-            # if unzipped into a directory, refer directly to model.onnx
-            self._path = os.path.join(self._path, "model.onnx")
+
+        onnx_model_path = expected_path.with_name(name="model.onnx")
+        if not onnx_model_path.exists():
+            raise FileNotFoundError(
+                f"Expected to find model.onnx at {onnx_model_path}, "
+                "but it does not exist."
+            )
+
+        # point _path to model.onnx
+        self._path = str(onnx_model_path)
         return self._path

@@ -157,7 +157,7 @@ class Model(Directory):
             stub_params=self.stub_params,
         )
 
-        self._onnx_gz: Directory = self._directory_from_files(
+        self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
         )
         self.onnx_model: File = (
@@ -452,7 +452,7 @@ class Model(Directory):
     def _get_directory(
         self,
         file: Dict[str, Any],
-        directory_class: Directory,
+        directory_class: type(Directory),
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
         **kwargs,
@@ -587,12 +587,12 @@ class Model(Directory):
         regex: Optional[bool] = False,
         allow_multiple_outputs: Optional[bool] = False,
         **kwargs: object,
-    ) -> Union[Directory, None]:
+    ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
 
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
         # otherwise None.
-        if all([file_dict.get("file_type") for file_dict in files]):
+        if all(file_dict.get("file_type") for file_dict in files):
             # if file_dict is retrieved from the API as `request_json`
             # first check if a directory can be created from the
             # "loose" files (alternative to parsing a .tar.gz file as
