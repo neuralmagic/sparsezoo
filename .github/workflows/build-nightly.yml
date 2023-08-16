@@ -29,13 +29,12 @@ jobs:
              source venv/bin/activate
              pip install -e .
 
-             echo "Installing nodejs 16.x"
-             sudo curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-             sudo apt install nodejs
-             echo "node -v"
-             node -v
-             echo "npm -v"
-             npm -v
+             #echo "Installing nodejs 16.x"
+             #sudo curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+             #sudo apt install nodejs
+             sudo apt install npm
+             echo "node: $(node -v)"
+             echo "npm: $(npm -v)"
              echo "Installing testmo cli..."
              sudo npm install -g @testmo/testmo-cli
 
@@ -46,17 +45,22 @@ jobs:
              PROJECT_ID=9
              NAME="${{ github.event.repository.name }} Nightly ${todaytime} ${GITHUB_SHA:0:7}"
              SOURCE="${{ github.event.repository.name }}"
-             echo "<status>ok</status>" > result.xml
+             status=$(make -B build || echo 'FAILED')
+             if [[ "${status}" = "FAILED" ]]; then
+                 echo "<status>failed</status>" > result.xml
+             else
+                 echo "<status>success</status>" > result.xml
+                 echo "Created build: $(ls dist/)"
+             fi
              testmo automation:run:submit \
                             --instance "${TESTMO_URL}" \
                             --project-id ${PROJECT_ID} \
                             --name "${NAME}" \
                             --source "${SOURCE}" \
-                            -- make -B build
+                            --results "result.xml"
 
-             status=$?
              deactivate
-             ls dist/
+             #ls dist/
              #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
              #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
