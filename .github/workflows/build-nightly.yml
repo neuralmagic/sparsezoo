@@ -2,10 +2,10 @@ name: build-nightly
 run-name: ${{ github.workflow }} is to create nightly wheel file for pypi
 on:
   push:
-    branches:
-      - 'main'
-  schedule:
-    - cron: '0 0 * * *'
+  #  branches:
+  #    - 'main'
+  #schedule:
+  #  - cron: '0 0 * * *'
   workflow_dispatch:
 jobs:
   build-nightly:
@@ -21,25 +21,50 @@ jobs:
       - uses: actions/checkout@v3
       - run: | 
              pwd
-             sudo apt-get install python3-pip
+             sudo apt update
+             sudo apt-get -y install python3-pip
              pip3 --version
              sudo pip3 install virtualenv
              virtualenv venv
              source venv/bin/activate
              pip install -e .
-             make -B build
-             deactivate
-             ls dist/
-             aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              todaytime=`date +%Y%m%d`
-             date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
-             aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
-             oldDate=`date --date='-2 month' +%Y%m%d`
-             oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
-             if [[ "${oldWhl}" != 'notfound' ]]; then
-                 for oldwhl in $(echo "${oldWhl}" | awk '{print $4}')
-                 do
-                     echo "Remove old build ${oldwhl}"
-                     aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
-                 done
-             fi
+
+             echo "Installing testmo cli..."
+             #sudo apt -y install nodejs npm
+             sudo curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+             sudo apt install nodejs
+             node -v
+             npm -v
+             #sudo apt-get install -y nodejs
+             sudo npm install -g @testmo/testmo-cli
+             TESTMO_URL="https://neuralmagic.testmo.net"
+             PROJECT_ID=9
+             NAME="${{ github.event.repository.name }} Nightly ${todaytime} ${GITHUB_SHA:0:7}"
+             SOURCE="${{ github.event.repository.name }}"
+             export TESTMO_TOKEN=${{ secrets.TESTMO_TEST_TOKEN }}
+             echo "<status>ok</status>" > result.xml
+             testmo automation:run:submit \
+                            --instance "${TESTMO_URL}" \
+                            --project-id ${PROJECT_ID} \
+                            --name "${NAME}" \
+                            --source "${SOURCE}" \
+                            --results "result.xml" \
+                            -- echo ok
+
+             #make -B build
+             #status=$?
+             #deactivate
+             #ls dist/
+             #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
+             #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
+             #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
+             #oldDate=`date --date='-2 month' +%Y%m%d`
+             #oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
+             #if [[ "${oldWhl}" != 'notfound' ]]; then
+             #    for oldwhl in $(echo "${oldWhl}" | awk '{print $4}')
+             #    do
+             #        echo "Remove old build ${oldwhl}"
+             #        aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
+             #    done
+             #fi
