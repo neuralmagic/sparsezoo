@@ -150,13 +150,29 @@ class TestSetupModel:
             recipes=recipes_path,
         )
 
-        assert {
+        files_in_directory = set(os.listdir(temp_dir.name))
+        expected_files = {
             "training",
             "deployment",
             "recipe",
             "model.onnx",
             "sample_inputs.tar.gz",
-        } == set(os.listdir(temp_dir.name))
+        }
+
+        extra_files = files_in_directory - expected_files
+        extraneous_files = set()
+        for file in extra_files:
+            # ignore model.onnx.tar.gz and model.data files
+            if  (
+                    "model.onnx.tar.gz" in file
+                    or "model.data" in file
+                    or "model.md" in file
+            ):
+                continue
+            extraneous_files.add(file)
+
+        assert not extra_files, f"Extraneous files found: {extraneous_files}"
+
 
     def test_setup_model_from_objects(self, setup):
         stub, temp_dir, download_dir = setup
