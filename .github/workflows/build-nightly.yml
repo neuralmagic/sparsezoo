@@ -52,6 +52,7 @@ jobs:
   REPORT:
     if: success() || failure()
     needs: BUILD
+    runs-on: ${{ needs.BUILD.runs_on }}
     uses: ./.github/workflows/util.yml
     with:
       runs-on: ${{ needs.BUILD.runs_on }}
