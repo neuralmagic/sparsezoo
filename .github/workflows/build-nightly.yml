@@ -19,3 +19,4 @@ jobs:
         run_id: ${{ github.run_id }}
         build_type: nightly
         testmo_project_id: 9
+      secrets: inherit
