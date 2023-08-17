@@ -15,7 +15,7 @@ jobs:
 
       uses: ./.github/workflows/util.yml
       with:
-        runs-on: ubuntu-22.04
+        runs_on: ubuntu-22.04
         run_id: ${{ github.run_id }}
         build_type: nightly
         testmo_project_id: 9
