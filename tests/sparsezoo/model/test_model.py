@@ -304,7 +304,8 @@ class TestModel:
 @pytest.mark.parametrize(
     "stub",
     [
-        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",
+        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+        "imagenet/pruned-moderate",
     ],
 )
 def test_model_gz_extraction_from_stub(stub: str):
@@ -318,7 +319,8 @@ def test_model_gz_extraction_from_stub(stub: str):
 @pytest.mark.parametrize(
     "stub",
     [
-        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",
+        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+        "imagenet/pruned-moderate",
     ],
 )
 def test_model_gz_extraction_from_local_files(stub: str):
