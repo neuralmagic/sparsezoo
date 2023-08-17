@@ -1,28 +1,18 @@
-name: report-to-testmo
+name: build-nightly
+run-name: ${{ github.workflow }} is to create nightly wheel file for pypi
 on:
-  workflow_call:
-    inputs:
-      runs_on:
-        description: "runner label specifying instance running the job"
-        type: string
-        required: true 
-      run_id:
-        description: "run id provided by GHA"
-        required: true
-        type: string
-      build_type:
-        description: "build type: nightly or release"
-        type: string
-        required: true
-      testmo_project_id:
-        description: "testmo project id"
-        type: string
-        required: true
+  push:
+  #  branches:
+  #    - 'main'
+  #schedule:
+  #  - cron: '0 0 * * *'
+  workflow_dispatch:
+
 
 jobs:
 
   BUILD:
-    runs-on: ${{ inputs.runs_on }}
+    runs-on: ubuntu-22.04
     outputs:
       status: ${{ steps.build.outputs.status }}
       commitid: ${{ steps.build.outputs.commitid }}
@@ -35,7 +25,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_WEBIDENTITY_FOR_GITHUB_ACTIONS }}
           aws-region: us-east-1
       - uses: actions/checkout@v3
-      - run: |
+      - run: | 
              pwd
              sudo apt-get -y install python3-pip
              pip3 --version
@@ -59,6 +49,19 @@ jobs:
              echo "=========== Generated build ==========="
              ls dist/
 
+  REPORT:
+    if: success() || failure()
+    runs-on: ubuntu-22.04
+    needs: BUILD
+    uses: ./.github/workflows/util.yml
+    with:
+      runs-on: ${{ needs.BUILD.runs_on }}
+      run_id: ${{ github.run_id }}
+      commit_id: ${{ needs.BUILD.outputs.commitid }}
+      status: ${{ needs.BUILD.outputs.status }}
+      build_type: nightly
+      testmo_project_id: 9
+      
              #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
              #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
@@ -71,33 +74,3 @@ jobs:
              #        aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
              #    done
              #fi
-
-  TESTMO:
-    if: success() || failure()
-    needs: BUILD
-    runs-on: ${{ inputs.runs_on }}
-    steps:
-
-      - id: report
-        run: |
-          echo "node: $(node -v)"
-          echo "npm: $(npm -v)"
-          echo "Installing testmo cli..."
-          sudo npm install -g @testmo/testmo-cli    
-          export TESTMO_TOKEN=${{ secrets.TESTMO_TEST_TOKEN }}
-          TESTMO_URL="https://neuralmagic.testmo.net"
-          todaytime=`date +%Y%m%d`
-          NAME="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID${{ inputs.run_id }}"
-          if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
-              echo "${{ github.event.repository.name }} build failed"
-              echo "<status>failed</status>" > result.xml
-          else
-              echo "<status>success</status>" > result.xml
-              echo "${{ github.event.repository.name }} build success"
-          fi
-          testmo automation:run:submit \
-                         --instance "${TESTMO_URL}" \
-                         --project-id ${{ inputs.testmo_project_id }}
-                         --name "${NAME}" \
-                         --source "${{ github.event.repository.name }}" \
-                         --results result.xml

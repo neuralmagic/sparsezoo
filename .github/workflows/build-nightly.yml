@@ -11,66 +11,11 @@ on:
 
 jobs:
 
-  BUILD:
-    runs-on: ubuntu-22.04
-    outputs:
-      status: ${{ steps.build.outputs.status }}
-      commitid: ${{ steps.build.outputs.commitid }}
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.AWS_WEBIDENTITY_FOR_GITHUB_ACTIONS }}
-          aws-region: us-east-1
-      - uses: actions/checkout@v3
-      - run: | 
-             pwd
-             sudo apt-get -y install python3-pip
-             pip3 --version
-             sudo pip3 install virtualenv
-             virtualenv venv
-             source venv/bin/activate
-             pip install -e .
-             status=$(make -B build || echo 'FAILED')
-             deactivate
-             echo "=========== Build log ==========="
-             echo "${status}"
-             echo "commitid=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
-             if [[ "${status}" = "FAILED" ]]; then
-                 echo "${{ github.event.repository.name }} build failed"
-                 echo "status=failed" >> "$GITHUB_OUTPUT"
-                 exit 1
-             else
-                 echo "${{ github.event.repository.name }} build success"
-                 echo "status=success" >> "$GITHUB_OUTPUT"
-             fi
-             echo "=========== Generated build ==========="
-             ls dist/
+    BUILD-SPARSEZOO_NIGHTLY:
 
-  REPORT:
-    if: success() || failure()
-    needs: BUILD
-    runs-on: ${{ needs.BUILD.runs_on }}
-    uses: ./.github/workflows/util.yml
-    with:
-      runs-on: ${{ needs.BUILD.runs_on }}
-      run_id: ${{ github.run_id }}
-      commit_id: ${{ needs.BUILD.outputs.commitid }}
-      status: ${{ needs.BUILD.outputs.status }}
-      build_type: nightly
-      testmo_project_id: 9
-      
-             #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
-             #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
-             #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
-             #oldDate=`date --date='-2 month' +%Y%m%d`
-             #oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
-             #if [[ "${oldWhl}" != 'notfound' ]]; then
-             #    for oldwhl in $(echo "${oldWhl}" | awk '{print $4}')
-             #    do
-             #        echo "Remove old build ${oldwhl}"
-             #        aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
-             #    done
-             #fi
+      uses: ./.github/workflows/util.yml
+      with:
+        runs-on: ubuntu-22.04
+        run_id: ${{ github.run_id }}
+        build_type: nightly
+        testmo_project_id: 9
