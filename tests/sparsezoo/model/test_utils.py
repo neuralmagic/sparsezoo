@@ -115,11 +115,7 @@ def check_extraneous_files(expected_files, temp_dir):
     extraneous_files = set()
     for file in extra_files:
         # ignore model.onnx.tar.gz and model.data files
-        if (
-                "model.onnx.tar.gz" in file
-                or "model.data" in file
-                or "model.md" in file
-        ):
+        if "model.onnx.tar.gz" in file or "model.data" in file or "model.md" in file:
             continue
         extraneous_files.add(file)
     assert not extra_files, f"Extraneous files found: {extraneous_files}"
