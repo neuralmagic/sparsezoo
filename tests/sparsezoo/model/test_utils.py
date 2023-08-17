@@ -109,6 +109,22 @@ def test_load_files_from_stub(stub, expected_files):
     assert repo_namespace is not None
 
 
+def check_extraneous_files(expected_files, temp_dir):
+    files_in_directory = set(os.listdir(temp_dir.name))
+    extra_files = files_in_directory - expected_files
+    extraneous_files = set()
+    for file in extra_files:
+        # ignore model.onnx.tar.gz and model.data files
+        if (
+                "model.onnx.tar.gz" in file
+                or "model.data" in file
+                or "model.md" in file
+        ):
+            continue
+        extraneous_files.add(file)
+    assert not extra_files, f"Extraneous files found: {extraneous_files}"
+
+
 @pytest.mark.parametrize(
     "stub",
     [
@@ -150,7 +166,6 @@ class TestSetupModel:
             recipes=recipes_path,
         )
 
-        files_in_directory = set(os.listdir(temp_dir.name))
         expected_files = {
             "training",
             "deployment",
@@ -159,19 +174,7 @@ class TestSetupModel:
             "sample_inputs.tar.gz",
         }
 
-        extra_files = files_in_directory - expected_files
-        extraneous_files = set()
-        for file in extra_files:
-            # ignore model.onnx.tar.gz and model.data files
-            if (
-                "model.onnx.tar.gz" in file
-                or "model.data" in file
-                or "model.md" in file
-            ):
-                continue
-            extraneous_files.add(file)
-
-        assert not extra_files, f"Extraneous files found: {extraneous_files}"
+        check_extraneous_files(expected_files, temp_dir)
 
     def test_setup_model_from_objects(self, setup):
         stub, temp_dir, download_dir = setup
@@ -195,11 +198,12 @@ class TestSetupModel:
             recipes=recipes,
         )
 
-        assert {
+        expected_files = {
             "training",
             "deployment",
             "recipe",
             "model.onnx",
             "sample_inputs",
-        } == set(os.listdir(temp_dir.name))
+        }
+        check_extraneous_files(expected_files, temp_dir)
         download_dir.cleanup()
