@@ -127,7 +127,7 @@ def check_extraneous_files(expected_files, temp_dir, ignore_external_data):
         (
             "zoo:nlp/question_answering/distilbert-none/pytorch/"
             "huggingface/squad/pruned80_quant-none-vnni",
-            True,
+            False,
         ),
     ],
 )
@@ -172,6 +172,7 @@ class TestSetupModel:
             "deployment",
             "recipe",
             "model.onnx",
+            "model.onnx.tar.gz",
             "sample_inputs.tar.gz",
         }
 
@@ -204,6 +205,7 @@ class TestSetupModel:
             "deployment",
             "recipe",
             "model.onnx",
+            "model.onnx.tar.gz",
             "sample_inputs",
         }
         check_extraneous_files(expected_files, temp_dir, ignore_external_data)
