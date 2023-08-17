@@ -369,4 +369,5 @@ class OnnxGz(Directory):
             if not unzipped_file_path.exists():
                 _LOGGER.info(f"{unzipped_file_path} does not exist, was it extracted?")
                 self.is_archive = True
+                return
         self.is_archive = False
