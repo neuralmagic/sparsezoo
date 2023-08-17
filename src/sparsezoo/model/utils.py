@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import shutil
+import tarfile
 import warnings
 from collections import defaultdict
 from pathlib import Path
@@ -576,11 +577,21 @@ def _copy_file_contents(
                 copy_path = os.path.join(output_dir, os.path.basename(_file.path))
                 _copy_and_overwrite(_file.path, copy_path, shutil.copyfile)
         elif isinstance(file, OnnxGz):
-            # copy all contents of unzipped onnx.tar.gz file to top level of output
-            onnx_gz_path = (
-                os.path.dirname(file.path) if os.path.isfile(file.path) else file.path
-            )
-            shutil.copytree(onnx_gz_path, output_dir, dirs_exist_ok=True)
+            # download and unzip model.onnx.tar.gz
+            model_gz_path = Path(file.path).with_name("model.onnx.tar.gz")
+
+            # copy all contents of unzipped model.onnx.tar.gz file to
+            #  top level of output
+            for name in tarfile.open(model_gz_path).getnames():
+                unzipped_file_path = model_gz_path.with_name(name)
+                copy_location = Path(output_dir) / name
+                _copy_and_overwrite(
+                    str(unzipped_file_path), str(copy_location), shutil.copyfile
+                )
+            # copy the model.onnx.tar.gz file to the top level of output
+            tar_copy_path = Path(output_dir) / model_gz_path.name
+            _copy_and_overwrite(str(model_gz_path), str(tar_copy_path), shutil.copyfile)
+
         elif isinstance(file, Directory):
             copy_path = os.path.join(output_dir, os.path.basename(file.path))
             _copy_and_overwrite(file.path, copy_path, shutil.copytree)
