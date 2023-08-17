@@ -48,6 +48,7 @@ jobs:
              echo "=========== Build log ==========="
              echo "${status}"
              echo "commitid=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+             echo "=========== Build status ==========="
              if [[ "${status}" = "FAILED" ]]; then
                  echo "${{ github.event.repository.name }} build failed"
                  echo "status=failed" >> "$GITHUB_OUTPUT"
@@ -87,17 +88,27 @@ jobs:
           export TESTMO_TOKEN=${{ secrets.TESTMO_TEST_TOKEN }}
           TESTMO_URL="https://neuralmagic.testmo.net"
           todaytime=`date +%Y%m%d`
-          NAME="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID${{ inputs.run_id }}"
+          name="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID${{ inputs.run_id }}"
+          echo "========== Build info ==========="
+          echo "name: ${name}"
+          echo "status: ${{ needs.BUILD.outputs.status }}"
           if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
-              echo "${{ github.event.repository.name }} build failed"
               echo "<status>failed</status>" > result.xml
           else
               echo "<status>success</status>" > result.xml
-              echo "${{ github.event.repository.name }} build success"
           fi
+          cat result.xml
+          echo "========== Report to testmo ==========="
+          echo "testmo command:"
+          echo "testmo automation:run:submit \"
+          echo "  --instance "${TESTMO_URL} \"
+          echo "  --project-id ${{ inputs.testmo_project_id }} \"
+          echo "  --name "${name} \"
+          echo "  --source "${{ github.event.repository.name }} \"
+          echo "  --results result.xml"
           testmo automation:run:submit \
                          --instance "${TESTMO_URL}" \
-                         --project-id ${{ inputs.testmo_project_id }}
-                         --name "${NAME}" \
+                         --project-id ${{ inputs.testmo_project_id }} \
+                         --name "${name}" \
                          --source "${{ github.event.repository.name }}" \
                          --results result.xml
