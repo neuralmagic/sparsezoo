@@ -7,15 +7,9 @@ on:
   #schedule:
   #  - cron: '0 0 * * *'
   workflow_dispatch:
-
-
 jobs:
-
-  BUILD:
+  build-nightly:
     runs-on: ubuntu-22.04
-    outputs:
-      status: ${{ steps.build.outputs.status }}
-      commitid: ${{ steps.build.outputs.commitid }}
     permissions:
       id-token: write
       contents: read
@@ -33,34 +27,38 @@ jobs:
              virtualenv venv
              source venv/bin/activate
              pip install -e .
+             #sudo apt install npm
+             echo "node: $(node -v)"
+             echo "npm: $(npm -v)"
+             echo "Installing testmo cli..."
+             sudo npm install -g @testmo/testmo-cli
+             echo "Build ${{ github.event.repository.name }} Nightly..."
+             todaytime=`date +%Y%m%d`
+             export TESTMO_TOKEN=${{ secrets.TESTMO_TEST_TOKEN }}
+             TESTMO_URL="https://neuralmagic.testmo.net"
+             PROJECT_ID=9
+             NAME="${{ github.event.repository.name }} Nightly ${todaytime} ${GITHUB_SHA:0:7}"
+             SOURCE="${{ github.event.repository.name }}"
              status=$(make -B build || echo 'FAILED')
-             deactivate
-             echo "=========== Build log ==========="
+             echo "${{ github.event.repository.name }} build log:"
              echo "${status}"
-             echo "commitid=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
              if [[ "${status}" = "FAILED" ]]; then
                  echo "${{ github.event.repository.name }} build failed"
-                 echo "status=failed" >> "$GITHUB_OUTPUT"
-                 exit 1
+                 echo "<status>failed</status>" > result.xml
              else
+                 echo "<status>success</status>" > result.xml
                  echo "${{ github.event.repository.name }} build success"
-                 echo "status=success" >> "$GITHUB_OUTPUT"
+                 echo "Created build: $(ls dist/)"
              fi
-             echo "=========== Generated build ==========="
-             ls dist/
+             testmo automation:run:submit \
+                            --instance "${TESTMO_URL}" \
+                            --project-id ${PROJECT_ID} \
+                            --name "${NAME}" \
+                            --source "${SOURCE}" \
+                            --results "result.xml"
 
-  REPORT:
-    if: success() || failure()
-    needs: BUILD
-    uses: ./.github/workflows/util.yml
-    with:
-      runs-on: ${{ needs.BUILD.runs_on }}
-      run_id: ${{ github.run_id }}
-      commit_id: ${{ needs.BUILD.outputs.commitid }}
-      status: ${{ needs.BUILD.outputs.status }}
-      build_type: nightly
-      testmo_project_id: 9
-      
+             deactivate
+             #ls dist/
              #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
              #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
