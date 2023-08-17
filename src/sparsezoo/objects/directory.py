@@ -346,7 +346,7 @@ def is_directory(file: File) -> bool:
 def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
     return [
         Directory.from_file(file)
-        if (is_directory(file) and not isinstance(file, Directory))
+        if not isinstance(file, Directory) and is_directory(file)
         else file
         for file in files
     ]

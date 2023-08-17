@@ -15,6 +15,7 @@
 import copy
 import os
 import shutil
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -298,3 +299,55 @@ class TestModel:
 
         if engine == "onnxruntime":
             assert os.path.isfile(tar_file_expected_path)
+
+
+@pytest.mark.parametrize(
+    "stub",
+    [
+        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",
+    ],
+)
+def test_model_gz_extraction_from_stub(stub: str):
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+
+    model = Model(stub, temp_dir.name)
+    _extraction_test_helper(model)
+    shutil.rmtree(temp_dir.name)
+
+
+@pytest.mark.parametrize(
+    "stub",
+    [
+        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",
+    ],
+)
+def test_model_gz_extraction_from_local_files(stub: str):
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    model = Model(stub, temp_dir.name)
+    model.download()
+
+    source = temp_dir.name
+    model_from_local_files = Model(source)
+    _extraction_test_helper(model_from_local_files)
+    shutil.rmtree(temp_dir.name)
+
+
+def _extraction_test_helper(model: Model):
+    # download and extract model.onnx.tar.gz
+    #  path should point to extracted model.onnx file
+    path = Path(model.onnx_model.path)
+
+    # assert path points to model.onnx file
+    assert path.exists(), f"{path} does not exist"
+    assert path.is_file(), f"{path} is not a file"
+
+    # assert model.onnx.tar.gz exists
+    model_gz_path = path.with_name("model.onnx.tar.gz")
+    assert model_gz_path.exists(), f"{model_gz_path} does not exist"
+
+    # assert all members of  model.onnx.tar.gz have been extracted
+    for zipped_filename in tarfile.open(model_gz_path).getnames():
+        unzipped_file_path = path.with_name(zipped_filename)
+        assert (
+            unzipped_file_path.exists()
+        ), f"{unzipped_file_path} does not exist, was it extracted?"

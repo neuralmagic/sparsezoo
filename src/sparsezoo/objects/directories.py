@@ -18,6 +18,7 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
+import tarfile
 from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -285,15 +286,13 @@ class OnnxGz(Directory):
     with or without external data.
 
     Class Invariants:
-        - `self.name` attribute of this class will point to the name of the tarball
+        - `self.name` attribute of this class will point to the name of the onnx file
         - `self._path` and `self.path` will point to the path of the extracted
             onnx model
     """
 
     def __init__(self, *args, **kwargs):
-        name = kwargs.get("name")
         super().__init__(*args, **kwargs)
-        self.name = name
 
     def __repr__(self):
         return f"OnnxGz(name={self.name}, path={self._path})"
@@ -306,22 +305,31 @@ class OnnxGz(Directory):
                 name `model.onnx`
             - the tarball will be extracted to the same directory as the tarball
 
-        :post-condition: self._path will point to the path of the extrated
+        :post-condition: self._path will point to the path of the extracted
             onnx model, and it exists
         :return: path to the onnx model
         """
+
         expected_path: Path = (
             Path(self._path)
             if self._path is not None
-            else Path(self.parent_directory) / self.name
+            else Path(self.parent_directory) / "model.onnx.tar.gz"
         )
-        # point _path to model.onnx.tar.gz if first time else
-        #  model.onnx
+
+        # _path can also point to parent directory of the tarball when
+        #  this object is initialized from files
+        if expected_path.is_dir():
+            # point expected to model.onnx.tar.gz
+            expected_path = expected_path / "model.onnx.tar.gz"
+
+        # point path to model.onnx.tar.gz before download/unzip
         self._path = str(expected_path)
 
         if not expected_path.exists():
+            # download the tarball if it does not exist
             self.download()
 
+        self._check_if_extracted()
         if self.is_archive:
             # if the tarball is not extracted, extract it
             self.unzip()
@@ -336,3 +344,29 @@ class OnnxGz(Directory):
         # point _path to model.onnx
         self._path = str(onnx_model_path)
         return self._path
+
+    def _check_if_extracted(self):
+        """
+        set `is_archive` to False if the tarball is extracted, else set it to
+        True. Condition for being extracted is that all members of the tarball
+        are extracted and exist as files in the same directory as the tarball.
+        """
+        # expected file will point to the tarball
+        expected_path: Path = (
+            Path(self._path)
+            if self._path is not None
+            else Path(self.parent_directory) / "model.onnx.tar.gz"
+        )
+
+        if expected_path.is_dir():
+            # point expected to model.onnx.tar.gz
+            expected_path = expected_path / "model.onnx.tar.gz"
+
+        model_gz_path = expected_path.with_name(name="model.onnx.tar.gz")
+        # assert all members of  model.onnx.tar.gz have been extracted
+        for zipped_filename in tarfile.open(model_gz_path).getnames():
+            unzipped_file_path = expected_path.with_name(zipped_filename)
+            if not unzipped_file_path.exists():
+                _LOGGER.info(f"{unzipped_file_path} does not exist, was it extracted?")
+                self.is_archive = True
+        self.is_archive = False
