@@ -163,16 +163,15 @@ class TestSetupModel:
         extraneous_files = set()
         for file in extra_files:
             # ignore model.onnx.tar.gz and model.data files
-            if  (
-                    "model.onnx.tar.gz" in file
-                    or "model.data" in file
-                    or "model.md" in file
+            if (
+                "model.onnx.tar.gz" in file
+                or "model.data" in file
+                or "model.md" in file
             ):
                 continue
             extraneous_files.add(file)
 
         assert not extra_files, f"Extraneous files found: {extraneous_files}"
-
 
     def test_setup_model_from_objects(self, setup):
         stub, temp_dir, download_dir = setup
