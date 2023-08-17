@@ -62,13 +62,19 @@ jobs:
                  exit 1
              else
                  echo "${{ github.event.repository.name }} build success"
-                 echo "status=success" >> "$GITHUB_OUTPUT"
              fi
              echo "=========== Generated build ==========="
              ls dist/
              echo "=========== Copy build to S3 ==========="
-             aws s3 list s3://nm-github-actions/${{ github.event.repository.name }}/
-
+             aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/
+             if [ $? -eq 0 ]; then
+                 echo "copied ok"
+                 echo "status=success" >> "$GITHUB_OUTPUT"
+             else
+                 echo "copy failed"
+                 echo "status=failed" >> "$GITHUB_OUTPUT"
+                 exit 1
+             fi
 
              #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
