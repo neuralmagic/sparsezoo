@@ -111,20 +111,21 @@ jobs:
           echo "========== Build info ==========="
           echo "name: ${name}"
           echo "status: ${{ needs.BUILD.outputs.status }}"
-          if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
-              echo "<status>failed</status>" > result.xml
-          else
-              echo "<status>success</status>" > result.xml
-          fi
+          echo "GHA job: https://github.com/neuralmagic/${{ github.event.repository.name }}/actions/runs/${{ inputs.run_id }}" > result.xml
+          #if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
+          #    echo "failed" > result.xml
+          #else
+          #    echo "success" > result.xml
+          #fi
           cat result.xml
           echo "========== Report to testmo ==========="
           echo "testmo command:"
-          echo "testmo automation:run:submit \"
-          echo "  --instance "${TESTMO_URL} \"
-          echo "  --project-id ${{ inputs.testmo_project_id }} \"
-          echo "  --name "${name} \"
-          echo "  --source "${{ github.event.repository.name }} \"
-          echo "  --results result.xml"
+          echo "testmo automation:run:submit \ "
+          echo "  --instance "${TESTMO_URL} \ "
+          echo "  --project-id ${{ inputs.testmo_project_id }} \ "
+          echo "  --name "${name} \ "
+          echo "  --source "${{ github.event.repository.name }} \ "
+          echo "  --results result.xml "
           testmo automation:run:submit \
                          --instance "${TESTMO_URL}" \
                          --project-id ${{ inputs.testmo_project_id }} \
