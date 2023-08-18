@@ -69,28 +69,24 @@ jobs:
              echo "=========== Generated build ==========="
              ls dist/
              echo "=========== Copy build to S3 ==========="
-             aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/
+             aws s3 cp dist/*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
              if [ $? -eq 0 ]; then
-                 echo "copied ok"
+                 echo "ok: copied to s3://nm-github-actions/${{ github.event.repository.name }}/"
                  echo "status=success" >> "$GITHUB_OUTPUT"
              else
-                 echo "copy failed"
+                 echo "failed: copied to s3://nm-github-actions/${{ github.event.repository.name }}/"
                  echo "status=failed" >> "$GITHUB_OUTPUT"
                  exit 1
              fi
-
-             #aws s3 cp dist/*nightly*.whl s3://nm-github-actions/${{ github.event.repository.name }}/
-             #date '+%Y%m%d-%k:%M:%S' | tee log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7}
-             #aws s3 cp log_${GITHUB_REF_NAME}_nightly_${todaytime}_${GITHUB_SHA:0:7} s3://nm-github-actions/${{ github.event.repository.name }}/
-             #oldDate=`date --date='-2 month' +%Y%m%d`
-             #oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
-             #if [[ "${oldWhl}" != 'notfound' ]]; then
-             #    for oldwhl in $(echo "${oldWhl}" | awk '{print $4}')
-             #    do
-             #        echo "Remove old build ${oldwhl}"
-             #        aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
-             #    done
-             #fi
+             oldDate=`date --date='-2 month' +%Y%m%d`
+             oldWhl=`(aws s3 ls s3://nm-github-actions/${{ github.event.repository.name }}/ | grep nightly | grep "${oldDate}") || echo "notfound"`
+             if [[ "${oldWhl}" != 'notfound' ]]; then
+                 for oldwhl in $(echo "${oldWhl}" | awk '{print $4}')
+                 do
+                     echo "Remove old build ${oldwhl} in S3"
+                     aws s3 rm s3://nm-github-actions/${{ github.event.repository.name }}/${oldwhl}
+                 done
+             fi
 
   TESTMO:
     if: success() || failure()
@@ -110,16 +106,9 @@ jobs:
           name="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID:${{ inputs.run_id }}"
           echo "========== Build info ==========="
           echo "name: ${name}"
-          echo "status: ${{ needs.BUILD.outputs.status }}"
-          echo "GHA job: https://github.com/neuralmagic/${{ github.event.repository.name }}/actions/runs/${{ inputs.run_id }}" > result.xml
-          #if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
-          #    echo "failed" > result.xml
-          #else
-          #    echo "success" > result.xml
-          #fi
-          cat result.xml
+          echo "build status: ${{ needs.BUILD.outputs.status }}"
+          echo "GHA job: https://github.com/neuralmagic/${{ github.event.repository.name }}/actions/runs/${{ inputs.run_id }}" | tee result.xml
           echo "========== Report to testmo ==========="
-          echo "testmo command:"
           echo "testmo automation:run:submit \\"
           echo "  --instance ${TESTMO_URL} \\"
           echo "  --project-id ${{ inputs.testmo_project_id }} \\"
@@ -132,3 +121,4 @@ jobs:
                          --name "${name}" \
                          --source "${{ github.event.repository.name }}" \
                          --results result.xml
+                         -- cat result.xml
