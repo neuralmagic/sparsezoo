@@ -50,6 +50,9 @@ jobs:
              virtualenv venv
              source venv/bin/activate
              pip install -e .
+             if [[ "${{ inputs.build_type }}" = release ]]; then
+                 sed -i 's/is_release = False/is_release = True/g' src/${{ github.event.repository.name }}/version.py
+             fi
              status=$(make -B build || echo 'FAILED')
              deactivate
              echo "=========== Build log ==========="
@@ -104,7 +107,7 @@ jobs:
           export TESTMO_TOKEN=${{ secrets.TESTMO_TEST_TOKEN }}
           TESTMO_URL="https://neuralmagic.testmo.net"
           todaytime=`date +%Y%m%d`
-          name="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID${{ inputs.run_id }}"
+          name="${{ github.event.repository.name }} ${{ inputs.build_type }} ${todaytime} ${{ needs.BUILD.outputs.commitid }} RunID:${{ inputs.run_id }}"
           echo "========== Build info ==========="
           echo "name: ${name}"
           echo "status: ${{ needs.BUILD.outputs.status }}"
