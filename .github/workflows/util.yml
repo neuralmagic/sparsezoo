@@ -120,5 +120,5 @@ jobs:
                          --project-id ${{ inputs.testmo_project_id }} \
                          --name "${name}" \
                          --source "${{ github.event.repository.name }}" \
-                         --results result.xml
+                         --results result.xml \
                          -- cat result.xml
