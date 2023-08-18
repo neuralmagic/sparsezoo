@@ -111,7 +111,7 @@ jobs:
           echo "========== Build info ==========="
           echo "name: ${name}"
           echo "status: ${{ needs.BUILD.outputs.status }}"
-          echo "GHA job: https://github.com/neuralmagic/${{ github.event.repository.name }}/actions/runs/${{ inputs.run_id }}/job/${{ job.container.id  }}" > result.xml
+          echo "GHA job: https://github.com/neuralmagic/${{ github.event.repository.name }}/actions/runs/${{ inputs.run_id }}/job/${{ github.run_number  }}" > result.xml
           #if [[ "${{ needs.BUILD.outputs.status }}" = "FAILED" ]]; then
           #    echo "failed" > result.xml
           #else
