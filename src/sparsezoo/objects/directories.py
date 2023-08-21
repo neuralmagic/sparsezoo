@@ -301,8 +301,9 @@ class OnnxGz(Directory):
     def path(self):
         """
         Assumptions:
-            - the tarball contains only one onnx model, with the
-                name `model.onnx`
+            - the tarball must contain atleast one `model.onnx` file
+            - the tarball may or may not contain additional external data or
+                onnx model file(s)
             - the tarball will be extracted to the same directory as the tarball
 
         :post-condition: self._path will point to the path of the extracted
@@ -367,7 +368,7 @@ class OnnxGz(Directory):
         for zipped_filename in tarfile.open(model_gz_path).getnames():
             unzipped_file_path = expected_path.with_name(zipped_filename)
             if not unzipped_file_path.exists():
-                _LOGGER.info(f"{unzipped_file_path} does not exist, was it extracted?")
+                _LOGGER.debug(f"{unzipped_file_path} does not exist, was it extracted?")
                 self.is_archive = True
                 return
         self.is_archive = False
