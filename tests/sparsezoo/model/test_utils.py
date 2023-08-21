@@ -109,19 +109,35 @@ def test_load_files_from_stub(stub, expected_files):
     assert repo_namespace is not None
 
 
+def check_extraneous_files(expected_files, temp_dir, ignore_external_data):
+    files_in_directory = set(os.listdir(temp_dir.name))
+    extra_files = files_in_directory - expected_files
+
+    for file in extra_files:
+        # ignore model.onnx.tar.gz and model.data files
+        valid_extra_file = ignore_external_data and (
+            "model.onnx.tar.gz" in file or "model.data" in file
+        )
+        assert valid_extra_file, f"Unexpected extra file found: {file}"
+
+
 @pytest.mark.parametrize(
-    "stub",
+    "stub, ignore_external_data",
     [
-        "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni"  # noqa E501
+        (
+            "zoo:nlp/question_answering/distilbert-none/pytorch/"
+            "huggingface/squad/pruned80_quant-none-vnni",
+            False,
+        ),
     ],
 )
 class TestSetupModel:
     @pytest.fixture()
-    def setup(self, stub):
+    def setup(self, stub, ignore_external_data):
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         download_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        yield stub, temp_dir, download_dir
+        yield stub, temp_dir, download_dir, ignore_external_data
         temp_dir.cleanup()
         download_dir.cleanup()
 
@@ -130,6 +146,7 @@ class TestSetupModel:
             stub,
             temp_dir,
             download_dir,
+            ignore_external_data,
         ) = setup
 
         model = Model(stub, download_dir.name)
@@ -150,16 +167,19 @@ class TestSetupModel:
             recipes=recipes_path,
         )
 
-        assert {
+        expected_files = {
             "training",
             "deployment",
             "recipe",
             "model.onnx",
+            "model.onnx.tar.gz",
             "sample_inputs.tar.gz",
-        } == set(os.listdir(temp_dir.name))
+        }
+
+        check_extraneous_files(expected_files, temp_dir, ignore_external_data)
 
     def test_setup_model_from_objects(self, setup):
-        stub, temp_dir, download_dir = setup
+        stub, temp_dir, download_dir, ignore_external_data = setup
         model = Model(stub, download_dir.name)
         model.download()
         model.sample_inputs.unzip()
@@ -180,11 +200,13 @@ class TestSetupModel:
             recipes=recipes,
         )
 
-        assert {
+        expected_files = {
             "training",
             "deployment",
             "recipe",
             "model.onnx",
+            "model.onnx.tar.gz",
             "sample_inputs",
-        } == set(os.listdir(temp_dir.name))
+        }
+        check_extraneous_files(expected_files, temp_dir, ignore_external_data)
         download_dir.cleanup()

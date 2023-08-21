@@ -65,7 +65,7 @@ class Directory(File):
             name=name, path=path, url=url, parent_directory=parent_directory
         )
 
-        if self._unpack():
+        if self._unpack() or force:
             self.unzip(force=force)
 
     @classmethod
@@ -284,9 +284,15 @@ class Directory(File):
             )
 
         name = ".".join(self.name.split(".")[:-2])
-        path = os.path.join(extract_directory, name)
-
-        if not os.path.exists(path) or force:  # do not re-unzip if not forced
+        is_model_gz = name == "model.onnx"
+        path = (
+            extract_directory if is_model_gz else os.path.join(extract_directory, name)
+        )
+        # if is_model_gz then path would point to the tarfile(s)
+        # parent directory and must be unzipped irrespective of existence
+        if (
+            is_model_gz or not os.path.exists(path) or force
+        ):  # do not re-unzip if not forced
             tar = tarfile.open(self._path, "r")
             for member in tar.getmembers():
                 member.name = os.path.basename(member.name)
@@ -340,7 +346,7 @@ def is_directory(file: File) -> bool:
 def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
     return [
         Directory.from_file(file)
-        if (is_directory(file) and not isinstance(file, Directory))
+        if not isinstance(file, Directory) and is_directory(file)
         else file
         for file in files
     ]
