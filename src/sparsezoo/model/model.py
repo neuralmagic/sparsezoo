@@ -236,17 +236,17 @@ class Model(Directory):
     def path(self) -> str:
         """
         Download(if not already downloaded) and return the local path of the model
-        
+
         :return: the local path of the model
         """
         # download the model if not already downloaded
         super().path
-        
+
         # extract onnx_model if it is a tar.gz
         self.onnx_model.path
-        
+
         return self._path
-    
+
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
     ) -> Generator[List[numpy.ndarray], None, None]:
@@ -310,7 +310,7 @@ class Model(Directory):
                             f"but it is `None`. The file is being skipped..."
                         )
             # extract the onnx model if needed
-            self.onnx_model.path    
+            self.onnx_model.path
 
         return all(downloads)
 
