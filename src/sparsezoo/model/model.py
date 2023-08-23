@@ -110,12 +110,12 @@ class Model(Directory):
         self.sample_originals: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            display_name="sample_originals",
+            display_name="sample-originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample_inputs",
+            display_name="sample-inputs",
         )
 
         self.model_card: File = self._file_from_files(files, display_name="model.md")
@@ -123,7 +123,7 @@ class Model(Directory):
         self.sample_outputs = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample_outputs",
+            display_name="sample-outputs",
             allow_multiple_outputs=True,
             regex=True,
         )
