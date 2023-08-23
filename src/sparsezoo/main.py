@@ -170,7 +170,7 @@ sparsezoo download --domain cv --sub-domain classification --architecture mobile
 import argparse
 import logging
 
-from sparsezoo import Model, model_args_to_stub, search_models
+from sparsezoo import Model, search_models
 from sparsezoo.analytics import sparsezoo_analytics
 
 
