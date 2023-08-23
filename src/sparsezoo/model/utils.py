@@ -142,7 +142,7 @@ def load_files_from_stub(
         fields=[
             "model_id",
             "model_onnx_size_compressed_bytes",
-            "files",
+            "files(version: 2)",
             "benchmark_results",
             "training_results",
             "repo_name",
