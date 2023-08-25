@@ -168,6 +168,9 @@ def load_files_from_stub(
         model_id = model["model_id"]
 
         files = model.get("files")
+        if len(files) == 0:
+            raise ValueError(f"No files found for stub {stub}")
+
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
 
