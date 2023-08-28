@@ -79,7 +79,7 @@ def _validate_response_files(
         for response_dict in response:
             files: List[Dict[str, Any]] = response_dict.get("files")
             if len(files) == 0:
-                raise FilesNotFoundException("No files found for {kwargs}")
+                raise FilesNotFoundException(f"No files found for {kwargs}")
 
             file_names = set()
             for file in files:
