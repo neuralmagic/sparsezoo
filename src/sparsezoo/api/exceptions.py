@@ -41,7 +41,7 @@ class FilesNotFoundException(Exception):
     pass
 
 
-class RequestedFilesMissingException(Exception):
+class DefaultFilesMissingException(Exception):
     pass
 
 
@@ -57,7 +57,7 @@ def graphqlapi_exception_handler(fn: Callable) -> Callable:
             raise
         except FilesNotFoundException:
             raise
-        except RequestedFilesMissingException:
+        except DefaultFilesMissingException:
             raise
 
     return inner_function
@@ -87,6 +87,6 @@ def _validate_response_files(
 
             diff = DEFAULT_FILE_DISPLAY_NAMES.difference(file_names)
             if len(diff) > 0:
-                raise RequestedFilesMissingException(
+                raise DefaultFilesMissingException(
                     f"The following files are missing: {diff} for {kwargs}"
                 )
