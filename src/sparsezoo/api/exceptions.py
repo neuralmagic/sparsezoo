@@ -14,15 +14,30 @@
 
 import logging
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable, Dict, List
 
 from requests.models import Response
 
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_FILE_DISPLAY_NAMES = {
+    "model.md",
+    "model.onnx",
+    "model.onnx.tar.gz",
+    "training",
+}
+
 
 class InvalidQueryException(Exception):
+    pass
+
+
+class FilesNotFoundException(Exception):
+    pass
+
+
+class RequestedFilesMissingException(Exception):
     pass
 
 
@@ -30,7 +45,9 @@ def graphqlapi_exception_handler(fn: Callable) -> Callable:
     @wraps(fn)
     def inner_function(*args, **kwargs):
         try:
-            return fn(*args, **kwargs)
+            response = fn(*args, **kwargs)
+            _validate_response_files(response, **kwargs)
+            return response
 
         except InvalidQueryException:
             raise
@@ -44,3 +61,24 @@ def validate_graphql_response(response: Response, query_body: str) -> None:
 
     if "errors" in response_json:
         raise InvalidQueryException(f"{response_json['errors']}\n{query_body}")
+
+
+def _validate_response_files(
+    response: List[Dict[str, Any]], **kwargs: Dict[str, Any]
+) -> None:
+    fields = kwargs.get("fields")
+    if fields is not None and "files" in fields:
+        for response_dict in response:
+            files: List[Dict[str, Any]] = response_dict.get("files")
+            if len(files) == 0:
+                raise FilesNotFoundException("No files found for {kwargs}")
+
+            file_names = set()
+            for file in files:
+                file_names.add(file.get("displayName"))
+
+            diff = DEFAULT_FILE_DISPLAY_NAMES.difference(file_names)
+            if len(diff) > 0:
+                raise RequestedFilesMissingException(
+                    f"The following files are missing: {diff} for {kwargs}"
+                )
