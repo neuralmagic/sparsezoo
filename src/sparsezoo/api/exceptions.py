@@ -26,6 +26,10 @@ DEFAULT_FILE_DISPLAY_NAMES = {
     "model.onnx",
     "model.onnx.tar.gz",
     "training",
+    "deployment",
+    "benchmark.yaml",
+    "metrics.yaml",
+    "analysis.yaml",
 }
 
 
@@ -51,6 +55,10 @@ def graphqlapi_exception_handler(fn: Callable) -> Callable:
 
         except InvalidQueryException:
             raise
+        except FilesNotFoundException:
+            raise
+        except RequestedFilesMissingException:
+            raise
 
     return inner_function
 
@@ -66,7 +74,7 @@ def validate_graphql_response(response: Response, query_body: str) -> None:
 def _validate_response_files(
     response: List[Dict[str, Any]], **kwargs: Dict[str, Any]
 ) -> None:
-    fields = kwargs.get("fields")
+    fields: List[str] = kwargs.get("fields")
     if fields is not None and "files" in fields:
         for response_dict in response:
             files: List[Dict[str, Any]] = response_dict.get("files")
