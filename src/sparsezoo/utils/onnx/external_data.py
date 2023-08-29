@@ -14,10 +14,13 @@
 
 import logging
 import os
+from collections import defaultdict
+from pathlib import Path
 from typing import Optional, Union
 
 import onnx
-from onnx import ModelProto
+from onnx import ModelProto, TensorProto
+from onnx.external_data_helper import ExternalDataInfo
 
 from sparsezoo.utils.helpers import clean_path
 
@@ -29,6 +32,7 @@ __all__ = [
     "save_onnx",
     "validate_onnx",
     "load_model",
+    "split_external_data",
     "EXTERNAL_ONNX_DATA_NAME",
 ]
 
@@ -170,6 +174,126 @@ def load_model(model: Union[str, ModelProto]) -> ModelProto:
     raise ValueError(f"unknown type given for model: {type(model)}")
 
 
+def split_external_data(
+    model_path: str,
+    max_file_size: int = 16e9,
+    allow_large_tensors: bool = True,
+):
+    """
+    Splits the external_data_path file into multiple files of size no larger than
+    max_file_size. ONNX model will be updated in-place, external data file will be
+    replaced with multiple files in the same location with the same base name
+
+    :param model_path: path to ONNX model file who has external data writen
+        to a single file in the same directory
+    :param max_file_size: maximum file size in bytes of a single split out file.
+        defaults to 16000000000 (16e9 = 16GB)
+    :param allow_large_tensors: if False, will raise an exception if any model tensor
+        is larger than max_file_size. If True, will write the large tensor to a single
+        file regardless of max_file_size. Default True
+    :raises ValueError: if the given model does not have external data
+    :raises ValueError: if the given model has external data written to multiple
+        locations
+    :raises RuntimeError: if the external data file does not exist in the same
+        directory as the model
+    """
+    model = onnx.load(model_path, load_external_data=False)
+    base_dir = str(Path(model_path).parent)
+
+    external_data_info_by_name = {
+        init.name: ExternalDataInfo(init)
+        for init in model.graph.initializer
+        if init.external_data
+    }
+
+    # VALIDATION: model has external data written to a single file in the same directory
+    if not external_data_info_by_name:
+        raise ValueError(f"{model_path} does not contain external data")
+
+    external_data_files = {
+        info.location for info in external_data_info_by_name.values()
+    }
+    if len(external_data_files) > 1:
+        raise ValueError(
+            f"External data files found: {external_data_files} for model "
+            f"{model_path}. External data must be written to a single file to split"
+        )
+
+    external_data_file = external_data_files.pop()
+    external_data_file_path = os.path.join(base_dir, external_data_file)
+    if not os.path.exists(external_data_file_path):
+        raise RuntimeError(
+            f"{external_data_file_path} not found. {model_path} must have external "
+            "data written to a single file in the same directory"
+        )
+
+    # UPDATE: external data info of graph tensors so they point to the new split out
+    # files with updated offsets
+    current_external_data_file_number = 1
+    current_external_data_file_size = 0  # bytes
+    new_files_to_old_byte_ranges = defaultdict(list)  # values: (start_byte, num_bytes)
+    for init in model.graph.initializer:
+        if init.name not in external_data_info_by_name:
+            continue  # not external data tensor
+        info = external_data_info_by_name[init.name]
+        tensor_size = info.length
+
+        if not allow_large_tensors and tensor_size > max_file_size:
+            raise ValueError(
+                f"tensor {init.name} has size {tensor_size} greater than max allowed "
+                f"size {max_file_size}. Set allow_large_tensors=True to allow"
+            )
+
+        if tensor_size + current_external_data_file_size > max_file_size:
+            # writing this tensor would set the current file over the max size, start
+            # a new file
+            current_external_data_file_number += 1
+            current_external_data_file_size = 0
+
+        # update the file of the tensor and its offset for the new data file
+        updated_location = f"{external_data_file}.{current_external_data_file_number}"
+        _set_external_data(
+            tensor=init,
+            location=updated_location,
+            offset=current_external_data_file_size,
+            length=info.length,
+        )
+        current_external_data_file_size += info.length
+
+        # add bytes to the current file to be written
+        new_files_to_old_byte_ranges[updated_location].append(
+            (info.offset, info.length)
+        )
+
+    # WRITE - new data files
+    with open(external_data_file_path, "rb") as external_data_file_reader:
+        for updated_file_name, tensor_ranges in new_files_to_old_byte_ranges.items():
+            updated_file_path = os.path.join(base_dir, updated_file_name)
+            _write_external_data_file_from_base_bytes(
+                updated_file_path, tensor_ranges, external_data_file_reader
+            )
+
+    # DELETE - old external data file
+    os.remove(external_data_file_path)
+
+    # WRITE - ONNX model with updated tensor external data info
+    onnx.save(model, model_path)
+
+
+def _write_external_data_file_from_base_bytes(
+    new_file_name, original_byte_ranges, original_file_bytes_reader
+):
+    # original_byte_ranges: List[(int, int)] must be in order of offset
+    with open(new_file_name, "wb") as new_file_writer:
+        for original_data_start, original_data_length in original_byte_ranges:
+            # set reader to start of a tensor
+            original_file_bytes_reader.seek(original_data_start)
+            # read entire tensor
+            tensor_bytes = original_file_bytes_reader.read(original_data_length)
+            # write tensor to new file
+            new_file_writer.write(tensor_bytes)
+
+
 def _check_for_old_external_data(model_path: str, external_data_file: str):
     old_external_data_file = os.path.join(
         os.path.dirname(model_path), external_data_file
@@ -184,3 +308,24 @@ def _check_for_old_external_data(model_path: str, external_data_file: str):
         os.remove(old_external_data_file)
 
     return
+
+
+def _set_external_data(
+    tensor: TensorProto,
+    location: str,
+    offset: Optional[int] = None,
+    length: Optional[int] = None,
+) -> None:
+    # ADAPTED FROM: https://github.com/onnx/onnx/blob/e724cc33616ff614dd8555743e9d707b5a7c5492/onnx/external_data_helper.py#L80  # noqa: E501
+    # adapted to skip blocking validation checks not relevant to our use case
+    del tensor.external_data[:]
+    tensor.data_location = TensorProto.EXTERNAL
+    for k, v in {
+        "location": location,
+        "offset": int(offset) if offset is not None else None,
+        "length": int(length) if length is not None else None,
+    }.items():
+        if v is not None:
+            entry = tensor.external_data.add()
+            entry.key = k
+            entry.value = str(v)
