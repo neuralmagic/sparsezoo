@@ -173,7 +173,6 @@ def load_files_from_stub(
 
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
-
         if params is not None:
             files = filter_files(files=files, params=params)
 
@@ -311,7 +310,7 @@ def save_outputs_to_tar(
 
     path = os.path.join(
         os.path.dirname(sample_inputs.path),
-        f"sample_outputs_{engine_type}",
+        f"sample-outputs_{engine_type}",
     )
     if not os.path.exists(path):
         os.mkdir(path)
@@ -385,26 +384,14 @@ def restructure_request_json(
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
 
-    # create recipes
-    recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")
-    for (idx, file_dict) in recipe_dicts_list:
-        display_name = file_dict["display_name"]
-        # make sure that recipe name has a
-        # format `recipe_{...}`.
-        prefix = "recipe_"
-        if not display_name.startswith(prefix):
-            display_name = prefix + display_name
-            file_dict["display_name"] = display_name
-            request_json[idx] = file_dict
-
     # restructure inputs/labels/originals/outputs directories
     # use `sample-inputs.tar.gz` to simulate non-existent directories
 
     files_to_create = [
-        "sample_inputs.tar.gz",
-        "sample_labels.tar.gz",
-        "sample_originals.tar.gz",
-        "sample_outputs.tar.gz",
+        "sample-inputs.tar.gz",
+        "sample-labels.tar.gz",
+        "sample-originals.tar.gz",
+        "sample-outputs.tar.gz",
     ]
     types = ["inputs", "labels", "originals", "outputs"]
     for file_name, type in zip(files_to_create, types):

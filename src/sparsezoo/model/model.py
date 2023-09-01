@@ -133,7 +133,7 @@ class Model(Directory):
             ] = self._sample_outputs_list_to_dict(self.sample_outputs)
 
         self.sample_labels: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="sample_labels"
+            files, directory_class=Directory, display_name="sample-labels"
         )
 
         self.deployment: SelectDirectory = self._directory_from_files(
@@ -150,12 +150,9 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.recipes: SelectDirectory = self._directory_from_files(
-            files,
-            directory_class=SelectDirectory,
-            display_name="recipe",
-            stub_params=self.stub_params,
-        )
+        self.recipes = self._file_from_files(files, display_name="^recipe", regex=True)
+        if isinstance(self.recipes, File):
+            self.recipes = [self.recipes]
 
         self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
@@ -691,7 +688,7 @@ class Model(Directory):
         if not isinstance(directories, list):
             # if found a single 'sample_outputs' directory,
             # assume it should be mapped to its the native framework
-            expected_name = "sample_outputs"
+            expected_name = "sample-outputs"
             if directories.name not in [expected_name, expected_name + ".tar.gz"]:
                 raise ValueError(
                     "Found single folder (or tar.gz archive)"
@@ -701,7 +698,7 @@ class Model(Directory):
             engine_to_numpydir_map["framework"] = directories
 
         else:
-            # if found multiple 'sample_outputs' directories,
+            # if found multiple 'sample-outputs' directories,
             # use directory name to relate it with the appropriate
             # inference engine
             for directory in directories:
@@ -710,7 +707,7 @@ class Model(Directory):
                     engine_name = engine_name.replace(".tar.gz", "")
                 if engine_name not in ENGINES:
                     raise ValueError(
-                        f"The name of the 'sample_outputs' directory should "
+                        f"The name of the 'sample-outputs' directory should "
                         f"end with an engine name (one of the {ENGINES}). "
                         f"However, the name is {directory.name}."
                     )
