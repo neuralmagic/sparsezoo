@@ -18,6 +18,7 @@ import tempfile
 import pytest
 
 from sparsezoo.model import Model, load_files_from_stub, setup_model
+from sparsezoo.objects import Directory
 
 
 EXPECTED_IC_FILES = {
@@ -152,7 +153,6 @@ class TestSetupModel:
         deployment_path = model.deployment.path
         onnx_model_path = model.onnx_model.path
         sample_inputs_path = model.sample_inputs.path
-        # recipes_path = model.recipes.path
 
         setup_model(
             output_dir=temp_dir.name,
@@ -161,8 +161,9 @@ class TestSetupModel:
             onnx_model=onnx_model_path,
             sample_inputs=sample_inputs_path,
             # TODO: .path() needs to be supported for dict-like obj
-            # sample_outputs=model.sample_outputs.path,
-            # recipes=recipes_path,
+            sample_outputs=model.sample_output.path
+            if isinstance(model.sample_outputs, Directory)
+            else None,
         )
 
         expected_files = {
