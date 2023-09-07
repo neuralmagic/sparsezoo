@@ -32,15 +32,14 @@ files_ic = {
     "onnx",
     "model.onnx",
     "model.onnx.tar.gz",
-    "recipe",
-    "sample_inputs.tar.gz",
-    "sample_originals.tar.gz",
-    "sample_labels.tar.gz",
-    "sample_outputs.tar.gz",
-    "sample_inputs",
-    "sample_originals",
-    "sample_labels",
-    "sample_outputs",
+    "sample-inputs.tar.gz",
+    "sample-originals.tar.gz",
+    "sample-labels.tar.gz",
+    "sample-outputs.tar.gz",
+    "sample-inputs",
+    "sample-originals",
+    "sample-labels",
+    "sample-outputs",
     "benchmarks.yaml",
     "eval.yaml",
     "analysis.yaml",
@@ -116,9 +115,7 @@ class TestSetupModel:
 
     @staticmethod
     def _assert_correct_files_downloaded(model, args):
-        if args[0] == "recipe":
-            assert len(model.recipes.available) == 1
-        elif args[0] == "checkpoint":
+        if args[0] == "checkpoint":
             assert len(model.training.available) == 1
         elif args[0] == "deployment":
             assert len(model.training.available) == 1
@@ -141,7 +138,7 @@ class TestSetupModel:
                 "pytorch/sparseml/imagenet/pruned-moderate"
             ),
             True,
-            files_ic,
+            files_ic.union({"recipe.md", "recipe_transfer_learn.md"}),
         ),
         (
             (
@@ -150,7 +147,7 @@ class TestSetupModel:
                 "pytorch/huggingface/squad/pruned80_quant-none-vnni"
             ),
             False,
-            files_nlp,
+            files_nlp.union({"recipe.md"}),
         ),
         (
             (
@@ -159,22 +156,22 @@ class TestSetupModel:
                 "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
             ),
             True,
-            files_yolo,
+            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
         ),
         (
             "yolov5-x-coco-pruned70.4block_quantized",
             False,
-            files_yolo,
+            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
         ),
         (
             "yolov5-n6-voc_coco-pruned55",
             False,
-            files_yolo,
+            files_yolo.union({"recipe.md"}),
         ),
         (
             "resnet_v1-50-imagenet-channel30_pruned90_quantized",
             False,
-            files_yolo,
+            files_yolo.union({"recipe.md", "recipe_transfer_classification.md"}),
         ),
     ],
     scope="function",
@@ -196,11 +193,10 @@ class TestModel:
         _, clone_sample_outputs, expected_files, temp_dir = setup
         if clone_sample_outputs:
             for file_name in [
-                "sample_outputs_onnxruntime",
-                "sample_outputs_deepsparse",
+                "sample-outputs_onnxruntime",
+                "sample-outputs_deepsparse",
             ]:
                 expected_files.update({file_name, file_name + ".tar.gz"})
-
         assert not set(os.listdir(temp_dir.name)).difference(expected_files)
 
     def test_validate(self, setup):
@@ -246,19 +242,19 @@ class TestModel:
             )
             Path(optional_recipe_yaml).touch()
 
-        # add remaining `sample_{...}` files, that may be potentially
+        # add remaining `sample-{...}` files, that may be potentially
         # missing
-        mock_sample_file = os.path.join(directory_path, "sample_inputs.tar.gz")
-        for file_name in ["sample_originals.tar.gz", "sample_labels.tar.gz"]:
+        mock_sample_file = os.path.join(directory_path, "sample-inputs.tar.gz")
+        for file_name in ["sample-originals.tar.gz", "sample-labels.tar.gz"]:
             expected_file_dir = os.path.join(directory_path, file_name)
             if not os.path.isfile(expected_file_dir):
                 shutil.copyfile(mock_sample_file, expected_file_dir)
 
         if clone_sample_outputs:
-            sample_outputs_file = os.path.join(directory_path, "sample_outputs.tar.gz")
+            sample_outputs_file = os.path.join(directory_path, "sample-outputs.tar.gz")
             for file_name in [
-                "sample_outputs_onnxruntime.tar.gz",
-                "sample_outputs_deepsparse.tar.gz",
+                "sample-outputs_onnxruntime.tar.gz",
+                "sample-outputs_deepsparse.tar.gz",
             ]:
                 shutil.copyfile(
                     sample_outputs_file, os.path.join(directory_path, file_name)
@@ -271,12 +267,11 @@ class TestModel:
         if engine == "onnxruntime":
             # test whether the functionality saves the numpy files to tar properly
             tar_file_expected_path = os.path.join(
-                directory_path, f"sample_outputs_{engine}.tar.gz"
+                directory_path, f"sample-outputs_{engine}.tar.gz"
             )
             if os.path.isfile(tar_file_expected_path):
                 os.remove(tar_file_expected_path)
             save_to_tar = True
-
         output_expected = next(iter(model_directory.sample_outputs[engine]))
         output_expected = list(output_expected.values())
         output = next(

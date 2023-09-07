@@ -50,9 +50,9 @@ _MODEL_PATHS = {
     "bert_pruned_quantized": {
         "stub": (
             "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
-            "12layer_pruned80_quant-none-vnni"
+            "pruned80_quant-none-vnni"
         ),
-        "truth": f"{os.path.dirname(__file__)}/bert_pruned_quantized.json",
+        "truth": f"{os.path.dirname(__file__)}/bert_pruned80_quant-none-vnni.json",
     },
     "resnet50_pruned_quantized": {
         "stub": (
