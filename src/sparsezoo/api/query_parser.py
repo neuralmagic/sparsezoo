@@ -121,8 +121,10 @@ class QueryParser:
     def parse_list_fields_to_string(self, fields: List[str]) -> str:
         parsed_fields = ""
         for field in fields:
-            camel_case_field = to_camel_case(field)
-            parsed_fields += f"{camel_case_field} "
+            field_without_arguments, sep, args = field.partition("(")
+            camel_case_field = to_camel_case(field_without_arguments)
+            args_str = f"{sep}{args}" if args else ""
+            parsed_fields += f"{camel_case_field}{args_str} "
             if camel_case_field in DEFAULT_FIELDS:
                 stringified_fields = self.parse_list_fields_to_string(
                     DEFAULT_FIELDS.get(camel_case_field)

@@ -194,7 +194,7 @@ class Directory(File):
         else:
             for file in self.files:
                 file.download(
-                    destination_path=os.path.join(destination_path, self.name)
+                    destination_path=destination_path,
                 )
                 file._path = os.path.join(destination_path, self.name, file.name)
 
