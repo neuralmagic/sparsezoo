@@ -212,7 +212,7 @@ class Directory(File):
         for file in self.files:
             if file is None:
                 continue
-            if file.name == os.path.basename(file_name):
+            if os.path.basename(file.name) == file_name:
                 return file
             if isinstance(file, Directory):
                 file = file.get_file(file_name=file_name)
