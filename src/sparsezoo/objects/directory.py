@@ -213,7 +213,6 @@ class Directory(File):
             if file is None:
                 continue
             if os.path.basename(file.name) == file_name:
-                print(file)
                 return file
             if isinstance(file, Directory):
                 file = file.get_file(file_name=file_name)
