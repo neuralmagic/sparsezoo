@@ -53,7 +53,7 @@ class RegistryMixin:
 
     # register with default name
     @Dataset.register()
-    class ImageNetDataset(Dataset)
+    class ImageNetDataset(Dataset):
         pass
 
     # load as "ImageNetDataset"
