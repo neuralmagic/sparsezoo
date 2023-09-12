@@ -22,6 +22,14 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Type
 
 
+__all__ = [
+    "RegistryMixin",
+    "register",
+    "get_from_registry",
+    "registered_names",
+]
+
+
 _REGISTRY: Dict[Type, Dict[str, Any]] = defaultdict(dict)
 
 
@@ -63,6 +71,14 @@ class RegistryMixin:
 
     @classmethod
     def register(cls, name: Optional[str] = None):
+        """
+        Decorator for registering a value (ie class or function) wrapped by this
+        decorator to the base class (class that .register is called from)
+
+        :param name: name to register the wrapped value as, defaults to value.__name__
+        :return: register decorator
+        """
+
         def decorator(value: Any):
             cls.register_value(value, name=name)
             return value
@@ -73,7 +89,14 @@ class RegistryMixin:
     def register_value(
         cls, value: Any, name: Optional[str] = None, require_subclass: bool = False
     ):
-        _register(
+        """
+        Registers the given value to the class `.register_value` is called from
+        :param value: value to register
+        :param name: name to register the wrapped value as, defaults to value.__name__
+        :param require_subclass: require that value is a subclass of the class this
+            method is called from
+        """
+        register(
             parent_class=cls,
             value=value,
             name=name,
@@ -82,37 +105,67 @@ class RegistryMixin:
 
     @classmethod
     def load_from_registry(
-        cls, class_name: str, require_subclass: bool = False, **constructor_kwargs
-    ):
-        constructor = cls.get_value(
-            class_name=class_name, require_subclass=require_subclass
+        cls, name: str, require_subclass: bool = False, **constructor_kwargs
+    ) -> object:
+        """
+        :param name: name of registered class to load
+        :param require_subclass: require that object is a subclass of the class this
+            method is called from
+        :param constructor_kwargs: arguments to pass to the constructor retrieved
+            from the registry
+        :return: loaded object registered to this class under the given name,
+            constructed with the given kwargs. Raises error if the name is
+            not found in the registry
+        """
+        constructor = cls.get_value_from_registry(
+            name=name, require_subclass=require_subclass
         )
         return constructor(**constructor_kwargs)
 
     @classmethod
-    def get_value_from_registry(cls, class_name: str, require_subclass: bool = False):
-        return _get_from_registry(
-            parent_class=cls, name=class_name, require_subclass=require_subclass
+    def get_value_from_registry(cls, name: str, require_subclass: bool = False):
+        """
+        :param name: name to retrieve from the registry
+        :param require_subclass: require that value is a subclass of the class this
+            method is called from
+        :return: value from retrieved the registry for the given name, raises
+            error if not found
+        """
+        return get_from_registry(
+            parent_class=cls, name=name, require_subclass=require_subclass
         )
 
     @classmethod
     def registered_names(cls) -> List[str]:
-        return list(_REGISTRY[cls].keys())
+        """
+        :return: list of all names registered to this class
+        """
+        return registered_names(cls)
 
 
-def _register(
+def register(
     parent_class: Type,
     value: Any,
     name: Optional[str] = None,
     require_subclass: bool = False,
 ):
+    """
+    :param parent_class: class to register the name under
+    :param value: value to register
+    :param name: name to register the wrapped value as, defaults to value.__name__
+    :param require_subclass: require that value is a subclass of the class this
+        method is called from
+    """
     if name is None:
+        # default name
         name = value.__name__
 
     if require_subclass:
         _validate_subclass(parent_class, value)
 
     if name in _REGISTRY[parent_class]:
+        # name already exists - raise error if two different values are attempting
+        # to share the same name
         registered_value = _REGISTRY[parent_class][name]
         if registered_value is not value:
             raise RuntimeError(
@@ -123,21 +176,30 @@ def _register(
         _REGISTRY[parent_class][name] = value
 
 
-def _get_from_registry(
+def get_from_registry(
     parent_class: Type, name: str, require_subclass: bool = False
 ) -> Any:
+    """
+    :param parent_class: class that the name is registered under
+    :param name: name to retrieve from the registry of the class
+    :param require_subclass: require that value is a subclass of the class this
+        method is called from
+    :return: value from retrieved the registry for the given name, raises
+        error if not found
+    """
 
     if ":" in name:
         # user specifying specific module to load and value to import
         module_path, value_name = name.split(":")
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
+        # look up name in registry
         retrieved_value = _REGISTRY[parent_class].get(name)
         if retrieved_value is None:
             raise ValueError(
                 f"Unable to find {name} registered under type {parent_class}. "
                 f"Registered values for {parent_class}: "
-                f"{list(_REGISTRY[parent_class].keys())}"
+                f"{registered_names(parent_class)}"
             )
 
     if require_subclass:
@@ -146,7 +208,18 @@ def _get_from_registry(
     return retrieved_value
 
 
+def registered_names(parent_class: Type) -> List[str]:
+    """
+    :param parent_class: class to look up the registry of
+    :return: all names registered to the given class
+    """
+    return list(_REGISTRY[parent_class].keys())
+
+
 def _import_and_get_value_from_module(module_path: str, value_name: str) -> Any:
+    # import the given module path and try to get the value_name if it is included
+    # in the module
+
     # load module
     spec = importlib.util.spec_from_file_location(
         f"plugin_module_for_{value_name}", module_path
