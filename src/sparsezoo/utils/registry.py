@@ -19,7 +19,7 @@ of neuralmagic utilities
 
 import importlib
 from collections import defaultdict
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 
 _REGISTRY: Dict[Type, Dict[str, Any]] = defaultdict(dict)
@@ -94,6 +94,10 @@ class RegistryMixin:
         return _get_from_registry(
             parent_class=cls, name=class_name, require_subclass=require_subclass
         )
+
+    @classmethod
+    def registered_names(cls) -> List[str]:
+        return list(_REGISTRY[cls].keys())
 
 
 def _register(
