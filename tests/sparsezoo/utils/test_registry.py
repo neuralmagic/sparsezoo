@@ -58,3 +58,18 @@ def test_registry_flow_multiple():
 
     assert Foo.get_value_from_registry("Foo1") is Foo1
     assert Bar.get_value_from_registry("Bar1") is Bar1
+
+
+def test_registry_requires_subclass():
+    class Foo(RegistryMixin):
+        registry_requires_subclass = True
+
+    @Foo.register()
+    class Foo1(Foo):
+        pass
+
+    with pytest.raises(ValueError):
+
+        @Foo.register()
+        class NotFoo:
+            pass

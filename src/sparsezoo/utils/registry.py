@@ -42,6 +42,9 @@ class RegistryMixin:
     `register` and `load` as the main entrypoints for adding new implementations and
     loading requested values from its registry.
 
+    If a class should only have its child classes in its registry, the class should
+    set the static attribute `registry_requires_subclass` to True
+
     example
     ```python
     class Dataset(RegistryMixin):
@@ -69,6 +72,10 @@ class RegistryMixin:
     ```
     """
 
+    # set to True in child class to add check that registered/retrieved values
+    # implement the class it is registered to
+    registry_requires_subclass: bool = False
+
     @classmethod
     def register(cls, name: Optional[str] = None):
         """
@@ -86,53 +93,43 @@ class RegistryMixin:
         return decorator
 
     @classmethod
-    def register_value(
-        cls, value: Any, name: Optional[str] = None, require_subclass: bool = False
-    ):
+    def register_value(cls, value: Any, name: Optional[str] = None):
         """
         Registers the given value to the class `.register_value` is called from
         :param value: value to register
         :param name: name to register the wrapped value as, defaults to value.__name__
-        :param require_subclass: require that value is a subclass of the class this
-            method is called from
         """
         register(
             parent_class=cls,
             value=value,
             name=name,
-            require_subclass=require_subclass,
+            require_subclass=cls.registry_requires_subclass,
         )
 
     @classmethod
-    def load_from_registry(
-        cls, name: str, require_subclass: bool = False, **constructor_kwargs
-    ) -> object:
+    def load_from_registry(cls, name: str, **constructor_kwargs) -> object:
         """
         :param name: name of registered class to load
-        :param require_subclass: require that object is a subclass of the class this
-            method is called from
         :param constructor_kwargs: arguments to pass to the constructor retrieved
             from the registry
         :return: loaded object registered to this class under the given name,
             constructed with the given kwargs. Raises error if the name is
             not found in the registry
         """
-        constructor = cls.get_value_from_registry(
-            name=name, require_subclass=require_subclass
-        )
+        constructor = cls.get_value_from_registry(name=name)
         return constructor(**constructor_kwargs)
 
     @classmethod
-    def get_value_from_registry(cls, name: str, require_subclass: bool = False):
+    def get_value_from_registry(cls, name: str):
         """
         :param name: name to retrieve from the registry
-        :param require_subclass: require that value is a subclass of the class this
-            method is called from
         :return: value from retrieved the registry for the given name, raises
             error if not found
         """
         return get_from_registry(
-            parent_class=cls, name=name, require_subclass=require_subclass
+            parent_class=cls,
+            name=name,
+            require_subclass=cls.registry_requires_subclass,
         )
 
     @classmethod
