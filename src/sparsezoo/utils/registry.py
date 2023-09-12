@@ -54,10 +54,10 @@ class RegistryMixin:
         pass
 
     # load as "cifar-dataset"
-    cifar = Dataset.load("cifar-dataset")
+    cifar = Dataset.load_from_registry("cifar-dataset")
 
     # load from custom file that implements a dataset
-    mnist = Dataset.load("/path/to/mnnist_dataset.py:MnistDataset")
+    mnist = Dataset.load_from_registry("/path/to/mnnist_dataset.py:MnistDataset")
     ```
     """
 
@@ -81,7 +81,7 @@ class RegistryMixin:
         )
 
     @classmethod
-    def load(
+    def load_from_registry(
         cls, class_name: str, require_subclass: bool = False, **constructor_kwargs
     ):
         constructor = cls.get_value(
@@ -90,7 +90,7 @@ class RegistryMixin:
         return constructor(**constructor_kwargs)
 
     @classmethod
-    def get_value(cls, class_name: str, require_subclass: bool = False):
+    def get_value_from_registry(cls, class_name: str, require_subclass: bool = False):
         return _get_from_registry(
             parent_class=cls, name=class_name, require_subclass=require_subclass
         )
