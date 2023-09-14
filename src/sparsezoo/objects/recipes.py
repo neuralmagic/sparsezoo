@@ -32,7 +32,9 @@ class Recipes:
 
     _RECIPE_DEFAULT_NAME = "recipe.md"
 
-    def __init__(self, recipes: Union[File, List[File]]):
+    def __init__(self, recipes: Union[None, File, List[File]]):
+        if recipes is None:
+            recipes = []
         if isinstance(recipes, File):
             recipes = [recipes]
 
