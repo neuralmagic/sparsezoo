@@ -28,7 +28,7 @@ class Recipes:
     Object to store a list of recipes for a downloaded model and pull the default
 
     :param recipes: list of recipes to store
-    :param stub_params: dictionary storing custom default recipes names
+    :param stub_params: dictionary that may contain custom default recipes names
     """
 
     _RECIPE_DEFAULT_NAME = "recipe.md"
