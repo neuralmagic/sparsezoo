@@ -19,9 +19,9 @@ from sparsezoo.model import Model
 
 
 def test_recipe_getters():
-    stub_with_multiple_recieps = "zoo:bert-base-wikipedia_bookcorpus-pruned90"
+    stub_with_multiple_recipes = "zoo:bert-base-wikipedia_bookcorpus-pruned90"
     temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-    model = Model(stub_with_multiple_recieps, temp_dir.name)
+    model = Model(stub_with_multiple_recipes, temp_dir.name)
 
     default_recipe = model.recipes.default
     assert default_recipe.name == "recipe.md"
@@ -37,3 +37,19 @@ def test_recipe_getters():
     assert found_by_name is None
 
     shutil.rmtree(temp_dir.name)
+
+
+def test_custom_default():
+    custom_default_name = "transfer_text_classification"
+    stub_with_multiple_recieps = (
+        "zoo:bert-base-wikipedia_bookcorpus-pruned90?recipe={}".format(
+            custom_default_name
+        )
+    )
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    model = Model(stub_with_multiple_recieps, temp_dir.name)
+
+    expected_default_name = "recipe_" + custom_default_name + ".md"
+
+    default_recipe = model.recipes.default
+    assert default_recipe.name == expected_default_name

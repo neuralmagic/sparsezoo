@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import List, Union
+from typing import Dict, List, Union
 
 from sparsezoo.objects import File
 
@@ -28,17 +28,24 @@ class Recipes:
     Object to store a list of recipes for a downloaded model and pull the default
 
     :param recipes: list of recipes to store
+    :param stub_params: dictionary storing custom default recipes names
     """
 
     _RECIPE_DEFAULT_NAME = "recipe.md"
 
-    def __init__(self, recipes: Union[None, File, List[File]]):
+    def __init__(
+        self, recipes: Union[None, File, List[File]], stub_params: Dict[str, str]
+    ):
         if recipes is None:
             recipes = []
         if isinstance(recipes, File):
             recipes = [recipes]
-
         self._recipes = recipes
+
+        self._default_recipe_name = self._RECIPE_DEFAULT_NAME
+        custom_default = stub_params.get("recipe_type") or stub_params.get("recipe")
+        if custom_default is not None:
+            self._default_recipe_name = "recipe_" + custom_default + ".md"
 
     @property
     def recipes(self) -> List:
@@ -53,12 +60,12 @@ class Recipes:
         :return: The default recipe in the recipe list
         """
         for recipe in self._recipes:
-            if recipe.name == self._RECIPE_DEFAULT_NAME:
+            if recipe.name == self._default_recipe_name:
                 return recipe
 
         # fallback to first recipe in list
         _LOGGER.warning(
-            "No default recipe {self._RECIPE_DEFAULT_NAME} found, falling back to"
+            "No default recipe {self._default_recipe_name} found, falling back to"
             "first listed recipe"
         )
         return self._recipes[0]

@@ -154,7 +154,7 @@ class Model(Directory):
         recipe_file_list = self._file_from_files(
             files, display_name="^recipe", regex=True
         )
-        self.recipes = Recipes(recipe_file_list)
+        self.recipes = Recipes(recipe_file_list, stub_params=self.stub_params)
 
         self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
