@@ -35,6 +35,7 @@ from sparsezoo.objects import (
     File,
     NumpyDirectory,
     OnnxGz,
+    Recipes,
     SelectDirectory,
     is_directory,
 )
@@ -150,9 +151,10 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.recipes = self._file_from_files(files, display_name="^recipe", regex=True)
-        if isinstance(self.recipes, File):
-            self.recipes = [self.recipes]
+        recipe_file_list = self._file_from_files(
+            files, display_name="^recipe", regex=True
+        )
+        self.recipes = Recipes(recipe_file_list)
 
         self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
