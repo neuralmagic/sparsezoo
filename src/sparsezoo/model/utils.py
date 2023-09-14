@@ -30,7 +30,7 @@ from sparsezoo.model.result_utils import (
     ThroughputResults,
     ValidationResult,
 )
-from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz
+from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz, Recipes
 from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
 
 
@@ -562,8 +562,8 @@ def _copy_file_contents(
             _copy_and_overwrite(file.path, copy_path, shutil.copytree)
     else:
         # for the structured directories/files
-        if isinstance(file, list):
-            for _file in file:
+        if isinstance(file, Recipes):
+            for _file in file.recipes:
                 copy_path = os.path.join(output_dir, os.path.basename(_file.path))
                 _copy_and_overwrite(_file.path, copy_path, shutil.copyfile)
         elif isinstance(file, OnnxGz):
