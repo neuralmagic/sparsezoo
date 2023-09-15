@@ -47,7 +47,7 @@ class Recipes:
         self._default_recipe_name = self._RECIPE_DEFAULT_NAME
         custom_default = stub_params.get("recipe_type") or stub_params.get("recipe")
         if custom_default is not None:
-            self._default_recipe_name = "recipe_" + custom_default + ".md"
+            self._default_recipe_name = "recipe_" + custom_default
 
     @property
     def recipes(self) -> List:
@@ -62,7 +62,7 @@ class Recipes:
         :return: The default recipe in the recipe list
         """
         for recipe in self._recipes:
-            if recipe.name == self._default_recipe_name:
+            if recipe.name.startswith(self._default_recipe_name):
                 return recipe
 
         # fallback to first recipe in list
