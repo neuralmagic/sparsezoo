@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from sparsezoo.objects import File
 
@@ -34,7 +34,9 @@ class Recipes:
     _RECIPE_DEFAULT_NAME = "recipe.md"
 
     def __init__(
-        self, recipes: Union[None, File, List[File]], stub_params: Dict[str, str]
+        self,
+        recipes: Optional[Union[File, List[File]]],
+        stub_params: Dict[str, str] = {},
     ):
         if recipes is None:
             recipes = []

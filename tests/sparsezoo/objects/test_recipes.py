@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import shutil
 import tempfile
 
 from sparsezoo.model import Model
@@ -36,18 +35,16 @@ def test_recipe_getters():
     found_by_name = model.recipes.get_recipe_by_name("does_not_exist.md")
     assert found_by_name is None
 
-    shutil.rmtree(temp_dir.name)
-
 
 def test_custom_default():
     custom_default_name = "transfer_text_classification"
-    stub_with_multiple_recieps = (
+    stub_with_multiple_recipes = (
         "zoo:bert-base-wikipedia_bookcorpus-pruned90?recipe={}".format(
             custom_default_name
         )
     )
     temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-    model = Model(stub_with_multiple_recieps, temp_dir.name)
+    model = Model(stub_with_multiple_recipes, temp_dir.name)
 
     expected_default_name = "recipe_" + custom_default_name + ".md"
 
