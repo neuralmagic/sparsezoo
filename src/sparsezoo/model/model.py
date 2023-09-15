@@ -35,6 +35,7 @@ from sparsezoo.objects import (
     File,
     NumpyDirectory,
     OnnxGz,
+    Recipes,
     SelectDirectory,
     is_directory,
 )
@@ -150,9 +151,10 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.recipes = self._file_from_files(files, display_name="^recipe", regex=True)
-        if isinstance(self.recipes, File):
-            self.recipes = [self.recipes]
+        recipe_file_list = self._file_from_files(
+            files, display_name="^recipe", regex=True
+        )
+        self.recipes = Recipes(recipe_file_list, stub_params=self.stub_params)
 
         self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
@@ -652,7 +654,9 @@ class Model(Directory):
             return directories_found[0]
 
     def _download(
-        self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
+        self,
+        file: Union[File, Recipes, Dict[Any, File]],
+        directory_path: str,
     ) -> bool:
 
         if isinstance(file, File):
@@ -670,9 +674,10 @@ class Model(Directory):
                 )
                 return False
 
-        elif isinstance(file, list):
-            validations = (self._download(_file, directory_path) for _file in file)
-            return all(validations)
+        elif isinstance(file, Recipes):
+            validations = (
+                self._download(_file, directory_path) for _file in file.recipes
+            )
 
         else:
             validations = (
