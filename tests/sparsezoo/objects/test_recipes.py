@@ -14,6 +14,8 @@
 
 import tempfile
 
+import pytest
+
 from sparsezoo.model import Model
 
 
@@ -35,6 +37,11 @@ def test_recipe_getters():
     found_by_name = model.recipes.get_recipe_by_name("does_not_exist.md")
     assert found_by_name is None
 
+    available_recipes = model.recipes.available
+    assert len(available_recipes) == 4
+    assert "recipe_transfer_token_classification" in available_recipes
+    assert "recipe" in available_recipes
+
 
 def test_custom_default():
     custom_default_name = "transfer_text_classification"
@@ -50,3 +57,16 @@ def test_custom_default():
 
     default_recipe = model.recipes.default
     assert default_recipe.name == expected_default_name
+
+    available_recipes = model.recipes.available
+    assert len(available_recipes) == 1
+    assert available_recipes[0] == "recipe_transfer_text_classification"
+
+
+def test_fail_default_on_empty():
+    false_recipe_stub = "zoo:bert-base-wikipedia_bookcorpus-pruned90?recipe=nope"
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    model = Model(false_recipe_stub, temp_dir.name)
+
+    with pytest.raises(ValueError):
+        _ = model.recipes.default
