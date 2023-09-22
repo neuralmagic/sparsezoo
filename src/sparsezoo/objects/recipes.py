@@ -76,6 +76,9 @@ class Recipes:
                 return recipe
 
         # fallback to first recipe in list
+        if len(self._recipes) == 0:
+            raise ValueError("No recipes found, could not retrieve a default.")
+
         _LOGGER.warning(
             f"No default recipe {self._default_recipe_name} found, falling back to "
             f"first listed recipe {self._recipes[0].name}"

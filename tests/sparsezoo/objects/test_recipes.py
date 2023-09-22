@@ -14,6 +14,8 @@
 
 import tempfile
 
+import pytest
+
 from sparsezoo.model import Model
 
 
@@ -59,3 +61,12 @@ def test_custom_default():
     available_recipes = model.recipes.available
     assert len(available_recipes) == 1
     assert available_recipes[0] == "recipe_transfer_text_classification"
+
+
+def test_fail_default_on_empty():
+    false_recipe_stub = "zoo:bert-base-wikipedia_bookcorpus-pruned90?recipe=nope"
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
+    model = Model(false_recipe_stub, temp_dir.name)
+
+    with pytest.raises(ValueError):
+        _ = model.recipes.default
