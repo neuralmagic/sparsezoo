@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from sparsezoo.objects import File
@@ -50,6 +51,15 @@ class Recipes:
             self._default_recipe_name = "recipe_" + custom_default
 
     @property
+    def available(self) -> Optional[List[str]]:
+        """
+        :return: List of all recipe names, or None if none are available
+        """
+        if len(self._recipes) == 0:
+            return None
+        return [Path(recipe.name).stem for recipe in self._recipes]
+
+    @property
     def recipes(self) -> List:
         """
         :return: The full list of recipes
@@ -67,8 +77,8 @@ class Recipes:
 
         # fallback to first recipe in list
         _LOGGER.warning(
-            "No default recipe {self._default_recipe_name} found, falling back to"
-            "first listed recipe"
+            f"No default recipe {self._default_recipe_name} found, falling back to "
+            f"first listed recipe {self._recipes[0].name}"
         )
         return self._recipes[0]
 
