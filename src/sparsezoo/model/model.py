@@ -751,9 +751,7 @@ class Model(Directory):
             return None
         else:
             files = [
-                File.from_dict(
-                    file, parent_directory=os.path.join(parent_directory, display_name)
-                )
+                File.from_dict(file, parent_directory=parent_directory)
                 for file in files
             ]
             directory = directory_class(
