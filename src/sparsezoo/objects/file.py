@@ -84,7 +84,6 @@ class File:
 
     @property
     def path(self):
-        breakpoint()
         if self._path is None:
             expected_path = os.path.join(
                 self.parent_directory, os.path.basename(self.name)
