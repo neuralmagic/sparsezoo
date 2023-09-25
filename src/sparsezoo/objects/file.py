@@ -85,9 +85,7 @@ class File:
     @property
     def path(self):
         if self._path is None:
-            expected_path = os.path.join(
-                self.parent_directory, os.path.basename(self.name)
-            )
+            expected_path = os.path.join(self.parent_directory, self.name)
             if os.path.exists(expected_path):
                 self._path = expected_path
                 return expected_path
@@ -144,7 +142,7 @@ class File:
                     "Please make sure that `destination_path` argument is not None."
                 )
 
-        new_file_path = os.path.join(destination_path, os.path.basename(self.name))
+        new_file_path = os.path.join(destination_path, self.name)
 
         if self.url is None:
             raise ValueError(
