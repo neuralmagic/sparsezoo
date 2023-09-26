@@ -31,7 +31,7 @@ from sparsezoo.model.result_utils import (
     ValidationResult,
 )
 from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz, Recipes
-from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
+from sparsezoo.utils import convert_to_bool, save_numpy
 
 
 __all__ = [

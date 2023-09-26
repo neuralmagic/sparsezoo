@@ -20,9 +20,7 @@ from .utils import to_camel_case
 
 DEFAULT_MODELS_FIELDS = ["modelId", "stub"]
 
-DEFAULT_FILES_FIELDS = [
-    "displayName", "downloadUrl", "fileSize", "fileType", "modelId"
-]
+DEFAULT_FILES_FIELDS = ["displayName", "downloadUrl", "fileSize", "fileType", "modelId"]
 
 DEFAULT_TRAINING_RESULTS_FIELDS = [
     "datasetName",
