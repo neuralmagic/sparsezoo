@@ -148,7 +148,7 @@ from sparsezoo import QueryParser
                 "fields": (
                     "modelId displayName benchmarkResults "
                     "{ batchSize deviceInfo numCores recordedUnits recordedValue } "
-                    "files { displayName fileSize modelId fileType } "
+                    "files { displayName downloadUrl fileSize fileType modelId } "
                 ),
             },
         ),
