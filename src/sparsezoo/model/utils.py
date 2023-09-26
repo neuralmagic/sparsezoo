@@ -599,9 +599,8 @@ def _copy_and_overwrite(from_path, to_path, func):
 
 def include_file_download_url(files: List[Dict]):
     for file in files:
-        file["url"] = get_file_download_url(
-            model_id=file["model_id"], file_name=file["display_name"]
-        )
+        file["url"] = get_file_download_url(file["download_url"])
+        del file["download_url"]
 
 
 def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
@@ -637,15 +636,12 @@ def is_stub(candidate: str) -> bool:
 
 
 def get_file_download_url(
-    model_id: str,
-    file_name: str,
-    base_url: str = BASE_API_URL,
+    download_url: str,
 ):
     """Url to download a file"""
-    download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
-
     # important, do not remove
     if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
-        download_url += "?increment_download=False"
+        delimiter = "&" if "?" in download_url else "?"
+        download_url += f"{delimiter}increment_download=False"
 
     return download_url
