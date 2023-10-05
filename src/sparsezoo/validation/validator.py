@@ -19,7 +19,7 @@ class objects are valid
 import os
 from typing import Callable, Dict, Optional, Set, Tuple, Union
 
-from sparsezoo.objects import Directory, File
+from sparsezoo.objects import Directory, File, Recipes
 from sparsezoo.validation import (
     validate_cv_classification,
     validate_cv_detection,
@@ -110,8 +110,10 @@ class IntegrationValidator:
                     _file.validate() for _file in file.values()
                 )
             # checker for list-type file
-            elif isinstance(file, list):
-                validations[file.__repr__()] = all(_file.validate() for _file in file)
+            elif isinstance(file, Recipes):
+                validations[file.__repr__()] = all(
+                    _file.validate() for _file in file.recipes
+                )
             else:
                 # checker for File/Directory class objects
                 if file.name == "training":
@@ -150,7 +152,11 @@ class IntegrationValidator:
         """
         if self.minimal_validation:
             for file in self.model.files:
-                if isinstance(file, list) or isinstance(file, dict) or (file is None):
+                if (
+                    isinstance(file, Recipes)
+                    or isinstance(file, dict)
+                    or (file is None)
+                ):
                     continue
                 else:
                     self.required_files.discard(file.name)

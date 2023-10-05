@@ -17,3 +17,4 @@ from .directory import *
 
 # flake8: noqa
 from .file import *
+from .recipes import *
