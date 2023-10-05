@@ -225,7 +225,7 @@ def _import_and_get_value_from_module(module_path: str, value_name: str) -> Any:
     spec.loader.exec_module(module)
 
     # get value from module
-    value = getattr(module, value_name)
+    value = getattr(module, value_name, None)
 
     if not value:
         raise RuntimeError(
