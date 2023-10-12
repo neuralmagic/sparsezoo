@@ -224,6 +224,20 @@ class Model(Directory):
         self.integration_validator = IntegrationValidator(model=self)
 
     @property
+    def deployment_directory_path(self) -> str:
+        """
+        :return: file path of uncompressed deployemnt directory. Both (1) downloads
+            compressed deployemnent directory if not downloaded (2) uncompresses
+            deployment directory if compressed
+        """
+        # trigger initial download if not downloaded
+        self.deployment.path
+        if self.deployment.is_archive:
+            self.deployment.unzip()
+
+        return self.deployment.path
+
+    @property
     def stub_params(self) -> Dict[str, str]:
         """
         :return: mapping of variable name to value for query params in zoo stub
