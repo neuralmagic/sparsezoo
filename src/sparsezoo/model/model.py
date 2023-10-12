@@ -140,7 +140,7 @@ class Model(Directory):
         self.deployment: SelectDirectory = self._directory_from_files(
             files,
             directory_class=SelectDirectory,
-            display_name="deployment",
+            display_name="deployment.tar.gz",
             stub_params=self.stub_params,
         )
 
