@@ -157,9 +157,9 @@ def load_files_from_stub(
         )
     if matching_models > 1:
         _LOGGER.warning(
-            f"{len(models)} found from the stub: {stub}"
-            "Using the first model to obtain metadata."
-            "Proceed with caution"
+            f"{len(models)} found from the stub: {stub}."
+            " Using the first model to obtain metadata."
+            " Proceed with caution..."
         )
 
     if matching_models:
