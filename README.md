@@ -64,6 +64,18 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 <img alt="SparseZoo Flow" src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
 
+
+## 🚨 New SparseZoo Models 🚨
+### 🎃 October 2023 🎃
+**Generative AI**
+- Sparse MPT Models - [21 variants](https://sparsezoo.neuralmagic.com/?architectures=mpt&ungrouped=true)
+    - ⚡ Highlighted Model ⚡ :  [mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized](https://sparsezoo.neuralmagic.com/models/mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized?hardware=deepsparse-c6i.12xlarge&comparison=mpt-7b-gsm8k_mpt_pretrain-base)
+- Sparse OPT Models - [12 variants](https://sparsezoo.neuralmagic.com/?architectures=opt&ungrouped=true)
+    - ⚡ Highlighted Model ⚡ :  [opt-6.7b-opt_pretrain-pruned50_quantW8A8](https://sparsezoo.neuralmagic.com/models/opt-6.7b-opt_pretrain-pruned50_quantW8A8?hardware=deepsparse-c6i.12xlarge&comparison=opt-6.7b-opt_pretrain-base)
+- Sparse Codegen (mono,multi) Models - [10 variants](https://sparsezoo.neuralmagic.com/?ungrouped=true&architectures=codegen_mono%2Ccodegen_multi)
+    - ⚡ Highlighted Model ⚡ :  [codegen_multi-350m-bigquery_thepile-pruned50_quantized](https://sparsezoo.neuralmagic.com/models/codegen_multi-350m-bigquery_thepile-pruned50_quantized?hardware=deepsparse-c6i.12xlarge&comparison=codegen_multi-350m-bigquery_thepile-base) 
+ 
+
 ## Highlights
 
 - [Model Stub Architecture Overview](https://docs.neuralmagic.com/sparsezoo/source/models.html)
