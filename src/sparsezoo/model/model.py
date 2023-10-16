@@ -31,6 +31,7 @@ from sparsezoo.model.utils import (
     save_outputs_to_tar,
 )
 from sparsezoo.objects import (
+    AliasedSelectDirectory,
     Directory,
     File,
     NumpyDirectory,
@@ -39,7 +40,6 @@ from sparsezoo.objects import (
     SelectDirectory,
     is_directory,
 )
-from sparsezoo.objects.directories import AliasedSelectDirectory
 from sparsezoo.utils import DataLoader
 from sparsezoo.validation import IntegrationValidator
 
