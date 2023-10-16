@@ -39,6 +39,7 @@ from sparsezoo.objects import (
     SelectDirectory,
     is_directory,
 )
+from sparsezoo.objects.directories import AliasedSelectDirectory
 from sparsezoo.utils import DataLoader
 from sparsezoo.validation import IntegrationValidator
 
@@ -137,10 +138,11 @@ class Model(Directory):
             files, directory_class=Directory, display_name="sample-labels"
         )
 
-        self.deployment: SelectDirectory = self._directory_from_files(
+        self.deployment: AliasedSelectDirectory = self._directory_from_files(
             files,
-            directory_class=SelectDirectory,
-            display_name="deployment.tar.gz",
+            directory_class=AliasedSelectDirectory,
+            display_name="deployment",
+            download_alias="deployment.tar.gz",
             stub_params=self.stub_params,
         )
 
