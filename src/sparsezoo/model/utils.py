@@ -388,12 +388,13 @@ def restructure_request_json(
     # use `sample-inputs.tar.gz` to simulate non-existent directories
 
     files_to_create = [
+        "deployment.tar.gz",
         "sample-inputs.tar.gz",
         "sample-labels.tar.gz",
         "sample-originals.tar.gz",
         "sample-outputs.tar.gz",
     ]
-    types = ["inputs", "labels", "originals", "outputs"]
+    types = ["deployment", "inputs", "labels", "originals", "outputs"]
     for file_name, type in zip(files_to_create, types):
         data = fetch_from_request_json(
             request_json, "display_name", file_name.replace("_", "-")

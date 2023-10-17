@@ -20,6 +20,7 @@ Class objects for standardization and validation of a model folder structure
 import logging
 import tarfile
 from collections import OrderedDict
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -35,6 +36,7 @@ __all__ = [
     "NumpyDirectory",
     "SelectDirectory",
     "OnnxGz",
+    "AliasedSelectDirectory",
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -275,6 +277,73 @@ class SelectDirectory(Directory):
     @available.setter
     def available(self, value):
         self._available = value
+
+
+class AliasedSelectDirectory(SelectDirectory):
+    """
+    A select directory that can be aliased to download a different
+    file but still point to the same path. This is especially
+    beneficial for cases where a tarball must be downloaded and extracted
+    but the directory should point to one of the directory
+    within the tarball.
+
+    :param files: list of files contained within the SelectDirectory
+    :param name: name of the SelectDirectory
+    :param path: path of the SelectDirectory
+    :param url: url of the SelectDirectory
+    :param parent_directory: path of the parent SelectDirectory
+    :param stub_params: dictionary of zoo stub params that this directory
+        was specified with
+    :param download_alias: name of the file to download
+    """
+
+    def __init__(self, *args, download_alias: Optional[str] = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.download_alias = download_alias
+
+    @contextmanager
+    def _override_name(self):
+        """
+        A context manager to temporarily override the name of the directory
+        to the download alias.
+        """
+        old_name = self.name
+        if self.download_alias:
+            self.name = self.download_alias
+        yield
+        self.name = old_name
+
+    def download(self, *args, **kwargs):
+        """
+        Override the download method to temporarily override the name
+        of the directory to the download alias.
+        """
+        with self._override_name():
+            return super().download(*args, **kwargs)
+
+    @property
+    def path(self):
+        """
+        Override the path property to download and extract
+        the download alias file but point to the path of the
+        actual expected file
+
+        :raises FileNotFoundError: if the expected file does not
+            exist, (it wasn't downloaded or extracted)
+        :return: path to the expected file
+        """
+        super().path
+        actual_file_path = (
+            Path(self._path).with_name(self.name)
+            if self._path.endswith(self.download_alias)
+            else Path(self._path)
+        )
+        if not actual_file_path.exists():
+            raise FileNotFoundError(
+                f"The directory {actual_file_path} should have been "
+                "downloaded but does not exist"
+            )
+        return str(actual_file_path)
 
 
 class OnnxGz(Directory):
