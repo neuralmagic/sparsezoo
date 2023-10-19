@@ -256,10 +256,6 @@ class Model(Directory):
         """
         # download the model if not already downloaded
         super().path
-
-        # extract onnx_model if it is a tar.gz
-        self.onnx_model.path
-
         return self._path
 
     def generate_outputs(
