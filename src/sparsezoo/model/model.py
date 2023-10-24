@@ -144,6 +144,7 @@ class Model(Directory):
             display_name="deployment",
             download_alias="deployment.tar.gz",
             stub_params=self.stub_params,
+            allow_multiple_outputs=True
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
