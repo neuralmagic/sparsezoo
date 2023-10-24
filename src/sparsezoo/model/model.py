@@ -228,15 +228,10 @@ class Model(Directory):
     @property
     def deployment_directory_path(self) -> str:
         """
-        :return: file path of uncompressed deployemnt directory. Both (1) downloads
-            compressed deployemnent directory if not downloaded (2) uncompresses
+        :return: file path of uncompressed deployment directory. Both (1) downloads
+            compressed deployment directory if not downloaded (2) uncompresses
             deployment directory if compressed
         """
-        # trigger initial download if not downloaded
-        self.deployment.path
-        if self.deployment.is_archive:
-            self.deployment.unzip()
-
         return self.deployment.path
 
     @property
@@ -757,7 +752,10 @@ class Model(Directory):
 
         # we want to only process "loose" files here,
         # the `.tar.gz` directories get parsed using
-        # a separate pathway.
+        # a separate pathway. The exception is the
+        # scenario where kwargs contain `download_alias`.
+        # In this case, we want to process the `.tar.gz`
+        # along with the other "loose" files.
         if kwargs.get("download_alias") is None:
             files = [
                 file_dict

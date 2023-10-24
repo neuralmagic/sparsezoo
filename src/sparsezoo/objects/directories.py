@@ -18,7 +18,6 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
-import os
 import tarfile
 from collections import OrderedDict
 from contextlib import contextmanager
@@ -301,44 +300,33 @@ class AliasedSelectDirectory(SelectDirectory):
     def __init__(self, *args, download_alias: Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.download_alias = download_alias
-        self.is_archive = True
-        self.url = self.get_file("deployment.tar.gz").url
 
     @contextmanager
-    def _override_name(self):
+    def _download_with_alias(self):
         """
         A context manager to temporarily override the name of the directory
         to the download alias.
         """
         old_name = self.name
+        old_url = self.url
+        old_is_archive = self.is_archive
         if self.download_alias:
             self.name = self.download_alias
+            self.is_archive = True
+            self.url = self.get_file(self.download_alias).url
         yield
         self.name = old_name
+        self.url = old_url
+        self.is_archive = old_is_archive
 
     def download(self, *args, **kwargs):
         """
         Override the download method to temporarily override the name
         of the directory to the download alias.
         """
-        with self._override_name():
-            return super().download(*args, **kwargs)
-
-    @property
-    def path(self):
-
-        if self._path is None:
-            expected_path = os.path.join(self.parent_directory, self.download_alias)
-            if os.path.exists(expected_path):
-                self._path = expected_path
-                return expected_path
-            else:
-                self.download()
-
-        elif not os.path.exists(self._path):
-            self.download()
-
-        return self._path
+        with self._download_with_alias():
+            super().download(*args, **kwargs)
+            self.unzip()
 
 
 class OnnxGz(Directory):
