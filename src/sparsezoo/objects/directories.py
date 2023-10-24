@@ -18,6 +18,7 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
+import os
 import tarfile
 from collections import OrderedDict
 from contextlib import contextmanager
@@ -300,6 +301,8 @@ class AliasedSelectDirectory(SelectDirectory):
     def __init__(self, *args, download_alias: Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.download_alias = download_alias
+        self.is_archive = True
+        self.url = self.get_file("deployment.tar.gz").url
 
     @contextmanager
     def _override_name(self):
@@ -323,27 +326,19 @@ class AliasedSelectDirectory(SelectDirectory):
 
     @property
     def path(self):
-        """
-        Override the path property to download and extract
-        the download alias file but point to the path of the
-        actual expected file
 
-        :raises FileNotFoundError: if the expected file does not
-            exist, (it wasn't downloaded or extracted)
-        :return: path to the expected file
-        """
-        super().path
-        actual_file_path = (
-            Path(self._path).with_name(self.name)
-            if self._path.endswith(self.download_alias)
-            else Path(self._path)
-        )
-        if not actual_file_path.exists():
-            raise FileNotFoundError(
-                f"The directory {actual_file_path} should have been "
-                "downloaded but does not exist"
-            )
-        return str(actual_file_path)
+        if self._path is None:
+            expected_path = os.path.join(self.parent_directory, self.download_alias)
+            if os.path.exists(expected_path):
+                self._path = expected_path
+                return expected_path
+            else:
+                self.download()
+
+        elif not os.path.exists(self._path):
+            self.download()
+
+        return self._path
 
 
 class OnnxGz(Directory):

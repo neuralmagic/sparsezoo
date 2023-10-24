@@ -757,12 +757,13 @@ class Model(Directory):
 
         # we want to only process "loose" files here,
         # the `.tar.gz` directories get parsed using
-        # a separate pathway
-        files = [
-            file_dict
-            for file_dict in files
-            if not file_dict["display_name"].endswith(".tar.gz")
-        ]
+        # a separate pathway.
+        if kwargs.get("download_alias") is None:
+            files = [
+                file_dict
+                for file_dict in files
+                if not file_dict["display_name"].endswith(".tar.gz")
+            ]
         if not files:
             return None
         else:
