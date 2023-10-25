@@ -142,6 +142,13 @@ class Model(Directory):
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
+            allow_multiple_outputs=True,
+        )
+
+        self.deployment_tar: SelectDirectory = self._directory_from_files(
+            files,
+            directory_class=SelectDirectory,
+            display_name="deployment.tar.gz",
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -222,6 +229,20 @@ class Model(Directory):
         )
 
         self.integration_validator = IntegrationValidator(model=self)
+
+    @property
+    def deployment_directory_path(self) -> str:
+        """
+        :return: file path of uncompressed deployemnt directory. Both (1) downloads
+            compressed deployemnent directory if not downloaded (2) uncompresses
+            deployment directory if compressed
+        """
+        # trigger initial download if not downloaded
+        self.deployment_tar.path
+        if self.deployment_tar.is_archive:
+            self.deployment_tar.unzip()
+
+        return self.deployment_tar.path
 
     @property
     def stub_params(self) -> Dict[str, str]:
@@ -646,7 +667,7 @@ class Model(Directory):
         # one directory (unless `allow-multiple_outputs`=True)
         elif len(directories_found) != 1:
             if allow_multiple_outputs:
-                return directories_found
+                return directories_found[0]
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
