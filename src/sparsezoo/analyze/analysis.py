@@ -105,9 +105,9 @@ class YAMLSerializableBaseModel(BaseModel):
         :return: if file_path is not given, the state of the analysis model
             as a yaml string, otherwise None
         """
-        file_stream = None if file_path is None else open(file_path, "w")
+        file_stream = None if file_path is None else open(file_path, "w")        
         ret = yaml.dump(
-            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+            {**self.summary().dict(), **self.dict()}, stream=file_stream, allow_unicode=True, sort_keys=False
         )
 
         if file_stream is not None:
@@ -732,6 +732,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
         # Add Param analysis section
         param_count_summary: CountSummary = _get_param_count_summary(analysis=analysis)
+        # breakpoint()
         param_section = Section(
             section_name="Params",
             entries=[
@@ -747,6 +748,8 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
         # Add Ops analysis section
         ops_count_summary: CountSummary = _get_ops_count_summary(analysis=analysis)
+        # breakpoint()
+
         ops_section = Section(
             section_name="Ops",
             entries=[
@@ -858,6 +861,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 sections.append(node_timing_section)
 
         sections.extend([param_section, ops_section, overall_section])
+        # breakpoint()
         return cls(sections=sections)
 
 
