@@ -735,7 +735,6 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
         # Add Param analysis section
         param_count_summary: CountSummary = _get_param_count_summary(analysis=analysis)
-        # breakpoint()
         param_section = Section(
             section_name="Params",
             entries=[
@@ -751,7 +750,6 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
 
         # Add Ops analysis section
         ops_count_summary: CountSummary = _get_ops_count_summary(analysis=analysis)
-        # breakpoint()
 
         ops_section = Section(
             section_name="Ops",
@@ -864,7 +862,6 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 sections.append(node_timing_section)
 
         sections.extend([param_section, ops_section, overall_section])
-        # breakpoint()
         return cls(sections=sections)
 
 
