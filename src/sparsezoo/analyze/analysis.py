@@ -105,9 +105,12 @@ class YAMLSerializableBaseModel(BaseModel):
         :return: if file_path is not given, the state of the analysis model
             as a yaml string, otherwise None
         """
-        file_stream = None if file_path is None else open(file_path, "w")        
+        file_stream = None if file_path is None else open(file_path, "w")
         ret = yaml.dump(
-            {**self.summary().dict(), **self.dict()}, stream=file_stream, allow_unicode=True, sort_keys=False
+            {**self.summary().dict(), **self.dict()},
+            stream=file_stream,
+            allow_unicode=True,
+            sort_keys=False,
         )
 
         if file_stream is not None:
