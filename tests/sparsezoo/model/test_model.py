@@ -340,7 +340,7 @@ def test_model_gz_extraction_from_local_files(stub: str):
 )
 def test_model_deployment_directory(tmpdir, stub):
     model = Model(stub, tmpdir)
-    assert model.deployment_tar.is_archive == True
+    assert model.deployment_tar.is_archive
     # download and extract deployment tar
     deployment_dir_path = model.deployment_directory_path
     assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
@@ -352,7 +352,7 @@ def test_model_deployment_directory(tmpdir, stub):
 
     assert isinstance(model.deployment_tar, SelectDirectory)
     assert len(model.deployment_tar.files) == 1
-    assert model.deployment_tar.is_archive == False
+    assert not model.deployment_tar.is_archive
 
     model = Model(tmpdir.strpath)
     assert isinstance(model.deployment, SelectDirectory)
