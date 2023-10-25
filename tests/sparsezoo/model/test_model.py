@@ -23,11 +23,13 @@ import numpy
 import pytest
 
 from sparsezoo import Model
+from sparsezoo.objects.directories import SelectDirectory
+from sparsezoo.objects.directory import Directory
 
 
 files_ic = {
     "training",
-    "deployment",
+    "deployment.tar.gz" "deployment",
     "logs",
     "onnx",
     "model.onnx",
@@ -327,6 +329,38 @@ def test_model_gz_extraction_from_local_files(stub: str):
     model_from_local_files = Model(source)
     _extraction_test_helper(model_from_local_files)
     shutil.rmtree(temp_dir.name)
+
+
+@pytest.mark.parametrize(
+    "stub",
+    [
+        "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/"
+        "imagenet/pruned-moderate",
+    ],
+)
+def test_model_deployment_directory(tmpdir, stub):
+    model = Model(stub, tmpdir)
+    assert model.deployment_tar.is_archive == True
+    # download and extract deployment tar
+    deployment_dir_path = model.deployment_directory_path
+    assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
+    assert set(os.listdir(tmpdir.strpath)) == {"deployment.tar.gz", "deployment"}
+
+    # deployment and deployment_tar should be point to the same files
+    assert isinstance(model.deployment, SelectDirectory)
+    assert len(model.deployment.files) == 2  # weird, this should be one
+
+    assert isinstance(model.deployment_tar, SelectDirectory)
+    assert len(model.deployment_tar.files) == 1
+    assert model.deployment_tar.is_archive == False
+
+    model = Model(tmpdir.strpath)
+    assert isinstance(model.deployment, SelectDirectory)
+    assert len(model.deployment.files) > 0
+    assert isinstance(model.deployment_tar, Directory)
+    assert len(model.deployment_tar.files) == 0
+
+    shutil.rmtree(tmpdir.dirname)
 
 
 def _extraction_test_helper(model: Model):
