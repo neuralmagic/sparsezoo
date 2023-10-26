@@ -338,10 +338,11 @@ def test_model_gz_extraction_from_local_files(stub: str):
         "imagenet/pruned-moderate",
     ],
 )
-def test_model_deployment_directory(tmpdir, stub):
+def test_model_deployment_directory(stub):
+    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
     expected_deployment_files = ["model.onnx"]
 
-    model = Model(stub, tmpdir)
+    model = Model(stub, temp_dir.name)
     assert model.deployment_tar.is_archive
     # download and extract deployment tar
     deployment_dir_path = model.deployment_directory_path
@@ -349,9 +350,9 @@ def test_model_deployment_directory(tmpdir, stub):
     # deployment and deployment_tar should be point to the same files
     assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
     # make sure that the model contains expected files
-    assert set(os.listdir(tmpdir.strpath)) == {"deployment.tar.gz", "deployment"}
+    assert set(os.listdir(temp_dir.name)) == {"deployment.tar.gz", "deployment"}
     assert (
-        os.listdir(os.path.join(tmpdir.strpath, "deployment"))
+        os.listdir(os.path.join(temp_dir.name, "deployment"))
         == expected_deployment_files
     )
 
@@ -368,7 +369,7 @@ def test_model_deployment_directory(tmpdir, stub):
     assert not model.deployment_tar.is_archive
 
     # test recreating the model from the local files
-    model = Model(tmpdir.strpath)
+    model = Model(temp_dir.name)
 
     assert isinstance(model.deployment, SelectDirectory)
     assert len(model.deployment.files) == len(expected_deployment_files)
@@ -377,7 +378,7 @@ def test_model_deployment_directory(tmpdir, stub):
     assert len(model.deployment_tar.files) == len(expected_deployment_files)
     assert not model.deployment_tar.is_archive
 
-    shutil.rmtree(tmpdir.dirname)
+    shutil.rmtree(temp_dir.name)
 
 
 def _extraction_test_helper(model: Model):
