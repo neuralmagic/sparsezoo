@@ -348,7 +348,7 @@ def test_model_deployment_directory(tmpdir, stub):
 
     # deployment and deployment_tar should be point to the same files
     assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
-    # make sure that the model contains expectedd files
+    # make sure that the model contains expected files
     assert set(os.listdir(tmpdir.strpath)) == {"deployment.tar.gz", "deployment"}
     assert (
         os.listdir(os.path.join(tmpdir.strpath, "deployment"))
