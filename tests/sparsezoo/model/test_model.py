@@ -358,7 +358,7 @@ def test_model_deployment_directory(tmpdir, stub):
     assert isinstance(model.deployment, SelectDirectory)
     # TODO: this should be 1. However, the API is returning for `deployment` file type
     # both `model.onnx` and `deployment/model.onnx`. T
-    # his should probably fix on the API side
+    # This should probably be fixed on the API side
     assert (
         len(model.deployment.files) == 2
     )  # should be == len(expected_deployment_files)
