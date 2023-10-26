@@ -145,6 +145,14 @@ class Model(Directory):
             allow_multiple_outputs=True,
         )
 
+        if isinstance(self.deployment, list):
+            # if there are multiple deployment directories
+            # (this may happen due to the presence of both
+            # - deployment directory
+            # - deployment.tar.gz file
+            # we need to choose one (they are identical)
+            self.deployment = self.deployment[0]
+
         self.deployment_tar: SelectDirectory = self._directory_from_files(
             files,
             directory_class=SelectDirectory,
@@ -668,7 +676,7 @@ class Model(Directory):
         # one directory (unless `allow-multiple_outputs`=True)
         elif len(directories_found) != 1:
             if allow_multiple_outputs:
-                return directories_found[0]
+                return directories_found
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
