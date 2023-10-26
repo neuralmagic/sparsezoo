@@ -24,12 +24,12 @@ import pytest
 
 from sparsezoo import Model
 from sparsezoo.objects.directories import SelectDirectory
-from sparsezoo.objects.directory import Directory
 
 
 files_ic = {
     "training",
-    "deployment.tar.gz" "deployment",
+    "deployment.tar.gz",
+    "deployment",
     "logs",
     "onnx",
     "model.onnx",
@@ -339,26 +339,43 @@ def test_model_gz_extraction_from_local_files(stub: str):
     ],
 )
 def test_model_deployment_directory(tmpdir, stub):
+    expected_deployment_files = ["model.onnx"]
+
     model = Model(stub, tmpdir)
     assert model.deployment_tar.is_archive
     # download and extract deployment tar
     deployment_dir_path = model.deployment_directory_path
-    assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
-    assert set(os.listdir(tmpdir.strpath)) == {"deployment.tar.gz", "deployment"}
 
     # deployment and deployment_tar should be point to the same files
+    assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
+    # make sure that the model contains expectedd files
+    assert set(os.listdir(tmpdir.strpath)) == {"deployment.tar.gz", "deployment"}
+    assert (
+        os.listdir(os.path.join(tmpdir.strpath, "deployment"))
+        == expected_deployment_files
+    )
+
     assert isinstance(model.deployment, SelectDirectory)
-    assert len(model.deployment.files) == 2  # weird, this should be one
+    # TODO: this should be 1. However, the API is returning for `deployment` file type
+    # both `model.onnx` and `deployment/model.onnx`. T
+    # his should probably fix on the API side
+    assert (
+        len(model.deployment.files) == 2
+    )  # should be == len(expected_deployment_files)
 
     assert isinstance(model.deployment_tar, SelectDirectory)
-    assert len(model.deployment_tar.files) == 1
+    assert len(model.deployment_tar.files) == len(expected_deployment_files)
     assert not model.deployment_tar.is_archive
 
+    # test recreating the model from the local files
     model = Model(tmpdir.strpath)
+
     assert isinstance(model.deployment, SelectDirectory)
-    assert len(model.deployment.files) > 0
-    assert isinstance(model.deployment_tar, Directory)
-    assert len(model.deployment_tar.files) == 0
+    assert len(model.deployment.files) == len(expected_deployment_files)
+
+    assert isinstance(model.deployment_tar, SelectDirectory)
+    assert len(model.deployment_tar.files) == len(expected_deployment_files)
+    assert not model.deployment_tar.is_archive
 
     shutil.rmtree(tmpdir.dirname)
 

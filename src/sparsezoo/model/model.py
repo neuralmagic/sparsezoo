@@ -201,6 +201,7 @@ class Model(Directory):
         self._files_dictionary = {
             "training": self.training,
             "deployment": self.deployment,
+            "deployment.tar.gz": self.deployment_tar,
             "onnx_folder": self.onnx_folder,
             "logs": self.logs,
             "sample_originals": self.sample_originals,
@@ -242,7 +243,7 @@ class Model(Directory):
         if self.deployment_tar.is_archive:
             self.deployment_tar.unzip()
 
-        return self.deployment_tar.path
+        return self.deployment.path
 
     @property
     def stub_params(self) -> Dict[str, str]:

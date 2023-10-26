@@ -298,9 +298,22 @@ class Directory(File):
                 member.name = os.path.basename(member.name)
                 tar.extract(member=member, path=path)
                 files.append(
-                    File(name=member.name, path=os.path.join(path, member.name))
+                    File(
+                        name=member.name,
+                        path=os.path.join(path, member.name),
+                        parent_directory=path,
+                    )
                 )
             tar.close()
+        # if path already exists, then the tar archive has already been unzipped
+        # and we can just use the files in the directory
+        elif os.path.exists(path):
+            for file in os.listdir(path):
+                files.append(
+                    File(
+                        name=file, path=os.path.join(path, file), parent_directory=path
+                    )
+                )
 
         self.name = name
         self.files = files
