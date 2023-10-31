@@ -21,7 +21,7 @@ on:
 
 jobs:
 
-  BUILD:
+  BUILD_AND_REPORT:
     runs-on: ${{ inputs.runs_on }}
     outputs:
       status: ${{ steps.build.outputs.status }}
