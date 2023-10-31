@@ -89,6 +89,8 @@ jobs:
              fi
              echo "Here========"
              pwd
+             ls -alt
+             ls -alt .github/workflows/
 
   TESTMO:
     if: success() || failure()
