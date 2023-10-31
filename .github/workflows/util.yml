@@ -108,6 +108,7 @@ jobs:
           echo "name: ${name}"
           echo "build status: ${{ needs.BUILD.outputs.status }}"
           exit_code=1
+          pwd
           if [[ "${{ needs.BUILD.outputs.status }}" = "success" ]]; then
               exit_code=0
               cp .github/workflows/result.xml.success .github/workflows/result.xml
