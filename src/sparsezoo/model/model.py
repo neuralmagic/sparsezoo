@@ -324,6 +324,12 @@ class Model(Directory):
         else:
             downloads = []
             for key, file in self._files_dictionary.items():
+                if key == "deployment":
+                    # skip the download of the deployment directory
+                    # since identical files will be downloaded
+                    # in the deployment_tar
+                    _LOGGER.debug(f"Intentionally skipping downloading the file {key}")
+                    continue
                 if file is not None:
                     # save all the files to a temporary directory
                     downloads.append(self._download(file, download_path))

@@ -184,6 +184,10 @@ class TestModel:
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         model = Model(stub, temp_dir.name)
         model.download()
+        # since downloading the `deployment` file is
+        # disabled by default, we need to do it
+        # explicitly
+        model.deployment.download()
         self._add_mock_files(temp_dir.name, clone_sample_outputs=clone_sample_outputs)
         model = Model(temp_dir.name)
 
