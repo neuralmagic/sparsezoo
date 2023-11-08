@@ -205,7 +205,7 @@ def collate_output_shapes(
     :param output_shapes: output shapes used to generate NodeShapes
     :return: a dictionary mapping node ids to NodeShapes
     """
-    output_shapes = output_shapes if output_shapes is not None else {}
+    output_shapes = output_shapes or {}
 
     # Maps NodeArg to its inputs
     node_to_inputs = {}

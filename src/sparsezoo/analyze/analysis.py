@@ -378,6 +378,7 @@ class NodeAnalysis(YAMLSerializableBaseModel):
             num_sparse_four_blocks,
             num_four_blocks,
         ) = get_node_num_four_block_zeros_and_size(model_graph, node)
+
         parameter_summary = ParameterSummary(
             total=num_parameters + node_bias_size,
             pruned=num_sparse_parameters,
@@ -529,6 +530,7 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                 else {},
             ),
         )
+        breakpoint()
 
         parameters = []
         if node_weight is not None:
@@ -593,7 +595,7 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                     dtype=str(node_bias.dtype),
                 )
             )
-
+        # breakpoint()
         return cls(
             name=node.name,
             node_id=node_id,
@@ -900,6 +902,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         description="A list of different benchmarking results for the onnx model",
     )
 
+    #### ==============================================
     @classmethod
     def from_onnx(cls, onnx_file_path: Union[str, ModelProto]):
         """
@@ -1260,6 +1263,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 },
             ),
         )
+        breakpoint()
 
         return cls(
             model_name=model_name,
@@ -1272,6 +1276,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             nodes=node_analyses,
         )
 
+    ### ======================================================================================
     @classmethod
     def create(cls, file_path: Union[str, ModelProto]) -> "ModelAnalysis":
         """
@@ -1355,6 +1360,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         for footer_key, footer_value in footer.items():
             print(f"{footer_key}: {footer_value}")
 
+    # ---------
     @staticmethod
     def analyze_nodes(model_graph: ONNXGraph) -> List[NodeAnalysis]:
         """
@@ -1372,6 +1378,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 model_graph, node, node_shape=node_shape, node_dtype=node_dtype
             )
             nodes.append(node_analysis)
+            # breakpoint()
 
         return nodes
 
@@ -1454,6 +1461,7 @@ def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
         )
         for op_type in non_parameterized_op_types
     ]
+    breakpoint()
 
     return CountSummary(
         items=[*parameterized_item_counts, *non_parameterized_item_counts]

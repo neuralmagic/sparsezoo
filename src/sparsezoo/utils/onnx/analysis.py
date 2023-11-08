@@ -26,6 +26,7 @@ __all__ = [
     "get_node_four_block_sparsity",
     "get_node_num_four_block_zeros_and_size",
     "get_node_sparsity",
+    "get_node_paramters",
     "get_node_weight_name",
     "get_node_weight",
     "get_node_bias",
@@ -438,3 +439,10 @@ def _get_node_input(
         return node.input[index]
     else:
         return default
+
+
+def get_node_paramters(node: NodeProto, model_graph: ONNXGraph):
+    _, num_parameters = get_node_num_zeros_and_size(model_graph, node)
+    node_bias = get_node_bias(model_graph, node)
+    node_bias_size = node_bias.size if node_bias is not None else 0
+    return num_parameters + node_bias_size
