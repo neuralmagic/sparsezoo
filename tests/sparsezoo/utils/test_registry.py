@@ -25,17 +25,30 @@ def test_registery_flow_single():
     class Foo1(Foo):
         pass
 
+    assert {"Foo1"} == set(Foo.registered_names())
+
     @Foo.register(name="name_2")
     class Foo2(Foo):
         pass
 
     assert {"Foo1", "name_2"} == set(Foo.registered_names())
 
-    with pytest.raises(ValueError):
+    @Foo.register(name=["name_3", "name_4"])
+    class Foo3(Foo):
+        pass
+
+    assert {"Foo1", "name_2", "name_3", "name_4"} == set(Foo.registered_names())
+
+    with pytest.raises(KeyError):
         Foo.get_value_from_registry("Foo2")
 
     assert Foo.get_value_from_registry("Foo1") is Foo1
     assert isinstance(Foo.load_from_registry("name_2"), Foo2)
+    assert (
+        Foo.get_value_from_registry("name_3")
+        is Foo3
+        is Foo.get_value_from_registry("name_4")
+    )
 
 
 def test_registry_flow_multiple():
