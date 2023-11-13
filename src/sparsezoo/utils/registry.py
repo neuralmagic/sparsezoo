@@ -19,7 +19,7 @@ of neuralmagic utilities
 
 import importlib
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 
 __all__ = [
@@ -64,6 +64,11 @@ class RegistryMixin:
     class Cifar(Dataset):
         pass
 
+    # register with multiple aliases
+    @Dataset.register(name=["cifar-10-dataset", "cifar-100-dataset"])
+    class Cifar(Dataset):
+        pass
+
     # load as "cifar-dataset"
     cifar = Dataset.load_from_registry("cifar-dataset")
 
@@ -77,12 +82,13 @@ class RegistryMixin:
     registry_requires_subclass: bool = False
 
     @classmethod
-    def register(cls, name: Optional[str] = None):
+    def register(cls, name: Union[List[str], str, None] = None):
         """
         Decorator for registering a value (ie class or function) wrapped by this
         decorator to the base class (class that .register is called from)
 
-        :param name: name to register the wrapped value as, defaults to value.__name__
+        :param name: name or list of names to register the wrapped value as,
+            defaults to value.__name__
         :return: register decorator
         """
 
@@ -93,18 +99,22 @@ class RegistryMixin:
         return decorator
 
     @classmethod
-    def register_value(cls, value: Any, name: Optional[str] = None):
+    def register_value(cls, value: Any, name: Union[List[str], str, None] = None):
         """
         Registers the given value to the class `.register_value` is called from
         :param value: value to register
-        :param name: name to register the wrapped value as, defaults to value.__name__
+        :param name: name or list of names to register the wrapped value as,
+            defaults to value.__name__
         """
-        register(
-            parent_class=cls,
-            value=value,
-            name=name,
-            require_subclass=cls.registry_requires_subclass,
-        )
+        names = name if isinstance(name, list) else [name]
+
+        for name in names:
+            register(
+                parent_class=cls,
+                value=value,
+                name=name,
+                require_subclass=cls.registry_requires_subclass,
+            )
 
     @classmethod
     def load_from_registry(cls, name: str, **constructor_kwargs) -> object:
@@ -148,7 +158,7 @@ def register(
 ):
     """
     :param parent_class: class to register the name under
-    :param value: value to register
+    :param value: the value to register
     :param name: name to register the wrapped value as, defaults to value.__name__
     :param require_subclass: require that value is a subclass of the class this
         method is called from
@@ -193,7 +203,7 @@ def get_from_registry(
         # look up name in registry
         retrieved_value = _REGISTRY[parent_class].get(name)
         if retrieved_value is None:
-            raise ValueError(
+            raise KeyError(
                 f"Unable to find {name} registered under type {parent_class}. "
                 f"Registered values for {parent_class}: "
                 f"{registered_names(parent_class)}"
