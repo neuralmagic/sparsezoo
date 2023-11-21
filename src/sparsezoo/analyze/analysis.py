@@ -368,9 +368,13 @@ class NodeAnalysis(YAMLSerializableBaseModel):
         node_weight = get_node_weight(model_graph, node)
         node_bias = get_node_bias(model_graph, node)
         node_bias_size = node_bias.size if node_bias is not None else 0
+        # param_dtypes = [
+        #     str(param.dtype) for param in [node_weight, node_bias] if param is not None
+        # ]
         param_dtypes = [
-            str(param.dtype) for param in [node_weight, node_bias] if param is not None
+            str(param.dtype) for param in [node_weight] if param is not None
         ]
+
         num_sparse_parameters, num_parameters = get_node_num_zeros_and_size(
             model_graph, node
         )
@@ -593,7 +597,7 @@ class NodeAnalysis(YAMLSerializableBaseModel):
                     dtype=str(node_bias.dtype),
                 )
             )
-
+        # breakpoint()
         return cls(
             name=node.name,
             node_id=node_id,
@@ -759,6 +763,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 ),
             ],
         )
+        breakpoint()
         if by_types:
             _LOGGER.info("Running analysis `by_types`")
 
@@ -858,6 +863,7 @@ class ModelAnalysisSummary(Entry, YAMLSerializableBaseModel):
                 sections.append(node_timing_section)
 
         sections.extend([param_section, ops_section, overall_section])
+        # breakpoint()
         return cls(sections=sections)
 
 
@@ -920,7 +926,6 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         model_graph = ONNXGraph(model_onnx)
 
         node_analyses = cls.analyze_nodes(model_graph)
-
         layer_counts, op_counts = get_layer_and_op_counts(model_graph)
         layer_counts.update(op_counts)
         node_counts = layer_counts.copy()
@@ -1013,7 +1018,6 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 ]
             ),
         )
-
         all_parameter_dtypes = []
         all_ops_operation_dtypes = []
         all_macs_operation_dtypes = []
@@ -1027,6 +1031,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             all_macs_operation_dtypes.extend(
                 node_analysis.operation_summary.macs.precision.keys()
             )
+            # print(node_analysis.operation_summary.ops.precision.keys())
+            # breakpoint()
         all_ops_operation_dtypes = set(all_ops_operation_dtypes)
         all_macs_operation_dtypes = set(all_macs_operation_dtypes)
         all_parameter_dtypes = set(all_parameter_dtypes)
@@ -1260,7 +1266,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
                 },
             ),
         )
-
+        breakpoint()
         return cls(
             model_name=model_name,
             node_counts=node_counts,
@@ -1414,6 +1420,7 @@ def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
     non_parameterized_op_types = set()
 
     for node in analysis.nodes:
+        # if node.op_type == "Gemm" : breakpoint()
         if node.parameterized_prunable:
             parameterized_op_types.add(node.op_type)
             pruned_param_counts[node.op_type] += node.parameter_summary.pruned
@@ -1454,7 +1461,7 @@ def _get_ops_count_summary(analysis: ModelAnalysis) -> CountSummary:
         )
         for op_type in non_parameterized_op_types
     ]
-
+    breakpoint()
     return CountSummary(
         items=[*parameterized_item_counts, *non_parameterized_item_counts]
     )

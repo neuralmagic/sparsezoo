@@ -12,34 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Optional, Tuple, Union
+from copy import deepcopy
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy
 from onnx import NodeProto, numpy_helper
 from onnx.helper import get_attribute_value
 
-from sparsezoo.utils import ONNXGraph
+from sparsezoo.utils import ONNXGraph  # extract_node_shapes_and_dtypes,; get_ops_dict,
 
 
-__all__ = [
-    "get_layer_and_op_counts",
-    "get_node_four_block_sparsity",
-    "get_node_num_four_block_zeros_and_size",
-    "get_node_sparsity",
-    "get_node_weight_name",
-    "get_node_weight",
-    "get_node_bias",
-    "get_node_bias_name",
-    "get_node_num_zeros_and_size",
-    "get_zero_point",
-    "is_four_block_sparse_layer",
-    "is_parameterized_prunable_layer",
-    "is_quantized_layer",
-    "is_sparse_layer",
-    "group_four_block",
-    "extract_node_id",
-    "get_node_attributes",
-]
+# __all__ = [
+#     "get_layer_and_op_counts",
+#     "get_node_four_block_sparsity",
+#     "get_node_num_four_block_zeros_and_size",
+#     "get_node_sparsity",
+#     "get_node_paramters",
+#     "get_node_weight_name",
+#     "get_node_weight",
+#     "get_node_bias",
+#     "get_node_bias_name",
+#     "get_node_num_zeros_and_size",
+#     "get_zero_point",
+#     "is_four_block_sparse_layer",
+#     "is_parameterized_prunable_layer",
+#     "is_quantized_layer",
+#     "is_sparse_layer",
+#     "group_four_block",
+#     "extract_node_id",
+#     "get_node_attributes",
+# ]
 
 
 def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
@@ -438,3 +440,128 @@ def _get_node_input(
         return node.input[index]
     else:
         return default
+
+
+#  ======== statistics ============
+def get_numpy_modes(arr: numpy.ndarray):
+    unique_values, counts = numpy.unique(arr.flatten(), return_counts=True)
+    max_value_indices = numpy.where(counts == numpy.max(counts))
+    mode = unique_values[max_value_indices]
+    return mode.tolist()
+
+
+def get_numpy_percentiles(
+    arr: numpy.ndarray, percentiles: List[int] = [10, 25, 50, 75, 90]
+):
+    return dict(
+        [
+            (f"{percentile}th", value)
+            for percentile, value in zip(
+                percentiles, numpy.percentile(arr, percentiles).tolist()
+            )
+        ]
+    )
+
+
+# ===================================
+
+
+def get_numpy_distribution_statistics(arr: numpy.ndarray):
+    """
+    Checked with scipy
+    """
+    flatten_arr = arr.flatten()
+    mean_val = numpy.mean(flatten_arr)
+    std_dev = numpy.std(flatten_arr)
+    n = len(flatten_arr)
+
+    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / (std_dev**3)
+    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / (std_dev**4) - 3
+
+    return skewness, kurtosis
+
+
+def get_numpy_entropy(arr: numpy.ndarray):
+    """overall entropy value of the given array disregrading channels"""
+    flatten_arr = arr.flatten()
+    flatten_arr = flatten_arr[flatten_arr > 0]
+    probs = flatten_arr / numpy.sum(flatten_arr)
+
+    return -numpy.sum(probs * numpy.log2(probs))
+
+
+def is_weighted_layer(node: NodeProto) -> bool:
+    inps = node.input
+    return any("weight" in inp for inp in inps)
+
+
+def get_node_input_feature_name(node: NodeProto) -> str:
+    """
+    :return the node input feature X name
+    """
+    return node.input[0]
+
+
+def get_node_output_name(node: NodeProto) -> str:
+    """
+    :return the node output Y name
+    """
+    return node.output[0]
+
+
+def get_node_kernel_shape(node: NodeProto) -> List[int]:
+    for attr in node.attribute:
+        if "kernel" in attr.name:
+            return attr.ints
+    return []
+
+
+# def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
+#     return {
+#         attr.name: dict(
+#             shape=attr.ints,
+#             size=attr.ByteSize(),
+#         )
+#         for attr in node.attribute
+#     }
+
+
+def get_node_param_counts(
+    node: NodeProto, model_graph: ONNXGraph
+) -> Tuple[int, int, int]:
+    """
+    :return: total number of params, number of bias, total sparse params
+    """
+    sparse_params, params = get_node_num_zeros_and_size(model_graph, node)
+    node_bias = get_node_bias(model_graph, node)
+    bias = node_bias.size if node_bias is not None else 0
+    return params, bias, sparse_params
+
+
+def get_numpy_quantization_level(arr: numpy.ndarray):
+    """return the actual quant level"""
+    if "32" not in str(arr.dtype):
+        return int(numpy.ceil(numpy.log2(numpy.max(arr) - numpy.min(arr))))
+
+    return 32
+
+
+def get_numpy_bits(arr: numpy.ndarray):
+    """Get the total bits required for the arr"""
+    precision = get_numpy_quantization_level(arr)
+    return arr.size * precision
+
+
+def get_node_bits(
+    model_graph: ONNXGraph,
+    node: NodeProto,
+):
+    node_weight = get_node_weight(model_graph, node)
+    return get_numpy_bits(node_weight)
+
+
+def get_ops_count_from_ops_dict(
+    key: str,
+    ops_dict: Dict,
+):
+    return sum(value[key] for value in ops_dict.values())
