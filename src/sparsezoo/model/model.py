@@ -137,12 +137,18 @@ class Model(Directory):
             files, directory_class=Directory, display_name="sample-labels"
         )
 
+        self.deployment_tar: SelectDirectory = self._directory_from_files(
+            files,
+            directory_class=SelectDirectory,
+            display_name="deployment.tar.gz",
+        )
         self.deployment: SelectDirectory = self._directory_from_files(
             files,
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
             allow_multiple_outputs=True,
+            tar_directory=self.deployment_tar,
         )
 
         if isinstance(self.deployment, list):
@@ -152,12 +158,6 @@ class Model(Directory):
             # - deployment.tar.gz file
             # we need to choose one (they are identical)
             self.deployment = self.deployment[0]
-
-        self.deployment_tar: SelectDirectory = self._directory_from_files(
-            files,
-            directory_class=SelectDirectory,
-            display_name="deployment.tar.gz",
-        )
 
         self.onnx_folder: Directory = self._directory_from_files(
             files,
