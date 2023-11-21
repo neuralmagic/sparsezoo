@@ -246,6 +246,10 @@ class Model(Directory):
             compressed deployemnent directory if not downloaded (2) uncompresses
             deployment directory if compressed
         """
+        # TODO: Can get rid of this as long as we update all references in deepsparse
+        # to now use model.deployment.path/download once we guarantee that it always
+        # goes through tar
+
         # trigger initial download if not downloaded
         self.deployment_tar.path
         if self.deployment_tar.is_archive:
