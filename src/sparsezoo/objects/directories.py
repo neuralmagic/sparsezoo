@@ -197,6 +197,9 @@ class SelectDirectory(Directory):
     :param parent_directory: path of the parent SelectDirectory
     :param stub_params: dictionary of zoo stub params that this directory
         was specified with
+    :param tar_directory: optional pointer to the tar_directory
+        of this directory. By default, when downloading the directory
+        in question, we should download and extract the tarball.
     """
 
     def __init__(
@@ -207,7 +210,7 @@ class SelectDirectory(Directory):
         url: Optional[str] = None,
         parent_directory: Optional[str] = None,
         stub_params: Optional[Dict[str, str]] = None,
-        tar_directory: Directory = None,
+        tar_directory: Optional[Directory] = None,
     ):
         self._default, self._available = None, None
 

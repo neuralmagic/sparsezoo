@@ -168,9 +168,12 @@ class Directory(File):
                     "Please make sure that `destination_path` argument is not None."
                 )
         if getattr(self, "tar_directory", None) is not None:
+            # if tar_directory is not None, then we are downloading
+            # the directory as a tar archive file
             self = self.tar_directory
 
         # Directory can represent a tar file.
+        # In this case, we download the tar file and unzip it.
         if self.is_archive:
             new_file_path = os.path.join(destination_path, self.name)
             for attempt in range(retries):

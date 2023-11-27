@@ -111,7 +111,7 @@ class Model(Directory):
         self.sample_originals: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            allow_multiple_outputs=True,
+            allow_picking_one_from_multiple=True,
             display_name="sample-originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
@@ -140,7 +140,7 @@ class Model(Directory):
         self.sample_labels: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            allow_multiple_outputs=True,
+            allow_picking_one_from_multiple=True,
             display_name="sample-labels",
         )
 
@@ -154,22 +154,9 @@ class Model(Directory):
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
-            allow_multiple_outputs=True,
+            allow_picking_one_from_multiple=True,
             tar_directory=self.deployment_tar,
         )
-        if isinstance(self.sample_originals, list):
-            self.sample_originals = self.sample_originals[0]
-
-        if isinstance(self.sample_labels, list):
-            self.sample_labels = self.sample_labels[0]
-
-        if isinstance(self.deployment, list):
-            # if there are multiple deployment directories
-            # (this may happen due to the presence of both
-            # - deployment directory
-            # - deployment.tar.gz file
-            # we need to choose one (they are identical)
-            self.deployment = self.deployment[0]
 
         self.onnx_folder: Directory = self._directory_from_files(
             files,
@@ -627,8 +614,9 @@ class Model(Directory):
         files: List[Dict[str, Any]],
         directory_class: Union[Directory, NumpyDirectory] = Directory,
         display_name: Optional[str] = None,
-        regex: Optional[bool] = False,
-        allow_multiple_outputs: Optional[bool] = False,
+        regex: bool = False,
+        allow_multiple_outputs: bool = False,
+        allow_picking_one_from_multiple: bool = False,
         **kwargs: object,
     ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
 
@@ -670,10 +658,13 @@ class Model(Directory):
             return None
         # For now, following the logic of this class,
         # it is prohibitive for find more than
-        # one directory (unless `allow-multiple_outputs`=True)
+        # one directory (unless `allow-multiple_outputs`=True
+        # or `allow_picking_one_from_multiple`=True)
         elif len(directories_found) != 1:
             if allow_multiple_outputs:
                 return directories_found
+            elif allow_picking_one_from_multiple:
+                return directories_found[0]
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
@@ -737,12 +728,11 @@ class Model(Directory):
                 engine_name = directory.name.split("_")[-1]
                 if engine_name.endswith(".tar.gz"):
                     engine_name = engine_name.replace(".tar.gz", "")
-                if engine_name == "sample-outputs":
-                    continue
-                if engine_name not in ENGINES:
+                if engine_name not in ENGINES and engine_name != "sample-outputs":
                     raise ValueError(
-                        f"The name of the 'sample-outputs' directory should "
-                        f"end with an engine name (one of the {ENGINES}). "
+                        f"The name of the sample-outputs directory should be"
+                        f"`sample-outputs` or shoud start with `sample-outputs_` and "
+                        f"end with an engine name (one of the {ENGINES})."
                         f"However, the name is {directory.name}."
                     )
                 engine_to_numpydir_map[engine_name] = directory

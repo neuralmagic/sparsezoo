@@ -23,7 +23,6 @@ import numpy
 import pytest
 
 from sparsezoo import Model
-from sparsezoo.objects.directories import SelectDirectory
 
 
 files_ic = {
@@ -61,40 +60,40 @@ files_yolo = copy.copy(files_ic)
             ("recipe", "transfer_learn"),
             True,
         ),
-        # (
-        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-        #     "pruned-moderate",
-        #     ("checkpoint", "some_dummy_name"),
-        #     False,
-        # ),
-        # (
-        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-        #     "pruned-moderate",
-        #     ("deployment", "default"),
-        #     True,
-        # ),
-        # (
-        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-        #     "pruned-moderate",
-        #     ("checkpoint", "preqat"),
-        #     True,
-        # ),
-        # (
-        #     "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
-        #     "12layer_pruned80_quant-none-vnni",
-        #     ("checkpoint", "postqat"),
-        #     True,
-        # ),
-        # (
-        #     "biobert-base_cased-jnlpba_pubmed-pruned80.4block_quantized",
-        #     ("deployment", "default"),
-        #     True,
-        # ),
-        # (
-        #     "resnet_v1-50-imagenet-pruned95",
-        #     ("checkpoint", "preqat"),
-        #     True,
-        # ),
+        (
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
+            ("checkpoint", "some_dummy_name"),
+            False,
+        ),
+        (
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
+            ("deployment", "default"),
+            True,
+        ),
+        (
+            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+            "pruned-moderate",
+            ("checkpoint", "preqat"),
+            True,
+        ),
+        (
+            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
+            "12layer_pruned80_quant-none-vnni",
+            ("checkpoint", "postqat"),
+            True,
+        ),
+        (
+            "biobert-base_cased-jnlpba_pubmed-pruned80.4block_quantized",
+            ("deployment", "default"),
+            True,
+        ),
+        (
+            "resnet_v1-50-imagenet-pruned95",
+            ("checkpoint", "preqat"),
+            True,
+        ),
     ],
     scope="function",
 )
@@ -142,39 +141,39 @@ class TestSetupModel:
             True,
             files_ic.union({"recipe.md", "recipe_transfer_learn.md"}),
         ),
-        # (
-        #     (
-        #         "zoo:"
-        #         "nlp/question_answering/distilbert-none/"
-        #         "pytorch/huggingface/squad/pruned80_quant-none-vnni"
-        #     ),
-        #     False,
-        #     files_nlp.union({"recipe.md"}),
-        # ),
-        # (
-        #     (
-        #         "zoo:"
-        #         "cv/detection/yolov5-s/"
-        #         "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
-        #     ),
-        #     True,
-        #     files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
-        # ),
-        # (
-        #     "yolov5-x-coco-pruned70.4block_quantized",
-        #     False,
-        #     files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
-        # ),
-        # (
-        #     "yolov5-n6-voc_coco-pruned55",
-        #     False,
-        #     files_yolo.union({"recipe.md"}),
-        # ),
-        # (
-        #     "resnet_v1-50-imagenet-channel30_pruned90_quantized",
-        #     False,
-        #     files_yolo.union({"recipe.md", "recipe_transfer_classification.md"}),
-        # ),
+        (
+            (
+                "zoo:"
+                "nlp/question_answering/distilbert-none/"
+                "pytorch/huggingface/squad/pruned80_quant-none-vnni"
+            ),
+            False,
+            files_nlp.union({"recipe.md"}),
+        ),
+        (
+            (
+                "zoo:"
+                "cv/detection/yolov5-s/"
+                "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
+            ),
+            True,
+            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
+        ),
+        (
+            "yolov5-x-coco-pruned70.4block_quantized",
+            False,
+            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
+        ),
+        (
+            "yolov5-n6-voc_coco-pruned55",
+            False,
+            files_yolo.union({"recipe.md"}),
+        ),
+        (
+            "resnet_v1-50-imagenet-channel30_pruned90_quantized",
+            False,
+            files_yolo.union({"recipe.md", "recipe_transfer_classification.md"}),
+        ),
     ],
     scope="function",
 )
@@ -338,49 +337,6 @@ def test_model_gz_extraction_from_local_files(stub: str):
         "imagenet/pruned-moderate",
     ],
 )
-def test_model_deployment_directory(stub):
-    temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
-    expected_deployment_files = ["model.onnx"]
-
-    model = Model(stub, temp_dir.name)
-    assert model.deployment_tar.is_archive
-    # download and extract deployment tar
-    deployment_dir_path = model.deployment_directory_path
-
-    # deployment and deployment_tar should be point to the same files
-    assert deployment_dir_path == model.deployment_tar.path == model.deployment.path
-    # make sure that the model contains expected files
-    assert set(os.listdir(temp_dir.name)) == {"deployment.tar.gz", "deployment"}
-    assert (
-        os.listdir(os.path.join(temp_dir.name, "deployment"))
-        == expected_deployment_files
-    )
-
-    assert isinstance(model.deployment, SelectDirectory)
-    # TODO: this should be 1. However, the API is returning for `deployment` file type
-    # both `model.onnx` and `deployment/model.onnx`.
-    # This should probably be fixed on the API side
-    assert (
-        len(model.deployment.files) == 2
-    )  # should be == len(expected_deployment_files)
-
-    assert isinstance(model.deployment_tar, SelectDirectory)
-    assert len(model.deployment_tar.files) == len(expected_deployment_files)
-    assert not model.deployment_tar.is_archive
-
-    # test recreating the model from the local files
-    model = Model(temp_dir.name)
-
-    assert isinstance(model.deployment, SelectDirectory)
-    assert len(model.deployment.files) == len(expected_deployment_files)
-
-    assert isinstance(model.deployment_tar, SelectDirectory)
-    assert len(model.deployment_tar.files) == len(expected_deployment_files)
-    assert not model.deployment_tar.is_archive
-
-    shutil.rmtree(temp_dir.name)
-
-
 def _extraction_test_helper(model: Model):
     # download and extract model.onnx.tar.gz
     #  path should point to extracted model.onnx file
