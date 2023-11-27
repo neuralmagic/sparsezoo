@@ -167,6 +167,8 @@ class Directory(File):
                     "Failed to recognize a valid download path. "
                     "Please make sure that `destination_path` argument is not None."
                 )
+        if self.tar_directory is not None:
+            self = self.tar_directory
 
         # Directory can represent a tar file.
         if self.is_archive:
@@ -180,6 +182,7 @@ class Directory(File):
                     )
 
                     self._path = new_file_path
+                    self.unzip()
                     return
 
                 except Exception as err:

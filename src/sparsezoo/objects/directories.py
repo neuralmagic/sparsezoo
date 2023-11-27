@@ -218,11 +218,7 @@ class SelectDirectory(Directory):
             url=url,
             parent_directory=parent_directory,
         )
-
-        # TODO: update download and/or path so on download of entire directory
-        # we go through the tar directory
         self.tar_directory = tar_directory
-
         self._stub_params = stub_params or {}
         self.files_dict = self.files_to_dictionary()
 
