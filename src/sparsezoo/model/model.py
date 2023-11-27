@@ -118,11 +118,9 @@ class Model(Directory):
             files,
             directory_class=NumpyDirectory,
             display_name="sample-inputs",
-            allow_multiple_outputs=True,
+            allow_picking_one_from_multiple=True,
         )
 
-        if isinstance(self.sample_inputs, list):
-            self.sample_inputs = self.sample_inputs[0]
         self.model_card: File = self._file_from_files(files, display_name="model.md")
 
         self.sample_outputs = self._directory_from_files(
@@ -616,6 +614,10 @@ class Model(Directory):
         display_name: Optional[str] = None,
         regex: bool = False,
         allow_multiple_outputs: bool = False,
+        # allow picking one from multiple directories
+        # is used when we initialize the model from
+        # local directory (not stub) and both [some_directory]
+        # and [some_directory].tar.gz are present
         allow_picking_one_from_multiple: bool = False,
         **kwargs: object,
     ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
