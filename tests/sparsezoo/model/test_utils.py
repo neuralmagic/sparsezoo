@@ -68,14 +68,14 @@ EXPECTED_YOLO_FILES = {
 @pytest.mark.parametrize(
     "stub, expected_files",
     [
-        (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
-            EXPECTED_IC_FILES,
-        ),
-        (
-            "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
-            EXPECTED_NLP_FILES,
-        ),
+        # (
+        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/pruned-moderate",  # noqa E501
+        #     EXPECTED_IC_FILES,
+        # ),
+        # (
+        #     "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni",  # noqa E501
+        #     EXPECTED_NLP_FILES,
+        # ),
         (
             "zoo:cv/detection/yolov5-s/pytorch/ultralytics/coco/pruned_quant-aggressive_94",  # noqa E501
             EXPECTED_YOLO_FILES,

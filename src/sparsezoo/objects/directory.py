@@ -167,7 +167,7 @@ class Directory(File):
                     "Failed to recognize a valid download path. "
                     "Please make sure that `destination_path` argument is not None."
                 )
-        if self.tar_directory is not None:
+        if getattr(self, "tar_directory", None) is not None:
             self = self.tar_directory
 
         # Directory can represent a tar file.

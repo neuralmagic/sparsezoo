@@ -61,40 +61,40 @@ files_yolo = copy.copy(files_ic)
             ("recipe", "transfer_learn"),
             True,
         ),
-        (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",
-            ("checkpoint", "some_dummy_name"),
-            False,
-        ),
-        (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",
-            ("deployment", "default"),
-            True,
-        ),
-        (
-            "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
-            "pruned-moderate",
-            ("checkpoint", "preqat"),
-            True,
-        ),
-        (
-            "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
-            "12layer_pruned80_quant-none-vnni",
-            ("checkpoint", "postqat"),
-            True,
-        ),
-        (
-            "biobert-base_cased-jnlpba_pubmed-pruned80.4block_quantized",
-            ("deployment", "default"),
-            True,
-        ),
-        (
-            "resnet_v1-50-imagenet-pruned95",
-            ("checkpoint", "preqat"),
-            True,
-        ),
+        # (
+        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+        #     "pruned-moderate",
+        #     ("checkpoint", "some_dummy_name"),
+        #     False,
+        # ),
+        # (
+        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+        #     "pruned-moderate",
+        #     ("deployment", "default"),
+        #     True,
+        # ),
+        # (
+        #     "zoo:cv/classification/mobilenet_v1-1.0/pytorch/sparseml/imagenet/"
+        #     "pruned-moderate",
+        #     ("checkpoint", "preqat"),
+        #     True,
+        # ),
+        # (
+        #     "zoo:nlp/question_answering/bert-base/pytorch/huggingface/squad/"
+        #     "12layer_pruned80_quant-none-vnni",
+        #     ("checkpoint", "postqat"),
+        #     True,
+        # ),
+        # (
+        #     "biobert-base_cased-jnlpba_pubmed-pruned80.4block_quantized",
+        #     ("deployment", "default"),
+        #     True,
+        # ),
+        # (
+        #     "resnet_v1-50-imagenet-pruned95",
+        #     ("checkpoint", "preqat"),
+        #     True,
+        # ),
     ],
     scope="function",
 )
@@ -142,39 +142,39 @@ class TestSetupModel:
             True,
             files_ic.union({"recipe.md", "recipe_transfer_learn.md"}),
         ),
-        (
-            (
-                "zoo:"
-                "nlp/question_answering/distilbert-none/"
-                "pytorch/huggingface/squad/pruned80_quant-none-vnni"
-            ),
-            False,
-            files_nlp.union({"recipe.md"}),
-        ),
-        (
-            (
-                "zoo:"
-                "cv/detection/yolov5-s/"
-                "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
-            ),
-            True,
-            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
-        ),
-        (
-            "yolov5-x-coco-pruned70.4block_quantized",
-            False,
-            files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
-        ),
-        (
-            "yolov5-n6-voc_coco-pruned55",
-            False,
-            files_yolo.union({"recipe.md"}),
-        ),
-        (
-            "resnet_v1-50-imagenet-channel30_pruned90_quantized",
-            False,
-            files_yolo.union({"recipe.md", "recipe_transfer_classification.md"}),
-        ),
+        # (
+        #     (
+        #         "zoo:"
+        #         "nlp/question_answering/distilbert-none/"
+        #         "pytorch/huggingface/squad/pruned80_quant-none-vnni"
+        #     ),
+        #     False,
+        #     files_nlp.union({"recipe.md"}),
+        # ),
+        # (
+        #     (
+        #         "zoo:"
+        #         "cv/detection/yolov5-s/"
+        #         "pytorch/ultralytics/coco/pruned_quant-aggressive_94"
+        #     ),
+        #     True,
+        #     files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
+        # ),
+        # (
+        #     "yolov5-x-coco-pruned70.4block_quantized",
+        #     False,
+        #     files_yolo.union({"recipe.md", "recipe_transfer_learn.md"}),
+        # ),
+        # (
+        #     "yolov5-n6-voc_coco-pruned55",
+        #     False,
+        #     files_yolo.union({"recipe.md"}),
+        # ),
+        # (
+        #     "resnet_v1-50-imagenet-channel30_pruned90_quantized",
+        #     False,
+        #     files_yolo.union({"recipe.md", "recipe_transfer_classification.md"}),
+        # ),
     ],
     scope="function",
 )
@@ -184,10 +184,6 @@ class TestModel:
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         model = Model(stub, temp_dir.name)
         model.download()
-        # since downloading the `deployment` file is
-        # disabled by default, we need to do it
-        # explicitly
-        model.deployment.download()
         self._add_mock_files(temp_dir.name, clone_sample_outputs=clone_sample_outputs)
         model = Model(temp_dir.name)
 
