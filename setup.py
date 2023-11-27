@@ -60,6 +60,13 @@ _dev_deps = [
     "flake8>=3.8.3",
     "flaky>=3.7.0",
     "isort>=5.7.0",
+    "pytest>=6.0.0",
+    "wheel>=0.36.2",
+    "onnxruntime>=1.0.0",
+    "matplotlib>=3.0.0",
+]
+
+_docs_deps = [
     "m2r2~=0.2.7",
     "mistune==0.8.4",
     "myst-parser~=0.14.0",
@@ -68,11 +75,7 @@ _dev_deps = [
     "sphinx-copybutton>=0.3.0",
     "sphinx-markdown-tables>=0.0.15",
     "sphinx-multiversion==0.2.4",
-    "pytest>=6.0.0",
     "sphinx-rtd-theme",
-    "wheel>=0.36.2",
-    "onnxruntime>=1.0.0",
-    "matplotlib>=3.0.0",
 ]
 
 
@@ -87,7 +90,7 @@ def _setup_install_requires() -> List:
 
 
 def _setup_extras() -> Dict:
-    return {"dev": _dev_deps, "nb": _notebook_deps}
+    return {"dev": _dev_deps, "nb": _notebook_deps, "docs": _docs_deps}
 
 
 def _setup_entry_points() -> Dict:
