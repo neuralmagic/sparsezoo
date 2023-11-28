@@ -111,14 +111,14 @@ class Model(Directory):
         self.sample_originals: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            allow_picking_one_from_multiple=True,
+            allow_multiple_outputs=True,
             display_name="sample-originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
             display_name="sample-inputs",
-            allow_picking_one_from_multiple=True,
+            allow_multiple_outputs=True,
         )
 
         self.model_card: File = self._file_from_files(files, display_name="model.md")
@@ -138,7 +138,7 @@ class Model(Directory):
         self.sample_labels: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            allow_picking_one_from_multiple=True,
+            allow_multiple_outputs=True,
             display_name="sample-labels",
         )
 
@@ -152,7 +152,7 @@ class Model(Directory):
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
-            allow_picking_one_from_multiple=True,
+            allow_multiple_outputs=True,
             tar_directory=self.deployment_tar,
         )
 
@@ -190,6 +190,30 @@ class Model(Directory):
 
         # compressed file size on disk in bytes
         self.compressed_size: Optional[int] = compressed_size
+
+        # if there are multiple deployment directories
+        # (this may happen due to the presence of both e.g.:
+        # - deployment directory
+        # - deployment.tar.gz file
+        # we need to choose one (they are identical at this point)
+        self.sample_originals = (
+            self.sample_originals[0]
+            if isinstance(self.sample_originals, list)
+            else self.sample_originals
+        )
+        self.sample_inputs = (
+            self.sample_inputs[0]
+            if isinstance(self.sample_inputs, list)
+            else self.sample_inputs
+        )
+        self.sample_labels = (
+            self.sample_labels[0]
+            if isinstance(self.sample_labels, list)
+            else self.sample_labels
+        )
+        self.deployment = (
+            self.deployment[0] if isinstance(self.deployment, list) else self.deployment
+        )
 
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
@@ -614,11 +638,6 @@ class Model(Directory):
         display_name: Optional[str] = None,
         regex: bool = False,
         allow_multiple_outputs: bool = False,
-        # allow picking one from multiple directories
-        # is used when we initialize the model from
-        # local directory (not stub) and both [some_directory]
-        # and [some_directory].tar.gz are present
-        allow_picking_one_from_multiple: bool = False,
         **kwargs: object,
     ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
 
@@ -660,13 +679,10 @@ class Model(Directory):
             return None
         # For now, following the logic of this class,
         # it is prohibitive for find more than
-        # one directory (unless `allow-multiple_outputs`=True
-        # or `allow_picking_one_from_multiple`=True)
+        # one directory (unless `allow-multiple_outputs`=True)
         elif len(directories_found) != 1:
             if allow_multiple_outputs:
                 return directories_found
-            elif allow_picking_one_from_multiple:
-                return directories_found[0]
             raise ValueError(
                 f"Found more than one Directory for `display_name`: {display_name}."
             )
