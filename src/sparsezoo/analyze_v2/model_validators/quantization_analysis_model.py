@@ -18,10 +18,9 @@ from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class QuantizationAnalysisModel(BaseModel):
-    bits: float  # for val in tensor: total_bits += num_bits
+    bits: float
     bits_quant: int
     percent: float
-    # grouping: str  # Tensor, Channel
 
     @validator("*", pre=True)
     def validate_types(cls, value):

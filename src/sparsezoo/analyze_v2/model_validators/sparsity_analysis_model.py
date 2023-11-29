@@ -21,7 +21,6 @@ class SparsityAnalysisModel(BaseModel):
     counts: int
     counts_sparse: int
     percent: float
-    # grouping: str  # None, Ben for block and channel strings
 
     @validator("*", pre=True)
     def validate_types(cls, value):

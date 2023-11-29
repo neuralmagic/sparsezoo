@@ -23,20 +23,19 @@ class DistributionAnalysisModel(BaseModel):
     counts: Optional[int]
     mean: Optional[float]
     median: Optional[float]
-    # modes: Optional[Union[List[float], numpy.ndarray]]
     modes: Optional[List]
     sum_val: Optional[float]
     min_val: Optional[float]
     max_val: Optional[float]
-    percentiles: Optional[Dict[float, float]]  # 0.1, 0.25, 0.5, 0.75, 0.9
+    percentiles: Optional[Dict[float, float]]
     std_dev: Optional[float]
     skewness: Optional[float]
     kurtosis: Optional[float]
     entropy: Optional[float]
-    bin_width: Optional[float]  # (max_val - min_val) / num_bins
-    num_bins: Optional[int]  # 25
-    hist: Optional[List[float]]  # counts in each bin
-    bin_edges: Optional[List[float]]  # edge value for each bin
+    bin_width: Optional[float]
+    num_bins: Optional[int]
+    hist: Optional[List[float]]
+    bin_edges: Optional[List[float]]
 
     @validator("*", pre=True)
     def validate_types(cls, value):
