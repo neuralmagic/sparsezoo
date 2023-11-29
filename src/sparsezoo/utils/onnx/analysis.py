@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Optional, Tuple, Union
+import re
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
 from onnx import NodeProto, numpy_helper
@@ -39,6 +40,12 @@ __all__ = [
     "group_four_block",
     "extract_node_id",
     "get_node_attributes",
+    "get_node_param_counts",
+    "get_node_weight_bits",
+    "get_numpy_distribution_statistics",
+    "get_numpy_entropy",
+    "get_numpy_modes",
+    "get_numpy_percentiles",
 ]
 
 
@@ -438,3 +445,82 @@ def _get_node_input(
         return node.input[index]
     else:
         return default
+
+
+def get_node_param_counts(
+    node: NodeProto, model_graph: ONNXGraph
+) -> Tuple[int, int, int]:
+    """
+    :return: total number of params, number of bias, total sparse params
+    """
+    sparse_params, params = get_node_num_zeros_and_size(model_graph, node)
+    node_bias = get_node_bias(model_graph, node)
+    bias = node_bias.size if node_bias is not None else 0
+    return params, bias, sparse_params
+
+
+def get_node_weight_bits(
+    model_graph: ONNXGraph,
+    node: NodeProto,
+):
+    """Get the bits needed to store the node weights"""
+    node_weight = get_node_weight(model_graph, node)
+    return get_numpy_bits(node_weight)
+
+
+def get_numpy_bits(arr: numpy.ndarray):
+    """Get the total bits required to store the arr"""
+    precision = get_numpy_quantization_level(arr)
+    return int(arr.size * precision)
+
+
+def get_numpy_quantization_level(arr: numpy.ndarray) -> int:
+    """return the quantization precision of the array"""
+    dtype_int_match = re.search(r"\d+", str(arr.dtype))
+    if dtype_int_match.group() and int(dtype_int_match.group()) < 16:
+        # log2 of the difference between the max and the min, convert float to int
+        return int(numpy.ceil(numpy.log2(numpy.max(arr) - numpy.min(arr))))
+
+    return int(dtype_int_match.group())
+
+
+def get_numpy_distribution_statistics(arr: numpy.ndarray):
+    """Remove dimensions and compute the statistics"""
+    flatten_arr = arr.flatten()
+    mean_val = numpy.mean(flatten_arr)
+    std_dev = numpy.std(flatten_arr)
+    n = len(flatten_arr)
+
+    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / (std_dev ** 3)
+    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / (std_dev ** 4) - 3
+
+    return skewness, kurtosis
+
+
+def get_numpy_entropy(arr: numpy.ndarray):
+    """Remove dimensions and compute the overall entropy"""
+    flatten_arr = arr.flatten()
+    flatten_arr = flatten_arr[flatten_arr > 0]
+    probs = flatten_arr / numpy.sum(flatten_arr)
+
+    return -numpy.sum(probs * numpy.log2(probs))
+
+
+def get_numpy_modes(arr: numpy.ndarray):
+    unique_values, counts = numpy.unique(arr.flatten(), return_counts=True)
+    max_value_indices = numpy.where(counts == numpy.max(counts))
+    mode = unique_values[max_value_indices]
+    return mode.tolist()
+
+
+def get_numpy_percentiles(
+    arr: numpy.ndarray, percentiles: List[int] = [10, 25, 50, 75, 90]
+):
+    return dict(
+        [
+            (percentile, value)
+            for percentile, value in zip(
+                percentiles, numpy.percentile(arr, percentiles).tolist()
+            )
+        ]
+    )
