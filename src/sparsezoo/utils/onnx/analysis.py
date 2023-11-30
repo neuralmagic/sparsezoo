@@ -50,6 +50,7 @@ __all__ = [
     "get_numpy_bits",
     "get_node_weight_bits",
     "get_node_param_counts",
+    "get_node_kernel_shape",
 ]
 
 
