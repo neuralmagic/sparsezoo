@@ -16,7 +16,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from sparsezoo.analyze_v2.model_validators.utils import type_validator
+from sparsezoo.analyze_v2.model_validator.utils import type_validator
 
 
 class DistributionAnalysisModel(BaseModel):
