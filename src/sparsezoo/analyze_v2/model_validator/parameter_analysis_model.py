@@ -16,13 +16,13 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from sparsezoo.analyze_v2.model_validators.distribution_analysis_model import (
+from sparsezoo.analyze_v2.model_validator.distribution_analysis_model import (
     DistributionAnalysisModel,
 )
-from sparsezoo.analyze_v2.model_validators.quantization_analysis_model import (
+from sparsezoo.analyze_v2.model_validator.quantization_analysis_model import (
     QuantizationAnalysisModel,
 )
-from sparsezoo.analyze_v2.model_validators.sparsity_analysis_model import (
+from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
     SparsityAnalysisModel,
 )
 
