@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 from onnx import NodeProto
 
-from sparsezoo.analyze_v2.model_validators import (
+from sparsezoo.analyze_v2.model_validator import (
     MemoryAccessAnalysisModel,
     QuantizationAnalysisModel,
     SparsityAnalysisModel,
