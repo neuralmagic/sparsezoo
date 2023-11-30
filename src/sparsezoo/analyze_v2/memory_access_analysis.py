@@ -13,11 +13,16 @@
 # limitations under the License.
 
 from functools import reduce
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import yaml
 from onnx import NodeProto
 
+from sparsezoo.analyze_v2.model_validators import (
+    MemoryAccessAnalysisModel,
+    QuantizationAnalysisModel,
+    SparsityAnalysisModel,
+)
 from sparsezoo.utils import (
     ONNXGraph,
     get_node_kernel_shape,
@@ -41,52 +46,47 @@ class MemoryAccessAnalysis:
         self.node = node
         self.node_shape = node_shape
 
-        self.counts = self.get_counts()
-        self.bits = self.get_bits()
+        self.counts: Dict = {}  # single grouping param counts
+        self.bits: Dict = {}  # Tensor grouping bits
 
-    def get_counts(self):
-        """Get the numeber of times"""
+        self.sparsity_analysis_model = self.get_sparsity()
+        self.quantization_analysis_model = self.get_quantization()
+
+    def get_sparsity(self) -> List["SparsityAnalysisModel"]:
+        """Get the number of dense and sparse weights"""
+
         data = get_memory_access_counts(self.model_graph, self.node, self.node_shape)
+        sparsity_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "single":
+                self.counts = counts_dict
 
-        return {
-            grouping: dict(
-                counts=counts_dict["counts"],
-                counts_sparse=counts_dict["counts_sparse"],
-                percent=counts_dict["counts_sparse"] / counts_dict["counts"]
-                if counts_dict["counts"] > 0
-                else 0,
+            sparsity_analysis_model.append(
+                SparsityAnalysisModel(grouping=grouping, **counts_dict)
             )
-            for grouping, counts_dict in data.items()
-        }
 
-    def get_bits(self):
-        """
-        Saves raw (tensor) and channel-wise metadata and
-        returns parameter percentage of raw quantized params
-        """
-        data = get_memeory_access_bits(
-            self.model_graph,
-            self.node,
-            self.node_shape,
-        )
-        return {
-            grouping: dict(
-                percent=quant_dict["bits_quant"] / quant_dict["bits"]
-                if quant_dict["bits"] > 0
-                else 0,
-                bits_quant=quant_dict["bits_quant"],
-                bits=quant_dict["bits"],
+        return sparsity_analysis_model
+
+    def get_quantization(self) -> List["QuantizationAnalysisModel"]:
+        """Get the number of bits and quantized bits from weights"""
+        data = get_memeory_access_bits(self.model_graph, self.node, self.node_shape)
+        quantization_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "tensor":
+                self.bits = counts_dict
+
+            quantization_analysis_model.append(
+                QuantizationAnalysisModel(grouping=grouping, **counts_dict)
             )
-            for grouping, quant_dict in data.items()
-        }
 
-    def to_dict(self):
-        return dict(
+        return quantization_analysis_model
+
+    def to_dict(self) -> Dict[str, Any]:
+        return MemoryAccessAnalysisModel(
             name=self.node.name,
-            op_type=self.node.op_type,
-            sparsity=self.counts,
-            quantization=self.bits,
-        )
+            sparsity=self.sparsity_analysis_model,
+            quantization=self.quantization_analysis_model,
+        ).dict()
 
     def to_yaml(self):
         return yaml.dump(self.to_dict())
@@ -120,30 +120,30 @@ def get_memory_access_counts(
                 num_weights_four_block,
             ) = get_node_num_four_block_zeros_and_size(model_graph, node)
 
+    counts = num_weights * out_feat_size + inp_feat_size * kernel_size + out_feat_size
+    counts_sparse = (
+        num_weights_sparse * out_feat_size + inp_feat_size * kernel_size + out_feat_size
+    )
+    counts_block4 = (
+        num_weights_four_block * out_feat_size
+        + inp_feat_size * kernel_size
+        + out_feat_size
+    )
+    counts_block4_sparse = (
+        num_sparse_weights_four_blocks * out_feat_size
+        + inp_feat_size * kernel_size
+        + out_feat_size
+    )
     return {
         "single": {
-            "counts": (
-                num_weights * out_feat_size
-                + inp_feat_size * kernel_size
-                + out_feat_size
-            ),
-            "counts_sparse": (
-                num_weights_sparse * out_feat_size
-                + inp_feat_size * kernel_size
-                + out_feat_size
-            ),
+            "counts": counts,
+            "counts_sparse": counts_sparse,
+            "percent": counts_sparse / counts if counts > 0 else 0,
         },
         "block4": {
-            "counts": (
-                num_weights_four_block * out_feat_size
-                + inp_feat_size * kernel_size
-                + out_feat_size
-            ),
-            "counts_sparse": (
-                num_sparse_weights_four_blocks * out_feat_size
-                + inp_feat_size * kernel_size
-                + out_feat_size
-            ),
+            "counts": counts_block4,
+            "counts_sparse": counts_block4_sparse,
+            "percent": counts_block4_sparse / counts_block4 if counts > 0 else 0,
         },
     }
 
@@ -166,6 +166,7 @@ def get_memeory_access_bits(
         "tensor": {
             "bits": bits,
             "bits_quant": bits_quant,
+            "percent": bits_quant / bits if bits > 0 else 0,
         }
         # TODO: Channel wise quantization
     }
