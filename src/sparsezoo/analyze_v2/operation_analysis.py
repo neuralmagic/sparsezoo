@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 import yaml
 from onnx import NodeProto
 
 from sparsezoo.analyze_v2.model_validators import (
+    OperationAnalysisModel,
     QuantizationAnalysisModel,
     SparsityAnalysisModel,
 )
@@ -52,32 +53,47 @@ class OperationAnalysis:
         self.node = node
         self.node_shape = node_shape
 
-        self.counts = self.get_counts()
-        self.bits = self.get_bits()
+        self.counts: Dict = {}  # single grouping param counts
+        self.bits: Dict = {}  # Tensor grouping bits
 
-    def get_counts(self) -> Dict[str, Union[int, float]]:
+        self.sparsity_analysis_model = self.get_sparsity()
+        self.quantization_analysis_model = self.get_quantization()
+
+    def get_sparsity(self) -> List["SparsityAnalysisModel"]:
         """Get the number of operation counts"""
-        data = get_operation_counts(self.model_graph, self.node, self.node_shape)
-        return {
-            grouping: SparsityAnalysisModel(**counts_dict).dict()
-            for grouping, counts_dict in data.items()
-        }
 
-    def get_bits(self) -> Dict[str, Union[int, float]]:
-        """Get the number of operation bits"""
+        data = get_operation_counts(self.model_graph, self.node, self.node_shape)
+        sparsity_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "single":
+                self.counts = counts_dict
+
+            sparsity_analysis_model.append(
+                SparsityAnalysisModel(grouping=grouping, **counts_dict)
+            )
+
+        return sparsity_analysis_model
+
+    def get_quantization(self) -> List["QuantizationAnalysisModel"]:
+        """Get the number of bits and quantized bits from weights"""
         data = get_operation_bits(self.model_graph, self.node, self.node_shape)
-        return {
-            grouping: QuantizationAnalysisModel(**bits_dict).dict()
-            for grouping, bits_dict in data.items()
-        }
+        quantization_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "tensor":
+                self.bits = counts_dict
+
+            quantization_analysis_model.append(
+                QuantizationAnalysisModel(grouping=grouping, **counts_dict)
+            )
+
+        return quantization_analysis_model
 
     def to_dict(self) -> Dict[str, Any]:
-        return dict(
+        return OperationAnalysisModel(
             name=self.node.name,
-            op_type=self.node.op_type,
-            sparsity=self.counts,
-            quantization=self.bits,
-        )
+            sparsity=self.sparsity_analysis_model,
+            quantization=self.quantization_analysis_model,
+        ).dict()
 
     def to_yaml(self) -> str:
         return yaml.dump(self.to_dict())
