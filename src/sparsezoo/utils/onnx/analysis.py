@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy
@@ -40,8 +39,6 @@ __all__ = [
     "group_four_block",
     "extract_node_id",
     "get_node_attributes",
-    "get_ops_count_from_ops_dict",
-    "get_numpy_quantization_level",
 ]
 
 
@@ -441,20 +438,3 @@ def _get_node_input(
         return node.input[index]
     else:
         return default
-
-
-def get_numpy_quantization_level(arr: numpy.ndarray) -> int:
-    """return the quantization precision of the array"""
-    dtype_int_match = re.search(r"\d+", str(arr.dtype))
-    if dtype_int_match.group() and int(dtype_int_match.group()) < 16:
-        # log2 of the difference between the max and the min, convert float to int
-        return int(numpy.ceil(numpy.log2(numpy.max(arr) - numpy.min(arr))))
-
-    return int(dtype_int_match.group())
-
-
-def get_ops_count_from_ops_dict(
-    key: str,
-    ops_dict: Dict,
-):
-    return sum(value[key] for value in ops_dict.values())
