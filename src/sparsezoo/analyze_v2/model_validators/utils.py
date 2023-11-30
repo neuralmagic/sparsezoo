@@ -13,9 +13,14 @@
 # limitations under the License.
 
 import numpy
+from typing import Any
 
 
-def type_validator(value):
+def type_validator(value) -> Any:
+    """
+    Used for pydantic validator, mostly used to convert numpy to 
+     non-numpy types
+    """
     if isinstance(value, numpy.generic):
         if isinstance(value, float):
             return float(value)

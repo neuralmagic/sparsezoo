@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class SparsityAnalysisModel(BaseModel):
-    counts: int
-    counts_sparse: int
-    percent: float
+    counts: int = Field(..., description="Total number of parameters in the node")
+    counts_sparse: int = Field(
+        ..., description="Total number of sparse parameters in the node"
+    )
+    percent: float = Field(..., description="Percentage of counts_sparse over counts")
 
     @validator("*", pre=True)
     def validate_types(cls, value):

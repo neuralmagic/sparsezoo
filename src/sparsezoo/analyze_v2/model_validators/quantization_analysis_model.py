@@ -12,15 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class QuantizationAnalysisModel(BaseModel):
-    bits: float
-    bits_quant: int
-    percent: float
+    bits: float = Field(..., description="Total bits required to store the weights")
+    bits_quant: int = Field(
+        ...,
+        description=(
+            "Total quantized bits required to store the weights."
+            "Here we assume if the layer is quantized, the entire array is quantized"
+        ),
+    )
+    percent: float = Field(..., description="Percentage of bits_quant over bits")
 
     @validator("*", pre=True)
     def validate_types(cls, value):

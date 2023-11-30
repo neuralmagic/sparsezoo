@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class DistributionAnalysisModel(BaseModel):
-    counts: Optional[int]
+    counts: Optional[int] = Field(..., description="Total number of parameters")
     mean: Optional[float]
     median: Optional[float]
     modes: Optional[List]
@@ -34,8 +34,12 @@ class DistributionAnalysisModel(BaseModel):
     entropy: Optional[float]
     bin_width: Optional[float]
     num_bins: Optional[int]
-    hist: Optional[List[float]]
-    bin_edges: Optional[List[float]]
+    hist: Optional[List[float]] = Field(
+        ..., description="Frequency of the parameters, with respect to the bin edges"
+    )
+    bin_edges: Optional[List[float]] = Field(
+        ..., description="Lower bound edges of each bin"
+    )
 
     @validator("*", pre=True)
     def validate_types(cls, value):

@@ -77,7 +77,7 @@ class ParameterAnalysis:
         }
 
     def get_distribution(self) -> Dict[str, Union[int, float]]:
-        """Get statistics"""
+        """Get the distribution statistics with respect to the weights"""
         distribution_dct = get_parameter_distribution(self.model_graph, self.node)
         return DistributionAnalysisModel(**distribution_dct).dict()
 
