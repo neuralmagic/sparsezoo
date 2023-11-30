@@ -13,7 +13,11 @@
 # limitations under the License.
 
 # flake8: noqa
-from .memory_access_analysis import MemoryAccessAnalysis
-from .node_analysis import NodeAnalysis
-from .operation_analysis import OperationAnalysis
-from .parameter_analysis import ParameterAnalysis
+
+from .distribution_analysis_model import DistributionAnalysisModel
+from .memory_access_analysis_model import MemoryAccessAnalysisModel
+from .node_analysis_model import NodeAnalysisModel
+from .operation_analysis_model import OperationAnalysisModel
+from .parameter_analysis_model import ParameterAnalysisModel
+from .quantization_analysis_model import QuantizationAnalysisModel
+from .sparsity_analysis_model import SparsityAnalysisModel
