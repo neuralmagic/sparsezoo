@@ -40,6 +40,16 @@ __all__ = [
     "group_four_block",
     "extract_node_id",
     "get_node_attributes",
+    "get_ops_count_from_ops_dict",
+    "get_node_input_feature_name",
+    "get_numpy_percentiles",
+    "get_numpy_modes",
+    "get_numpy_entropy",
+    "get_numpy_distribution_statistics",
+    "get_numpy_quantization_level",
+    "get_numpy_bits",
+    "get_node_weight_bits",
+    "get_node_param_counts",
 ]
 
 
