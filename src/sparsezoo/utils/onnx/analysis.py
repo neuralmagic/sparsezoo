@@ -491,8 +491,8 @@ def get_numpy_distribution_statistics(arr: numpy.ndarray):
     std_dev = numpy.std(flatten_arr)
     n = len(flatten_arr)
 
-    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / (std_dev ** 3)
-    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / (std_dev ** 4) - 3
+    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / (std_dev**3)
+    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / (std_dev**4) - 3
 
     return skewness, kurtosis
 

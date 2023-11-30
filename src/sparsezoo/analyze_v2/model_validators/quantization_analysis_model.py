@@ -18,6 +18,7 @@ from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class QuantizationAnalysisModel(BaseModel):
+    grouping: str = Field(..., description="The combining group name")
     bits: float = Field(..., description="Total bits required to store the weights")
     bits_quant: int = Field(
         ...,

@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# flake8: noqa
 
 from .distribution_analysis_model import DistributionAnalysisModel
+from .parameter_analysis_model import ParameterAnalysisModel
 from .quantization_analysis_model import QuantizationAnalysisModel
 from .sparsity_analysis_model import SparsityAnalysisModel

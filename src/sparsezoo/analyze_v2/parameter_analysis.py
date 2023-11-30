@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 import numpy
 import yaml
@@ -20,6 +20,7 @@ from onnx import NodeProto
 
 from sparsezoo.analyze_v2.model_validators import (
     DistributionAnalysisModel,
+    ParameterAnalysisModel,
     QuantizationAnalysisModel,
     SparsityAnalysisModel,
 )
@@ -56,39 +57,55 @@ class ParameterAnalysis:
         self.model_graph = model_graph
         self.node = node
 
-        self.counts = self.get_counts()
-        self.bits = self.get_bits()
-        self.distribution = self.get_distribution()
+        self.counts: Dict = {}  # single grouping param counts
+        self.bits: Dict = {}  # Tensor grouping bits
 
-    def get_counts(self) -> Dict[str, Union[int, float]]:
+        self.sparsity_analysis_model = self.get_sparsity()
+        self.quantization_analysis_model = self.get_quantization()
+        self.distribution_model = self.get_distribution()
+
+    def get_sparsity(self) -> List["SparsityAnalysisModel"]:
         """Get the number of dense and sparse weights"""
-        data = get_parameter_counts(self.model_graph, self.node)
-        return {
-            grouping: SparsityAnalysisModel(**counts_dict).dict()
-            for grouping, counts_dict in data.items()
-        }
 
-    def get_bits(self) -> Dict[str, Union[int, float]]:
+        data = get_parameter_counts(self.model_graph, self.node)
+        sparsity_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "single":
+                self.counts = counts_dict
+
+            sparsity_analysis_model.append(
+                SparsityAnalysisModel(grouping=grouping, **counts_dict)
+            )
+
+        return sparsity_analysis_model
+
+    def get_quantization(self) -> List["QuantizationAnalysisModel"]:
         """Get the number of bits and quantized bits from weights"""
         data = get_parameter_bits(self.model_graph, self.node)
-        return {
-            grouping: QuantizationAnalysisModel(**bits_dict).dict()
-            for grouping, bits_dict in data.items()
-        }
+        quantization_analysis_model = []
+        for grouping, counts_dict in data.items():
+            if grouping == "tensor":
+                self.bits = counts_dict
 
-    def get_distribution(self) -> Dict[str, Union[int, float]]:
+            quantization_analysis_model.append(
+                QuantizationAnalysisModel(grouping=grouping, **counts_dict)
+            )
+
+        return quantization_analysis_model
+
+    def get_distribution(self) -> "DistributionAnalysisModel":
         """Get the distribution statistics with respect to the weights"""
         distribution_dct = get_parameter_distribution(self.model_graph, self.node)
-        return DistributionAnalysisModel(**distribution_dct).dict()
+        return DistributionAnalysisModel(**distribution_dct)
 
     def to_dict(self) -> Dict[str, Any]:
-        return dict(
+        return ParameterAnalysisModel(
             name=self.node.name,
             op_type=self.node.op_type,
-            distribution=self.distribution,
-            sparsity=self.counts,
-            quantization=self.bits,
-        )
+            distribution=self.distribution_model,
+            sparsity=self.sparsity_analysis_model,
+            quantization=self.quantization_analysis_model,
+        ).dict()
 
     def to_yaml(self) -> str:
         return yaml.dump(self.to_dict())
@@ -119,7 +136,7 @@ def get_parameter_counts(
             "counts_sparse": num_sparse_weights_four_blocks,
             "percent": num_sparse_weights_four_blocks / num_weights_four_block
             if num_weights > 0
-            else 9,
+            else 0,
         },
     }
 
@@ -147,11 +164,6 @@ def get_parameter_bits(
             "bits_quant": bits * is_quantized_layer(model_graph, node),
             "percent": bits_quant / bits if bits > 0 else 0,
         },
-        # TODO: Channels
-        #  "Channel1,2,3...": {
-        #     "bits": bits_channel,
-        #     "quantized_bits": quantized_bits_channel,
-        # },
     }
 
 

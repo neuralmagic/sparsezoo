@@ -18,6 +18,7 @@ from sparsezoo.analyze_v2.model_validators.utils import type_validator
 
 
 class SparsityAnalysisModel(BaseModel):
+    grouping: str = Field(..., description="The combining group name")
     counts: int = Field(..., description="Total number of parameters in the node")
     counts_sparse: int = Field(
         ..., description="Total number of sparse parameters in the node"
