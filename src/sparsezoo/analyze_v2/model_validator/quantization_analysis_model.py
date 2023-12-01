@@ -40,7 +40,7 @@ class QuantizationAnalysisModel(BaseModel):
     @validator("percent", pre=True, always=True)
     def calculate_percent_if_none(cls, value, values):
         if value is None:
-            counts = values.get("bits", 0)
-            counts_sparse = values.get("bits_quant", 0)
-            return counts_sparse / counts if counts > 0 else 0.0
+            bits = values.get("bits", 0)
+            bits_quant = values.get("bits_quant", 0)
+            return bits_quant / bits if bits > 0 else 0.0
         return value
