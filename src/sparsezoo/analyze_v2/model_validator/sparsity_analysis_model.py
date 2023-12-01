@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
+
 from pydantic import BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.model_validator.utils import type_validator
@@ -23,8 +25,18 @@ class SparsityAnalysisModel(BaseModel):
     counts_sparse: int = Field(
         ..., description="Total number of sparse parameters in the node"
     )
-    percent: float = Field(..., description="Percentage of counts_sparse over counts")
+    percent: Optional[float] = Field(
+        None, description="Percentage of counts_sparse over counts"
+    )
 
     @validator("*", pre=True)
     def validate_types(cls, value):
         return type_validator(value)
+
+    @validator("percent", pre=True, always=True)
+    def calculate_percent_if_none(cls, value, values):
+        if value is None:
+            counts = values.get("counts", 0)
+            counts_sparse = values.get("counts_sparse", 0)
+            return counts_sparse / counts if counts > 0 else 0.0
+        return value

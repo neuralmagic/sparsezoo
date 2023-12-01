@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
+
 from pydantic import BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.model_validator.utils import type_validator
@@ -27,8 +29,18 @@ class QuantizationAnalysisModel(BaseModel):
             "Here we assume if the layer is quantized, the entire array is quantized"
         ),
     )
-    percent: float = Field(..., description="Percentage of bits_quant over bits")
+    percent: Optional[float] = Field(
+        None, description="Percentage of counts_sparse over counts"
+    )
 
     @validator("*", pre=True)
     def validate_types(cls, value):
         return type_validator(value)
+
+    @validator("percent", pre=True, always=True)
+    def calculate_percent_if_none(cls, value, values):
+        if value is None:
+            counts = values.get("bits", 0)
+            counts_sparse = values.get("bits_quant", 0)
+            return counts_sparse / counts if counts > 0 else 0.0
+        return value
