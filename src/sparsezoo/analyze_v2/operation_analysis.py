@@ -134,12 +134,10 @@ def get_operation_counts(
         "single": {
             "counts": ops_total,
             "counts_sparse": ops_sparse,
-            "percent": ops_sparse / ops_total if ops_total > 0 else 0,
         },
         "block4": {
             "counts": ops_total_block_four,
             "counts_sparse": ops_sparse_block_four,
-            "percent": ops_sparse / ops_total if ops_total > 0 else 0,
         },
     }
 
@@ -172,11 +170,9 @@ def get_operation_bits(
         "tensor": {
             "bits": bits,
             "bits_quant": bits_quant,
-            "percent": bits_quant / bits if bits > 0 else 0,
         },
         "block4": {
             "bits": bits_block4,
             "bits_quant": bits_quant,
-            "percent": bits_quant / bits if bits > 0 else 0,
         },
     }
