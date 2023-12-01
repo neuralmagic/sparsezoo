@@ -129,14 +129,10 @@ def get_parameter_counts(
         "single": {
             "counts": num_weights,
             "counts_sparse": num_weights_sparse,
-            "percent": num_weights_sparse / num_weights if num_weights > 0 else 0,
         },
         "block4": {
             "counts": num_weights_four_block,
             "counts_sparse": num_sparse_weights_four_blocks,
-            "percent": num_sparse_weights_four_blocks / num_weights_four_block
-            if num_weights > 0
-            else 0,
         },
     }
 
@@ -162,7 +158,6 @@ def get_parameter_bits(
         "tensor": {
             "bits": bits,
             "bits_quant": bits * is_quantized_layer(model_graph, node),
-            "percent": bits_quant / bits if bits > 0 else 0,
         },
     }
 
