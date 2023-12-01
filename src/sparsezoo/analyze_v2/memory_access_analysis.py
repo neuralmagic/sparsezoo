@@ -138,12 +138,10 @@ def get_memory_access_counts(
         "single": {
             "counts": counts,
             "counts_sparse": counts_sparse,
-            "percent": counts_sparse / counts if counts > 0 else 0,
         },
         "block4": {
             "counts": counts_block4,
             "counts_sparse": counts_block4_sparse,
-            "percent": counts_block4_sparse / counts_block4 if counts > 0 else 0,
         },
     }
 
@@ -166,7 +164,6 @@ def get_memeory_access_bits(
         "tensor": {
             "bits": bits,
             "bits_quant": bits_quant,
-            "percent": bits_quant / bits if bits > 0 else 0,
         }
         # TODO: Channel wise quantization
     }
