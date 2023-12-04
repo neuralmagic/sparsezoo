@@ -19,8 +19,7 @@ from pydantic import BaseModel, Field, validator
 from sparsezoo.analyze_v2.model_validator.utils import type_validator
 
 
-class SparsityAnalysisModel(BaseModel):
-    grouping: str = Field(..., description="The combining group name")
+class SparsitySummaryAnalysisModel(BaseModel):
     counts: int = Field(..., description="Total number of parameters in the node")
     counts_sparse: int = Field(
         ..., description="Total number of sparse parameters in the node"
@@ -40,3 +39,30 @@ class SparsityAnalysisModel(BaseModel):
             counts_sparse = values.get("counts_sparse", 0)
             return counts_sparse / counts if counts > 0 else 0.0
         return value
+
+    def __add__(self, model: BaseModel):
+        validator_model = None
+        if isinstance(model, SparsitySummaryAnalysisModel):
+            validator_model = SparsitySummaryAnalysisModel
+
+        if validator_model is not None:
+            return validator_model(
+                counts=self.counts + model.counts,
+                counts_sparse=self.counts_sparse + model.counts_sparse,
+            )
+
+
+class SparsityAnalysisModel(SparsitySummaryAnalysisModel):
+    grouping: str = Field(..., description="The combining group name")
+
+    def __add__(self, model: BaseModel):
+        validator_model = None
+        if isinstance(model, SparsityAnalysisModel):
+            validator_model = SparsityAnalysisModel
+
+        if validator_model is not None and self.grouping == model.grouping:
+            return validator_model(
+                grouping=self.grouping,
+                counts=self.counts + model.counts,
+                counts_sparse=self.counts_sparse + model.counts_sparse,
+            )
