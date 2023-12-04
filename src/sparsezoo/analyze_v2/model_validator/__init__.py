@@ -24,3 +24,5 @@ from .sparsity_analysis_model import SparsityAnalysisModel, SparsitySummaryAnaly
 from .parameter_analysis_model import ParameterAnalysisModel
 from .operation_analysis_model import OperationAnalysisModel
 from .memory_access_analysis_model import MemoryAccessAnalysisModel
+from .node_analysis_model import NodeAnalysisModel
+

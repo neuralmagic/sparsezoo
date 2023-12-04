@@ -16,7 +16,7 @@ from typing import Optional
 
 import yaml
 
-from sparsezoo.utils.node_inference import extract_nodes_shapes_and_dtypes_ort
+from sparsezoo.analyze_v2.model_validator import NodeAnalysisModel
 
 from .memory_access_analysis import MemoryAccessAnalysis
 from .operation_analysis import OperationAnalysis
@@ -37,34 +37,19 @@ class NodeAnalysis:
             model_graph, node, node_shape
         )
 
-        (
-            self.params_counts,
-            self.params_counts_sparse,
-            self.params_bits,
-            self.params_bits_quant,
-        ) = (
-            0,
-            0,
-            0,
-            0,
-        )  # flake8: noqa
-        self.ops_counts, self.ops_counts_sparse, self.ops_bits, self.ops_bits_quant = (
-            0,
-            0,
-            0,
-            0,
-        )  # flake8: noqa
-        self.mem_counts, self.mem_counts_sparse, self.mem_bits, self.mem_bits_quant = (
-            0,
-            0,
-            0,
-            0,
-        )  # flake8: noqa
+        self.params_counts, self.params_counts_sparse = 0, 0
+        self.params_bits, self.params_bits_quant = 0, 0
+
+        self.ops_counts, self.ops_counts_sparse = 0, 0
+        self.ops_bits, self.ops_bits_quant = 0, 0
+
+        self.mem_counts, self.mem_counts_sparse = 0, 0
+        self.mem_bits, self.mem_bits_quant = 0, 0
 
         self._update_metadata()
 
     def to_dict(self):
-        return dict(
+        return NodeAnalysisModel(
             name=self.node.name,
             op_type=self.node.op_type,
             graph_order=self.graph_order,
@@ -73,38 +58,23 @@ class NodeAnalysis:
             params=self.parameter_analysis.to_dict(),
             ops=self.operation_analysis.to_dict(),
             mem_access=self.memory_access_analysis.to_dict(),
-        )
+        ).dict()
 
     def to_yaml(self):
         return yaml.dump(self.to_dict())
 
     def _update_metadata(self):
-        # breakpoint()
-        self.params_counts = self.parameter_analysis.counts["single"]["counts"]
-        self.params_counts_sparse = self.parameter_analysis.counts["single"][
-            "counts_sparse"
-        ]
-        self.params_bits = self.parameter_analysis.bits["tensor"]["bits"]
-        self.params_bits_quant = self.parameter_analysis.bits["tensor"]["bits_quant"]
+        self.params_counts = self.parameter_analysis.counts["counts"]
+        self.params_counts_sparse = self.parameter_analysis.counts["counts_sparse"]
+        self.params_bits = self.parameter_analysis.bits["bits"]
+        self.params_bits_quant = self.parameter_analysis.bits["bits_quant"]
 
-        self.ops_counts = self.operation_analysis.counts["single"]["counts"]
-        self.ops_counts_sparse = self.operation_analysis.counts["single"][
-            "counts_sparse"
-        ]
-        self.ops_bits = self.operation_analysis.bits["tensor"]["bits"]
-        self.ops_bits_quant = self.operation_analysis.bits["tensor"]["bits_quant"]
+        self.ops_counts = self.operation_analysis.counts["counts"]
+        self.ops_counts_sparse = self.operation_analysis.counts["counts_sparse"]
+        self.ops_bits = self.operation_analysis.bits["bits"]
+        self.ops_bits_quant = self.operation_analysis.bits["bits_quant"]
 
-        self.mem_counts = self.memory_access_analysis.counts["single"]["counts"]
-        self.mem_counts_sparse = self.memory_access_analysis.counts["single"][
-            "counts_sparse"
-        ]
-        self.mem_bits = self.memory_access_analysis.bits["tensor"]["bits"]
-        self.mem_bits_quant = self.memory_access_analysis.bits["tensor"]["bits_quant"]
-
-
-"""
-(Pdb) self.param_counts_sparse
-22284083
-(Pdb) self.param_counts
-25502912
-"""
+        self.mem_counts = self.memory_access_analysis.counts["counts"]
+        self.mem_counts_sparse = self.memory_access_analysis.counts["counts_sparse"]
+        self.mem_bits = self.memory_access_analysis.bits["bits"]
+        self.mem_bits_quant = self.memory_access_analysis.bits["bits_quant"]
