@@ -57,8 +57,8 @@ class ParameterAnalysis:
         self.model_graph = model_graph
         self.node = node
 
-        self.counts: Dict = {}  # single grouping param counts
-        self.bits: Dict = {}  # Tensor grouping bits
+        self.counts: Dict[str, int] = {}  # single grouping param counts
+        self.bits: Dict[str, int] = {}  # Tensor grouping bits
 
         self.sparsity_analysis_model = self.get_sparsity()
         self.quantization_analysis_model = self.get_quantization()
@@ -153,7 +153,6 @@ def get_parameter_bits(
     if node_weight is not None and node_weight.size > 0:
         bits = get_node_weight_bits(model_graph, node)
 
-    bits_quant = bits * is_quantized_layer(model_graph, node)
     return {
         "tensor": {
             "bits": bits,
