@@ -16,5 +16,8 @@
 
 
 from .distribution_analysis_model import DistributionAnalysisModel
-from .quantization_analysis_model import QuantizationAnalysisModel
-from .sparsity_analysis_model import SparsityAnalysisModel
+from .quantization_analysis_model import (
+    QuantizationAnalysisModel,
+    QuantizationSummaryAnalysisModel,
+)
+from .sparsity_analysis_model import SparsityAnalysisModel, SparsitySummaryAnalysisModel
