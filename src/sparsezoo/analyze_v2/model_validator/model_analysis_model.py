@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import Dict
 
+from pydantic import BaseModel
 
-from .distribution_analysis_model import DistributionAnalysisModel
-from .quantization_analysis_model import (
-    QuantizationAnalysisModel,
-    QuantizationSummaryAnalysisModel,
+from sparsezoo.analyze_v2.model_validator.node_analysis_model import NodeAnalysisModel
+from sparsezoo.analyze_v2.model_validator.summary_analysis_model import (
+    SummaryAnalysisModel,
 )
-from .sparsity_analysis_model import SparsityAnalysisModel, SparsitySummaryAnalysisModel
-from .parameter_analysis_model import ParameterAnalysisModel
-from .operation_analysis_model import OperationAnalysisModel
-from .memory_access_analysis_model import MemoryAccessAnalysisModel
-from .node_analysis_model import NodeAnalysisModel
-from .summary_analysis_model import SummaryAnalysisModel
 
+
+class ModelAnalysisModel(BaseModel):
+    summaries: SummaryAnalysisModel
+    nodes: Dict[str, NodeAnalysisModel]  # = None if detailed=False, key=node_id,
+    # benchmarks: Dict[str, BenchmarkAnalysis]  # future work
