@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, validator
 from sparsezoo.analyze_v2.model_validator.utils import type_validator
 
 
-class QuantizatioSummarynAnalysisModel(BaseModel):
+class QuantizationSummaryAnalysisModel(BaseModel):
     bits: float = Field(..., description="Total bits required to store the weights")
     bits_quant: int = Field(
         ...,
@@ -46,8 +46,8 @@ class QuantizatioSummarynAnalysisModel(BaseModel):
 
     def __add__(self, model: BaseModel):
         validator_model = None
-        if isinstance(model, QuantizatioSummarynAnalysisModel):
-            validator_model = QuantizatioSummarynAnalysisModel
+        if isinstance(model, QuantizationSummaryAnalysisModel):
+            validator_model = QuantizationSummaryAnalysisModel
 
         if validator_model is not None:
             return validator_model(
@@ -56,7 +56,7 @@ class QuantizatioSummarynAnalysisModel(BaseModel):
             )
 
 
-class QuantizationAnalysisModel(QuantizatioSummarynAnalysisModel):
+class QuantizationAnalysisModel(QuantizationSummaryAnalysisModel):
     grouping: str = Field(..., description="The combining group name")
 
     def __add__(self, model: BaseModel):
