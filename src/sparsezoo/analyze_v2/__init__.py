@@ -14,3 +14,4 @@
 
 # flake8: noqa
 from .parameter_analysis import ParameterAnalysis
+from .operation_analysis import OperationAnalysis
