@@ -17,7 +17,7 @@ from typing import Dict
 from pydantic import BaseModel
 
 from sparsezoo.analyze_v2.model_validator.quantization_analysis_model import (
-    QuantizatioSummarynAnalysisModel,
+    QuantizationSummaryAnalysisModel,
 )
 from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
     SparsitySummaryAnalysisModel,
@@ -26,7 +26,7 @@ from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
 
 class SummaryMetricsAnalysisModel(BaseModel):
     sparsity: Dict[str, SparsitySummaryAnalysisModel]
-    quantization: Dict[str, QuantizatioSummarynAnalysisModel]
+    quantization: Dict[str, QuantizationSummaryAnalysisModel]
 
 
 class SummaryAnalysisModel(BaseModel):
