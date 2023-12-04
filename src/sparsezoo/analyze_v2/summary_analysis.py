@@ -16,6 +16,7 @@ from typing import Any, Dict
 
 import yaml
 
+from sparsezoo.analyze_v2.memory_access_analysis import MemoryAccessAnalysis
 from sparsezoo.analyze_v2.model_validator import SummaryAnalysisModel
 from sparsezoo.analyze_v2.node_analysis import NodeAnalysis
 from sparsezoo.analyze_v2.operation_analysis import OperationAnalysis
@@ -28,6 +29,7 @@ class SummaryAnalysis:
     ):
         self.parameter_analysis = {}
         self.operation_analysis = {}
+        self.memory_access_analysis = {}
 
     def aggregate_analysis_metrics_from_node_analysis(
         self, node_analysis: NodeAnalysis
@@ -38,9 +40,13 @@ class SummaryAnalysis:
         """
         parameter_analysis: ParameterAnalysis = node_analysis.parameter_analysis
         operation_analysis: OperationAnalysis = node_analysis.operation_analysis
+        memory_access_analysis: MemoryAccessAnalysis = (
+            node_analysis.memory_access_analysis
+        )
 
         self.aggregate_metrics_from_parameter_analysis(parameter_analysis)
         self.aggregate_metrics_from_operation_analysis(operation_analysis)
+        self.aggregate_metrics_from_memory_access_analysis(memory_access_analysis)
 
     def aggregate_metrics_from_parameter_analysis(self, analysis: ParameterAnalysis):
         sparsity_analysis_model = analysis.sparsity_analysis_model
@@ -67,7 +73,6 @@ class SummaryAnalysis:
             if grouping not in quantization_dct:
                 quantization_dct[grouping] = model
                 continue
-            # breakpoint()
             quantization_dct[grouping] += model
 
     def aggregate_metrics_from_operation_analysis(self, analysis: OperationAnalysis):
@@ -97,10 +102,40 @@ class SummaryAnalysis:
                 continue
             quantization_dct[grouping] += model
 
+    def aggregate_metrics_from_memory_access_analysis(
+        self, analysis: MemoryAccessAnalysis
+    ):
+        sparsity_analysis_model = analysis.sparsity_analysis_model
+        quantization_analysis_model = analysis.quantization_analysis_model
+
+        model_dct = self.memory_access_analysis
+        if "sparsity" not in model_dct:
+            model_dct["sparsity"] = {}
+
+        sparsity_dct = model_dct["sparsity"]
+        for model in sparsity_analysis_model:
+            grouping = model.grouping
+            if grouping not in sparsity_dct:
+                sparsity_dct[grouping] = model
+                continue
+            sparsity_dct[grouping] += model
+
+        if "quantization" not in model_dct:
+            model_dct["quantization"] = {}
+        quantization_dct = model_dct["quantization"]
+
+        for model in quantization_analysis_model:
+            grouping = model.grouping
+            if grouping not in quantization_dct:
+                quantization_dct[grouping] = model
+                continue
+            quantization_dct[grouping] += model
+
     def to_dict(self) -> Dict[str, Any]:
         return SummaryAnalysisModel(
             params=self.parameter_analysis,
             ops=self.operation_analysis,
+            mem_access=self.memory_access_analysis,
         ).dict()
 
     def to_yaml(self) -> str:

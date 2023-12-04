@@ -32,3 +32,4 @@ class SummaryMetricsAnalysisModel(BaseModel):
 class SummaryAnalysisModel(BaseModel):
     params: SummaryMetricsAnalysisModel
     ops: SummaryMetricsAnalysisModel
+    mem_access: SummaryMetricsAnalysisModel
