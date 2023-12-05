@@ -67,7 +67,7 @@ class RegistryMixin:
         pass
 
     # register with multiple aliases
-    @Dataset.register(name=["cifar-10-dataset", "cifar-100-dataset"])
+    @Dataset.register(alias=["cifar-10-dataset", "cifar_100_dataset"])
     class Cifar(Dataset):
         pass
 
@@ -77,6 +77,13 @@ class RegistryMixin:
     # load from custom file that implements a dataset
     mnist = Dataset.load_from_registry("/path/to/mnnist_dataset.py:MnistDataset")
     ```
+
+    Note, that any name or alias that is being registered, will be also recognized
+    when all hyphens are replaced with underscores and vice versa.
+    For example, if a class is registered:
+     - as "cifar-10-dataset", it will be also recognized as "cifar_10_dataset"
+     - as "cifar_10_dataset", it will be also recognized as "cifar-10-dataset"
+        etc.
     """
 
     # set to True in child class to add check that registered/retrieved values
