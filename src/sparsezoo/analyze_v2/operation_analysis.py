@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from onnx import NodeProto
 
-from sparsezoo.analyze_v2.model_validator import (
-    OperationAnalysisModel,
-    QuantizationAnalysisModel,
-    SparsityAnalysisModel,
+from sparsezoo.analyze_v2.schemas import (
+    OperationAnalysisSchema,
+    QuantizationAnalysisSchema,
+    SparsityAnalysisSchema,
 )
 from sparsezoo.utils import (
     ONNXGraph,
@@ -56,54 +56,60 @@ class OperationAnalysis:
         self.sparsity_analysis_model = self.get_sparsity()
         self.quantization_analysis_model = self.get_quantization()
 
-    def get_sparsity(self) -> List["SparsityAnalysisModel"]:
+    def get_sparsity(self) -> Optional[List["SparsityAnalysisSchema"]]:
         """
-        Get the number of operation counts
+        Get the number of dense and sparse weights, if any
 
-        :returns: List of SparsityAnalysis schemas for each grouping
+        :returns: List of sparsity analysis pydantic models for each grouping
+         if the node has weights
         """
 
         data = get_operation_counts(self.model_graph, self.node, self.node_shape)
-        sparsity_analysis_model = []
-        for grouping, counts_dict in data.items():
-            sparsity_analysis_model.append(
-                SparsityAnalysisModel(grouping=grouping, **counts_dict)
-            )
+        if data is not None:
+            sparsity_analysis_model = []
+            for grouping, counts_dict in data.items():
+                sparsity_analysis_model.append(
+                    SparsityAnalysisSchema(grouping=grouping, **counts_dict)
+                )
 
-        return sparsity_analysis_model
+            return sparsity_analysis_model
 
-    def get_quantization(self) -> List["QuantizationAnalysisModel"]:
+    def get_quantization(self) -> Optional[List["QuantizationAnalysisSchema"]]:
         """
         Get the number of bits and quantized bits from weights
 
-        :returns: List of QuantizationAnalysis schemas for each grouping
+        :returns: List of quantization analysis pydantic models for each grouping
+         if the node has weights
         """
         data = get_operation_bits(self.model_graph, self.node, self.node_shape)
-        quantization_analysis_model = []
-        for grouping, counts_dict in data.items():
-            quantization_analysis_model.append(
-                QuantizationAnalysisModel(grouping=grouping, **counts_dict)
-            )
+        if data is not None:
+            quantization_analysis_model = []
+            for grouping, counts_dict in data.items():
+                quantization_analysis_model.append(
+                    QuantizationAnalysisSchema(grouping=grouping, **counts_dict)
+                )
 
-        return quantization_analysis_model
+            return quantization_analysis_model
 
-    def to_dict(self) -> Dict[str, Any]:
-        return OperationAnalysisModel(
-            name=self.node.name,
-            sparsity=self.sparsity_analysis_model,
-            quantization=self.quantization_analysis_model,
-        ).dict()
+    def to_dict(self) -> Optional[Dict[str, Any]]:
+        if self.sparsity_analysis_model is not None:
+            return OperationAnalysisSchema(
+                name=self.node.name,
+                sparsity=self.sparsity_analysis_model,
+                quantization=self.quantization_analysis_model,
+            ).dict()
 
-    def to_yaml(self) -> str:
-        return yaml.dump(self.to_dict())
+    def to_yaml(self) -> Optional[str]:
+        if self.sparsity_analysis_model is not None:
+            return yaml.dump(self.to_dict())
 
 
 def get_operation_counts(
     model_graph: ONNXGraph,
     node: NodeProto,
     node_shape,
-) -> Dict[str, Union[int, float]]:
-    """Get the number of operations for the weighted layers"""
+) -> Optional[Dict[str, Union[int, float]]]:
+    """Get the number of operations for the weighted layers, if any"""
     ops_sparse, ops_sparse_block_four = 0, 0
 
     ops_dict_single = get_ops_dict(
@@ -145,11 +151,8 @@ def get_operation_bits(
     model_graph: ONNXGraph,
     node: NodeProto,
     node_shapes,
-) -> Dict[str, Union[int, float]]:
-    """Get the number of bits and quantized bits from ops"""
-    bits, bits_block4 = 0, 0
-    is_quantized_op = False
-
+) -> Optional[Dict[str, Union[int, float]]]:
+    """Get the number of bits and quantized bits from ops, if any"""
     node_weight = get_node_weight(model_graph, node)
     if node_weight is not None and node_weight.size > 0:
 
@@ -164,14 +167,14 @@ def get_operation_bits(
             ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
         ) * precision
 
-    bits_quant = is_quantized_op * bits
-    return {
-        "tensor": {
-            "bits": bits,
-            "bits_quant": bits_quant,
-        },
-        "block4": {
-            "bits": bits_block4,
-            "bits_quant": bits_quant,
-        },
-    }
+        bits_quant = is_quantized_op * bits
+        return {
+            "tensor": {
+                "bits": bits,
+                "bits_quant": bits_quant,
+            },
+            "block4": {
+                "bits": bits_block4,
+                "bits_quant": bits_quant,
+            },
+        }
