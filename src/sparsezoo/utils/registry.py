@@ -198,7 +198,6 @@ def register(
     if name in _REGISTRY[parent_class]:
         # name already exists - raise error if two different values are attempting
         # to share the same name
-        name = _ALIAS_REGISTRY[name]
         registered_value = _REGISTRY[parent_class][name]
         if registered_value is not value:
             raise RuntimeError(
@@ -227,10 +226,8 @@ def get_from_registry(
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
         # look up name in registry
-
         name = _ALIAS_REGISTRY.get(name)
         retrieved_value = _REGISTRY[parent_class].get(name)
-
         if retrieved_value is None:
             raise KeyError(
                 f"Unable to find {name} registered under type {parent_class}.\n"
