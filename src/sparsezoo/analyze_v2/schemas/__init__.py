@@ -14,4 +14,4 @@
 
 # flake8: noqa
 
-from .parameter_analysis_model import ParameterAnalysisModel
+from .parameter_analysis import ParameterAnalysisSchema

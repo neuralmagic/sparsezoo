@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 import yaml
 from onnx import NodeProto
 
-from sparsezoo.analyze_v2.model_validator import (
-    DistributionAnalysisModel,
-    ParameterAnalysisModel,
-    QuantizationAnalysisModel,
-    SparsityAnalysisModel,
+from sparsezoo.analyze_v2.schemas import (
+    DistributionAnalysisSchema,
+    ParameterAnalysisSchema,
+    QuantizationAnalysisSchema,
+    SparsityAnalysisSchema,
 )
 from sparsezoo.utils import (
     ONNXGraph,
@@ -57,49 +57,54 @@ class ParameterAnalysis:
         self.model_graph = model_graph
         self.node = node
 
-        self.counts: Dict[str, int] = {}  # single grouping param counts
-        self.bits: Dict[str, int] = {}  # Tensor grouping bits
-
         self.sparsity_analysis_model = self.get_sparsity()
         self.quantization_analysis_model = self.get_quantization()
         self.distribution_model = self.get_distribution()
 
-    def get_sparsity(self) -> List["SparsityAnalysisModel"]:
-        """Get the number of dense and sparse weights"""
+    def get_sparsity(self) -> Optional[List["SparsityAnalysisSchema"]]:
+        """
+        Get the number of dense and sparse weights, if any
+
+        :returns: List of sparsity analysis pydantic models for each grouping
+         if the node has weights
+        """
 
         data = get_parameter_counts(self.model_graph, self.node)
-        sparsity_analysis_model = []
-        for grouping, counts_dict in data.items():
-            if grouping == "single":
-                self.counts = counts_dict
+        if data is not None:
+            sparsity_analysis_model = []
 
-            sparsity_analysis_model.append(
-                SparsityAnalysisModel(grouping=grouping, **counts_dict)
-            )
+            for grouping, counts_dict in data.items():
+                sparsity_analysis_model.append(
+                    SparsityAnalysisSchema(grouping=grouping, **counts_dict)
+                )
 
-        return sparsity_analysis_model
+            return sparsity_analysis_model
 
-    def get_quantization(self) -> List["QuantizationAnalysisModel"]:
-        """Get the number of bits and quantized bits from weights"""
+    def get_quantization(self) -> List["QuantizationAnalysisSchema"]:
+        """
+        Get the number of bits and quantized bits from weights
+
+        :returns: List of quantization analysis pydantic models for each grouping
+         if the node has weights
+        """
         data = get_parameter_bits(self.model_graph, self.node)
-        quantization_analysis_model = []
-        for grouping, counts_dict in data.items():
-            if grouping == "tensor":
-                self.bits = counts_dict
+        if data is not None:
+            quantization_analysis_model = []
 
-            quantization_analysis_model.append(
-                QuantizationAnalysisModel(grouping=grouping, **counts_dict)
-            )
+            for grouping, counts_dict in data.items():
+                quantization_analysis_model.append(
+                    QuantizationAnalysisSchema(grouping=grouping, **counts_dict)
+                )
 
-        return quantization_analysis_model
+            return quantization_analysis_model
 
-    def get_distribution(self) -> "DistributionAnalysisModel":
+    def get_distribution(self) -> Optional["DistributionAnalysisSchema"]:
         """Get the distribution statistics with respect to the weights"""
         distribution_dct = get_parameter_distribution(self.model_graph, self.node)
-        return DistributionAnalysisModel(**distribution_dct)
+        return DistributionAnalysisSchema(**distribution_dct)
 
     def to_dict(self) -> Dict[str, Any]:
-        return ParameterAnalysisModel(
+        return ParameterAnalysisSchema(
             name=self.node.name,
             op_type=self.node.op_type,
             distribution=self.distribution_model,
@@ -114,27 +119,26 @@ class ParameterAnalysis:
 def get_parameter_counts(
     model_graph: ONNXGraph,
     node: NodeProto,
-) -> Dict[str, Union[int, float]]:
+) -> Optional[Dict[str, Union[int, float]]]:
     """Get the number of parameters in the node, if any"""
-    num_sparse_weights_four_blocks, num_weights_four_block = 0, 0
-    num_weights, _, num_weights_sparse = get_node_param_counts(node, model_graph)
 
+    num_weights, _, num_weights_sparse = get_node_param_counts(node, model_graph)
     if num_weights > 0:
         (
             num_sparse_weights_four_blocks,
             num_weights_four_block,
         ) = get_node_num_four_block_zeros_and_size(model_graph, node)
 
-    return {
-        "single": {
-            "counts": num_weights,
-            "counts_sparse": num_weights_sparse,
-        },
-        "block4": {
-            "counts": num_weights_four_block,
-            "counts_sparse": num_sparse_weights_four_blocks,
-        },
-    }
+        return {
+            "single": {
+                "counts": num_weights,
+                "counts_sparse": num_weights_sparse,
+            },
+            "block4": {
+                "counts": num_weights_four_block,
+                "counts_sparse": num_sparse_weights_four_blocks,
+            },
+        }
 
 
 def get_parameter_bits(
@@ -142,23 +146,22 @@ def get_parameter_bits(
     node: NodeProto,
     *args,
     **kwargs,
-) -> Dict[str, Union[int, float]]:
+) -> Optional[Dict[str, Union[int, float]]]:
     """
     Get the number of bits used to store the array
     If the layer is quantized, assume all its elements in the ndarray
      are quantized
     """
-    bits = 0
     node_weight = get_node_weight(model_graph, node)
     if node_weight is not None and node_weight.size > 0:
         bits = get_node_weight_bits(model_graph, node)
 
-    return {
-        "tensor": {
-            "bits": bits,
-            "bits_quant": bits * is_quantized_layer(model_graph, node),
-        },
-    }
+        return {
+            "tensor": {
+                "bits": bits,
+                "bits_quant": bits * is_quantized_layer(model_graph, node),
+            },
+        }
 
 
 def get_parameter_distribution(
@@ -167,11 +170,8 @@ def get_parameter_distribution(
     num_bins: int = 25,
     *args,
     **kwargs,
-) -> Dict[str, Union[int, float]]:
-    counts, mean, median, modes = None, None, None, None
-    sum_val, min_val, max_val = None, None, None
-    percentiles, std_dev, skewness, kurtosis, entropy = None, None, None, None, None
-    bin_width, hist, bin_edges = None, None, None
+) -> Optional[Dict[str, Union[int, float]]]:
+    """Get the statistics of the parameters in the node if any"""
 
     node_weight = get_node_weight(model_graph, node)
 
@@ -192,23 +192,23 @@ def get_parameter_distribution(
         bin_width = (max_val - min_val) / num_bins
         hist, bin_edges = numpy.histogram(node_weight, bins=num_bins)
 
-    return {
-        "counts": counts,
-        "mean": mean,
-        "median": median,
-        "modes": modes,
-        "sum_val": sum_val,
-        "min_val": min_val,
-        "max_val": max_val,
-        "percentiles": percentiles,
-        "std_dev": std_dev,
-        "skewness": skewness,
-        "kurtosis": kurtosis,
-        "entropy": entropy,
-        "num_bins": num_bins,
-        "bin_width": bin_width,
-        "hist": hist.tolist() if isinstance(hist, numpy.ndarray) else hist,
-        "bin_edges": bin_edges.tolist()
-        if isinstance(bin_edges, numpy.ndarray)
-        else bin_edges,
-    }
+        return {
+            "counts": counts,
+            "mean": mean,
+            "median": median,
+            "modes": modes,
+            "sum_val": sum_val,
+            "min_val": min_val,
+            "max_val": max_val,
+            "percentiles": percentiles,
+            "std_dev": std_dev,
+            "skewness": skewness,
+            "kurtosis": kurtosis,
+            "entropy": entropy,
+            "num_bins": num_bins,
+            "bin_width": bin_width,
+            "hist": hist.tolist() if isinstance(hist, numpy.ndarray) else hist,
+            "bin_edges": bin_edges.tolist()
+            if isinstance(bin_edges, numpy.ndarray)
+            else bin_edges,
+        }

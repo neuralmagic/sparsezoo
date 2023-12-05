@@ -16,20 +16,18 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from sparsezoo.analyze_v2.model_validator.distribution_analysis_model import (
-    DistributionAnalysisModel,
+from sparsezoo.analyze_v2.schemas.distribution_analysis import (
+    DistributionAnalysisSchema,
 )
-from sparsezoo.analyze_v2.model_validator.quantization_analysis_model import (
-    QuantizationAnalysisModel,
+from sparsezoo.analyze_v2.schemas.quantization_analysis import (
+    QuantizationAnalysisSchema,
 )
-from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
-    SparsityAnalysisModel,
-)
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsityAnalysisSchema
 
 
 class ParameterAnalysisModel(BaseModel):
     name: str = Field(..., description="Node name")
     op_type: str = Field(..., description="Node op type")
-    distribution: DistributionAnalysisModel
-    sparsity: List[SparsityAnalysisModel]
-    quantization: List[QuantizationAnalysisModel]
+    distribution: DistributionAnalysisSchema
+    sparsity: List[SparsityAnalysisSchema]
+    quantization: List[QuantizationAnalysisSchema]
