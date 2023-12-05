@@ -505,7 +505,7 @@ def get_numpy_distribution_statistics(arr: numpy.ndarray) -> Tuple[int, int]:
 def get_numpy_entropy(arr: numpy.ndarray) -> float:
     """Remove dimensions and compute the overall entropy"""
     flatten_arr = arr.flatten()
-    flatten_arr = flatten_arr[flatten_arr > 0]
+    flatten_arr = numpy.abs(flatten_arr)
     probs = flatten_arr / numpy.sum(flatten_arr)
 
     return -numpy.sum(probs * numpy.log2(probs))
@@ -521,6 +521,7 @@ def get_numpy_modes(arr: numpy.ndarray) -> List[Union[int, float]]:
 def get_numpy_percentiles(
     arr: numpy.ndarray, percentiles: List[int] = [10, 25, 50, 75, 90]
 ) -> Dict[int, float]:
+    """Get the percentiles of the elements inside the array"""
     return dict(
         [
             (percentile, value)
