@@ -25,7 +25,7 @@ from sparsezoo.analyze_v2.schemas.quantization_analysis import (
 from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsityAnalysisSchema
 
 
-class ParameterAnalysisModel(BaseModel):
+class ParameterAnalysisSchema(BaseModel):
     name: str = Field(..., description="Node name")
     op_type: str = Field(..., description="Node op type")
     distribution: DistributionAnalysisSchema

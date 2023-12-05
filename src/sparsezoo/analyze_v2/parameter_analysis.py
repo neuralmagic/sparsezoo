@@ -72,7 +72,6 @@ class ParameterAnalysis:
         data = get_parameter_counts(self.model_graph, self.node)
         if data is not None:
             sparsity_analysis_model = []
-
             for grouping, counts_dict in data.items():
                 sparsity_analysis_model.append(
                     SparsityAnalysisSchema(grouping=grouping, **counts_dict)
@@ -90,7 +89,6 @@ class ParameterAnalysis:
         data = get_parameter_bits(self.model_graph, self.node)
         if data is not None:
             quantization_analysis_model = []
-
             for grouping, counts_dict in data.items():
                 quantization_analysis_model.append(
                     QuantizationAnalysisSchema(grouping=grouping, **counts_dict)
@@ -101,19 +99,22 @@ class ParameterAnalysis:
     def get_distribution(self) -> Optional["DistributionAnalysisSchema"]:
         """Get the distribution statistics with respect to the weights"""
         distribution_dct = get_parameter_distribution(self.model_graph, self.node)
-        return DistributionAnalysisSchema(**distribution_dct)
+        if distribution_dct:
+            return DistributionAnalysisSchema(**distribution_dct)
 
-    def to_dict(self) -> Dict[str, Any]:
-        return ParameterAnalysisSchema(
-            name=self.node.name,
-            op_type=self.node.op_type,
-            distribution=self.distribution_model,
-            sparsity=self.sparsity_analysis_model,
-            quantization=self.quantization_analysis_model,
-        ).dict()
+    def to_dict(self) -> Optional[Dict[str, Any]]:
+        if self.sparsity_analysis_model:
+            return ParameterAnalysisSchema(
+                name=self.node.name,
+                op_type=self.node.op_type,
+                distribution=self.distribution_model,
+                sparsity=self.sparsity_analysis_model,
+                quantization=self.quantization_analysis_model,
+            ).dict()
 
-    def to_yaml(self) -> str:
-        return yaml.dump(self.to_dict())
+    def to_yaml(self) -> Optional[str]:
+        if self.sparsity_analysis_model:
+            return yaml.dump(self.to_dict())
 
 
 def get_parameter_counts(
