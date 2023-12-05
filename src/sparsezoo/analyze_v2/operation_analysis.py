@@ -110,7 +110,6 @@ def get_operation_counts(
     node_shape,
 ) -> Optional[Dict[str, Union[int, float]]]:
     """Get the number of operations for the weighted layers, if any"""
-    ops_sparse, ops_sparse_block_four = 0, 0
 
     ops_dict_single = get_ops_dict(
         model_graph, node, node_shape=node_shape, is_four_block_sparse=False
@@ -120,31 +119,34 @@ def get_operation_counts(
     )
 
     ops_dense = get_ops_count_from_ops_dict("num_dense_ops", ops_dict_single)
-    ops_dense_block4 = get_ops_count_from_ops_dict("num_dense_ops", ops_dict_block_four)
-    true_ops_dict = (
-        ops_dict_single
-        if not is_four_block_sparse_layer(model_graph, node)
-        else ops_dict_block_four
-    )
-
-    if is_sparse_layer(model_graph, node):
-        ops_sparse = get_ops_count_from_ops_dict("num_sparse_ops", true_ops_dict)
-        ops_sparse_block_four = get_ops_count_from_ops_dict(
-            "num_sparse_ops", ops_dict_block_four
+    if ops_dense > 0:
+        ops_dense_block4 = get_ops_count_from_ops_dict(
+            "num_dense_ops", ops_dict_block_four
+        )
+        true_ops_dict = (
+            ops_dict_single
+            if not is_four_block_sparse_layer(model_graph, node)
+            else ops_dict_block_four
         )
 
-    ops_total = ops_dense + ops_sparse
-    ops_total_block_four = ops_dense_block4 + ops_sparse_block_four
-    return {
-        "single": {
-            "counts": ops_total,
-            "counts_sparse": ops_sparse,
-        },
-        "block4": {
-            "counts": ops_total_block_four,
-            "counts_sparse": ops_sparse_block_four,
-        },
-    }
+        if is_sparse_layer(model_graph, node):
+            ops_sparse = get_ops_count_from_ops_dict("num_sparse_ops", true_ops_dict)
+            ops_sparse_block_four = get_ops_count_from_ops_dict(
+                "num_sparse_ops", ops_dict_block_four
+            )
+
+            ops_total = ops_dense + ops_sparse
+            ops_total_block_four = ops_dense_block4 + ops_sparse_block_four
+            return {
+                "single": {
+                    "counts": ops_total,
+                    "counts_sparse": ops_sparse,
+                },
+                "block4": {
+                    "counts": ops_total_block_four,
+                    "counts_sparse": ops_sparse_block_four,
+                },
+            }
 
 
 def get_operation_bits(
