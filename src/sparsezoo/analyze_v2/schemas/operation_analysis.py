@@ -16,15 +16,13 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from sparsezoo.analyze_v2.model_validator.quantization_analysis_model import (
-    QuantizationAnalysisModel,
+from sparsezoo.analyze_v2.schemas.quantization_analysis import (
+    QuantizationAnalysisSchema,
 )
-from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
-    SparsityAnalysisModel,
-)
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsityAnalysisSchema
 
 
-class OperationAnalysisModel(BaseModel):
+class OperationAnalysisSchema(BaseModel):
     name: str = Field(..., description="Node name")
-    sparsity: List[SparsityAnalysisModel]
-    quantization: List[QuantizationAnalysisModel]
+    sparsity: List[SparsityAnalysisSchema]
+    quantization: List[QuantizationAnalysisSchema]

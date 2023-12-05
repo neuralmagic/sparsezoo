@@ -53,21 +53,19 @@ class OperationAnalysis:
         self.node = node
         self.node_shape = node_shape
 
-        self.counts: Dict = {}  # single grouping param counts
-        self.bits: Dict = {}  # Tensor grouping bits
-
         self.sparsity_analysis_model = self.get_sparsity()
         self.quantization_analysis_model = self.get_quantization()
 
     def get_sparsity(self) -> List["SparsityAnalysisModel"]:
-        """Get the number of operation counts"""
+        """
+        Get the number of operation counts
+
+        :returns: List of SparsityAnalysis schemas for each grouping
+        """
 
         data = get_operation_counts(self.model_graph, self.node, self.node_shape)
         sparsity_analysis_model = []
         for grouping, counts_dict in data.items():
-            if grouping == "single":
-                self.counts = counts_dict
-
             sparsity_analysis_model.append(
                 SparsityAnalysisModel(grouping=grouping, **counts_dict)
             )
@@ -75,13 +73,14 @@ class OperationAnalysis:
         return sparsity_analysis_model
 
     def get_quantization(self) -> List["QuantizationAnalysisModel"]:
-        """Get the number of bits and quantized bits from weights"""
+        """
+        Get the number of bits and quantized bits from weights
+
+        :returns: List of QuantizationAnalysis schemas for each grouping
+        """
         data = get_operation_bits(self.model_graph, self.node, self.node_shape)
         quantization_analysis_model = []
         for grouping, counts_dict in data.items():
-            if grouping == "tensor":
-                self.bits = counts_dict
-
             quantization_analysis_model.append(
                 QuantizationAnalysisModel(grouping=grouping, **counts_dict)
             )

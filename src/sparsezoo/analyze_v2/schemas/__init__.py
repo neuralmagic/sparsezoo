@@ -14,4 +14,4 @@
 
 # flake8: noqa
 
-from .operation_analysis_model import OperationAnalysisModel
+from .operation_analysis_model import OperationAnalysisSchema
