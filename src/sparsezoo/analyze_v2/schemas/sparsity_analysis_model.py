@@ -16,17 +16,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, validator
 
-from sparsezoo.analyze_v2.model_validator.utils import type_validator
+from sparsezoo.analyze_v2.schemas.utils import type_validator
 
 
-class QuantizationSummaryAnalysisModel(BaseModel):
-    bits: float = Field(..., description="Total bits required to store the weights")
-    bits_quant: int = Field(
-        ...,
-        description=(
-            "Total quantized bits required to store the weights."
-            "Here we assume if the layer is quantized, the entire array is quantized"
-        ),
+class SparsitySummaryAnalysisSchema(BaseModel):
+    counts: int = Field(..., description="Total number of parameters in the node")
+    counts_sparse: int = Field(
+        ..., description="Total number of sparse parameters in the node"
     )
     percent: Optional[float] = Field(
         None, description="Percentage of counts_sparse over counts"
@@ -39,34 +35,34 @@ class QuantizationSummaryAnalysisModel(BaseModel):
     @validator("percent", pre=True, always=True)
     def calculate_percent_if_none(cls, value, values):
         if value is None:
-            bits = values.get("bits", 0)
-            bits_quant = values.get("bits_quant", 0)
-            return bits_quant / bits if bits > 0 else 0.0
+            counts = values.get("counts", 0)
+            counts_sparse = values.get("counts_sparse", 0)
+            return counts_sparse / counts if counts > 0 else 0.0
         return value
 
     def __add__(self, model: BaseModel):
         validator_model = None
-        if isinstance(model, QuantizationSummaryAnalysisModel):
-            validator_model = QuantizationSummaryAnalysisModel
+        if isinstance(model, SparsitySummaryAnalysisSchema):
+            validator_model = SparsitySummaryAnalysisSchema
 
         if validator_model is not None:
             return validator_model(
-                bits=self.bits + model.bits,
-                bits_quant=self.bits_quant + model.bits_quant,
+                counts=self.counts + model.counts,
+                counts_sparse=self.counts_sparse + model.counts_sparse,
             )
 
 
-class QuantizationAnalysisModel(QuantizationSummaryAnalysisModel):
+class SparsityAnalysisSchema(SparsitySummaryAnalysisSchema):
     grouping: str = Field(..., description="The combining group name")
 
     def __add__(self, model: BaseModel):
         validator_model = None
-        if isinstance(model, QuantizationAnalysisModel):
-            validator_model = QuantizationAnalysisModel
+        if isinstance(model, SparsityAnalysisSchema):
+            validator_model = SparsityAnalysisSchema
 
         if validator_model is not None and self.grouping == model.grouping:
             return validator_model(
                 grouping=self.grouping,
-                bits=self.bits + model.bits,
-                bits_quant=self.bits_quant + model.bits_quant,
+                counts=self.counts + model.counts,
+                counts_sparse=self.counts_sparse + model.counts_sparse,
             )
