@@ -15,9 +15,9 @@
 # flake8: noqa
 
 
-from .distribution_analysis_model import DistributionAnalysisModel
-from .quantization_analysis_model import (
-    QuantizationAnalysisModel,
-    QuantizationSummaryAnalysisModel,
+from .distribution_analysis import DistributionAnalysisSchema
+from .quantization_analysis import (
+    QuantizationAnalysisSchema,
+    QuantizationSummaryAnalysisSchema,
 )
-from .sparsity_analysis_model import SparsityAnalysisModel, SparsitySummaryAnalysisModel
+from .sparsity_analysis import SparsityAnalysisSchema, SparsitySummaryAnalysisSchema
