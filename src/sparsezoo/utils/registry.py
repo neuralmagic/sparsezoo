@@ -27,9 +27,11 @@ __all__ = [
     "register",
     "get_from_registry",
     "registered_names",
+    "registered_aliases",
 ]
 
 
+_ALIAS_REGISTRY: Dict[str, str] = defaultdict(dict)
 _REGISTRY: Dict[Type, Dict[str, Any]] = defaultdict(dict)
 
 
@@ -82,7 +84,9 @@ class RegistryMixin:
     registry_requires_subclass: bool = False
 
     @classmethod
-    def register(cls, name: Union[List[str], str, None] = None):
+    def register(
+        cls, name: Optional[str] = None, alias: Union[List[str], str, None] = None
+    ):
         """
         Decorator for registering a value (ie class or function) wrapped by this
         decorator to the base class (class that .register is called from)
@@ -93,28 +97,30 @@ class RegistryMixin:
         """
 
         def decorator(value: Any):
-            cls.register_value(value, name=name)
+            cls.register_value(value, name=name, alias=alias)
             return value
 
         return decorator
 
     @classmethod
-    def register_value(cls, value: Any, name: Union[List[str], str, None] = None):
+    def register_value(
+        cls, value: Any, name: str, alias: Union[str, List[str], None] = None
+    ):
         """
         Registers the given value to the class `.register_value` is called from
         :param value: value to register
-        :param name: name or list of names to register the wrapped value as,
+        :param name: name to register the wrapped value as,
             defaults to value.__name__
+        :param alias: alias or list of aliases to register the wrapped value as,
+            defaults to None
         """
-        names = name if isinstance(name, list) else [name]
-
-        for name in names:
-            register(
-                parent_class=cls,
-                value=value,
-                name=name,
-                require_subclass=cls.registry_requires_subclass,
-            )
+        register(
+            parent_class=cls,
+            value=value,
+            name=name,
+            alias=alias,
+            require_subclass=cls.registry_requires_subclass,
+        )
 
     @classmethod
     def load_from_registry(cls, name: str, **constructor_kwargs) -> object:
@@ -149,17 +155,27 @@ class RegistryMixin:
         """
         return registered_names(cls)
 
+    @classmethod
+    def registered_aliases(cls) -> List[str]:
+        """
+        :return: list of all aliases registered to this class
+        """
+        return registered_aliases(cls)
+
 
 def register(
     parent_class: Type,
     value: Any,
     name: Optional[str] = None,
+    alias: Union[List[str], str, None] = None,
     require_subclass: bool = False,
 ):
     """
     :param parent_class: class to register the name under
     :param value: the value to register
     :param name: name to register the wrapped value as, defaults to value.__name__
+    :param alias: alias or list of aliases to register the wrapped value as,
+        defaults to None
     :param require_subclass: require that value is a subclass of the class this
         method is called from
     """
@@ -167,12 +183,15 @@ def register(
         # default name
         name = value.__name__
 
+    register_alias(name=name, alias=alias)
+
     if require_subclass:
         _validate_subclass(parent_class, value)
 
     if name in _REGISTRY[parent_class]:
         # name already exists - raise error if two different values are attempting
         # to share the same name
+        name = _ALIAS_REGISTRY[name]
         registered_value = _REGISTRY[parent_class][name]
         if registered_value is not value:
             raise RuntimeError(
@@ -201,12 +220,17 @@ def get_from_registry(
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
         # look up name in registry
+
+        name = _ALIAS_REGISTRY.get(name)
         retrieved_value = _REGISTRY[parent_class].get(name)
+
         if retrieved_value is None:
             raise KeyError(
-                f"Unable to find {name} registered under type {parent_class}. "
+                f"Unable to find {name} registered under type {parent_class}.\n"
                 f"Registered values for {parent_class}: "
-                f"{registered_names(parent_class)}"
+                f"{registered_names(parent_class)}\n"
+                f"Registered aliases for {parent_class}: "
+                f"{registered_aliases(parent_class)}"
             )
 
     if require_subclass:
@@ -221,6 +245,51 @@ def registered_names(parent_class: Type) -> List[str]:
     :return: all names registered to the given class
     """
     return list(_REGISTRY[parent_class].keys())
+
+
+def registered_aliases(parent_class: Type) -> List[str]:
+    """
+    :param parent_class: class to look up the registry of
+    :return: all aliases registered to the given class
+    """
+    alias_keys = set(_ALIAS_REGISTRY.keys())
+    names_keys = set(_REGISTRY[parent_class].keys())
+    return list(alias_keys.difference(names_keys))
+
+
+def register_alias(name: str, alias: Union[str, List[str], None] = None):
+    """
+    Updates the mapping from the alias(es) to the given name.
+    If the alias is None, the name is used as the alias.
+
+    Note, that the number of actual added alias(es) will be potentially
+    larger than the number of given aliases, since the function adds
+    variants of the alias with hyphens and underscores.
+
+    Examples:
+
+    If alias = ["alias1", "alias2"]
+    ```
+    _ALIAS_REGISTRY = {..., "alias1": "name", "alias2": "name"}
+    ```
+    If alias = None
+    ```
+    _ALIAS_REGISTRY = {..., "name": "name"}
+    ```
+
+    :param name: name that the alias refers to
+    :param alias: single alias or list of aliases that
+        refer to the name, defaults to None
+    """
+    if alias is not None:
+        alias = alias if isinstance(alias, list) else [alias]
+    else:
+        alias = []
+    alias.append(name)
+    alias = _add_hyphen_underscores_variants(alias)
+
+    for alias_name in alias:
+        _ALIAS_REGISTRY[alias_name] = name
 
 
 def _import_and_get_value_from_module(module_path: str, value_name: str) -> Any:
@@ -250,3 +319,13 @@ def _validate_subclass(parent_class: Type, child_class: Type):
             f"class {child_class} is not a subclass of the class it is "
             f"registered for: {parent_class}."
         )
+
+
+def _add_hyphen_underscores_variants(alias: List[str]) -> List[str]:
+    # add variants of the alias with hyphens and underscores
+    new_alias = []
+    for alias_name in alias:
+        new_alias.append(alias_name)
+        new_alias.append(alias_name.replace("_", "-"))
+        new_alias.append(alias_name.replace("-", "_"))
+    return list(set(new_alias))

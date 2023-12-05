@@ -14,41 +14,71 @@
 
 import pytest
 
-from sparsezoo.utils.registry import RegistryMixin
+from sparsezoo.utils.registry import _ALIAS_REGISTRY, _REGISTRY, RegistryMixin
 
 
-def test_registery_flow_single():
+@pytest.fixture()
+def foo():
     class Foo(RegistryMixin):
         pass
 
-    @Foo.register()
-    class Foo1(Foo):
-        pass
+    yield Foo
+    _ALIAS_REGISTRY.clear()
+    _REGISTRY.clear()
 
-    assert {"Foo1"} == set(Foo.registered_names())
 
-    @Foo.register(name="name_2")
-    class Foo2(Foo):
-        pass
+class TestFooRegistry:
+    def test_single_item(self, foo):
+        @foo.register()
+        class Foo1(foo):
+            pass
 
-    assert {"Foo1", "name_2"} == set(Foo.registered_names())
+        assert {"Foo1"} == set(foo.registered_names())
+        assert set() == set(foo.registered_aliases())
 
-    @Foo.register(name=["name_3", "name_4"])
-    class Foo3(Foo):
-        pass
+    def test_single_item_custom_name(self, foo):
+        @foo.register(name="name_2")
+        class Foo1(foo):
+            pass
 
-    assert {"Foo1", "name_2", "name_3", "name_4"} == set(Foo.registered_names())
+        assert {"name_2"} == set(foo.registered_names())
+        assert {"name-2"} == set(foo.registered_aliases())
 
-    with pytest.raises(KeyError):
-        Foo.get_value_from_registry("Foo2")
+    def test_alias(self, foo):
+        @foo.register(alias=["name-3", "name_4"])
+        class Foo1(foo):
+            pass
 
-    assert Foo.get_value_from_registry("Foo1") is Foo1
-    assert isinstance(Foo.load_from_registry("name_2"), Foo2)
-    assert (
-        Foo.get_value_from_registry("name_3")
-        is Foo3
-        is Foo.get_value_from_registry("name_4")
-    )
+        assert {"Foo1"} == set(foo.registered_names())
+        assert {"name-3", "name-4", "name_3", "name_4"} == set(foo.registered_aliases())
+
+    def test_alias_with_custom_name(self, foo):
+        @foo.register(name="name_2", alias=["name-3", "name_4"])
+        class Foo1(foo):
+            pass
+
+        assert {"name_2"} == set(foo.registered_names())
+        assert {"name-3", "name-4", "name_3", "name_4", "name-2"} == set(
+            foo.registered_aliases()
+        )
+
+    def test_get_value_from_registry(self, foo):
+        @foo.register(alias=["name-3"])
+        class Foo1(foo):
+            pass
+
+        @foo.register()
+        class Foo2(foo):
+            pass
+
+        with pytest.raises(KeyError):
+            foo.get_value_from_registry("Foo3")
+
+        assert foo.get_value_from_registry("Foo1") is Foo1
+        assert isinstance(foo.load_from_registry("Foo2"), Foo2)
+        assert foo.get_value_from_registry("Foo2") is Foo2
+        assert foo.get_value_from_registry("name_3") is Foo1
+        assert foo.get_value_from_registry("name-3") is Foo1
 
 
 def test_registry_flow_multiple():
