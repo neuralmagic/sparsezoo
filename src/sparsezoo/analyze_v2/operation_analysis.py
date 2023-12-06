@@ -129,24 +129,25 @@ def get_operation_counts(
             else ops_dict_block_four
         )
 
+        ops_sparse, ops_sparse_block_four = 0, 0
         if is_sparse_layer(model_graph, node):
             ops_sparse = get_ops_count_from_ops_dict("num_sparse_ops", true_ops_dict)
             ops_sparse_block_four = get_ops_count_from_ops_dict(
                 "num_sparse_ops", ops_dict_block_four
             )
 
-            ops_total = ops_dense + ops_sparse
-            ops_total_block_four = ops_dense_block4 + ops_sparse_block_four
-            return {
-                "single": {
-                    "counts": ops_total,
-                    "counts_sparse": ops_sparse,
-                },
-                "block4": {
-                    "counts": ops_total_block_four,
-                    "counts_sparse": ops_sparse_block_four,
-                },
-            }
+        ops_total = ops_dense + ops_sparse
+        ops_total_block_four = ops_dense_block4 + ops_sparse_block_four
+        return {
+            "single": {
+                "counts": ops_total,
+                "counts_sparse": ops_sparse,
+            },
+            "block4": {
+                "counts": ops_total_block_four,
+                "counts_sparse": ops_sparse_block_four,
+            },
+        }
 
 
 def get_operation_bits(
@@ -158,25 +159,29 @@ def get_operation_bits(
     node_weight = get_node_weight(model_graph, node)
     if node_weight is not None and node_weight.size > 0:
 
-        precision = get_numpy_quantization_level(node_weight)
-        is_quantized_op = "32" not in str(precision)
-
         ops = get_operation_counts(model_graph, node, node_shapes)
+        if ops is not None:
+            precision = get_numpy_quantization_level(node_weight)
+            is_quantized_op = "32" not in str(precision)
 
-        bits = (ops["single"]["counts"] + ops["single"]["counts_sparse"]) * precision
+            bits = (
+                ops["single"]["counts"] + ops["single"]["counts_sparse"]
+            ) * precision
 
-        bits_block4 = (
-            ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
-        ) * precision
+            bits_block4 = (
+                ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
+            ) * precision
 
-        bits_quant = is_quantized_op * bits
-        return {
-            "tensor": {
-                "bits": bits,
-                "bits_quant": bits_quant,
-            },
-            "block4": {
-                "bits": bits_block4,
-                "bits_quant": bits_quant,
-            },
-        }
+            bits_quant = is_quantized_op * bits
+            return {
+                "tensor": {
+                    "bits": bits,
+                    "bits_quant": bits_quant,
+                },
+                "block4": {
+                    "bits": bits_block4,
+                    "bits_quant": bits_quant,
+                },
+            }
+        breakpoint()
+        ops = get_operation_counts(model_graph, node, node_shapes)
