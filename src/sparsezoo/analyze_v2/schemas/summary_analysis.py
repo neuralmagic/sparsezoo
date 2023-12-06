@@ -16,20 +16,18 @@ from typing import Dict
 
 from pydantic import BaseModel
 
-from sparsezoo.analyze_v2.model_validator.quantization_analysis_model import (
-    QuantizationSummaryAnalysisModel,
+from sparsezoo.analyze_v2.schemas.quantization_analysis import (
+    QuantizationSummaryAnalysisSchema,
 )
-from sparsezoo.analyze_v2.model_validator.sparsity_analysis_model import (
-    SparsitySummaryAnalysisModel,
-)
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsitySummaryAnalysisSchema
 
 
-class SummaryMetricsAnalysisModel(BaseModel):
-    sparsity: Dict[str, SparsitySummaryAnalysisModel]
-    quantization: Dict[str, QuantizationSummaryAnalysisModel]
+class SummaryMetricsAnalysisSchemal(BaseModel):
+    sparsity: Dict[str, SparsitySummaryAnalysisSchema]
+    quantization: Dict[str, QuantizationSummaryAnalysisSchema]
 
 
-class SummaryAnalysisModel(BaseModel):
-    params: SummaryMetricsAnalysisModel
-    ops: SummaryMetricsAnalysisModel
-    mem_access: SummaryMetricsAnalysisModel
+class SummaryAnalysisSchema(BaseModel):
+    params: SummaryMetricsAnalysisSchemal
+    ops: SummaryMetricsAnalysisSchemal
+    mem_access: SummaryMetricsAnalysisSchemal
