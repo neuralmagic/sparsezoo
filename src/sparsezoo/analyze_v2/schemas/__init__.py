@@ -14,4 +14,4 @@
 
 # flake8: noqa
 
-from .memory_access import MemoryAccessAnalysisSchema
+from .memory_access_analysis import MemoryAccessAnalysisSchema
