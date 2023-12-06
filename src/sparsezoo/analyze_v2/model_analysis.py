@@ -23,6 +23,28 @@ from sparsezoo.analyze_v2.summary_analysis import SummaryAnalysis
 
 
 class ModelAnalysis:
+    """
+    Given summary and node anlysis, obtain the overall analysis of the onnx model.
+    From fine-grained detailed analysis (top):
+
+    SparsityAnalysis:       num_counts, num_counts_sparse
+    MemoryAccessAnalysis:   num_mem_access, num_mem_access_sparse
+    QuantizationAnalysis:   num_bits, num_bits_quant
+
+    ParameterAnalysis:      contains SparsityAnalysis, MemoryAccessAnalysis,
+                             QuantizationAnalysis
+    OperationAnalysis:      contains SparsityAnalysis, MemoryAccessAnalysis,
+                             QuantizationAnalysis
+    DistributionAnalysis:   contains SparsityAnalysis, MemoryAccessAnalysis,
+                             QuantizationAnalysis
+
+    NodeAnalysis:           contains ParameterAnalysis, OperationAnalysis,
+                             DistributionAnalysis per node_id
+    SummaryAnalysis         contains the sum of SparsityAnalysis, MemoryAccessAnalysis,
+                             QuantizationAnalysis per grouping
+    ModelAnalysis           contains NodeAnalysis, SummaryAnalysis
+    """
+
     def __init__(
         self, summary_analysis: SummaryAnalysis, node_analyses: Dict[str, NodeAnalysis]
     ):
