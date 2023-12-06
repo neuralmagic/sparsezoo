@@ -14,4 +14,4 @@
 
 # flake8: noqa
 
-from .summary_analysis_model import SummaryAnalysisModel
+from .summary_analysis import SummaryAnalysis
