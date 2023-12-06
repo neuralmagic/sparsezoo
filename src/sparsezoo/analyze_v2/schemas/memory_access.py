@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import List
 
-from .memory_access_analysis_model import MemoryAccessAnalysisModel
+from pydantic import BaseModel, Field
+
+from sparsezoo.analyze_v2.schema.quantization_analysis import QuantizationAnalysisSchema
+from sparsezoo.analyze_v2.schema.sparsity_analysis import SparsityAnalysisSchema
+
+
+class MemoryAccessAnalysisSchema(BaseModel):
+    name: str = Field(..., description="Node name")
+    sparsity: List[SparsityAnalysisSchema]
+    quantization: List[QuantizationAnalysisSchema]
