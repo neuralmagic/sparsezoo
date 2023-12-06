@@ -84,10 +84,11 @@ def analyze(path: str) -> "ModelAnalysis":
         onnx_model = onnx.load(path)
     else:
         model = Model(path)
-        onnx_model = model.onnx_model
+        onnx_model_path = model.deployment.files[0].path
+        onnx_model = onnx.load(onnx_model_path)
 
     model_graph = ONNXGraph(onnx_model)
-    node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
+    node_shapes, _ = extract_node_shapes_and_dtypes(model_graph.model)
 
     summary_analysis = SummaryAnalysis()
     node_analyses = {}
