@@ -15,16 +15,20 @@
 
 from typing import Dict
 
+import onnx
 import yaml
 
+from sparsezoo import Model
 from sparsezoo.analyze_v2.node_analysis import NodeAnalysis
 from sparsezoo.analyze_v2.schemas import ModelAnalysisSchema
 from sparsezoo.analyze_v2.summary_analysis import SummaryAnalysis
+from sparsezoo.utils import ONNXGraph, extract_node_id, extract_node_shapes_and_dtypes
 
 
 class ModelAnalysis:
     """
     Given summary and node anlysis, obtain the overall analysis of the onnx model.
+
     From fine-grained detailed analysis (top):
 
     SparsityAnalysis:       num_counts, num_counts_sparse
@@ -65,3 +69,40 @@ class ModelAnalysis:
 
     def to_yaml(self):
         return yaml.dump(self.to_dict())
+
+
+def analyze(path: str) -> "ModelAnalysis":
+    """
+    Entry point to run the model analysis.
+
+    Carries out analysis of the desired onnx model with respect
+    to the weights in the nodes, if exists.
+
+    :param path: .onnx path or stub
+    """
+    if path.endswith(".onnx"):
+        onnx_model = onnx.load(path)
+    else:
+        model = Model(path)
+        onnx_model = model.onnx_model
+
+    model_graph = ONNXGraph(onnx_model)
+    node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
+
+    summary_analysis = SummaryAnalysis()
+    node_analyses = {}
+
+    for graph_order, node in enumerate(model_graph.nodes):
+        node_id = extract_node_id(node)
+        node_shape = node_shapes.get(node_id)
+
+        analysis = NodeAnalysis(model_graph, node, node_shape, graph_order + 1)
+        node_analyses[node_id] = analysis
+
+        summary_analysis.aggregate_analysis_metrics_from_node_analysis(analysis)
+
+    model_analysis = ModelAnalysis(
+        summary_analysis=summary_analysis,
+        node_analyses=node_analyses,
+    )
+    return model_analysis
