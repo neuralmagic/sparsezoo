@@ -16,8 +16,8 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from sparsezoo.analyze_v2.schema.quantization_analysis import QuantizationAnalysisSchema
-from sparsezoo.analyze_v2.schema.sparsity_analysis import SparsityAnalysisSchema
+from sparsezoo.analyze_v2.schemas.quantization_analysis import QuantizationAnalysisSchema
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsityAnalysisSchema
 
 
 class MemoryAccessAnalysisSchema(BaseModel):
