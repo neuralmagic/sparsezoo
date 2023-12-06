@@ -506,6 +506,7 @@ def get_numpy_entropy(arr: numpy.ndarray) -> float:
     """Remove dimensions and compute the overall entropy"""
     flatten_arr = arr.flatten()
     flatten_arr = numpy.abs(flatten_arr)
+    flatten_arr = flatten_arr[flatten_arr != 0]
     probs = flatten_arr / numpy.sum(flatten_arr)
 
     return -numpy.sum(probs * numpy.log2(probs))
