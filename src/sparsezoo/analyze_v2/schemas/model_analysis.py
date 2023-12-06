@@ -16,13 +16,10 @@ from typing import Dict
 
 from pydantic import BaseModel
 
-from sparsezoo.analyze_v2.model_validator.node_analysis_model import NodeAnalysisModel
-from sparsezoo.analyze_v2.model_validator.summary_analysis_model import (
-    SummaryAnalysisModel,
-)
+from sparsezoo.analyze_v2.schemas.node_analysis import NodeAnalysisSchema
+from sparsezoo.analyze_v2.schemas.summary_analysis import SummaryAnalysisSchema
 
 
-class ModelAnalysisModel(BaseModel):
-    summaries: SummaryAnalysisModel
-    nodes: Dict[str, NodeAnalysisModel]  # = None if detailed=False, key=node_id,
-    # benchmarks: Dict[str, BenchmarkAnalysis]  # future work
+class ModelAnalysisSchema(BaseModel):
+    summaries: SummaryAnalysisSchema
+    nodes: Dict[str, NodeAnalysisSchema]  # = None if detailed=False, key=node_id,

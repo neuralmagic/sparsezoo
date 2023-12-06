@@ -17,8 +17,8 @@ from typing import Dict
 
 import yaml
 
-from sparsezoo.analyze_v2.model_validator import ModelAnalysisModel
 from sparsezoo.analyze_v2.node_analysis import NodeAnalysis
+from sparsezoo.analyze_v2.schemas import ModelAnalysisSchema
 from sparsezoo.analyze_v2.summary_analysis import SummaryAnalysis
 
 
@@ -30,9 +30,15 @@ class ModelAnalysis:
         self.node_analyses = node_analyses
 
     def to_dict(self):
-        return ModelAnalysisModel(
-            summaries=self.summary_analysis.to_dict(),
-            nodes={id: node.to_dict() for id, node in self.node_analyses.items()},
+        summaries = self.summary_analysis.to_dict()
+        nodes = {}
+        for id, node in self.node_analyses.items():
+            if node.to_dict() is not None:
+                nodes[id] = node.to_dict()
+
+        return ModelAnalysisSchema(
+            summaries=summaries,
+            nodes=nodes,
         ).dict()
 
     def to_yaml(self):

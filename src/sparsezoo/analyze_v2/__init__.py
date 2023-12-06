@@ -1,5 +1,3 @@
-# flake8: noqa
-
 # Copyright (c) 2021 - present / Neuralmagic, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,4 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# flake8: noqa
+
+from .memory_access_analysis import MemoryAccessAnalysis
 from .model_analysis import ModelAnalysis
+from .node_analysis import NodeAnalysis
+from .operation_analysis import OperationAnalysis
+from .parameter_analysis import ParameterAnalysis
+from .summary_analysis import SummaryAnalysis
