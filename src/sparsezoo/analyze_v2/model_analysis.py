@@ -22,7 +22,13 @@ from sparsezoo import Model
 from sparsezoo.analyze_v2.node_analysis import NodeAnalysis
 from sparsezoo.analyze_v2.schemas import ModelAnalysisSchema
 from sparsezoo.analyze_v2.summary_analysis import SummaryAnalysis
-from sparsezoo.utils import ONNXGraph, extract_node_id, extract_node_shapes_and_dtypes
+from sparsezoo.model.utils import is_stub
+from sparsezoo.utils import (
+    ONNXGraph,
+    extract_node_id,
+    extract_node_shapes_and_dtypes,
+    load_model,
+)
 
 
 class ModelAnalysis:
@@ -62,10 +68,12 @@ class ModelAnalysis:
             if node.to_dict() is not None:
                 nodes[id] = node.to_dict()
 
-        return ModelAnalysisSchema(
-            summaries=summaries,
-            nodes=nodes,
-        ).dict()
+        return dict(
+            ModelAnalysisSchema(
+                summaries=summaries,
+                nodes=nodes,
+            )
+        )
 
     def to_yaml(self):
         return yaml.dump(self.to_dict())
@@ -81,11 +89,13 @@ def analyze(path: str) -> "ModelAnalysis":
     :param path: .onnx path or stub
     """
     if path.endswith(".onnx"):
-        onnx_model = onnx.load(path)
-    else:
+        onnx_model = load_model(path)
+    elif is_stub(path):
         model = Model(path)
         onnx_model_path = model.deployment.files[0].path
         onnx_model = onnx.load(onnx_model_path)
+    else:
+        raise ValueError(f"{path} is not a valid argument")
 
     model_graph = ONNXGraph(onnx_model)
     node_shapes, _ = extract_node_shapes_and_dtypes(model_graph.model)
