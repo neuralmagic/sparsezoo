@@ -111,12 +111,14 @@ class Model(Directory):
         self.sample_originals: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
+            allow_multiple_outputs=True,
             display_name="sample-originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
             display_name="sample-inputs",
+            allow_multiple_outputs=True,
         )
 
         self.model_card: File = self._file_from_files(files, display_name="model.md")
@@ -134,29 +136,24 @@ class Model(Directory):
             ] = self._sample_outputs_list_to_dict(self.sample_outputs)
 
         self.sample_labels: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="sample-labels"
+            files,
+            directory_class=Directory,
+            allow_multiple_outputs=True,
+            display_name="sample-labels",
         )
 
+        self.deployment_tar: SelectDirectory = self._directory_from_files(
+            files,
+            directory_class=SelectDirectory,
+            display_name="deployment.tar.gz",
+        )
         self.deployment: SelectDirectory = self._directory_from_files(
             files,
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
             allow_multiple_outputs=True,
-        )
-
-        if isinstance(self.deployment, list):
-            # if there are multiple deployment directories
-            # (this may happen due to the presence of both
-            # - deployment directory
-            # - deployment.tar.gz file
-            # we need to choose one (they are identical)
-            self.deployment = self.deployment[0]
-
-        self.deployment_tar: SelectDirectory = self._directory_from_files(
-            files,
-            directory_class=SelectDirectory,
-            display_name="deployment.tar.gz",
+            tar_directory=self.deployment_tar,
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -194,6 +191,30 @@ class Model(Directory):
         # compressed file size on disk in bytes
         self.compressed_size: Optional[int] = compressed_size
 
+        # if there are multiple deployment directories
+        # (this may happen due to the presence of both e.g.:
+        # - deployment directory
+        # - deployment.tar.gz file
+        # we need to choose one (they are identical at this point)
+        self.sample_originals = (
+            self.sample_originals[0]
+            if isinstance(self.sample_originals, list)
+            else self.sample_originals
+        )
+        self.sample_inputs = (
+            self.sample_inputs[0]
+            if isinstance(self.sample_inputs, list)
+            else self.sample_inputs
+        )
+        self.sample_labels = (
+            self.sample_labels[0]
+            if isinstance(self.sample_labels, list)
+            else self.sample_labels
+        )
+        self.deployment = (
+            self.deployment[0] if isinstance(self.deployment, list) else self.deployment
+        )
+
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
         # iterate over them
@@ -209,7 +230,6 @@ class Model(Directory):
         self._files_dictionary = {
             "training": self.training,
             "deployment": self.deployment,
-            "deployment.tar.gz": self.deployment_tar,
             "onnx_folder": self.onnx_folder,
             "logs": self.logs,
             "sample_originals": self.sample_originals,
@@ -238,20 +258,6 @@ class Model(Directory):
         )
 
         self.integration_validator = IntegrationValidator(model=self)
-
-    @property
-    def deployment_directory_path(self) -> str:
-        """
-        :return: file path of uncompressed deployemnt directory. Both (1) downloads
-            compressed deployemnent directory if not downloaded (2) uncompresses
-            deployment directory if compressed
-        """
-        # trigger initial download if not downloaded
-        self.deployment_tar.path
-        if self.deployment_tar.is_archive:
-            self.deployment_tar.unzip()
-
-        return self.deployment.path
 
     @property
     def stub_params(self) -> Dict[str, str]:
@@ -324,12 +330,6 @@ class Model(Directory):
         else:
             downloads = []
             for key, file in self._files_dictionary.items():
-                if key == "deployment":
-                    # skip the download of the deployment directory
-                    # since identical files will be downloaded
-                    # in the deployment_tar
-                    _LOGGER.debug(f"Intentionally skipping downloading the file {key}")
-                    continue
                 if file is not None:
                     # save all the files to a temporary directory
                     downloads.append(self._download(file, download_path))
@@ -636,8 +636,8 @@ class Model(Directory):
         files: List[Dict[str, Any]],
         directory_class: Union[Directory, NumpyDirectory] = Directory,
         display_name: Optional[str] = None,
-        regex: Optional[bool] = False,
-        allow_multiple_outputs: Optional[bool] = False,
+        regex: bool = False,
+        allow_multiple_outputs: bool = False,
         **kwargs: object,
     ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
 
@@ -746,10 +746,11 @@ class Model(Directory):
                 engine_name = directory.name.split("_")[-1]
                 if engine_name.endswith(".tar.gz"):
                     engine_name = engine_name.replace(".tar.gz", "")
-                if engine_name not in ENGINES:
+                if engine_name not in ENGINES and engine_name != "sample-outputs":
                     raise ValueError(
-                        f"The name of the 'sample-outputs' directory should "
-                        f"end with an engine name (one of the {ENGINES}). "
+                        f"The name of the sample-outputs directory should be"
+                        f"`sample-outputs` or shoud start with `sample-outputs_` and "
+                        f"end with an engine name (one of the {ENGINES})."
                         f"However, the name is {directory.name}."
                     )
                 engine_to_numpydir_map[engine_name] = directory
