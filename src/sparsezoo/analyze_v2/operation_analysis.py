@@ -93,11 +93,13 @@ class OperationAnalysis:
 
     def to_dict(self) -> Optional[Dict[str, Any]]:
         if self.sparsity_analysis_model is not None:
-            return OperationAnalysisSchema(
-                name=self.node.name,
-                sparsity=self.sparsity_analysis_model,
-                quantization=self.quantization_analysis_model,
-            ).dict()
+            return dict(
+                OperationAnalysisSchema(
+                    name=self.node.name,
+                    sparsity=self.sparsity_analysis_model,
+                    quantization=self.quantization_analysis_model,
+                )
+            )
 
     def to_yaml(self) -> Optional[str]:
         if self.sparsity_analysis_model is not None:
@@ -183,5 +185,4 @@ def get_operation_bits(
                     "bits_quant": bits_quant,
                 },
             }
-        breakpoint()
         ops = get_operation_counts(model_graph, node, node_shapes)
