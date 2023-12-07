@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import List
 
-from .memory_access_analysis import MemoryAccessAnalysis
-from .node_analysis import NodeAnalysis
-from .operation_analysis import OperationAnalysis
-from .parameter_analysis import ParameterAnalysis
+from pydantic import BaseModel, Field
+
+from sparsezoo.analyze_v2.schemas.quantization_analysis import (
+    QuantizationAnalysisSchema,
+)
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsityAnalysisSchema
+
+
+class OperationAnalysisSchema(BaseModel):
+    name: str = Field(..., description="Node name")
+    sparsity: List[SparsityAnalysisSchema]
+    quantization: List[QuantizationAnalysisSchema]
