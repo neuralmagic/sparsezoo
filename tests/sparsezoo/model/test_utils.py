@@ -172,7 +172,7 @@ class TestSetupModel:
             "recipe.md",
             "model.onnx",
             "model.onnx.tar.gz",
-            "sample-inputs.tar.gz",
+            "sample-inputs",
         }
         check_extraneous_files(expected_files, temp_dir, ignore_external_data)
 
@@ -180,7 +180,6 @@ class TestSetupModel:
         stub, temp_dir, download_dir, ignore_external_data = setup
         model = Model(stub, download_dir.name)
         model.download()
-        model.sample_inputs.unzip()
 
         training = model.training
         deployment = model.deployment
