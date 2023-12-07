@@ -15,7 +15,7 @@
 # flake8: noqa
 
 from .memory_access_analysis import MemoryAccessAnalysis
-from .model_analysis import ModelAnalysis
+from .model_analysis import ModelAnalysis, analyze
 from .node_analysis import NodeAnalysis
 from .operation_analysis import OperationAnalysis
 from .parameter_analysis import ParameterAnalysis
