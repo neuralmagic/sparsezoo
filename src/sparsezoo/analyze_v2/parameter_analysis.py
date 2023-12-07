@@ -104,13 +104,15 @@ class ParameterAnalysis:
 
     def to_dict(self) -> Optional[Dict[str, Any]]:
         if self.sparsity_analysis_model:
-            return ParameterAnalysisSchema(
-                name=self.node.name,
-                op_type=self.node.op_type,
-                distribution=self.distribution_model,
-                sparsity=self.sparsity_analysis_model,
-                quantization=self.quantization_analysis_model,
-            ).dict()
+            return dict(
+                ParameterAnalysisSchema(
+                    name=self.node.name,
+                    op_type=self.node.op_type,
+                    distribution=self.distribution_model,
+                    sparsity=self.sparsity_analysis_model,
+                    quantization=self.quantization_analysis_model,
+                )
+            )
 
     def to_yaml(self) -> Optional[str]:
         if self.sparsity_analysis_model:
