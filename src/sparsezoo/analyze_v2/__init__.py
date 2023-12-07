@@ -14,8 +14,9 @@
 
 # flake8: noqa
 
-from .summary_analysis import SummaryAnalysis
 from .memory_access_analysis import MemoryAccessAnalysis
+from .model_analysis import ModelAnalysis
 from .node_analysis import NodeAnalysis
 from .operation_analysis import OperationAnalysis
 from .parameter_analysis import ParameterAnalysis
+from .summary_analysis import SummaryAnalysis
