@@ -12,16 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import Dict
 
-from .node_analysis import NodeAnalysisSchema
-from .memory_access_analysis import MemoryAccessAnalysisSchema
-from .operation_analysis import OperationAnalysisSchema
-from .parameter_analysis import ParameterAnalysisSchema
-from .distribution_analysis import DistributionAnalysisSchema
-from .quantization_analysis import (
-    QuantizationAnalysisSchema,
+from pydantic import BaseModel
+
+from sparsezoo.analyze_v2.schemas.quantization_analysis import (
     QuantizationSummaryAnalysisSchema,
 )
-from .sparsity_analysis import SparsityAnalysisSchema, SparsitySummaryAnalysisSchema
-from .summary_analysis import SummaryAnalysisSchema
+from sparsezoo.analyze_v2.schemas.sparsity_analysis import SparsitySummaryAnalysisSchema
+
+
+class SummaryMetricsAnalysisSchemal(BaseModel):
+    sparsity: Dict[str, SparsitySummaryAnalysisSchema]
+    quantization: Dict[str, QuantizationSummaryAnalysisSchema]
+
+
+class SummaryAnalysisSchema(BaseModel):
+    params: SummaryMetricsAnalysisSchemal
+    ops: SummaryMetricsAnalysisSchemal
+    mem_access: SummaryMetricsAnalysisSchemal
