@@ -185,4 +185,3 @@ def get_operation_bits(
                     "bits_quant": bits_quant,
                 },
             }
-        ops = get_operation_counts(model_graph, node, node_shapes)
