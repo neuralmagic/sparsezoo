@@ -225,8 +225,9 @@ def get_from_registry(
         module_path, value_name = name.split(":")
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
-        # look up name in registry
+        # look up name in alias registry
         name = _ALIAS_REGISTRY.get(name)
+        # look up name in registry
         retrieved_value = _REGISTRY[parent_class].get(name)
         if retrieved_value is None:
             raise KeyError(
@@ -293,6 +294,12 @@ def register_alias(name: str, alias: Union[str, List[str], None] = None):
     alias = _add_hyphen_underscores_variants(alias)
 
     for alias_name in alias:
+        if alias_name in _ALIAS_REGISTRY:
+            raise KeyError(
+                f"Attempting to register alias {alias_name} as {name} "
+                f"however {alias_name} has already been registered as "
+                f"{_ALIAS_REGISTRY[alias_name]}"
+            )
         _ALIAS_REGISTRY[alias_name] = name
 
 

@@ -27,7 +27,17 @@ def foo():
     _REGISTRY.clear()
 
 
-class TestFooRegistry:
+@pytest.fixture()
+def bar():
+    class Bar(RegistryMixin):
+        pass
+
+    yield Bar
+    _ALIAS_REGISTRY.clear()
+    _REGISTRY.clear()
+
+
+class TestRegistryFlowSingle:
     def test_single_item(self, foo):
         @foo.register()
         class Foo1(foo):
@@ -51,6 +61,31 @@ class TestFooRegistry:
 
         assert {"Foo1"} == set(foo.registered_names())
         assert {"name-3", "name-4", "name_3", "name_4"} == set(foo.registered_aliases())
+
+    def test_key_error_on_duplicate_alias(self, foo):
+        @foo.register(alias=["name-3"])
+        class Foo1(foo):
+            pass
+
+        with pytest.raises(KeyError):
+
+            @foo.register(alias=["name-3"])
+            class Foo2(foo):
+                pass
+
+        with pytest.raises(KeyError):
+
+            @foo.register(alias=["name_3"])
+            class Foo3(foo):
+                pass
+
+    def test_alias_equal_name(self, foo):
+        @foo.register(name="name-3", alias=["name-3"])
+        class Foo1(foo):
+            pass
+
+        assert {"name-3"} == set(foo.registered_names())
+        assert {"name_3"} == set(foo.registered_aliases())
 
     def test_alias_with_custom_name(self, foo):
         @foo.register(name="name_2", alias=["name-3", "name_4"])
@@ -81,26 +116,21 @@ class TestFooRegistry:
         assert foo.get_value_from_registry("name-3") is Foo1
 
 
-def test_registry_flow_multiple():
-    class Foo(RegistryMixin):
-        pass
+class TestRegistryFlowMultiple:
+    def test_single_item(self, foo, bar):
+        @foo.register()
+        class Foo1(foo):
+            pass
 
-    class Bar(RegistryMixin):
-        pass
+        @bar.register()
+        class Bar1(bar):
+            pass
 
-    @Foo.register()
-    class Foo1(Foo):
-        pass
+        assert ["Foo1"] == foo.registered_names()
+        assert ["Bar1"] == bar.registered_names()
 
-    @Bar.register()
-    class Bar1(Bar):
-        pass
-
-    assert ["Foo1"] == Foo.registered_names()
-    assert ["Bar1"] == Bar.registered_names()
-
-    assert Foo.get_value_from_registry("Foo1") is Foo1
-    assert Bar.get_value_from_registry("Bar1") is Bar1
+        assert foo.get_value_from_registry("Foo1") is Foo1
+        assert bar.get_value_from_registry("Bar1") is Bar1
 
 
 def test_registry_requires_subclass():
