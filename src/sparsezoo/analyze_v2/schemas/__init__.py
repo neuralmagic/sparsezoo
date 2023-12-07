@@ -14,12 +14,12 @@
 
 # flake8: noqa
 
+from .distribution_analysis import DistributionAnalysisSchema
+from .memory_access_analysis import MemoryAccessAnalysisSchema
 from .model_analysis import ModelAnalysisSchema
 from .node_analysis import NodeAnalysisSchema
-from .memory_access_analysis import MemoryAccessAnalysisSchema
 from .operation_analysis import OperationAnalysisSchema
 from .parameter_analysis import ParameterAnalysisSchema
-from .distribution_analysis import DistributionAnalysisSchema
 from .quantization_analysis import (
     QuantizationAnalysisSchema,
     QuantizationSummaryAnalysisSchema,
