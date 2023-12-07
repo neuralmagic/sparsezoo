@@ -68,12 +68,10 @@ class ModelAnalysis:
             if node.to_dict() is not None:
                 nodes[id] = node.to_dict()
 
-        return dict(
-            ModelAnalysisSchema(
-                summaries=summaries,
-                nodes=nodes,
-            )
-        )
+        return ModelAnalysisSchema(
+            summaries=summaries,
+            nodes=nodes,
+        ).dict()
 
     def to_yaml(self):
         return yaml.dump(self.to_dict())

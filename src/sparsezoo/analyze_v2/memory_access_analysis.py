@@ -84,13 +84,13 @@ class MemoryAccessAnalysis:
 
     def to_dict(self) -> Dict[str, Any]:
         if self.sparsity_analysis_model:
-            return dict(
-                MemoryAccessAnalysisSchema(
-                    name=self.node.name,
-                    sparsity=self.sparsity_analysis_model,
-                    quantization=self.quantization_analysis_model,
-                )
-            )
+            return MemoryAccessAnalysisSchema(
+                name=self.node.name,
+                sparsity=[dict(model) for model in self.sparsity_analysis_model],
+                quantization=[
+                    dict(model) for model in self.quantization_analysis_model
+                ],
+            ).dict()
 
     def to_yaml(self) -> str:
         if self.sparsity_analysis_model:

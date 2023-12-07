@@ -93,13 +93,13 @@ class OperationAnalysis:
 
     def to_dict(self) -> Optional[Dict[str, Any]]:
         if self.sparsity_analysis_model is not None:
-            return dict(
-                OperationAnalysisSchema(
-                    name=self.node.name,
-                    sparsity=self.sparsity_analysis_model,
-                    quantization=self.quantization_analysis_model,
-                )
-            )
+            return OperationAnalysisSchema(
+                name=self.node.name,
+                sparsity=[dict(model) for model in self.sparsity_analysis_model],
+                quantization=[
+                    dict(model) for model in self.quantization_analysis_model
+                ],
+            ).dict()
 
     def to_yaml(self) -> Optional[str]:
         if self.sparsity_analysis_model is not None:

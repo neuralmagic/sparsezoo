@@ -39,18 +39,16 @@ class NodeAnalysis:
 
     def to_dict(self):
         if self.parameter_analysis.to_dict() is not None:
-            return dict(
-                NodeAnalysisSchema(
-                    name=self.node.name,
-                    op_type=self.node.op_type,
-                    graph_order=self.graph_order,
-                    input=self.node.input,
-                    output=self.node.output,
-                    params=self.parameter_analysis.to_dict(),
-                    ops=self.operation_analysis.to_dict(),
-                    mem_access=self.memory_access_analysis.to_dict(),
-                )
-            )
+            return NodeAnalysisSchema(
+                name=self.node.name,
+                op_type=self.node.op_type,
+                graph_order=self.graph_order,
+                input=self.node.input,
+                output=self.node.output,
+                params=self.parameter_analysis.to_dict(),
+                ops=self.operation_analysis.to_dict(),
+                mem_access=self.memory_access_analysis.to_dict(),
+            ).dict()
 
     def to_yaml(self):
         if self.parameter_analysis is not None:
