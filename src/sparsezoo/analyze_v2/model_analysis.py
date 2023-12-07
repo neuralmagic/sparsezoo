@@ -90,7 +90,7 @@ def analyze(path: str) -> "ModelAnalysis":
         onnx_model = load_model(path)
     elif is_stub(path):
         model = Model(path)
-        onnx_model_path = model.deployment.files[0].path
+        onnx_model_path = model.onnx_model.path
         onnx_model = onnx.load(onnx_model_path)
     else:
         raise ValueError(f"{path} is not a valid argument")
