@@ -12,12 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
+from typing import Any
 
-from .parameter_analysis import ParameterAnalysisSchema
-from .distribution_analysis import DistributionAnalysisSchema
-from .quantization_analysis import (
-    QuantizationAnalysisSchema,
-    QuantizationSummaryAnalysisSchema,
-)
-from .sparsity_analysis import SparsityAnalysisSchema, SparsitySummaryAnalysisSchema
+import numpy
+
+
+def type_validator(value) -> Any:
+    """
+    Pydantic validator, mostly used to convert numpy to
+     non-numpy types
+    """
+    if isinstance(value, numpy.generic):
+        if isinstance(value, float):
+            return float(value)
+        if isinstance(value, int):
+            return int(value)
+        if isinstance(value, list):
+            return value.tolist()
+    return value
