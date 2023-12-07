@@ -140,11 +140,13 @@ class SummaryAnalysis:
 
     def to_dict(self) -> Dict[str, Any]:
         if self.parameter_analysis:
-            return SummaryAnalysisSchema(
-                params=self.parameter_analysis,
-                ops=self.operation_analysis,
-                mem_access=self.memory_access_analysis,
-            ).dict()
+            return dict(
+                SummaryAnalysisSchema(
+                    params=self.parameter_analysis,
+                    ops=self.operation_analysis,
+                    mem_access=self.memory_access_analysis,
+                )
+            )
 
     def to_yaml(self) -> str:
         if self.parameter_analysis:
