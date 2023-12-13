@@ -357,9 +357,23 @@ def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
     shape = []
 
     for dim in tensor_type.shape.dim:
+        # print(dim)
         if dim.HasField("dim_value"):
-            shape.append(dim.dim_value)
+            # print(value)
+            value = dim.dim_value
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1) # batch, past_sequence_len
+        elif dim.HasField("dim_param"):
+            value = dim.dim_param
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1) # batch, past_sequence_len
         else:
+            # breakpoint()
             shape.append(None)
-
+    # print(shape)
+    # breakpoint()
     return tuple(shape)
