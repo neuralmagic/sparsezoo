@@ -168,18 +168,26 @@ class Directory(File):
                     "Please make sure that `destination_path` argument is not None."
                 )
 
+        # If tar_directory is not None, then we are downloading
+        # the directory as a tar archive file
+        target_directory = (
+            self if getattr(self, "tar_directory", None) is None else self.tar_directory
+        )
+
         # Directory can represent a tar file.
-        if self.is_archive:
-            new_file_path = os.path.join(destination_path, self.name)
+        # In this case, we download the tar file and unzip it.
+        if target_directory.is_archive:
+            new_file_path = os.path.join(destination_path, target_directory.name)
             for attempt in range(retries):
                 try:
                     download_file(
-                        url_path=self.url,
+                        url_path=target_directory.url,
                         dest_path=new_file_path,
                         overwrite=overwrite,
                     )
 
-                    self._path = new_file_path
+                    target_directory._path = new_file_path
+                    target_directory.unzip()
                     return
 
                 except Exception as err:
@@ -192,13 +200,15 @@ class Directory(File):
 
         # Directory can represent a folder or directory.
         else:
-            for file in self.files:
+            for file in target_directory.files:
                 file.download(
                     destination_path=destination_path,
                 )
-                file._path = os.path.join(destination_path, self.name, file.name)
+                file._path = os.path.join(
+                    destination_path, target_directory.name, file.name
+                )
 
-        self._path = os.path.join(destination_path, self.name)
+        target_directory._path = os.path.join(destination_path, target_directory.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
