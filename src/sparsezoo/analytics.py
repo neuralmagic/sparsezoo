@@ -47,7 +47,9 @@ class GoogleAnalytics:
     Google Analytics client for sending events for the given package and version
 
     :param package: the name of the package to send events for
-    :param version: the version of the package to send events for
+    :param version: the version of the package to send events for,
+        if the version string has a nightly datestamp, the datestamp portion will
+        be replaced by 'nightly'
     :param package_params: optional dictionary of parameters to send with each event
     """
 
@@ -75,7 +77,7 @@ class GoogleAnalytics:
             GoogleAnalytics.get_client_id() if not self._disabled else None
         )
         self._package = package
-        self._version = version
+        self._version = _maybe_replace_nightly_date(version)
         self._package_params = package_params if package_params is not None else {}
 
     def send_event_decorator(
@@ -157,6 +159,18 @@ class GoogleAnalytics:
 
         if _await_response:
             thread.join()
+
+
+def _maybe_replace_nightly_date(version: str) -> str:
+    version_parts = version.split(".")
+    if len(version_parts) == 4 and len(version_parts[3]) == 8:
+        # nightly would be the 4th part of version string
+        # and would be 8 character YYYYMMDD, assume this check is
+        # sufficient, replace datestamp with 'nightly'
+        version_parts[3] = "nightly"
+        version = ".".join(version_parts)
+
+    return version
 
 
 # analytics client for sparsezoo, to disable set NM_DISABLE_ANALYTICS=1
