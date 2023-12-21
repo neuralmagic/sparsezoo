@@ -39,6 +39,7 @@ def bar():
 
 class TestRegistryFlowSingle:
     def test_single_item(self, foo):
+        # register Foo1 in registry foo under the default name Foo1
         @foo.register()
         class Foo1(foo):
             pass
@@ -47,22 +48,32 @@ class TestRegistryFlowSingle:
         assert set() == set(foo.registered_aliases())
 
     def test_single_item_custom_name(self, foo):
+        # register Foo1 in registry foo under the name name_2
+        # (this will turn name_2 into name-2, as we standardize names)
         @foo.register(name="name_2")
         class Foo1(foo):
             pass
 
-        assert {"name_2"} == set(foo.registered_names())
-        assert {"name-2"} == set(foo.registered_aliases())
+        assert {"name-2"} == set(foo.registered_names())
+        assert set() == set(foo.registered_aliases())
+        # because we registered under a custom name, we can't
+        # use the original object name
+        with pytest.raises(KeyError):
+            foo.get_value_from_registry("Foo1")
 
     def test_alias(self, foo):
+        # register Foo1 in registry foo under the default name Foo1
+        # and alias names name-3 and name_4
         @foo.register(alias=["name-3", "name_4"])
         class Foo1(foo):
             pass
 
         assert {"Foo1"} == set(foo.registered_names())
-        assert {"name-3", "name-4", "name_3", "name_4"} == set(foo.registered_aliases())
+        assert {"name-3", "name_4"} == set(foo.registered_aliases())
 
     def test_key_error_on_duplicate_alias(self, foo):
+        # once we register an object under one alias, we can't
+        # register it under the same alias once again
         @foo.register(alias=["name-3"])
         class Foo1(foo):
             pass
@@ -73,29 +84,34 @@ class TestRegistryFlowSingle:
             class Foo2(foo):
                 pass
 
-        with pytest.raises(KeyError):
-
-            @foo.register(alias=["name_3"])
-            class Foo3(foo):
-                pass
-
-    def test_alias_equal_name(self, foo):
-        @foo.register(name="name-3", alias=["name-3"])
+    def test_key_error_alias_equal_name(self, foo):
+        # once we register the object under name-3
+        # (not name_3, as we standardize names), we can't
+        # register it under the same alias
+        @foo.register(name="name_3")
         class Foo1(foo):
             pass
 
-        assert {"name-3"} == set(foo.registered_names())
-        assert {"name_3"} == set(foo.registered_aliases())
+        with pytest.raises(KeyError):
+
+            @foo.register(alias=["name-3"])
+            class Foo2(foo):
+                pass
+
+    def test_key_error_alias_equal_name_simultaneously(self, foo):
+        with pytest.raises(KeyError):
+
+            @foo.register(name="name_3", alias=["name-3"])
+            class Foo2(foo):
+                pass
 
     def test_alias_with_custom_name(self, foo):
         @foo.register(name="name_2", alias=["name-3", "name_4"])
         class Foo1(foo):
             pass
 
-        assert {"name_2"} == set(foo.registered_names())
-        assert {"name-3", "name-4", "name_3", "name_4", "name-2"} == set(
-            foo.registered_aliases()
-        )
+        assert {"name-2"} == set(foo.registered_names())
+        assert {"name-3", "name_4"} == set(foo.registered_aliases())
 
     def test_get_value_from_registry(self, foo):
         @foo.register(alias=["name-3"])
@@ -112,8 +128,10 @@ class TestRegistryFlowSingle:
         assert foo.get_value_from_registry("Foo1") is Foo1
         assert isinstance(foo.load_from_registry("Foo2"), Foo2)
         assert foo.get_value_from_registry("Foo2") is Foo2
-        assert foo.get_value_from_registry("name_3") is Foo1
         assert foo.get_value_from_registry("name-3") is Foo1
+        assert foo.get_value_from_registry("name_3") is Foo1
+        assert foo.get_value_from_registry("name 3") is Foo1
+        assert isinstance(foo.load_from_registry("name_3"), Foo1)
 
 
 class TestRegistryFlowMultiple:

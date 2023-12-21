@@ -28,11 +28,29 @@ __all__ = [
     "get_from_registry",
     "registered_names",
     "registered_aliases",
+    "standardize_lookup_name",
 ]
 
 
-_ALIAS_REGISTRY: Dict[str, str] = defaultdict(dict)
+_ALIAS_REGISTRY: Dict[Type, Dict[str, str]] = defaultdict(dict)
 _REGISTRY: Dict[Type, Dict[str, Any]] = defaultdict(dict)
+
+
+def standardize_lookup_name(name: str) -> str:
+    """
+    Standardize the given name for lookup in the registry.
+    This will replace all underscores and spaces with hyphens and
+    convert the name to lowercase.
+
+    example:
+    ```
+    standardize_lookup_name("foo_bar baz") == "foo-bar-baz"
+    ```
+
+    :param name: name to standardize
+    :return: standardized name
+    """
+    return name.replace("_", "-").replace(" ", "-")
 
 
 class RegistryMixin:
@@ -66,10 +84,16 @@ class RegistryMixin:
     class Cifar(Dataset):
         pass
 
+    Note: the name will be standardized for lookup in the registry.
+    For example, if a class is registered as "cifar_dataset" or
+    "cifar dataset", it will be stored as "cifar-dataset". The user
+    will be able to load the class with any of the three name variants.
+
     # register with multiple aliases
     @Dataset.register(alias=["cifar-10-dataset", "cifar_100_dataset"])
     class Cifar(Dataset):
         pass
+    Note: aliases will NOT be standardized for lookup in the registry.
 
     # load as "cifar-dataset"
     cifar = Dataset.load_from_registry("cifar-dataset")
@@ -77,13 +101,6 @@ class RegistryMixin:
     # load from custom file that implements a dataset
     mnist = Dataset.load_from_registry("/path/to/mnnist_dataset.py:MnistDataset")
     ```
-
-    Note, that any name or alias that is being registered, will be also recognized
-    when all hyphens are replaced with underscores and vice versa.
-    For example, if a class is registered:
-     - as "cifar-10-dataset", it will be also recognized as "cifar_10_dataset"
-     - as "cifar_10_dataset", it will be also recognized as "cifar-10-dataset"
-        etc.
     """
 
     # set to True in child class to add check that registered/retrieved values
@@ -100,6 +117,8 @@ class RegistryMixin:
 
         :param name: name or list of names to register the wrapped value as,
             defaults to value.__name__
+        :param alias: alias or list of aliases to register the wrapped value as,
+            defaults to None
         :return: register decorator
         """
 
@@ -190,7 +209,8 @@ def register(
         # default name
         name = value.__name__
 
-    register_alias(name=name, alias=alias)
+    name = standardize_lookup_name(name)
+    register_alias(name=name, alias=alias, parent_class=parent_class)
 
     if require_subclass:
         _validate_subclass(parent_class, value)
@@ -219,6 +239,7 @@ def get_from_registry(
     :return: value from retrieved the registry for the given name, raises
         error if not found
     """
+    name = standardize_lookup_name(name)
 
     if ":" in name:
         # user specifying specific module to load and value to import
@@ -226,7 +247,7 @@ def get_from_registry(
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
         # look up name in alias registry
-        name = _ALIAS_REGISTRY.get(name)
+        name = _ALIAS_REGISTRY[parent_class].get(name)
         # look up name in registry
         retrieved_value = _REGISTRY[parent_class].get(name)
         if retrieved_value is None:
@@ -257,32 +278,23 @@ def registered_aliases(parent_class: Type) -> List[str]:
     :param parent_class: class to look up the registry of
     :return: all aliases registered to the given class
     """
-    alias_keys = set(_ALIAS_REGISTRY.keys())
-    names_keys = set(_REGISTRY[parent_class].keys())
-    return list(alias_keys.difference(names_keys))
+    registered_aliases_plus_names = list(_ALIAS_REGISTRY[parent_class].keys())
+    registered_aliases = list(
+        set(registered_aliases_plus_names) - set(registered_names(parent_class))
+    )
+    return registered_aliases
 
 
-def register_alias(name: str, alias: Union[str, List[str], None] = None):
+def register_alias(
+    name: str, parent_class: Type, alias: Union[str, List[str], None] = None
+):
     """
     Updates the mapping from the alias(es) to the given name.
     If the alias is None, the name is used as the alias.
-
-    Note, that the number of actual added alias(es) will be potentially
-    larger than the number of given aliases, since the function adds
-    variants of the alias with hyphens and underscores.
-
-    Examples:
-
-    If alias = ["alias1", "alias2"]
-    ```
-    _ALIAS_REGISTRY = {..., "alias1": "name", "alias2": "name"}
-    ```
-    If alias = None
-    ```
-    _ALIAS_REGISTRY = {..., "name": "name"}
     ```
 
     :param name: name that the alias refers to
+    :param parent_class: class that the name is registered under
     :param alias: single alias or list of aliases that
         refer to the name, defaults to None
     """
@@ -290,17 +302,22 @@ def register_alias(name: str, alias: Union[str, List[str], None] = None):
         alias = alias if isinstance(alias, list) else [alias]
     else:
         alias = []
+
+    if name in alias:
+        raise KeyError(
+            f"Attempting to register alias {name}, "
+            f"that is identical to the standardized name: {name}."
+        )
     alias.append(name)
-    alias = _add_hyphen_underscores_variants(alias)
 
     for alias_name in alias:
-        if alias_name in _ALIAS_REGISTRY:
+        if alias_name in _ALIAS_REGISTRY[parent_class]:
             raise KeyError(
                 f"Attempting to register alias {alias_name} as {name} "
                 f"however {alias_name} has already been registered as "
                 f"{_ALIAS_REGISTRY[alias_name]}"
             )
-        _ALIAS_REGISTRY[alias_name] = name
+        _ALIAS_REGISTRY[parent_class][alias_name] = name
 
 
 def _import_and_get_value_from_module(module_path: str, value_name: str) -> Any:
@@ -330,13 +347,3 @@ def _validate_subclass(parent_class: Type, child_class: Type):
             f"class {child_class} is not a subclass of the class it is "
             f"registered for: {parent_class}."
         )
-
-
-def _add_hyphen_underscores_variants(alias: List[str]) -> List[str]:
-    # add variants of the alias with hyphens and underscores
-    new_alias = []
-    for alias_name in alias:
-        new_alias.append(alias_name)
-        new_alias.append(alias_name.replace("_", "-"))
-        new_alias.append(alias_name.replace("-", "_"))
-    return list(set(new_alias))
