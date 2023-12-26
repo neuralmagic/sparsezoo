@@ -357,9 +357,7 @@ def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
     shape = []
 
     for dim in tensor_type.shape.dim:
-        # print(dim)
         if dim.HasField("dim_value"):
-            # print(value)
             value = dim.dim_value
             if isinstance(value, int) or isinstance(value, float):
                 shape.append(value)
