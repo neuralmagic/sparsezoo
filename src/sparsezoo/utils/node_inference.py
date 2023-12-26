@@ -358,8 +358,20 @@ def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
 
     for dim in tensor_type.shape.dim:
         if dim.HasField("dim_value"):
-            shape.append(dim.dim_value)
+            value = dim.dim_value
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1)  # batch, past_sequence_len
+        elif dim.HasField("dim_param"):
+            value = dim.dim_param
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1)  # batch, past_sequence_len
         else:
+            _LOGGER.warning(
+                "Could not fimd dim_value or dim_param in tensor_type.shape.dim"
+            )
             shape.append(None)
-
     return tuple(shape)
