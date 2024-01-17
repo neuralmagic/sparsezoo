@@ -44,7 +44,7 @@ class TestRegistryFlowSingle:
         class Foo1(foo):
             pass
 
-        assert {"Foo1"} == set(foo.registered_names())
+        assert {"foo1"} == set(foo.registered_names())
         assert set() == set(foo.registered_aliases())
 
     def test_single_item_custom_name(self, foo):
@@ -68,7 +68,7 @@ class TestRegistryFlowSingle:
         class Foo1(foo):
             pass
 
-        assert {"Foo1"} == set(foo.registered_names())
+        assert {"foo1"} == set(foo.registered_names())
         assert {"name-3", "name_4"} == set(foo.registered_aliases())
 
     def test_key_error_on_duplicate_alias(self, foo):
@@ -144,11 +144,11 @@ class TestRegistryFlowMultiple:
         class Bar1(bar):
             pass
 
-        assert ["Foo1"] == foo.registered_names()
-        assert ["Bar1"] == bar.registered_names()
+        assert ["foo1"] == foo.registered_names()
+        assert ["bar1"] == bar.registered_names()
 
-        assert foo.get_value_from_registry("Foo1") is Foo1
-        assert bar.get_value_from_registry("Bar1") is Bar1
+        assert foo.get_value_from_registry("foo1") is Foo1
+        assert bar.get_value_from_registry("bar1") is Bar1
 
 
 def test_registry_requires_subclass():

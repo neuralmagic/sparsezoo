@@ -44,13 +44,13 @@ def standardize_lookup_name(name: str) -> str:
 
     example:
     ```
-    standardize_lookup_name("foo_bar baz") == "foo-bar-baz"
+    standardize_lookup_name("Foo_bar baz") == "foo-bar-baz"
     ```
 
     :param name: name to standardize
     :return: standardized name
     """
-    return name.replace("_", "-").replace(" ", "-")
+    return name.replace("_", "-").replace(" ", "-").lower()
 
 
 class RegistryMixin:
