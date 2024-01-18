@@ -69,7 +69,7 @@ class TestRegistryFlowSingle:
             pass
 
         assert {"foo1"} == set(foo.registered_names())
-        assert {"name-3", "name_4"} == set(foo.registered_aliases())
+        assert {"name-3", "name-4"} == set(foo.registered_aliases())
 
     def test_key_error_on_duplicate_alias(self, foo):
         # once we register an object under one alias, we can't
@@ -111,7 +111,7 @@ class TestRegistryFlowSingle:
             pass
 
         assert {"name-2"} == set(foo.registered_names())
-        assert {"name-3", "name_4"} == set(foo.registered_aliases())
+        assert {"name-3", "name-4"} == set(foo.registered_aliases())
 
     def test_get_value_from_registry(self, foo):
         @foo.register(alias=["name-3"])

@@ -53,6 +53,17 @@ def standardize_lookup_name(name: str) -> str:
     return name.replace("_", "-").replace(" ", "-").lower()
 
 
+def standardize_alias_name(
+    name: Union[None, str, List[str]]
+) -> Union[None, str, List[str]]:
+    if name is None:
+        return None
+    elif isinstance(name, str):
+        return standardize_lookup_name(name)
+    else:  # isinstance(name, list)
+        return [standardize_lookup_name(n) for n in name]
+
+
 class RegistryMixin:
     """
     Universal registry to support registration and loading of child classes and plugins
@@ -210,6 +221,7 @@ def register(
         name = value.__name__
 
     name = standardize_lookup_name(name)
+    alias = standardize_alias_name(alias)
     register_alias(name=name, alias=alias, parent_class=parent_class)
 
     if require_subclass:
