@@ -27,10 +27,41 @@ __all__ = [
     "register",
     "get_from_registry",
     "registered_names",
+    "registered_aliases",
+    "standardize_lookup_name",
 ]
 
 
+_ALIAS_REGISTRY: Dict[Type, Dict[str, str]] = defaultdict(dict)
 _REGISTRY: Dict[Type, Dict[str, Any]] = defaultdict(dict)
+
+
+def standardize_lookup_name(name: str) -> str:
+    """
+    Standardize the given name for lookup in the registry.
+    This will replace all underscores and spaces with hyphens and
+    convert the name to lowercase.
+
+    example:
+    ```
+    standardize_lookup_name("Foo_bar baz") == "foo-bar-baz"
+    ```
+
+    :param name: name to standardize
+    :return: standardized name
+    """
+    return name.replace("_", "-").replace(" ", "-").lower()
+
+
+def standardize_alias_name(
+    name: Union[None, str, List[str]]
+) -> Union[None, str, List[str]]:
+    if name is None:
+        return None
+    elif isinstance(name, str):
+        return standardize_lookup_name(name)
+    else:  # isinstance(name, list)
+        return [standardize_lookup_name(n) for n in name]
 
 
 class RegistryMixin:
@@ -64,10 +95,16 @@ class RegistryMixin:
     class Cifar(Dataset):
         pass
 
+    Note: the name will be standardized for lookup in the registry.
+    For example, if a class is registered as "cifar_dataset" or
+    "cifar dataset", it will be stored as "cifar-dataset". The user
+    will be able to load the class with any of the three name variants.
+
     # register with multiple aliases
-    @Dataset.register(name=["cifar-10-dataset", "cifar-100-dataset"])
+    @Dataset.register(alias=["cifar-10-dataset", "cifar_100_dataset"])
     class Cifar(Dataset):
         pass
+    Note: aliases will NOT be standardized for lookup in the registry.
 
     # load as "cifar-dataset"
     cifar = Dataset.load_from_registry("cifar-dataset")
@@ -82,39 +119,45 @@ class RegistryMixin:
     registry_requires_subclass: bool = False
 
     @classmethod
-    def register(cls, name: Union[List[str], str, None] = None):
+    def register(
+        cls, name: Optional[str] = None, alias: Union[List[str], str, None] = None
+    ):
         """
         Decorator for registering a value (ie class or function) wrapped by this
         decorator to the base class (class that .register is called from)
 
         :param name: name or list of names to register the wrapped value as,
             defaults to value.__name__
+        :param alias: alias or list of aliases to register the wrapped value as,
+            defaults to None
         :return: register decorator
         """
 
         def decorator(value: Any):
-            cls.register_value(value, name=name)
+            cls.register_value(value, name=name, alias=alias)
             return value
 
         return decorator
 
     @classmethod
-    def register_value(cls, value: Any, name: Union[List[str], str, None] = None):
+    def register_value(
+        cls, value: Any, name: str, alias: Union[str, List[str], None] = None
+    ):
         """
         Registers the given value to the class `.register_value` is called from
         :param value: value to register
-        :param name: name or list of names to register the wrapped value as,
+        :param name: name to register the wrapped value as,
             defaults to value.__name__
+        :param alias: alias or list of aliases to register the wrapped value as,
+            defaults to None
         """
-        names = name if isinstance(name, list) else [name]
-
-        for name in names:
-            register(
-                parent_class=cls,
-                value=value,
-                name=name,
-                require_subclass=cls.registry_requires_subclass,
-            )
+        register(
+            parent_class=cls,
+            value=value,
+            name=name,
+            alias=alias,
+            require_subclass=cls.registry_requires_subclass,
+        )
 
     @classmethod
     def load_from_registry(cls, name: str, **constructor_kwargs) -> object:
@@ -149,23 +192,37 @@ class RegistryMixin:
         """
         return registered_names(cls)
 
+    @classmethod
+    def registered_aliases(cls) -> List[str]:
+        """
+        :return: list of all aliases registered to this class
+        """
+        return registered_aliases(cls)
+
 
 def register(
     parent_class: Type,
     value: Any,
     name: Optional[str] = None,
+    alias: Union[List[str], str, None] = None,
     require_subclass: bool = False,
 ):
     """
     :param parent_class: class to register the name under
     :param value: the value to register
     :param name: name to register the wrapped value as, defaults to value.__name__
+    :param alias: alias or list of aliases to register the wrapped value as,
+        defaults to None
     :param require_subclass: require that value is a subclass of the class this
         method is called from
     """
     if name is None:
         # default name
         name = value.__name__
+
+    name = standardize_lookup_name(name)
+    alias = standardize_alias_name(alias)
+    register_alias(name=name, alias=alias, parent_class=parent_class)
 
     if require_subclass:
         _validate_subclass(parent_class, value)
@@ -194,19 +251,24 @@ def get_from_registry(
     :return: value from retrieved the registry for the given name, raises
         error if not found
     """
+    name = standardize_lookup_name(name)
 
     if ":" in name:
         # user specifying specific module to load and value to import
         module_path, value_name = name.split(":")
         retrieved_value = _import_and_get_value_from_module(module_path, value_name)
     else:
+        # look up name in alias registry
+        name = _ALIAS_REGISTRY[parent_class].get(name)
         # look up name in registry
         retrieved_value = _REGISTRY[parent_class].get(name)
         if retrieved_value is None:
             raise KeyError(
-                f"Unable to find {name} registered under type {parent_class}. "
+                f"Unable to find {name} registered under type {parent_class}.\n"
                 f"Registered values for {parent_class}: "
-                f"{registered_names(parent_class)}"
+                f"{registered_names(parent_class)}\n"
+                f"Registered aliases for {parent_class}: "
+                f"{registered_aliases(parent_class)}"
             )
 
     if require_subclass:
@@ -221,6 +283,53 @@ def registered_names(parent_class: Type) -> List[str]:
     :return: all names registered to the given class
     """
     return list(_REGISTRY[parent_class].keys())
+
+
+def registered_aliases(parent_class: Type) -> List[str]:
+    """
+    :param parent_class: class to look up the registry of
+    :return: all aliases registered to the given class
+    """
+    registered_aliases_plus_names = list(_ALIAS_REGISTRY[parent_class].keys())
+    registered_aliases = list(
+        set(registered_aliases_plus_names) - set(registered_names(parent_class))
+    )
+    return registered_aliases
+
+
+def register_alias(
+    name: str, parent_class: Type, alias: Union[str, List[str], None] = None
+):
+    """
+    Updates the mapping from the alias(es) to the given name.
+    If the alias is None, the name is used as the alias.
+    ```
+
+    :param name: name that the alias refers to
+    :param parent_class: class that the name is registered under
+    :param alias: single alias or list of aliases that
+        refer to the name, defaults to None
+    """
+    if alias is not None:
+        alias = alias if isinstance(alias, list) else [alias]
+    else:
+        alias = []
+
+    if name in alias:
+        raise KeyError(
+            f"Attempting to register alias {name}, "
+            f"that is identical to the standardized name: {name}."
+        )
+    alias.append(name)
+
+    for alias_name in alias:
+        if alias_name in _ALIAS_REGISTRY[parent_class]:
+            raise KeyError(
+                f"Attempting to register alias {alias_name} as {name} "
+                f"however {alias_name} has already been registered as "
+                f"{_ALIAS_REGISTRY[alias_name]}"
+            )
+        _ALIAS_REGISTRY[parent_class][alias_name] = name
 
 
 def _import_and_get_value_from_module(module_path: str, value_name: str) -> Any:
