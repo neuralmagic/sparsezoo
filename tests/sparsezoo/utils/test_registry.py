@@ -14,63 +14,141 @@
 
 import pytest
 
-from sparsezoo.utils.registry import RegistryMixin
+from sparsezoo.utils.registry import _ALIAS_REGISTRY, _REGISTRY, RegistryMixin
 
 
-def test_registery_flow_single():
+@pytest.fixture()
+def foo():
     class Foo(RegistryMixin):
         pass
 
-    @Foo.register()
-    class Foo1(Foo):
-        pass
-
-    assert {"Foo1"} == set(Foo.registered_names())
-
-    @Foo.register(name="name_2")
-    class Foo2(Foo):
-        pass
-
-    assert {"Foo1", "name_2"} == set(Foo.registered_names())
-
-    @Foo.register(name=["name_3", "name_4"])
-    class Foo3(Foo):
-        pass
-
-    assert {"Foo1", "name_2", "name_3", "name_4"} == set(Foo.registered_names())
-
-    with pytest.raises(KeyError):
-        Foo.get_value_from_registry("Foo2")
-
-    assert Foo.get_value_from_registry("Foo1") is Foo1
-    assert isinstance(Foo.load_from_registry("name_2"), Foo2)
-    assert (
-        Foo.get_value_from_registry("name_3")
-        is Foo3
-        is Foo.get_value_from_registry("name_4")
-    )
+    yield Foo
+    _ALIAS_REGISTRY.clear()
+    _REGISTRY.clear()
 
 
-def test_registry_flow_multiple():
-    class Foo(RegistryMixin):
-        pass
-
+@pytest.fixture()
+def bar():
     class Bar(RegistryMixin):
         pass
 
-    @Foo.register()
-    class Foo1(Foo):
-        pass
+    yield Bar
+    _ALIAS_REGISTRY.clear()
+    _REGISTRY.clear()
 
-    @Bar.register()
-    class Bar1(Bar):
-        pass
 
-    assert ["Foo1"] == Foo.registered_names()
-    assert ["Bar1"] == Bar.registered_names()
+class TestRegistryFlowSingle:
+    def test_single_item(self, foo):
+        # register Foo1 in registry foo under the default name Foo1
+        @foo.register()
+        class Foo1(foo):
+            pass
 
-    assert Foo.get_value_from_registry("Foo1") is Foo1
-    assert Bar.get_value_from_registry("Bar1") is Bar1
+        assert {"foo1"} == set(foo.registered_names())
+        assert set() == set(foo.registered_aliases())
+
+    def test_single_item_custom_name(self, foo):
+        # register Foo1 in registry foo under the name name_2
+        # (this will turn name_2 into name-2, as we standardize names)
+        @foo.register(name="name_2")
+        class Foo1(foo):
+            pass
+
+        assert {"name-2"} == set(foo.registered_names())
+        assert set() == set(foo.registered_aliases())
+        # because we registered under a custom name, we can't
+        # use the original object name
+        with pytest.raises(KeyError):
+            foo.get_value_from_registry("Foo1")
+
+    def test_alias(self, foo):
+        # register Foo1 in registry foo under the default name Foo1
+        # and alias names name-3 and name_4
+        @foo.register(alias=["name-3", "name_4"])
+        class Foo1(foo):
+            pass
+
+        assert {"foo1"} == set(foo.registered_names())
+        assert {"name-3", "name-4"} == set(foo.registered_aliases())
+
+    def test_key_error_on_duplicate_alias(self, foo):
+        # once we register an object under one alias, we can't
+        # register it under the same alias once again
+        @foo.register(alias=["name-3"])
+        class Foo1(foo):
+            pass
+
+        with pytest.raises(KeyError):
+
+            @foo.register(alias=["name-3"])
+            class Foo2(foo):
+                pass
+
+    def test_key_error_alias_equal_name(self, foo):
+        # once we register the object under name-3
+        # (not name_3, as we standardize names), we can't
+        # register it under the same alias
+        @foo.register(name="name_3")
+        class Foo1(foo):
+            pass
+
+        with pytest.raises(KeyError):
+
+            @foo.register(alias=["name-3"])
+            class Foo2(foo):
+                pass
+
+    def test_key_error_alias_equal_name_simultaneously(self, foo):
+        with pytest.raises(KeyError):
+
+            @foo.register(name="name_3", alias=["name-3"])
+            class Foo2(foo):
+                pass
+
+    def test_alias_with_custom_name(self, foo):
+        @foo.register(name="name_2", alias=["name-3", "name_4"])
+        class Foo1(foo):
+            pass
+
+        assert {"name-2"} == set(foo.registered_names())
+        assert {"name-3", "name-4"} == set(foo.registered_aliases())
+
+    def test_get_value_from_registry(self, foo):
+        @foo.register(alias=["name-3"])
+        class Foo1(foo):
+            pass
+
+        @foo.register()
+        class Foo2(foo):
+            pass
+
+        with pytest.raises(KeyError):
+            foo.get_value_from_registry("Foo3")
+
+        assert foo.get_value_from_registry("Foo1") is Foo1
+        assert isinstance(foo.load_from_registry("Foo2"), Foo2)
+        assert foo.get_value_from_registry("Foo2") is Foo2
+        assert foo.get_value_from_registry("name-3") is Foo1
+        assert foo.get_value_from_registry("name_3") is Foo1
+        assert foo.get_value_from_registry("name 3") is Foo1
+        assert isinstance(foo.load_from_registry("name_3"), Foo1)
+
+
+class TestRegistryFlowMultiple:
+    def test_single_item(self, foo, bar):
+        @foo.register()
+        class Foo1(foo):
+            pass
+
+        @bar.register()
+        class Bar1(bar):
+            pass
+
+        assert ["foo1"] == foo.registered_names()
+        assert ["bar1"] == bar.registered_names()
+
+        assert foo.get_value_from_registry("foo1") is Foo1
+        assert bar.get_value_from_registry("bar1") is Bar1
 
 
 def test_registry_requires_subclass():

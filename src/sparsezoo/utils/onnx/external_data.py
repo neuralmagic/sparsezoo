@@ -39,6 +39,14 @@ __all__ = [
 
 EXTERNAL_ONNX_DATA_NAME = "model.data"
 
+# DUMP_EXTERNAL_DATA_TRESHOLD is a limiting value
+# for the model saved with external data. If the model
+# is larger than this value, it will be saved with external data.
+# The threshold is expressed in bits and corresponds
+# set to 500MB. This is roughly the size of
+# 250 million parameters (assuming fp16).
+DUMP_EXTERNAL_DATA_THRESHOLD = 4e9
+
 
 def onnx_includes_external_data(model: ModelProto) -> bool:
     """
@@ -66,6 +74,7 @@ def onnx_includes_external_data(model: ModelProto) -> bool:
 def save_onnx(
     model: ModelProto,
     model_path: str,
+    max_external_file_size: int = 16e9,
     external_data_file: Optional[str] = None,
 ) -> bool:
     """
@@ -84,10 +93,15 @@ def save_onnx(
         large to be saved as a single protobuf, and this argument is None,
         the external data file will be coerced to take the default name
         specified in the variable EXTERNAL_ONNX_DATA_NAME
+    :param max_external_file_size: The maximum file size in bytes of a single split
+        external data out file. Defaults to 16000000000 (16e9 = 16GB)
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
-        _LOGGER.debug(f"Saving with external data: {external_data_file}")
+        _LOGGER.debug(
+            f"Saving with external data, with file chunks of maximum size "
+            f"{max_external_file_size / 1e9} GB"
+        )
         _check_for_old_external_data(
             model_path=model_path, external_data_file=external_data_file
         )
@@ -98,13 +112,15 @@ def save_onnx(
             all_tensors_to_one_file=True,
             location=external_data_file,
         )
+        split_external_data(model_path, max_file_size=max_external_file_size)
         return True
 
-    if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
+    if model.ByteSize() > DUMP_EXTERNAL_DATA_THRESHOLD:
         external_data_file = external_data_file or EXTERNAL_ONNX_DATA_NAME
-        _LOGGER.warning(
+        _LOGGER.debug(
             "The ONNX model is too large to be saved as a single protobuf. "
-            f"Saving with external data: {external_data_file}"
+            "Saving with external data, with file chunks of maximum size "
+            f"{max_external_file_size / 1e9} GB"
         )
         _check_for_old_external_data(
             model_path=model_path, external_data_file=external_data_file
@@ -116,6 +132,7 @@ def save_onnx(
             all_tensors_to_one_file=True,
             location=external_data_file,
         )
+        split_external_data(model_path, max_file_size=max_external_file_size)
         return True
 
     onnx.save(model, model_path)
