@@ -117,10 +117,10 @@ def save_onnx(
 
     if model.ByteSize() > DUMP_EXTERNAL_DATA_THRESHOLD:
         external_data_file = external_data_file or EXTERNAL_ONNX_DATA_NAME
-        _LOGGER.warning(
+        _LOGGER.debug(
             "The ONNX model is too large to be saved as a single protobuf. "
             "Saving with external data, with file chunks of maximum size "
-            f"{DUMP_EXTERNAL_DATA_THRESHOLD / 1e9} GB"
+            f"{max_external_file_size / 1e9} GB"
         )
         _check_for_old_external_data(
             model_path=model_path, external_data_file=external_data_file
