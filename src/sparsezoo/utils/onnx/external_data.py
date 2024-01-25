@@ -296,6 +296,14 @@ def split_external_data(
     # WRITE - ONNX model with updated tensor external data info
     onnx.save(model, model_path)
 
+    # RENAME - if as a result of splitting we end up with a single file, rename it to
+    # the original external data file name
+    if current_external_data_file_number == 1:
+        os.rename(
+            os.path.join(base_dir, updated_file_name),
+            os.path.join(base_dir, external_data_file),
+        )
+
 
 def _write_external_data_file_from_base_bytes(
     new_file_name, original_byte_ranges, original_file_bytes_reader
