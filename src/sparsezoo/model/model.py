@@ -181,6 +181,9 @@ class Model(Directory):
         self.benchmarks: File = self._file_from_files(
             files, display_name="benchmarks.yaml"
         )
+        self.benchmark: File = self._file_from_files(
+            files, display_name="benchmark.yaml"
+        )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
 
         # plaintext validation metrics optionally parsed from a zoo stub
@@ -241,6 +244,7 @@ class Model(Directory):
             "onnx_model": self.onnx_model,
             "analysis": self.analysis,
             "benchmarks": self.benchmarks,
+            "benchmark": self.benchmark,
             "eval_results": self.eval_results,
         }
 
