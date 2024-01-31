@@ -71,6 +71,16 @@ class TestRegistryFlowSingle:
         assert {"foo1"} == set(foo.registered_names())
         assert {"name-3", "name-4"} == set(foo.registered_aliases())
 
+    def test_alias_is_standardized(self, foo):
+        alias = "Name_3"
+        expected_standardized_alias = "name-3"
+
+        @foo.register(alias=[alias])
+        class Foo1(foo):
+            pass
+
+        assert {expected_standardized_alias} == set(foo.registered_aliases())
+
     def test_key_error_on_duplicate_alias(self, foo):
         # once we register an object under one alias, we can't
         # register it under the same alias once again
