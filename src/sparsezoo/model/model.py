@@ -705,23 +705,23 @@ class Model(Directory):
                 )
             ):
                 file.download(destination_path=directory_path)
-                return True
+                validations = True
             else:
                 _LOGGER.warning(
                     f"Failed to download file {file.name}. The url of the file is None."
                 )
-                return False
+                validations = False
 
         elif isinstance(file, Recipes):
-            validations = (
+            validations = all(
                 self._download(_file, directory_path) for _file in file.recipes
             )
 
         else:
-            validations = (
+            validations = all(
                 self._download(_file, directory_path) for _file in file.values()
             )
-            return all(validations)
+        return validations
 
     def _sample_outputs_list_to_dict(
         self,
