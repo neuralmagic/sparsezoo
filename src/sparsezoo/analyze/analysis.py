@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import numpy
-import onnx
 import yaml
 from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
@@ -68,6 +67,7 @@ from sparsezoo.utils import (
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
+    load_model,
 )
 
 
@@ -914,7 +914,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             model_onnx = onnx_file_path
             model_name = ""
         else:
-            model_onnx = onnx.load(onnx_file_path)
+            model_onnx = load_model(onnx_file_path)
             model_name = str(onnx_file_path)
 
         model_graph = ONNXGraph(model_onnx)
