@@ -15,6 +15,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
@@ -88,6 +89,7 @@ class Model(Directory):
             _setup_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _setup_args
             if download_path is not None:
+                download_path = str(Path(download_path).expanduser().resolve())
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
