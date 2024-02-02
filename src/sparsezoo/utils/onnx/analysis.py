@@ -385,13 +385,16 @@ def get_node_weight(
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
-
     initializer_name = get_node_weight_name(model_graph, node)
     weight = get_initializer_value(model_graph, node, initializer_name)
+
     if initializer_name is not None and weight is None and node.op_type != "Gather":
         raise Exception(f"Parameter for {node.name} not found")
 
-    return weight
+    # some weights are not accessible, and returns the zero_points, which are scalars
+    if weight is not None and weight.size > 1:
+        return weight
+    return None
 
 
 def get_layer_and_op_counts(

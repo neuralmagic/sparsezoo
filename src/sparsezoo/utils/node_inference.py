@@ -18,15 +18,24 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py
 
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, NamedTuple, Tuple, Union
+from typing import Any, Dict, List, NamedTuple, Tuple, Type, Union
 
 import numpy
 import onnx
-from onnx import ModelProto
+from onnx import ModelProto, ValueInfoProto
 from onnx.helper import make_empty_tensor_value_info
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
 
-from sparsezoo.utils.onnx import extract_node_id
+
+try:
+    import onnxruntime
+
+    is_onnxruntime_available = True
+except Exception as e:
+    is_onnxruntime_available = False
+
+
+from sparsezoo.utils.onnx import extract_node_id, save_onnx
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -375,3 +384,120 @@ def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
             )
             shape.append(None)
     return tuple(shape)
+
+
+def extract_activations_shape_and_type(
+    model: ModelProto,
+    activation_ids: List[str],
+    sample_input: Dict[str, numpy.ndarray],
+) -> Dict[str, Tuple[Tuple, Type[numpy.dtype]]]:
+    """
+    :param model: model to extract activation info from
+    :param activation_ids: ids of activations in model to find information of
+    :param sample_input: list of numpy arrays that represent a singular
+        onnxruntime input to the model
+    :return: dictionary of activation ids mapped to a tuple of the given
+        activation shape and corresponding numpy data type
+    """
+    model = deepcopy(model)
+
+    # augment graph to output all activations
+    for activation_id in activation_ids:
+        activation_output = ValueInfoProto()
+        activation_output.name = activation_id
+        model.graph.output.append(activation_output)
+
+    # run graph and extract activations
+    session = ort_session_from_model(model)
+    breakpoint()
+    activations = session.run(activation_ids, sample_input)
+
+    # get activation info from outputs
+    return {
+        activation_id: (activation.shape, activation.dtype)
+        for activation_id, activation in zip(activation_ids, activations)
+    }
+
+
+def ort_session_from_model(
+    model: ModelProto, providers: str = ["CPUExecutionProvider"]
+) -> onnxruntime.InferenceSession:
+    """
+    Creates an ONNXRuntime session from a loaded ONNX graph. If the model is larger
+    than the maximum protobuf size then serialization to string will not work, so load
+    from a temporary external file instead
+    :param model: model to create session from
+    :param providers: list of provider strings to compile with
+    :return: sparsity as a float
+    """
+    if is_onnxruntime_available:
+
+        if not model_exceeds_protobuf_size(model):
+            session = onnxruntime.InferenceSession(
+                model.SerializeToString(), providers=providers
+            )
+        else:
+            with save_onnx_to_temp_files(
+                model, store_data_externally=True
+            ) as temp_model_path:
+                session = onnxruntime.InferenceSession(
+                    temp_model_path, providers=providers
+                )
+
+        return session
+
+
+def model_exceeds_protobuf_size(model: ModelProto) -> bool:
+    """
+    Maximum protobuf size is 2GB so if an ONNX model is greater than that, certain
+    operations can't be performed and the model must be saved in an external data
+    format.
+
+    :param model: model to save
+    :return: True if the model is larger than protobuf maximum
+    """
+    return model.ByteSize() >= onnx.checker.MAXIMUM_PROTOBUF
+
+
+import contextlib
+import os
+import tempfile
+
+import sparsezoo
+
+
+@contextlib.contextmanager
+def save_onnx_to_temp_files(
+    model: ModelProto, store_data_externally: bool = False
+) -> str:
+    """
+    Save model to a temporary file, optionally store data externally
+
+    :param model: model to save
+    :return: filepath to temporary onnx file that will be deleted along with the data
+    file once the context is left.
+    """
+    shaped_model = tempfile.NamedTemporaryFile(
+        dir=".", mode="w", delete=False, suffix=".onnx"
+    )
+    if store_data_externally:
+        external_data = tempfile.NamedTemporaryFile(
+            dir=".", mode="w", delete=False, suffix=".data"
+        )
+        relative_external_path = os.path.relpath(external_data.name, start=".")
+        save_onnx(
+            model,
+            model_path=shaped_model.name,
+            external_data_file=relative_external_path,
+        )
+    else:
+        save_onnx(model, model_path=shaped_model.name)
+
+    try:
+        yield shaped_model.name
+    finally:
+        os.unlink(shaped_model.name)
+        shaped_model.close()
+        if store_data_externally:
+            os.unlink(external_data.name)
+            external_data.close()
