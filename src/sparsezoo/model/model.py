@@ -15,6 +15,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
@@ -88,6 +89,7 @@ class Model(Directory):
             _setup_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _setup_args
             if download_path is not None:
+                download_path = str(Path(download_path).expanduser().resolve())
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
@@ -703,23 +705,23 @@ class Model(Directory):
                 )
             ):
                 file.download(destination_path=directory_path)
-                return True
+                validations = True
             else:
                 _LOGGER.warning(
                     f"Failed to download file {file.name}. The url of the file is None."
                 )
-                return False
+                validations = False
 
         elif isinstance(file, Recipes):
-            validations = (
+            validations = all(
                 self._download(_file, directory_path) for _file in file.recipes
             )
 
         else:
-            validations = (
+            validations = all(
                 self._download(_file, directory_path) for _file in file.values()
             )
-            return all(validations)
+        return validations
 
     def _sample_outputs_list_to_dict(
         self,
