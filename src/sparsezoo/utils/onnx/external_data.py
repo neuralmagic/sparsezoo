@@ -174,7 +174,7 @@ def validate_onnx(model: Union[str, ModelProto]):
         raise ValueError(f"Invalid onnx model: {err}")
 
 
-def load_model(model: Union[str, ModelProto]) -> ModelProto:
+def load_model(model: Union[str, ModelProto, Path]) -> ModelProto:
     """
     Load an ONNX model from an onnx model file path. If a ModelProto
     is given, then it is returned.
@@ -185,10 +185,10 @@ def load_model(model: Union[str, ModelProto]) -> ModelProto:
     if isinstance(model, ModelProto):
         return model
 
-    if isinstance(model, str):
+    if isinstance(model, (Path, str)):
         return onnx.load(clean_path(model))
 
-    raise ValueError(f"unknown type given for model: {type(model)}")
+    raise TypeError(f"unknown type given for model: {type(model)}")
 
 
 def split_external_data(
