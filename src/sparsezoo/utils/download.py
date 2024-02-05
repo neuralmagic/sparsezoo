@@ -14,9 +14,9 @@
 
 import logging
 import os
-from typing import Iterator, NamedTuple, Union
 import threading
 from queue import Queue
+from typing import Iterator, NamedTuple, Union
 
 import requests
 from tqdm import auto, tqdm, tqdm_notebook
@@ -27,7 +27,6 @@ from .helpers import clean_path, create_parent_dirs
 __all__ = ["download_file", "download_file_iter"]
 
 _LOGGER = logging.getLogger(__name__)
-
 
 
 def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
@@ -68,16 +67,21 @@ class PreviouslyDownloadedError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+
 def download_part(url, start_byte, end_byte, part_num, queue):
     _LOGGER.debug(f"bytes={start_byte}-{end_byte}")
-    
+    # print(f"bytes={start_byte}-{end_byte}")
+
     headers = {"Range": f"bytes={start_byte}-{end_byte}"}
     response = requests.get(url, headers=headers, stream=True, allow_redirects=True)
     response.raise_for_status()
 
     queue.put((part_num, response.content))
 
-def _download_iter(url_path: str, dest_path: str, chunk_div=10) -> Iterator[DownloadProgress]:
+
+def _download_iter(
+    url_path: str, dest_path: str, chunk_div=10
+) -> Iterator[DownloadProgress]:
 
     _LOGGER.debug(f"downloading file from {url_path} to {dest_path}")
 
@@ -90,7 +94,9 @@ def _download_iter(url_path: str, dest_path: str, chunk_div=10) -> Iterator[Down
     threads = []
     for chunk_num in range(chunk_div):
         start_byte = chunk_num * chunk_size
-        end_byte = start_byte + chunk_size - 1 if chunk_num < chunk_div - 1 else file_size
+        end_byte = (
+            start_byte + chunk_size - 1 if chunk_num < chunk_div - 1 else file_size
+        )
         thread = threading.Thread(
             target=download_part,
             args=(url_path, start_byte, end_byte, chunk_num, parts_queue),
@@ -102,11 +108,11 @@ def _download_iter(url_path: str, dest_path: str, chunk_div=10) -> Iterator[Down
 
     try:
         yield DownloadProgress(0, 0, file_size, dest_path)
-        
+
         downloaded_chunk = 0
         while downloaded_chunk < file_size:
             prev_chunk = downloaded_chunk
-            
+
             while not parts_queue.empty():
                 iteration, data = parts_queue.get()
                 parts[iteration] = data
@@ -115,14 +121,12 @@ def _download_iter(url_path: str, dest_path: str, chunk_div=10) -> Iterator[Down
             if prev_chunk == downloaded_chunk:
                 continue
 
-            yield DownloadProgress(
-                chunk_size, downloaded_chunk, file_size, dest_path
-            )
+            yield DownloadProgress(chunk_size, downloaded_chunk, file_size, dest_path)
 
         with open(dest_path, "wb") as file:
             for part in parts:
                 file.write(part)
-                   
+
     except Exception as err:
         _LOGGER.error(f"error downloading file from {url_path} to {dest_path}: {err}")
 
