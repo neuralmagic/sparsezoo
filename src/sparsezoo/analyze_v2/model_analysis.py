@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from typing import Dict
+from typing import Dict, Optional
 
 import onnx
 import yaml
@@ -73,11 +73,70 @@ class ModelAnalysis:
             nodes=nodes,
         ).dict()
 
+    def calculate_sparsity_percentage(self, category: Dict):
+        counts_sparse = category["counts_sparse"]
+        counts = category["counts"]
+        return (counts_sparse / counts) * 100 if counts != 0 else 0
+
+    def calculate_quantized_percentage(self, tensor: Dict):
+        bits_quant = tensor["bits_quant"]
+        bits = tensor["bits"]
+        return (bits_quant / bits) * 100 if bits != 0 else 0
+
+    def __repr__(self):
+        data = self.to_dict()
+        summaries = data["summaries"]
+
+        param_total = summaries["params"]["sparsity"]["single"]["counts"]
+        param_sparsity = self.calculate_sparsity_percentage(
+            summaries["params"]["sparsity"]["single"]
+        )
+        param_size = summaries["params"]["quantization"]["tensor"]["bits"]
+        param_quantized = self.calculate_quantized_percentage(
+            summaries["params"]["quantization"]["tensor"]
+        )
+
+        ops_total = summaries["ops"]["sparsity"]["single"]["counts"]
+        ops_sparsity = self.calculate_sparsity_percentage(
+            summaries["ops"]["sparsity"]["single"]
+        )
+        ops_size = summaries["ops"]["quantization"]["tensor"]["bits"]
+        ops_quantized = self.calculate_quantized_percentage(
+            summaries["ops"]["quantization"]["tensor"]
+        )
+
+        mem_access_total = summaries["mem_access"]["sparsity"]["single"]["counts"]
+        mem_access_sparsity = self.calculate_sparsity_percentage(
+            summaries["mem_access"]["sparsity"]["single"]
+        )
+        mem_access_size = summaries["mem_access"]["quantization"]["tensor"]["bits"]
+        mem_access_quantized = self.calculate_quantized_percentage(
+            summaries["mem_access"]["quantization"]["tensor"]
+        )
+
+        return (
+            "Params:\n"
+            f"\ttotal\t\t: {param_total}\n"
+            f"\tsparsity%\t: {param_sparsity}\n"
+            f"\tsize [bits]\t: {param_size}\n"
+            f"\tquantized %\t: {param_quantized}\n"
+            "Ops:\n"
+            f"\ttotal\t\t: {ops_total}\n"
+            f"\tsparsity%\t: {ops_sparsity}\n"
+            f"\tsize [bits]\t: {ops_size}\n"
+            f"\tquantized %\t: {ops_quantized}\n"
+            "Memory Access:\n"
+            f"\ttotal\t\t: {mem_access_total}\n"
+            f"\tsparsity%\t: {mem_access_sparsity}\n"
+            f"\tsize [bits]\t: {mem_access_size}\n"
+            f"\tquantized %\t: {mem_access_quantized}\n"
+        )
+
     def to_yaml(self):
         return yaml.dump(self.to_dict())
 
 
-def analyze(path: str) -> "ModelAnalysis":
+def analyze(path: str, download_path: Optional[str] = None) -> "ModelAnalysis":
     """
     Entry point to run the model analysis.
 
@@ -89,7 +148,7 @@ def analyze(path: str) -> "ModelAnalysis":
     if path.endswith(".onnx"):
         onnx_model = load_model(path)
     elif is_stub(path):
-        model = Model(path)
+        model = Model(path, download_path)
         onnx_model_path = model.onnx_model.path
         onnx_model = onnx.load(onnx_model_path)
     else:

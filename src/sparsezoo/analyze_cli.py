@@ -77,6 +77,8 @@ def main(
         with open(save, "w") as file:
             file.write(analysis.to_yaml())
 
+    print(analysis)
+
 
 if __name__ == "__main__":
     main()
