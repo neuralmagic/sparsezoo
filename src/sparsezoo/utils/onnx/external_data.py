@@ -188,7 +188,7 @@ def load_model(model: Union[str, ModelProto, Path]) -> ModelProto:
     if isinstance(model, (Path, str)):
         return onnx.load(clean_path(model))
 
-    raise ValueError(f"unknown type given for model: {type(model)}")
+    raise TypeError(f"unknown type given for model: {type(model)}")
 
 
 def split_external_data(
