@@ -392,9 +392,9 @@ def get_node_weight(
         raise Exception(f"Parameter for {node.name} not found")
 
     # some weights are not accessible, and returns the zero_points, which are scalars
-    if weight is not None and weight.size > 1:
-        return weight
-    return None
+    if weight is not None and weight.ndim == 0:
+        return None
+    return weight
 
 
 def get_layer_and_op_counts(
