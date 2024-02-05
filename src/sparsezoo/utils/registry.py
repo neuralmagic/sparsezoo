@@ -104,7 +104,6 @@ class RegistryMixin:
     @Dataset.register(alias=["cifar-10-dataset", "cifar_100_dataset"])
     class Cifar(Dataset):
         pass
-    Note: aliases will NOT be standardized for lookup in the registry.
 
     # load as "cifar-dataset"
     cifar = Dataset.load_from_registry("cifar-dataset")
