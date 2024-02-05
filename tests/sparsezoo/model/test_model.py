@@ -42,6 +42,7 @@ files_ic = {
     "sample-labels",
     "sample-outputs",
     "benchmarks.yaml",
+    "benchmark.yaml",
     "eval.yaml",
     "analysis.yaml",
     "model.md",

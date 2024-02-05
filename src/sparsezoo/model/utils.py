@@ -58,6 +58,7 @@ ALLOWED_FILE_TYPES = {
     "benchmarking",
     "outputs",
     "onnx_gz",
+    "benchmark",
 }
 
 _LOGGER = logging.getLogger(__name__)
