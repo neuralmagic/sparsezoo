@@ -15,6 +15,8 @@
 import logging
 import os
 from typing import Iterator, NamedTuple, Union
+import threading
+from queue import Queue
 
 import requests
 from tqdm import auto, tqdm, tqdm_notebook
@@ -25,6 +27,7 @@ from .helpers import clean_path, create_parent_dirs
 __all__ = ["download_file", "download_file_iter"]
 
 _LOGGER = logging.getLogger(__name__)
+
 
 
 def create_tqdm_auto_constructor() -> Union[tqdm, tqdm_notebook]:
@@ -65,47 +68,61 @@ class PreviouslyDownloadedError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+def download_part(url, start_byte, end_byte, part_num, queue):
+    _LOGGER.debug(f"bytes={start_byte}-{end_byte}")
+    
+    headers = {"Range": f"bytes={start_byte}-{end_byte}"}
+    response = requests.get(url, headers=headers, stream=True, allow_redirects=True)
+    response.raise_for_status()
 
-def _download_iter(url_path: str, dest_path: str) -> Iterator[DownloadProgress]:
+    queue.put((part_num, response.content))
+
+def _download_iter(url_path: str, dest_path: str, chunk_div=10) -> Iterator[DownloadProgress]:
+
     _LOGGER.debug(f"downloading file from {url_path} to {dest_path}")
 
-    if os.path.exists(dest_path):
-        _LOGGER.debug(f"removing file for download at {dest_path}")
+    response = requests.head(url_path, stream=True, allow_redirects=True)
+    file_size = int(response.headers["Content-Length"])
+    chunk_size = file_size // chunk_div
 
-        try:
-            os.remove(dest_path)
-        except OSError as err:
-            _LOGGER.warning(
-                "error encountered when removing older "
-                f"cache_file at {dest_path}: {err}"
+    parts_queue = Queue()
+
+    threads = []
+    for chunk_num in range(chunk_div):
+        start_byte = chunk_num * chunk_size
+        end_byte = start_byte + chunk_size - 1 if chunk_num < chunk_div - 1 else file_size
+        thread = threading.Thread(
+            target=download_part,
+            args=(url_path, start_byte, end_byte, chunk_num, parts_queue),
+        )
+        thread.start()
+        threads.append(thread)
+
+    parts = [None] * chunk_div
+
+    try:
+        yield DownloadProgress(0, 0, file_size, dest_path)
+        
+        downloaded_chunk = 0
+        while downloaded_chunk < file_size:
+            prev_chunk = downloaded_chunk
+            
+            while not parts_queue.empty():
+                iteration, data = parts_queue.get()
+                parts[iteration] = data
+                downloaded_chunk += file_size / chunk_div
+
+            if prev_chunk == downloaded_chunk:
+                continue
+
+            yield DownloadProgress(
+                chunk_size, downloaded_chunk, file_size, dest_path
             )
-    request = requests.get(url_path, stream=True)
-
-    request.raise_for_status()
-    content_length = request.headers.get("content-length")
-
-    try:
-        content_length = int(content_length)
-    except Exception:
-        _LOGGER.debug(f"could not get content length for file at {url_path}")
-        content_length = None
-
-    try:
-        downloaded = 0
-        yield DownloadProgress(0, downloaded, content_length, dest_path)
 
         with open(dest_path, "wb") as file:
-            for chunk in request.iter_content(chunk_size=1024):
-                if not chunk:
-                    continue
-                file.write(chunk)
-                file.flush()
-
-                downloaded += len(chunk)
-
-                yield DownloadProgress(
-                    len(chunk), downloaded, content_length, dest_path
-                )
+            for part in parts:
+                file.write(part)
+                   
     except Exception as err:
         _LOGGER.error(f"error downloading file from {url_path} to {dest_path}: {err}")
 
