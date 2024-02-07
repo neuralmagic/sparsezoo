@@ -1305,6 +1305,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             result = ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
 
         elif file_path.startswith("zoo:"):
+            Model(file_path).deployment.download()
             result = ModelAnalysis.from_onnx(
                 Model(file_path).deployment.get_file("model.onnx").path
             )
