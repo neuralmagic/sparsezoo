@@ -46,6 +46,7 @@ files_ic = {
     "eval.yaml",
     "analysis.yaml",
     "model.md",
+    "metrics.yaml",
 }
 
 files_nlp = copy.copy(files_ic)

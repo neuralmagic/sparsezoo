@@ -188,6 +188,8 @@ class Model(Directory):
         )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
 
+        self.metrics: File = self._file_from_files(files, display_name="metrics.yaml")
+
         # plaintext validation metrics optionally parsed from a zoo stub
         self.validation_results: Optional[
             Dict[str, List[ModelResult]]
@@ -248,6 +250,7 @@ class Model(Directory):
             "benchmarks": self.benchmarks,
             "benchmark": self.benchmark,
             "eval_results": self.eval_results,
+            "metrics": self.metrics,
         }
 
         self.inference_runner = InferenceRunner(
