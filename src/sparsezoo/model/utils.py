@@ -59,6 +59,7 @@ ALLOWED_FILE_TYPES = {
     "outputs",
     "onnx_gz",
     "benchmark",
+    "metrics",
 }
 
 _LOGGER = logging.getLogger(__name__)
@@ -345,6 +346,7 @@ def restructure_request_json(
         that will not be filtered out during restructuring
     :return: restructured files
     """
+
     # create `training` folder
     training_dicts_list = fetch_from_request_json(
         request_json, "file_type", "framework"
