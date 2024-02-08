@@ -87,19 +87,22 @@ def analyze(path: str) -> "ModelAnalysis":
     :param path: .onnx path or stub
     """
     if path.endswith(".onnx"):
-        onnx_model = load_model(path)
+        onnx_model = load_model(path, load_external_data=False)
+        onnx_model_path = path
     elif is_stub(path):
         model = Model(path)
         onnx_model_path = model.onnx_model.path
-        onnx_model = onnx.load(onnx_model_path)
+        onnx_model = onnx.load(onnx_model_path, load_external_data=False)
     else:
         raise ValueError(f"{path} is not a valid argument")
 
-    model_graph = ONNXGraph(onnx_model)
-    node_shapes, _ = extract_node_shapes_and_dtypes(model_graph.model)
+    node_shapes, _ = extract_node_shapes_and_dtypes(onnx_model, onnx_model_path)
 
     summary_analysis = SummaryAnalysis()
     node_analyses = {}
+
+    onnx_model = onnx.load(onnx_model_path)
+    model_graph = ONNXGraph(onnx_model)
 
     for graph_order, node in enumerate(model_graph.nodes):
         node_id = extract_node_id(node)
