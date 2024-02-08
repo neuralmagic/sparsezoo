@@ -155,11 +155,13 @@ def analyze(path: str, download_path: Optional[str] = None) -> "ModelAnalysis":
     else:
         raise ValueError(f"{path} is not a valid argument")
 
+    # just need graph to get shape information; dont load external data
     node_shapes, _ = extract_node_shapes_and_dtypes(onnx_model, onnx_model_path)
 
     summary_analysis = SummaryAnalysis()
     node_analyses = {}
 
+    # load external data for node analysis
     onnx_model = onnx.load(onnx_model_path)
     model_graph = ONNXGraph(onnx_model)
 

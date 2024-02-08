@@ -19,7 +19,7 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Tuple, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import numpy
 import onnx
@@ -61,7 +61,7 @@ NodeDataType = NamedTuple(
 
 
 def extract_nodes_shapes_and_dtypes_ort(
-    model: ModelProto, path: str
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
     Creates a modified model to expose intermediate outputs and runs an ONNX Runtime
@@ -81,16 +81,24 @@ def extract_nodes_shapes_and_dtypes_ort(
         )
         model_copy.graph.output.append(intermediate_layer_value_info)
 
-    parent_dir = Path(path).parent.absolute()
-    new_path = parent_dir / "model_new.onnx"
-    onnx.save(model_copy, new_path, save_as_external_data=True)
-
+    # using the ModelProto does not work for large models when running the session
+    # have to save again and pass the new path to the inference session
     sess_options = onnxruntime.SessionOptions()
     sess_options.log_severity_level = 3
 
-    sess = onnxruntime.InferenceSession(
-        new_path, sess_options, providers=onnxruntime.get_available_providers()
-    )
+    if path:
+        parent_dir = Path(path).parent.absolute()
+        new_path = parent_dir / "model_new.onnx"
+        onnx.save(model_copy, new_path, save_as_external_data=True)
+        sess = onnxruntime.InferenceSession(
+            new_path, sess_options, providers=onnxruntime.get_available_providers()
+        )
+    else:
+        sess = onnxruntime.InferenceSession(
+            model_copy.SerializeToString(),
+            sess_options,
+            providers=onnxruntime.get_available_providers(),
+        )
 
     input_value_dict = {}
     for input in model_copy.graph.input:
@@ -173,7 +181,7 @@ def extract_nodes_shapes_and_dtypes_shape_inference(
 
 
 def extract_nodes_shapes_and_dtypes(
-    model: ModelProto, path: str
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
     Uses ONNX Runtime or shape inference to infer output shapes and dtypes from model
@@ -314,7 +322,7 @@ def collate_output_dtypes(
 
 
 def extract_node_shapes_and_dtypes(
-    model: ModelProto, path: str
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, NodeShape], Dict[str, NodeDataType]]:
     """
     Extracts the shape and dtype information for each node as NodeShape objects
