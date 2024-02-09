@@ -201,33 +201,6 @@ def _download_iter(
                         chunk_size, downloaded_chunk, file_size, dest_path
                     )
 
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-        print(0)
-
     except Exception as err:
         _LOGGER.error(f"error downloading file from {url_path} to {dest_path}: {err}")
 
@@ -295,6 +268,7 @@ def download_file_iter(
     if retry_err is not None:
         raise retry_err
 
+
 def download_file(
     url_path: str,
     dest_path: str,
@@ -316,26 +290,43 @@ def download_file(
     :raise PreviouslyDownloadedError: raised if file already exists at dest_path
         nad overwrite is False
     """
-    # dest_path = "/home/george/sparsezoo/tmp"
-
     downloader = Downloader(
         url=url_path, download_path=dest_path, max_retries=num_retries
     )
     downloader.download()
 
 
-from typing import Any, Dict, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from queue import Queue
+import concurrent.futures
 import re
-from dataclasses import dataclass
+import shutil
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from queue import Queue
+from typing import Any, Callable, Dict, List, Optional
+
+
+class Queue(Queue):
+    def __init__(self, maxsize=0):
+        super().__init__(maxsize)
+        self.custom_property = "custom_value"
 
 
 @dataclass
 class Job:
     id: int
-    chunk_range: str
-    is_completed: bool
+    func: Callable
+    max_retries: int = 3
+    retries: int = 0
+
+    description: str = ""
+    func_kwargs: Dict[str, Any] = field(default_factory=dict)
+
+
+class JobQueue(Queue):
+    def __init__(self, maxsize=0, description: str = ""):
+        super().__init__(maxsize)
+        self.description = description
 
 
 class Downloader:
@@ -344,14 +335,18 @@ class Downloader:
         url: str,
         download_path: str,
         max_retries: int = 3,
+        chunk_bytes: int = 500_000_000,
     ):
+
         self.url = url
         self.download_path = download_path
         self.max_retries = max_retries
         self.file_size = self.get_file_size()
-        self.queue = Queue(maxsize=0)
+        self.chunk_bytes = chunk_bytes
+        self.job_queues = Queue()
+        self._lock = threading.Lock()
 
-    def is_chunk_downloable(self):
+    def is_range_header_supported(self):
         response = requests.head(
             self.url, headers={"Accept-Encoding": "identity"}, allow_redirects=True
         )
@@ -368,116 +363,170 @@ class Downloader:
             return file_size
         raise ValueError(f"Invalid download URL: {self.url}")
 
+    def queue_chunk_download_jobs(self):
+
+        download_jobs: Queue[Job] = JobQueue(description="Downloading Chunks")
+        num_download_jobs = self.file_size // self.chunk_bytes + int(
+            self.chunk_bytes % (self.file_size - 1) != 0
+        )
+        for job_id in range(num_download_jobs):
+            start_byte = job_id * self.chunk_bytes
+            end_byte = (
+                start_byte + self.chunk_bytes - 1
+                if self.chunk_bytes * (job_id + 1) < self.file_size
+                else self.file_size
+            )
+            bytes_range = f"bytes={start_byte}-{end_byte}"
+
+            func_kwargs = {
+                "download_path": self.get_chunk_file_path(
+                    f"{job_id:05d}_{bytes_range}"
+                ),
+                "headers": {
+                    "Range": bytes_range,
+                },
+            }
+
+            download_jobs.put(
+                Job(
+                    id=job_id,
+                    func=self.download_file,
+                    func_kwargs=func_kwargs,
+                )
+            )
+
+        # add chunk combine job at the end
+        chunk_combine_job = JobQueue(description="Combining Chunks")
+        chunk_combine_job.put(
+            Job(
+                id=job_id + 1,
+                func=self.combine_chunks_and_delete,
+                func_kwargs={
+                    "download_path": self.download_path,
+                },
+            )
+        )
+        self.job_queues.put(download_jobs)
+        self.job_queues.put(chunk_combine_job)
+
     def download(self, *args, **kwargs):
-        if self.is_chunk_downloable():
-            self.chunk_download(*args, **kwargs)
-            self.combine_chunks(*args, **kwargs)
+        self.queue_jobs(*args, **kwargs)
+        self.run()
+
+    def queue_jobs(self):
+        # queue of queue. Run each job in job_queue sequentially
+        # run each job in job_queue in parallel
+
+        # Chunk stream download
+        if self.is_range_header_supported():
+            self.queue_chunk_download_jobs()
             return
-        
-        self.download_file(download_path=self.download_path, **kwargs)
-        
-    def combine_chunks(self):
-        parent_directory = os.path.dirname(self.download_path)
+
+        # regular stream download
+        job_queue = JobQueue(maxsize=0)
+        func_kwargs = {
+            "download_path": self.download_path,
+        }
+        job_queue.put(
+            Job(
+                id=1,
+                func=self.download_file,
+                func_kwargs=func_kwargs,
+            )
+        )
+        self.job_queues.put(job_queue)
+
+    def run(self, num_threads: int = 10):
+
+        while not self.job_queues.empty():
+            job_queue = self.job_queues.get()
+
+            with tqdm(
+                total=self.file_size,
+                unit="B",
+                unit_scale=True,
+                desc=job_queue.description,
+                leave=True,
+            ) as progress_bar:
+
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=num_threads
+                ) as executor:
+                    futures = []
+                    while not job_queue.empty():
+                        for i in range(min(num_threads, job_queue.qsize())):
+                            future = executor.submit(
+                                self.execute_job_from_queue,
+                                job_queue,
+                                progress_bar=progress_bar,
+                            )
+                            futures.append(future)
+
+                        for future in futures:
+                            future.result()
+
+    def execute_job_from_queue(self, job_queue: Queue[Job], **kwargs):
+        with self._lock:
+            job: Job = job_queue.get()
+        success = False
+        while not success and job.retries < job.max_retries:
+            try:
+                job.func(**job.func_kwargs, **kwargs)
+                success = True
+            except Exception as _err:
+                print(
+                    f"{job.retries/self.max_retries}: Failed running {self.func} with kwargs {job.func_kwargs}"
+                )
+                print(_err)
+                job.retries += 1
+                if job.retries < job.max_retries:
+                    job_queue.put(job)
+
+        if not success:
+            print(f"Chunk download failed after {self.max_retries} retries.")
+            raise ValueError
+
+    def download_file(
+        self,
+        download_path: str,
+        progress_bar: tqdm,
+        headers: Dict[str, Any] = {},
+        write_chunk_size: Optional[int] = None,
+    ):
+        write_chunk_size = min(500_000_000, self.file_size)
+        create_parent_dirs(download_path)
+        response = requests.get(
+            self.url, headers=headers, stream=True, allow_redirects=True
+        )
+        with open(download_path, "wb") as f:
+            for chunk in response.iter_content(write_chunk_size):
+                if chunk:
+                    f.write(chunk)
+                    progress_bar.update(len(chunk))
+
+    def combine_chunks_and_delete(self, download_path: str, progress_bar: tqdm):
+        parent_directory = os.path.dirname(download_path)
         chunk_directory = os.path.join(parent_directory, "chunks")
-        
-        pattern = re.compile(r"\d+_bytes=")  
+
+        pattern = re.compile(r"\d+_bytes=")
         files = os.listdir(chunk_directory)
 
         chunk_files = [chunk_file for chunk_file in files if pattern.match(chunk_file)]
 
         sorted_chunk_files = list(sorted(chunk_files))
-        
+
         create_parent_dirs(self.download_path)
-        
+
         with open(self.download_path, "ab") as combined_file:
             for file_path in sorted_chunk_files:
                 chunk_path = os.path.join(chunk_directory, file_path)
                 with open(chunk_path, "rb") as infile:
-                    combined_file.write(infile.read())
-        
-        
-    
+                    data = infile.read()
+                    combined_file.write(data)
+                    progress_bar.update(len(data))
+
+        shutil.rmtree(chunk_directory)
+
     def get_chunk_file_path(self, file_range: str):
         parent_directory = os.path.dirname(self.download_path)
         return os.path.join(parent_directory, "chunks", file_range)
-    
-    
-    def populate_job_queue(self, chunk_size: int):
-        iter =  self.file_size //chunk_size + int(chunk_size % (self.file_size -1) != 0)
-        for job_id in range(iter):
-            start_byte = job_id * chunk_size
-            end_byte = start_byte + chunk_size - 1 if chunk_size * (job_id + 1) < self.file_size else self.file_size
-            self.queue.put(
-               (job_id,  f"bytes={start_byte}-{end_byte}")
-            )
-
-
-    def chunk_download(self, num_threads: int = 40, chunk_size: int =500_000_000):
-        
-        self.populate_job_queue(chunk_size)
-
-        with tqdm(total=self.file_size, unit='B', unit_scale=True, desc='Downloading', leave=True) as progress_bar:
-            
-            while self.queue:
-                with ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    futures = []
-                    for _ in range(num_threads):
-                        job = self.queue.get()
-                        bytes_range = job[1]
-                        headers = {"Range": bytes_range}
-
-                        download_path = self.get_chunk_file_path(f"{i:05d}_{bytes_range}")
-                        kwargs = dict(
-                            headers=headers, 
-                            download_path=download_path,
-                            progress_bar = progress_bar,
-                        )
-                        future = executor.submit(self.run, **kwargs)
-                        futures.append(future)
-
-                    for future in futures:
-                        future.result()  # This will propagate any exceptions if they occurred in the threads
-
-    
-
-    def download_file(
-        self,
-        download_path: str,
-        **kwargs,
-    ):
-        with tqdm(
-            total=self.file_size,
-            unit="B",
-            unit_scale=True,
-            desc="Downloading",
-            leave=True,
-        ) as progress_bar:
-            self.run(
-                download_path=download_path,
-                progress_bar=progress_bar,
-                **kwargs
-            )
-
-    def run(self, download_path: str, progress_bar, headers: Dict[str, Any] = {}, write_chunk_size: Optional[int] = None):
-        
-        retries = 0
-        success = False
-        create_parent_dirs(download_path)
-        while not success and retries < self.max_retries:
-            try:
-                response = requests.get(
-                    self.url, headers=headers, stream=True, allow_redirects=True
-                )
-                with open(download_path, "wb") as f:
-                    for chunk in response.iter_content(write_chunk_size):
-                        if chunk:
-                            f.write(chunk)
-                            progress_bar.update(len(chunk))
-                success = True
-            except Exception as e:
-                print(
-                    f"Chunk download failed. Retrying... ({retries+1}/{self.max_retries})"
-                )
-                retries += 1
-        if not success:
-            print(f"Chunk download failed after {self.max_retries} retries.")
