@@ -12,26 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import concurrent.futures
 import logging
 import os
-import threading
-from queue import Queue
-
-import requests
-from tqdm import tqdm
-
-import concurrent.futures
 import re
 import shutil
 import threading
 from dataclasses import dataclass, field
 from queue import Queue
-from typing import Any, Callable, Dict,  Optional
+from typing import Any, Callable, Dict, Optional
 
-from .helpers import clean_path, create_parent_dirs
+import requests
+from tqdm import tqdm
+
+from .helpers import create_parent_dirs
 
 
-# __all__ = ["download_file", "download_file_iter"]
+__all__ = ["download_file"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,10 +36,8 @@ _LOGGER = logging.getLogger(__name__)
 def download_file(
     url_path: str,
     dest_path: str,
-    overwrite: bool,
     num_retries: int = 3,
-    show_progress: bool = True,
-    progress_title: str = None,
+    **kwargs,
 ):
     """
     Download a file from the given url to the desired local path
@@ -61,14 +56,6 @@ def download_file(
         url=url_path, download_path=dest_path, max_retries=num_retries
     )
     downloader.download()
-
-
-
-
-class Queue(Queue):
-    def __init__(self, maxsize=0):
-        super().__init__(maxsize)
-        self.custom_property = "custom_value"
 
 
 @dataclass
@@ -233,16 +220,17 @@ class Downloader:
                 job.func(**job.func_kwargs, **kwargs)
                 success = True
             except Exception as _err:
-                print(
-                    f"{job.retries/self.max_retries}: Failed running {self.func} with kwargs {job.func_kwargs}"
+                _LOGGER.debug(
+                    f"{job.retries/self.max_retries}: "
+                    "Failed running {self.func} with kwargs {job.func_kwargs}"
                 )
-                print(_err)
+                _LOGGER.debug(_err)
                 job.retries += 1
                 if job.retries < job.max_retries:
                     job_queue.put(job)
 
         if not success:
-            print(f"Chunk download failed after {self.max_retries} retries.")
+            _LOGGER.debug(f"Chunk download failed after {self.max_retries} retries.")
             raise ValueError
 
     def download_file(
