@@ -182,7 +182,7 @@ def load_model(
     is given, then it is returned.
 
     :param model: the model proto or path to the model ONNX file to check for loading
-    :param laod_external_data: if a path is given, whether or not to also load the
+    :param load_external_data: if a path is given, whether or not to also load the
         external model data
     :return: the loaded ONNX ModelProto
     """
