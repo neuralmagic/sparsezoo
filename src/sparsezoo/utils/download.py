@@ -114,7 +114,10 @@ class Downloader:
         download_jobs: Queue[Job] = JobQueue(description="Downloading Chunks")
         num_download_jobs = self.file_size // self.chunk_bytes + int(
             self.chunk_bytes % (self.file_size - 1) != 0
+            if self.file_size > self.chunk_bytes
+            else 1
         )
+
         for job_id in range(num_download_jobs):
             start_byte = job_id * self.chunk_bytes
             end_byte = (
@@ -145,7 +148,7 @@ class Downloader:
         chunk_combine_job = JobQueue(description="Combining Chunks")
         chunk_combine_job.put(
             Job(
-                id=job_id + 1,
+                id=download_jobs.qsize() + 1,
                 func=self.combine_chunks_and_delete,
                 func_kwargs={
                     "download_path": self.download_path,
@@ -183,10 +186,10 @@ class Downloader:
         self.job_queues.put(job_queue)
 
     def run(self, num_threads: int = 10):
-
-        while not self.job_queues.empty():
+        is_prev_job_queue_success = True
+        while not self.job_queues.empty() and is_prev_job_queue_success:
             job_queue = self.job_queues.get()
-
+            is_prev_job_queue_success = False
             with tqdm(
                 total=self.file_size,
                 unit="B",
@@ -210,6 +213,7 @@ class Downloader:
 
                         for future in futures:
                             future.result()
+                is_prev_job_queue_success = True
 
     def execute_job_from_queue(self, job_queue: Queue[Job], **kwargs):
         with self._lock:
