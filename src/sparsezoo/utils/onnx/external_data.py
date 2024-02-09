@@ -174,19 +174,23 @@ def validate_onnx(model: Union[str, ModelProto]):
         raise ValueError(f"Invalid onnx model: {err}")
 
 
-def load_model(model: Union[str, ModelProto, Path]) -> ModelProto:
+def load_model(
+    model: Union[str, ModelProto, Path], load_external_data: bool = True
+) -> ModelProto:
     """
     Load an ONNX model from an onnx model file path. If a ModelProto
     is given, then it is returned.
 
     :param model: the model proto or path to the model ONNX file to check for loading
+    :param load_external_data: if a path is given, whether or not to also load the
+        external model data
     :return: the loaded ONNX ModelProto
     """
     if isinstance(model, ModelProto):
         return model
 
     if isinstance(model, (Path, str)):
-        return onnx.load(clean_path(model))
+        return onnx.load(clean_path(model), load_external_data=load_external_data)
 
     raise TypeError(f"unknown type given for model: {type(model)}")
 
