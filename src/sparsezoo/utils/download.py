@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# src/sparsezoo/utils/download.py
+
 import concurrent.futures
 import logging
+import math
 import os
 import re
 import shutil
@@ -28,7 +32,7 @@ from tqdm import tqdm
 from .helpers import create_parent_dirs
 
 
-__all__ = ["download_file"]
+__all__ = ["download_file", "Downloader"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -120,16 +124,16 @@ class Downloader:
          range of the file. After queuing all the chunk download jobs, it queues an
          additional job to combine these chunks into the final file.
 
-        Each download job is added to a JobQueue with a descrition (shown in the
+        Each download job is added to a JobQueue with a description (shown in the
          progress bar), and the jobs areconfigured with the necessary parameters,
-         including the path where the chunk will be saved andthe 'Range' header to
+         including the path where the chunk will be saved and the 'Range' header to
          download the specified byte range. The method ensures that the byte ranges
          are calculated correctly to cover the entire file, even if the file size is
          not a multiple of the chunk size.
 
         After all chunk download jobs are queued, if at least one chunk download job
          exists, a final job is queued to combine all downloaded chunks into the final
-         file and deletethe individual chunk files. This combining job is added to a
+         file and delete the individual chunk files. This combining job is added to a
          separate JobQueue with its own descriptive label.
 
         Side effects:
@@ -147,16 +151,12 @@ class Downloader:
              queued JobQueues.
         """
         download_jobs: Queue[Job] = JobQueue(description="Downloading Chunks")
-        num_download_jobs = self.file_size // self.chunk_bytes + int(
-            self.chunk_bytes % (self.file_size - 1) != 0
-            if self.file_size > self.chunk_bytes
-            else 1
-        )
+        num_download_jobs = math.ceil(self.file_size / self.chunk_bytes)
 
         for job_id in range(num_download_jobs):
-            start_byte = job_id * self.chunk_bytes
+            start_byte = 0 if job_id == 0 else job_id * (self.chunk_bytes) + 1
             end_byte = (
-                start_byte + self.chunk_bytes - 1
+                max(0, start_byte - 1) + self.chunk_bytes
                 if self.chunk_bytes * (job_id + 1) < self.file_size
                 else self.file_size
             )
@@ -184,7 +184,7 @@ class Downloader:
             chunk_combine_job = JobQueue(description="Combining Chunks")
             chunk_combine_job.put(
                 Job(
-                    id=download_jobs.qsize() + 1,
+                    id=download_jobs.qsize(),
                     func=self.combine_chunks_and_delete,
                     func_kwargs={
                         "download_path": self.download_path,
@@ -263,7 +263,6 @@ class Downloader:
                 desc=job_queue.description,
                 leave=True,
             ) as progress_bar:
-
                 with concurrent.futures.ThreadPoolExecutor(
                     max_workers=num_threads
                 ) as executor:
