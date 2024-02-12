@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-# src/sparsezoo/utils/download.py
-
 import concurrent.futures
 import logging
 import math
@@ -96,7 +94,7 @@ class Downloader:
         self._lock = threading.Lock()
 
     def is_range_header_supported(self) -> bool:
-        """Check if chuck download is supported"""
+        """Check if chunck download is supported"""
         response = requests.head(
             self.url, headers={"Accept-Encoding": "identity"}, allow_redirects=True
         )
@@ -104,7 +102,7 @@ class Downloader:
             return True
         return False
 
-    def get_file_size(self):
+    def get_file_size(self) -> int:
         """Get file size of the requested file"""
         response = requests.head(
             self.url, headers={"Accept-Encoding": "identity"}, allow_redirects=True
@@ -119,13 +117,13 @@ class Downloader:
         Queues two jobs: file chunk download and combining the chunks.
 
         This method calculates the number of download jobs needed based on the size of
-         the file to be downloadedand the size of each chunk. It creates download jobs
+         the file to be downloaded and the size of each chunk. It creates download jobs
          for each chunk, where each job is responsible for downloading a specific byte
          range of the file. After queuing all the chunk download jobs, it queues an
          additional job to combine these chunks into the final file.
 
         Each download job is added to a JobQueue with a description (shown in the
-         progress bar), and the jobs areconfigured with the necessary parameters,
+         progress bar), and the jobs are configured with the necessary parameters,
          including the path where the chunk will be saved and the 'Range' header to
          download the specified byte range. The method ensures that the byte ranges
          are calculated correctly to cover the entire file, even if the file size is
