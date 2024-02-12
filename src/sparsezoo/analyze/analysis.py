@@ -304,9 +304,12 @@ class NodeAnalysis(YAMLSerializableBaseModel):
     )
     sparse_node: bool = Field(description="Does the node have sparse weights")
     quantized_node: bool = Field(description="Does the node have quantized weights")
-    zero_point: int = Field(
+    zero_point: Union[int, numpy.ndarray] = Field(
         description="Node zero point for quantization, default zero"
     )
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_node(
