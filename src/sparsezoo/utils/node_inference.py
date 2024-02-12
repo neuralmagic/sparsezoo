@@ -86,10 +86,17 @@ def extract_nodes_shapes_and_dtypes_ort(
     sess_options = onnxruntime.SessionOptions()
     sess_options.log_severity_level = 3
 
+    # figure out if the current model has external data
+    has_external_data = False
+    for initializer in model.graph.initializer:
+        if initializer.HasField("data_location") and initializer.data_location == 1:
+            has_external_data = True
+            break
+
     if path:
         parent_dir = Path(path).parent.absolute()
         new_path = parent_dir / "model_new.onnx"
-        onnx.save(model_copy, new_path, save_as_external_data=True)
+        onnx.save(model_copy, new_path, save_as_external_data=has_external_data)
         sess = onnxruntime.InferenceSession(
             new_path, sess_options, providers=onnxruntime.get_available_providers()
         )
