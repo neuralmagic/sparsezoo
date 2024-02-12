@@ -51,6 +51,7 @@ _deps = [
     "pandas>1.3",
     "py-machineid>=0.3.0",
     "geocoder>=1.38.0",
+    "onnxruntime>=1.0.0",
 ]
 _notebook_deps = ["ipywidgets>=7.0.0", "jupyter>=1.0.0"]
 
@@ -62,7 +63,6 @@ _dev_deps = [
     "isort>=5.7.0",
     "pytest>=6.0.0",
     "wheel>=0.36.2",
-    "onnxruntime>=1.0.0",
     "matplotlib>=3.0.0",
 ]
 

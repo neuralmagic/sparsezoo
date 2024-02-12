@@ -13,14 +13,16 @@
 # limitations under the License.
 
 """
-Usage: sparsezoo.analyze [OPTIONS] MODEL_PATH
+Usage: analyze_cli.py [OPTIONS] PATH
 
-  Model analysis for ONNX models.
+  Model analysis for ONNX models. Runs analysis for nodes with weights
 
-  MODEL_PATH: can be path to the onnx file or sparsezoo stub
+  Usage: sparsezoo.analyze path/to/model.onnx sparsezoo.analyze stub
 
 Options:
-  --save TEXT         File path or directory to save the results as yaml to
+  --save TEXT  File path or directory to save the results as yaml to Note:
+               file will be overwritten if exists
+  --help       Show this message and exit.
 
 ##########
 Usage:
@@ -52,9 +54,7 @@ _LOGGER = logging.getLogger(__name__)
     default=None,
     type=str,
     help="File path or directory to save the results as yaml to Note: file will be "
-    "overwritten if exists, if a directory path is passed results will be "
-    "stored under the directory as `analysis.yaml`, if set to True the file "
-    "will be saved under CWD as `analysis.yaml`",
+    "overwritten if exists",
 )
 @sparsezoo_analytics.send_event_decorator("cli__main")
 def main(
@@ -76,6 +76,8 @@ def main(
         _LOGGER.info(f"Writing results to {save}")
         with open(save, "w") as file:
             file.write(analysis.to_yaml())
+
+    print(analysis)
 
 
 if __name__ == "__main__":
