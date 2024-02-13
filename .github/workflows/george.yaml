@@ -19,6 +19,6 @@ jobs:
         uses: actions/setup-java@v4
 
       - name: Use custom workflow from nm-actions
-        uses: neuralmagic/nmstore@pilot
+        uses: neuralmagic/nmstore/actions/common
         with:
           workflow-file: workflow/common/quality-check.yaml
