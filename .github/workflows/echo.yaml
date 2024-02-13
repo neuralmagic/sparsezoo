@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Echo Action from repo1
-        uses: neuralmagic/nmstore/actions/commmon/test@pilot
+        uses: /neuralmagic/nmstore/actions/commmon/test@pilot
