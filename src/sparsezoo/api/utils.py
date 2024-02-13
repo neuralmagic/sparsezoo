@@ -42,11 +42,12 @@ def map_keys(
     """
     mapped_dict = {}
     for key, value in dictionary.items():
-        if isinstance(value, List) or isinstance(value, Dict):
-            value_type = type(value)
-            mapped_dict[mapper(key)] = value_type(
+        if isinstance(value, List):
+            mapped_dict[mapper(key)] = [
                 map_keys(dictionary=sub_dict, mapper=mapper) for sub_dict in value
-            )
+            ]
+        elif isinstance(value, Dict):
+            mapped_dict[mapper(key)] = dict(map_keys(dictionary=value, mapper=mapper))
         else:
             mapped_dict[mapper(key)] = value
 

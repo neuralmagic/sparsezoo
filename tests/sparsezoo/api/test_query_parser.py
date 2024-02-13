@@ -172,6 +172,18 @@ from sparsezoo import QueryParser
                 ),
             },
         ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": {"stub": "zoo:mobilenet_v2-1.0-imagenet-base"},
+                "fields": {"analysis": {"analysisId": None}},
+            },
+            {
+                "operation_body": "models",
+                "arguments": '(stub: "zoo:mobilenet_v2-1.0-imagenet-base",)',
+                "fields": "analysis { analysisId } ",
+            },
+        ),
     ],
 )
 def test_query_parser(
