@@ -121,6 +121,11 @@ class TestGraphQLAPI(GraphQLAPI):
             },
             "fields": None,
         },
+        {
+            "operation_body": "models",
+            "arguments": {"stub": "zoo:mobilenet_v2-1.0-imagenet-base"},
+            "fields": {"analysis": {"analysisId": None}},
+        },
     ],
 )
 def test_graphql_api_response(query_args: Dict[str, Any]):
