@@ -150,12 +150,21 @@ def get_node_num_zeros_and_size(
     if weight is None:
         return 0, 0
 
-    num_zeros = numpy.count_nonzero(weight == zero_point)
+    is_channel_wise_quantized = (
+        isinstance(zero_point, numpy.ndarray) and zero_point.ndim > 0
+    )
+    if is_channel_wise_quantized:
+        # Broadcast zero point to match weight shape
+        broadcasted_zero_point = numpy.broadcast_to(zero_point, weight.shape)
+        num_zeros = numpy.count_nonzero(weight == broadcasted_zero_point)
+        del broadcasted_zero_point
+    else:
+        num_zeros = numpy.count_nonzero(weight == zero_point)
 
     return num_zeros, weight.size
 
 
-def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndarray:
+def group_four_block(array: numpy.ndarray) -> numpy.ndarray:
     """
     :param array: array to group into four blocks
     :param pad_value: value to pad remainder block with
@@ -205,16 +214,28 @@ def get_node_num_four_block_zeros_and_size(
         return 0, 0
 
     # Group into blocks
-    weight_blocks = group_four_block(weight, pad_value=zero_point)
+    weight_blocks = group_four_block(weight)
 
     # Count non-zero blocks
-    num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
-    num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
+    if isinstance(zero_point, numpy.ndarray):
+        # Channel-wise quantized case
+        # Group zero point into blocks like the weight
+        zero_point_blocks = group_four_block(
+            numpy.broadcast_to(zero_point, weight.shape)
+        )
+        num_zeros_per_block = numpy.count_nonzero(
+            weight_blocks == zero_point_blocks, axis=1
+        )
+    else:
+        num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
 
+    num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
     return num_zero_blocks, weight_blocks.shape[0]
 
 
-def get_zero_point(model_graph: ONNXGraph, node: NodeProto) -> int:
+def get_zero_point(
+    model_graph: ONNXGraph, node: NodeProto
+) -> Union[int, numpy.ndarray]:
     """
     :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to find zero point of
@@ -240,10 +261,7 @@ def get_zero_point(model_graph: ONNXGraph, node: NodeProto) -> int:
         zero_point = get_initializer_value(
             model_graph, node, zero_point_initializer_name
         )
-        if zero_point.ndim != 0:
-            raise NotImplementedError("Channel-wise zero points are not supported")
-
-        return int(zero_point)
+        return int(zero_point) if zero_point.ndim == 0 else zero_point
     else:
         return 0
 
