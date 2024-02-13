@@ -148,7 +148,7 @@ class Downloader:
             The jobs need to be executed by a worker or scheduler that processes the
              queued JobQueues.
         """
-        download_jobs: Queue[Job] = JobQueue(description="Downloading Chunks")
+        download_jobs: Queue = JobQueue(description="Downloading Chunks")
         num_download_jobs = math.ceil(self.file_size / self.chunk_bytes)
 
         for job_id in range(num_download_jobs):
@@ -278,7 +278,7 @@ class Downloader:
                             future.result()
                 is_prev_job_queue_success = True
 
-    def execute_job_from_queue(self, job_queue: Queue[Job], **kwargs) -> None:
+    def execute_job_from_queue(self, job_queue: Queue, **kwargs) -> None:
         """
         Executes a single job from the given job queue, managing retries and
          synchronization.
