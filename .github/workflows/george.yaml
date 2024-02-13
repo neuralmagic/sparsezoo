@@ -1,11 +1,24 @@
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
+name: george
+on: 
+  push:
+    branches:
+      - main
+      - 'release/*'
+  pull_request:
+    branches:
+      - main
+      - 'release/*'
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  - name: Setup Java
-    uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
 
-  - name: Use custom workflow from nm-actions
-    uses: neuralmagic/nmstore@pilot
-    with:
-      workflow-file: workflow/common/quality-check.yaml
+      - name: Use custom workflow from nm-actions
+        uses: neuralmagic/nmstore@pilot
+        with:
+          workflow-file: workflow/common/quality-check.yaml
