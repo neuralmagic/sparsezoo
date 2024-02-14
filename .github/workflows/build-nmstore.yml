@@ -7,10 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.build_pypi.outputs.status }}
+      status: ${{ steps.build.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build PyPi wheel
-        id: build_pypi
+      - name: build
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
