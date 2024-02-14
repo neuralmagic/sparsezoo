@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    output:
+    outputs:
       filename: ${{ steps.build_wheel.outputs.filename }}
     steps:
       - name: Checkout code
