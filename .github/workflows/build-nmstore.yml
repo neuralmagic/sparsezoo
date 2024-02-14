@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build.outputs.status }}
+      commitid: ${{ steps.build.outputs.commitid }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
