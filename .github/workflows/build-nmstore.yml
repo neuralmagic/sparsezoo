@@ -14,5 +14,5 @@ jobs:
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
       - name: Check commit id and wheel
         run:  |
-              echo ${{steps.build_wheel.outputs.filename}}
-              
+              echo "${{ steps.build_wheel.outputs.filename }}"
+              echo "hello world"
