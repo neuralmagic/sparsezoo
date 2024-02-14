@@ -21,6 +21,8 @@ jobs:
       - name: Echo filename
         run:  |
               echo "${{ needs.build.outputs.filename }}"
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: s3
         uses: aws-actions/configure-aws-credentials@v2
         with:
