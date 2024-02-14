@@ -6,6 +6,8 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    outputs:
+      filename: ${{ steps.build_wheel.outputs.filename }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -15,4 +17,4 @@ jobs:
       - name: Push to s3
         uses: neuralmagic/nmstore/actions/s3@pypi-test
         with:
-          filename: dist/*.whl
+          filename: ${{ steps.build_wheel.outputs.filename }}
