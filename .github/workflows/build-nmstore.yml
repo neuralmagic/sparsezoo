@@ -14,5 +14,6 @@ jobs:
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
       - name: Check commit id and wheel
         run:  |
+              echo ${{steps.build_wheel.output.filename}}
               ls dist/
-              echo ${{steps.build_wheel.output.commitid}}
+              
