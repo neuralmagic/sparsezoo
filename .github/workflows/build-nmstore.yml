@@ -15,4 +15,4 @@ jobs:
       - name: Check commit id and wheel
         run:  |
               ls dist/
-              echo ${{build_wheel.output.commitid}}
+              echo ${{steps.build_wheel.output.commitid}}
