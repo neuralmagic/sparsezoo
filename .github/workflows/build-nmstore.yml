@@ -10,4 +10,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build PyPi wheel
-        uses: neuralmagic/nmstore/actions/pypi/build@pypi-test
+        uses: neuralmagic/nmstore/actions/pypi/action@pypi-test
