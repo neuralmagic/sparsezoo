@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       filename: ${{ steps.build_wheel.outputs.filename }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
