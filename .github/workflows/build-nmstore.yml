@@ -10,6 +10,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build PyPi wheel
+        id: build_pypi
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
       - name: Check status 
-        run: echo ${{ build.outputs.status }}
+        run: echo ${{ step.sbuild_pypi.outputs.status }}
