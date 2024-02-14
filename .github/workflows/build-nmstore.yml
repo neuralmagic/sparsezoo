@@ -10,4 +10,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build PyPi Wheel
+        id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
+      - name: Check commit id and wheel
+        runs: |
+              ls dist/
+              echo ${{build_wheel.output.commitid}}
