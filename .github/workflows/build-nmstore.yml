@@ -6,13 +6,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    output:
+      filename: ${{ steps.build_wheel.outputs.filename }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
+  push_build:
+    runs-on: ubuntu-latest
+    steps:
       - name: Check commit id and wheel
         run:  |
-              echo "${{ steps.build_wheel.outputs.filename }}"
+              echo "${{ needs.build.outputs.filename }}"
               echo "hello world"
