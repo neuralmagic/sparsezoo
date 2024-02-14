@@ -4,26 +4,15 @@ on:
     branches:
       - '*'
 jobs:
-  build:
+  build_and_push:
     runs-on: ubuntu-latest
-    outputs:
-      filename: ${{ steps.build_wheel.outputs.filename }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
-  push_build:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo filename
-        run:  |
-              echo "${{ needs.build.outputs.filename }}"
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: s3
+      - name: Login to s3
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.AWS_WEBIDENTITY_FOR_GITHUB_ACTIONS }}
