@@ -15,6 +15,7 @@ jobs:
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
   push_build:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check commit id and wheel
