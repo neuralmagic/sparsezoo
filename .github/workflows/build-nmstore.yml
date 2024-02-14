@@ -11,10 +11,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Login to s3
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_WEBIDENTITY_FOR_GITHUB_ACTIONS }}
+          aws-region: us-east-1
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
       - name: Push to s3
         uses: neuralmagic/nmstore/actions/s3@pypi-test
         with:
-          filename: ${{ steps.build_wheel.outputs.filename }}
+          filename: dist/*.whl
