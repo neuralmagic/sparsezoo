@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build_pypi.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
