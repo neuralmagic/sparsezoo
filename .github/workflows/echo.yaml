@@ -14,6 +14,5 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Use Echo Action from repo1
-        uses: neuralmagic/nmstore/actions/common/test@pilot
+        uses: neuralmagic/nmstore/actions/demo/test@pilot
