@@ -13,4 +13,4 @@ jobs:
         id: build_pypi
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
       - name: Check status 
-        run: echo ${{ step.sbuild_pypi.outputs.status }}
+        run: echo ${{ steps.build_pypi.outputs.status }}
