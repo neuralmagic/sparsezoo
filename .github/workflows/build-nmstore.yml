@@ -22,7 +22,7 @@ jobs:
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
-      - name: Push to s3
+      - name: Push to s3 bucket
         uses: neuralmagic/nmstore/actions/s3@pypi-test
         with:
           filename: dist/*.whl
