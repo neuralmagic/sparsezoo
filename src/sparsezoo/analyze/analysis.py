@@ -1377,7 +1377,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
         if path:
             model = load_model(path)
 
-        model_graph = ONNXGraph(path)
+        model_graph = ONNXGraph(model)
 
         nodes = []
         for node in model_graph.nodes:
