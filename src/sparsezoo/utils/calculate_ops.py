@@ -114,7 +114,7 @@ def get_ops_dict(
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
         if input_shapes is None:
-            _LOGGER.warn(
+            _LOGGER.debug(
                 "Invalid shape, skipping "
                 f"{'four block ' if is_four_block_sparse else ''}ops calculation"
                 f" for {node.name}"
@@ -146,7 +146,7 @@ def get_ops_dict(
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
         if input_shapes is None:
-            _LOGGER.warn(
+            _LOGGER.debug(
                 "Invalid shape, skipping "
                 f"{'four block ' if is_four_block_sparse else ''}ops calculation"
                 f" for {node.name}"
