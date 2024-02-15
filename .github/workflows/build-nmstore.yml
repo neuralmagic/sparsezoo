@@ -1,6 +1,6 @@
 name: Build PyPi Wheel
 on:
-  pull_requests:
+  pull_request:
     branches:
       - main
   push:
