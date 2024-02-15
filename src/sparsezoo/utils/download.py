@@ -369,8 +369,7 @@ class Downloader:
         sorted_chunk_files = list(sorted(chunk_files))
 
         create_parent_dirs(self.download_path)
-
-        with open(self.download_path, "ab") as combined_file:
+        with open(self.download_path, "wb") as combined_file:
             for file_path in sorted_chunk_files:
                 chunk_path = os.path.join(chunk_directory, file_path)
                 with open(chunk_path, "rb") as infile:
