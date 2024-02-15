@@ -22,6 +22,7 @@ from datetime import date
 
 version_base = "1.7.0"
 is_release = False  # change to True to set the generated version as a release version
+is_dev = False
 
 
 def _generate_version():

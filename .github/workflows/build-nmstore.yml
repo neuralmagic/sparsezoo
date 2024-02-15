@@ -1,8 +1,20 @@
 name: Build PyPi Wheel
 on:
+  pull_requests:
+    - main
   push:
     branches:
-      - '*'
+      - main
+      - 'release/[0-9]+.[0-9]+' 
+  schedule:
+    - cron: '0 0 * * *'
+
+env:
+  INTERNAL: ${{ github.event_name != 'schedule' }}
+  RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release/[0-9]+.[0-9]+' }}
+  DEV: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+  NIGHTLY: ${{ github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main) }}
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
@@ -22,7 +34,13 @@ jobs:
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
+        with:
+          nightly: $NIGHTLY
+          dev: $DEV
+          releae: $RELEASE
+          runs-on: ubuntu-latest
       - name: Push to s3 bucket
         uses: neuralmagic/nmstore/actions/s3@pypi-test
         with:
           filename: dist/*.whl
+          internal: $INTERNAL
