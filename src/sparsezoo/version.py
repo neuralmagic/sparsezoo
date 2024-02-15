@@ -30,7 +30,7 @@ def _generate_version():
     if is_release:
         return version_base
     elif is_dev:
-        return else f"{version_base}[PR#{dev_number}].{date.today().strftime('%Y%m%d')}"
+        return f"{version_base}[PR#{dev_number}].{date.today().strftime('%Y%m%d')}"
     else:
         return f"{version_base}.{date.today().strftime('%Y%m%d')}"
 
