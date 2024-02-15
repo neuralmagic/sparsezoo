@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - 'release/[0-9]+.[0-9]+' 
+      - '*'
   schedule:
     - cron: '0 0 * * *'
 
@@ -31,6 +32,11 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_WEBIDENTITY_FOR_GITHUB_ACTIONS }}
           aws-region: us-east-1
+      - name: Env Variables
+        run: |
+             echo $INTERNAL
+             echo $DEV
+             echo $RELEASE
       - name: Build PyPi Wheel
         id: build_wheel
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
