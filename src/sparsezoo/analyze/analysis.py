@@ -22,7 +22,7 @@ import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
 import yaml
@@ -913,16 +913,20 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             analyze
         :return: instance of cls
         """
+        path = None
         if isinstance(onnx_file_path, ModelProto):
             model_onnx = onnx_file_path
             model_name = ""
         else:
-            model_onnx = load_model(onnx_file_path)
+            # initially do not load the external data, if present
+            # as not required for node analysis
+            model_onnx = load_model(onnx_file_path, load_external_data=False)
             model_name = str(onnx_file_path)
+            path = onnx_file_path
 
-        model_graph = ONNXGraph(model_onnx)
-
-        node_analyses = cls.analyze_nodes(model_graph)
+        # returns the node analysis and the model graph after loading the model with
+        # external data
+        node_analyses, model_graph = cls.analyze_nodes(model_onnx, path=path)
 
         layer_counts, op_counts = get_layer_and_op_counts(model_graph)
         layer_counts.update(op_counts)
@@ -1361,12 +1365,19 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             print(f"{footer_key}: {footer_value}")
 
     @staticmethod
-    def analyze_nodes(model_graph: ONNXGraph) -> List[NodeAnalysis]:
+    def analyze_nodes(
+        model: ModelProto, path: Optional[str] = None
+    ) -> Tuple[List[NodeAnalysis], ONNXGraph]:
         """
         :param: model that contains the nodes to be analyzed
-        :return: list of node analyses from model graph
+        :return: list of node analyses from model graph and ONNXGraph of loaded model
         """
-        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model, path)
+
+        if path:
+            model = load_model(path)
+
+        model_graph = ONNXGraph(model)
 
         nodes = []
         for node in model_graph.nodes:
@@ -1378,7 +1389,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             )
             nodes.append(node_analysis)
 
-        return nodes
+        return nodes, model_graph
 
 
 def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:
