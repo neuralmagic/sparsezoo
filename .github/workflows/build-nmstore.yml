@@ -16,7 +16,7 @@ on:
 env:
   INTERNAL: ${{ github.event_name != 'schedule' }}
   RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release/[0-9]+.[0-9]+' }}
-  DEV: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+  DEV: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' ||  github.event.action == 'edited')}}
 
 jobs:
   build_and_push:
