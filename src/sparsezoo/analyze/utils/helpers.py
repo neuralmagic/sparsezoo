@@ -12,6 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# flake8: noqa
 
-from .helpers import *
+import numpy
+import yaml
+
+
+__all__ = [
+    "numpy_array_representer",
+]
+
+
+def numpy_array_representer(dumper: yaml.Dumper, data: numpy.ndarray):
+    """
+    A representer for numpy arrays to be used with pyyaml
+    """
+    return dumper.represent_sequence("tag:yaml.org,2002:seq", data.tolist())
