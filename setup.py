@@ -45,6 +45,8 @@ elif is_dev:
 else:
     _PACKAGE_NAME = "sparsezoo-nightly"
 
+print("PACKAGE NAME", _PACKAGE_NAME)
+
 _deps = [
     "numpy>=1.0.0",
     "onnx>=1.5.0,<1.15.0",
