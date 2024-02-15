@@ -40,8 +40,8 @@ print(f"loaded version {version} from src/sparsezoo/version.py")
 
 if is_release:
     _PACKAGE_NAME = "sparsezoo"
-else is_dev:
-     _PACKAGE_NAME = "sparsezoo-dev"
+elif is_dev:
+    _PACKAGE_NAME = "sparsezoo-dev"
 else:
     _PACKAGE_NAME = "sparsezoo-nightly"
 

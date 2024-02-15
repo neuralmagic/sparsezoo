@@ -11,6 +11,8 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+# if not dev or release, will create a nightly build
+# everything is pushed to internal unless created through a nightly scheduled cron job
 env:
   INTERNAL: ${{ github.event_name != 'schedule' }}
   RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release/[0-9]+.[0-9]+' }}
@@ -43,7 +45,6 @@ jobs:
         with:
           dev: $DEV
           release: $RELEASE
-          runs-on: ubuntu-latest
       - name: Push to s3 bucket
         uses: neuralmagic/nmstore/actions/s3@pypi-test
         with:
