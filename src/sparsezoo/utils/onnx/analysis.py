@@ -503,22 +503,32 @@ def get_numpy_bits(arr: numpy.ndarray) -> int:
 def get_numpy_quantization_level(arr: numpy.ndarray) -> int:
     """return the quantization precision of the array"""
     dtype_int_match = re.search(r"\d+", str(arr.dtype))
-    if dtype_int_match.group() and int(dtype_int_match.group()) < 16:
+    if (
+        dtype_int_match.group()
+        and int(dtype_int_match.group()) < 16
+        and numpy.unique(arr).size > 1
+    ):
         # log2 of the difference between the max and the min, convert float to int
         return int(numpy.ceil(numpy.log2(numpy.max(arr) - numpy.min(arr))))
 
     return int(dtype_int_match.group())
 
 
-def get_numpy_distribution_statistics(arr: numpy.ndarray) -> Tuple[int, int]:
+def get_numpy_distribution_statistics(
+    arr: numpy.ndarray, epsilon: float = 1e-10
+) -> Tuple[int, int]:
     """Remove dimensions and compute the statistics"""
     flatten_arr = arr.flatten()
     mean_val = numpy.mean(flatten_arr)
     std_dev = numpy.std(flatten_arr)
     n = len(flatten_arr)
 
-    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / (std_dev**3)
-    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / (std_dev**4) - 3
+    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / max(
+        std_dev**3, epsilon
+    )
+    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / max(
+        std_dev**4, epsilon
+    ) - 3
 
     return skewness, kurtosis
 
