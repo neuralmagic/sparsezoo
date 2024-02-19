@@ -25,7 +25,7 @@ except ImportError:
     plt = None
     matplotlib_available = False
 
-from sparsezoo.analyze.analysis import ModelAnalysis, NodeAnalysis
+from sparsezoo.analyze_v1.analysis import ModelAnalysis, NodeAnalysis
 
 
 __all__ = [
