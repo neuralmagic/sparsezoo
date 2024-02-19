@@ -15,9 +15,9 @@ from numbers import Number
 
 import pytest
 
-from sparsezoo.analyze import ModelAnalysis
-from sparsezoo.analyze.analysis import ModelAnalysisSummary
-from sparsezoo.analyze.utils.models import ModelEntry, Section, SizedModelEntry
+from sparsezoo.analyze_v1 import ModelAnalysis
+from sparsezoo.analyze_v1.analysis import ModelAnalysisSummary
+from sparsezoo.analyze_v1.utils.models import ModelEntry, Section, SizedModelEntry
 
 
 @pytest.fixture

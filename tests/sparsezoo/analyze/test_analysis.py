@@ -16,7 +16,7 @@
 
 import pytest
 
-from sparsezoo.analyze import ModelAnalysis
+from sparsezoo.analyze_v1 import ModelAnalysis
 from tests.sparsezoo.analyze.helpers import (
     get_expected_analysis,
     get_generated_analysis,
