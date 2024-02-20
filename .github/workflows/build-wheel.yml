@@ -42,7 +42,7 @@ jobs:
           release: $RELEASE
           name: $NAME
       - name: Push to s3 bucket
-        uses: neuralmagic/nmstore/actions/s3@pypi-test
+        uses: neuralmagic/nmstore/actions/s3_push@pypi-test
         with:
           filename: dist/*.whl
           internal: $INTERNAL
