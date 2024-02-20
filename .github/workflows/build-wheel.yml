@@ -45,10 +45,6 @@ jobs:
         with:
           filename: dist/*.whl
           internal: $INTERNAL
-      - run: echo wheel "$WHEEL"
-        shell: bash
-        env:
-          WHEEL: ${{ steps.push-wheel.outputs.wheel }}
 
   pull_wheel:
     needs: build_and_push
@@ -64,6 +60,7 @@ jobs:
           aws-region: us-east-1
       - name: Set vars
         run: |
+             echo $WHEEL
              mkdir dist_s3
       - name: Pull from s3
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
