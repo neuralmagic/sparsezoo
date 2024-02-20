@@ -48,6 +48,7 @@ jobs:
           filename: dist/*.whl
           internal: $INTERNAL
   pull_wheel:
+    needs: build_and_push
     runs-on: ubuntu-latest  
     permissions:
       id-token: write
