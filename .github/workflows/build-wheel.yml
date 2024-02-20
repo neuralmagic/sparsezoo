@@ -21,6 +21,8 @@ env:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    outputs:
+      wheel: ${{ steps.push-wheel.outputs.wheel }}
     permissions:
       id-token: write
       contents: write
@@ -40,7 +42,7 @@ jobs:
           release: $RELEASE
           name: $NAME
       - name: Push to s3 bucket
-        id: push-wheeel
+        id: push-wheel
         uses: neuralmagic/nmstore/actions/s3_push@pypi-test
         with:
           filename: dist/*.whl
@@ -60,12 +62,12 @@ jobs:
           aws-region: us-east-1
       - name: Set vars
         run: |
-             echo $WHEEL
+             echo ${{ needs.build_and_push.outputs.wheel }}
              mkdir dist_s3
       - name: Pull from s3
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
         with:
-          filename: ${{ needs.build_and_push.outputs.built_wheel }}
+          filename: ${{ needs.build_and_push.outputs.wheel }}
           internal: $INTERNAL
           dst: dist_s3
     
