@@ -36,8 +36,6 @@ jobs:
           aws-region: us-east-1 
       - name: Build PyPi Wheel
         id: build_wheel
-        outputs:
-          filename: ${{ steps.build_wheel.outputs.filename }}
         uses: neuralmagic/nmstore/actions/pypi@pypi-test
         with:
           dev: $DEV
