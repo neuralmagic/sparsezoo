@@ -67,7 +67,7 @@ jobs:
       - name: Pull from s3
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
         with:
-          filename: ${{ jobs.build_and_push.outputs.built_wheel }}
+          filename: ${{ needs.build_and_push.outputs.built_wheel }}
           internal: $INTERNAL
           dst: dist_s3
     

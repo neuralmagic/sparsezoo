@@ -1,8 +1,5 @@
 name: Basic Test Checks
-on: 
-  pull_request:
-    branches:
-      - '*'
+on:
   push:
     branches:
       - '*'
