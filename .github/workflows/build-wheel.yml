@@ -60,7 +60,7 @@ jobs:
           aws-region: us-east-1
       - name: Set vars
         run: |
-             echo ${{ jobs.build_and_push.outputs.built_wheel }}
+             echo ${{ needs.build_and_push.outputs.built_wheel }}
              mkdir dist_s3
       - name: Pull from s3
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
