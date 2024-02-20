@@ -21,8 +21,6 @@ env:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-    outputs:
-      built_wheel: ${{ steps.push-wheel.outputs.wheel }}
     permissions:
       id-token: write
       contents: read
@@ -48,8 +46,8 @@ jobs:
           filename: dist/*.whl
           internal: $INTERNAL
       - name: Temp Step
-        run: | 
-             echo ${{ steps.push-wheel.outputs.wheel }}
+        env:
+          WHEEL: ${{ steps.push-wheel.outputs.wheel }}
 
   pull_wheel:
     needs: build_and_push
@@ -65,7 +63,6 @@ jobs:
           aws-region: us-east-1
       - name: Set vars
         run: |
-             echo ${{ needs.build_and_push.outputs.built_wheel }}
              mkdir dist_s3
       - name: Pull from s3
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
