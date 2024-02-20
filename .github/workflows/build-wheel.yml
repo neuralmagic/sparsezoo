@@ -25,7 +25,7 @@ jobs:
       wheel: ${{ steps.push-wheel.outputs.wheel }}
     permissions:
       id-token: write
-      contents: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
