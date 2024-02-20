@@ -48,7 +48,7 @@ jobs:
           filename: dist/*.whl
           internal: $INTERNAL
 
-  pull_wheel:
+  pull_and_test:
     needs: build_and_push
     runs-on: ubuntu-latest  
     permissions:
@@ -70,4 +70,13 @@ jobs:
           filename: ${{ needs.build_and_push.outputs.wheel }}
           internal: $INTERNAL
           dst: dist_s3
+      - name: Test Wheel 
+        if: not $DEV
+        run:
+            pip install dist_s3/*.whl
+            make test TARGETS=full
+        if: $DEV
+        run:
+            pip install dist_s3/*.whl
+            make test
     
