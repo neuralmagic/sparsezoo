@@ -45,7 +45,8 @@ jobs:
         with:
           filename: dist/*.whl
           internal: $INTERNAL
-      - name: Temp Step
+      - run: echo wheel "$WHEEL"
+        shell: bash
         env:
           WHEEL: ${{ steps.push-wheel.outputs.wheel }}
 
