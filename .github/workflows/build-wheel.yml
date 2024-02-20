@@ -78,6 +78,7 @@ jobs:
       - name: Test Wheel 
         if: ${{ env.DEV == 'true' }}
         run:
+            pip install pytest
             make test
       - name: Test Wheel, Extensive
         if: ${{ env.DEV != 'true' }}
