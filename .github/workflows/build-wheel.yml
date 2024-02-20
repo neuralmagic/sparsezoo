@@ -71,10 +71,6 @@ jobs:
           internal: $INTERNAL
           dst: dist_s3
       - name: Test Wheel 
-        if: not $DEV
-        run:
-            pip install dist_s3/*.whl
-            make test TARGETS=full
         if: $DEV
         run:
             pip install dist_s3/*.whl
