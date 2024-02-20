@@ -49,7 +49,7 @@ jobs:
           internal: $INTERNAL
       - name: Temp Step
         run: | 
-             echo ${{ steps.push-wheel.outputs.wheel }} 
+             echo ${{steps.push-wheel.outputs.wheel}} 
 
   pull_wheel:
     needs: build_and_push
