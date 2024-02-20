@@ -1,0 +1,37 @@
+name: Basic Test Checks
+on: 
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      python-diff: ${{ steps.python-check.outputs.output }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: "Checking if sparsezoo python code was changed"
+        id: python-check
+        run: >
+          ((git diff --name-only origin/main HEAD | grep -E "[src|tests]/sparsezoo|setup.py")
+          || (echo $GITHUB_REF | grep -E "refs/heads/[release/|main]"))
+          && echo "::set-output name=output::1" || echo "::set-output name=output::0"
+  python-tests:
+    runs-on: ubuntu-latest
+    env:
+      SPARSEZOO_TEST_MODE: "true"
+      NM_DISABLE_ANALYTICS: "true"
+    needs: test-setup
+    if: ${{needs.test-setup.outputs.python-diff == 1}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: "⚙️ Install dependencies"
+        run: pip3 install .[dev]
+      - name: "🔬 Running tests"
+        run: make test
