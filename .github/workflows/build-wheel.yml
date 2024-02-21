@@ -73,12 +73,12 @@ jobs:
       - name: Install Wheel
         run:
           pip install dist_s3/*.whl
+          pip install pytest
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Test Wheel 
         if: ${{ env.DEV == 'true' }}
         run:
-            pip install pytest
             make test
       - name: Test Wheel, Extensive
         if: ${{ env.DEV != 'true' }}
