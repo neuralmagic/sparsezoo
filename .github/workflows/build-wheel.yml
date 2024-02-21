@@ -15,8 +15,9 @@ permissions:
   contents: read
 
 concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
-
+  
 # if not dev or release, will create a nightly build
 # everything is pushed to internal unless created through a nightly scheduled cron job
 env:
