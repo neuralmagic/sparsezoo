@@ -10,6 +10,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  id-token: write
+  contents: read
+
 # if not dev or release, will create a nightly build
 # everything is pushed to internal unless created through a nightly scheduled cron job
 env:
@@ -23,9 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       wheel: ${{ steps.push-wheel.outputs.wheel }}
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -51,9 +52,6 @@ jobs:
   pull_and_test:
     needs: build_and_push
     runs-on: ubuntu-latest  
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Login to s3
         uses: aws-actions/configure-aws-credentials@v2
@@ -67,7 +65,6 @@ jobs:
         uses: neuralmagic/nmstore/actions/s3_pull@pypi-test
         with:
           filename: ${{ needs.build_and_push.outputs.wheel }}
-          internal: $INTERNAL
           dst: dist_s3
       - name: Install Wheel
         run: |
