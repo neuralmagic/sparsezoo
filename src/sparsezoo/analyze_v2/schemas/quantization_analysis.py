@@ -20,6 +20,14 @@ from sparsezoo.analyze_v2.schemas.utils import type_validator
 
 
 class QuantizationSummaryAnalysisSchema(BaseModel):
+    counts: float = Field(..., description="Total number of weights")
+    counts_quant: int = Field(
+        ...,
+        description=(
+            "Total number of quantized weights."
+            "Here we assume if the layer is quantized, the entire array is quantized"
+        ),
+    )
     bits: float = Field(..., description="Total bits required to store the weights")
     bits_quant: int = Field(
         ...,
@@ -39,9 +47,9 @@ class QuantizationSummaryAnalysisSchema(BaseModel):
     @validator("percent", pre=True, always=True)
     def calculate_percent_if_none(cls, value, values):
         if value is None:
-            bits = values.get("bits", 0)
-            bits_quant = values.get("bits_quant", 0)
-            return bits_quant / bits if bits > 0 else 0.0
+            counts = values.get("counts", 0)
+            counts_quant = values.get("counts_quant", 0)
+            return counts_quant / counts if counts > 0 else 0.0
         return value
 
     def __add__(self, model: BaseModel):
@@ -51,8 +59,10 @@ class QuantizationSummaryAnalysisSchema(BaseModel):
 
         if validator_model is not None:
             return validator_model(
+                counts=self.counts + model.counts,
                 bits=self.bits + model.bits,
-                bits_quant=self.bits_quant + model.bits_quant,
+                counts_quant=self.counts_quant + model.counts_quant,
+                bits_quant=self.bits_quant + model.bits_quant
             )
 
 
@@ -67,6 +77,8 @@ class QuantizationAnalysisSchema(QuantizationSummaryAnalysisSchema):
         if validator_model is not None and self.grouping == model.grouping:
             return validator_model(
                 grouping=self.grouping,
+                counts=self.counts + model.counts,
                 bits=self.bits + model.bits,
-                bits_quant=self.bits_quant + model.bits_quant,
+                counts_quant=self.counts_quant + model.counts_quant,
+                bits_quant=self.bits_quant + model.bits_quant
             )

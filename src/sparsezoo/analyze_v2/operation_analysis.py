@@ -166,22 +166,21 @@ def get_operation_bits(
             precision = get_numpy_quantization_level(node_weight)
             is_quantized_op = "32" not in str(precision)
 
-            bits = (
-                ops["single"]["counts"] + ops["single"]["counts_sparse"]
-            ) * precision
-
-            bits_block4 = (
-                ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
-            ) * precision
-
-            bits_quant = is_quantized_op * bits
+            single_counts = ops["single"]["counts"]+ ops["single"]["counts_sparse"]
+            single_bits = single_counts * precision
+            block4_counts = ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
+            block4_bits = block4_counts * precision
             return {
                 "tensor": {
-                    "bits": bits,
-                    "bits_quant": bits_quant,
+                    "counts": single_counts,
+                    "counts_quant": is_quantized_op * single_counts,
+                    "bits": single_bits,
+                    "bits_quant": is_quantized_op * single_bits
                 },
                 "block4": {
-                    "bits": bits_block4,
-                    "bits_quant": bits_quant,
+                    "counts": block4_counts,
+                    "counts_quant": is_quantized_op * block4_counts,
+                    "bits": block4_bits,
+                    "bits_quant": is_quantized_op * block4_bits
                 },
             }
