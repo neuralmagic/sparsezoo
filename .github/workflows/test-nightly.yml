@@ -1,0 +1,17 @@
+name: Run nightly tests
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  extensive-python-tests:
+    runs-on: ubuntu-latest
+    env:
+      SPARSEZOO_TEST_MODE: "true"
+      NM_DISABLE_ANALYTICS: "true"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "⚙️ Install dependencies"
+        run: pip3 install .[dev]
+      - name: "🔬 Running tests"
+        run: make test TARGETS=full
