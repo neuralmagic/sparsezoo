@@ -75,11 +75,13 @@ jobs:
              pip install dist_s3/*.whl
              pip install pytest
              pip install matplotlib
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Test Wheel 
         if: ${{ env.DEV == 'true' }}
         run: | 
              pip list
-             pytest
+             make test
       - name: Test Wheel, Extensive
         if: ${{ env.DEV != 'true' }}
         run:
