@@ -166,13 +166,9 @@ def get_operation_bits(
             precision = get_numpy_quantization_level(node_weight)
             is_quantized_op = "32" not in str(precision)
 
-            bits = (
-                ops["single"]["counts"] + ops["single"]["counts_sparse"]
-            ) * precision
+            bits = (ops["single"]["counts"]) * precision
 
-            bits_block4 = (
-                ops["block4"]["counts"] + ops["block4"]["counts_sparse"]
-            ) * precision
+            bits_block4 = (ops["block4"]["counts"]) * precision
 
             bits_quant = is_quantized_op * bits
             return {
