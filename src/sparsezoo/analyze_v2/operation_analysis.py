@@ -167,9 +167,11 @@ def get_operation_bits(
             is_quantized_op = "32" not in str(precision)
 
             single_counts = ops["single"]["counts"]
-            single_bits = single_counts * precision
+            single_counts_sparse = ops["single"]["counts_sparse"]
+            single_bits = (single_counts - single_counts_sparse) * precision
             block4_counts = ops["block4"]["counts"]
-            block4_bits = block4_counts * precision
+            block4_counts_sparse = ops["block4"]["counts_sparse"]
+            block4_bits = (block4_counts - block4_counts_sparse) * precision
             return {
                 "tensor": {
                     "counts": single_counts,

@@ -165,7 +165,8 @@ def get_memory_access_bits(
         node_weight = get_node_weight(model_graph, node)
         precision = get_numpy_quantization_level(node_weight)
         counts = memory_access_counts["single"]["counts"]
-        bits = counts * precision
+        counts_sparse = memory_access_counts["single"]["counts_sparse"]
+        bits = (counts - counts_sparse) * precision
         is_quantized = is_quantized_layer(model_graph, node)
 
         return {
