@@ -62,7 +62,7 @@ class QuantizationSummaryAnalysisSchema(BaseModel):
                 counts=self.counts + model.counts,
                 bits=self.bits + model.bits,
                 counts_quant=self.counts_quant + model.counts_quant,
-                bits_quant=self.bits_quant + model.bits_quant
+                bits_quant=self.bits_quant + model.bits_quant,
             )
 
 
@@ -80,5 +80,5 @@ class QuantizationAnalysisSchema(QuantizationSummaryAnalysisSchema):
                 counts=self.counts + model.counts,
                 bits=self.bits + model.bits,
                 counts_quant=self.counts_quant + model.counts_quant,
-                bits_quant=self.bits_quant + model.bits_quant
+                bits_quant=self.bits_quant + model.bits_quant,
             )

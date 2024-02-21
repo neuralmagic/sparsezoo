@@ -173,6 +173,6 @@ def get_memory_access_bits(
                 "bits": bits,
                 "bits_quant": bits * is_quantized,
                 "counts": counts,
-                "counts_quant": counts * is_quantized
+                "counts_quant": counts * is_quantized,
             }
         }

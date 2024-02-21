@@ -162,7 +162,7 @@ def get_parameter_bits(
                 "counts": num_weights,
                 "counts_quant": num_weights * is_quantized,
                 "bits": num_weights * precision,
-                "bits_quant": num_weights * precision * is_quantized
+                "bits_quant": num_weights * precision * is_quantized,
             },
         }
 
