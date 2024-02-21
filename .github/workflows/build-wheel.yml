@@ -14,6 +14,9 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  cancel-in-progress: true
+
 # if not dev or release, will create a nightly build
 # everything is pushed to internal unless created through a nightly scheduled cron job
 env:
