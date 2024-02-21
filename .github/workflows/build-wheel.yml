@@ -79,7 +79,7 @@ jobs:
         if: ${{ env.DEV == 'true' }}
         run: | 
              pip list
-             make test
+             pytest
       - name: Test Wheel, Extensive
         if: ${{ env.DEV != 'true' }}
         run:
