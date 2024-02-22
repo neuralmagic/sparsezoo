@@ -22,7 +22,7 @@ import onnx
 import pytest
 
 from sparsezoo import Model
-from sparsezoo.analyze import ModelAnalysis
+from sparsezoo.analyze_v1 import ModelAnalysis
 from sparsezoo.utils.graph_editor import ONNXGraph
 
 

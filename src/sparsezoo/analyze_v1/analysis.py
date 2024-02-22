@@ -30,8 +30,8 @@ from onnx import ModelProto, NodeProto
 from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 
 from sparsezoo import Model
-from sparsezoo.analyze.utils.helpers import numpy_array_representer
-from sparsezoo.analyze.utils.models import (
+from sparsezoo.analyze_v1.utils.helpers import numpy_array_representer
+from sparsezoo.analyze_v1.utils.models import (
     DenseSparseOps,
     Entry,
     ModelEntry,
