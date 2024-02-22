@@ -48,7 +48,7 @@ __all__ = [
     "get_numpy_distribution_statistics",
     "get_numpy_quantization_level",
     "get_numpy_bits",
-    "get_node_weight_bits",
+    "get_node_weight_precision",
     "get_node_param_counts",
     "get_node_kernel_shape",
 ]
@@ -485,13 +485,13 @@ def get_node_param_counts(
     return params, bias, sparse_params
 
 
-def get_node_weight_bits(
+def get_node_weight_precision(
     model_graph: ONNXGraph,
     node: NodeProto,
 ) -> int:
-    """Get the bits needed to store the node weights"""
+    """Get the precision of the node in number of bits"""
     node_weight = get_node_weight(model_graph, node)
-    return get_numpy_bits(node_weight)
+    return get_numpy_quantization_level(node_weight)
 
 
 def get_numpy_bits(arr: numpy.ndarray) -> int:

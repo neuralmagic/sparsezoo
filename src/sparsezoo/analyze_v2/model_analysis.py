@@ -78,10 +78,10 @@ class ModelAnalysis:
         counts = category["counts"]
         return (counts_sparse / counts) * 100 if counts != 0 else 0
 
-    def calculate_quantized_percentage(self, tensor: Dict):
-        bits_quant = tensor["bits_quant"]
-        bits = tensor["bits"]
-        return (bits_quant / bits) * 100 if bits != 0 else 0
+    def calculate_quantized_percentage(self, tensor: Dict, counts_prefix: str):
+        counts_quant = tensor[f"{counts_prefix}_quant"]
+        counts = tensor[counts_prefix]
+        return (counts_quant / counts) * 100 if counts != 0 else 0
 
     def __repr__(self):
         data = self.to_dict()
@@ -93,7 +93,7 @@ class ModelAnalysis:
         )
         param_size = summaries["params"]["quantization"]["tensor"]["bits"]
         param_quantized = self.calculate_quantized_percentage(
-            summaries["params"]["quantization"]["tensor"]
+            summaries["params"]["quantization"]["tensor"], "counts"
         )
 
         ops_total = summaries["ops"]["sparsity"]["single"]["counts"]
@@ -102,7 +102,7 @@ class ModelAnalysis:
         )
         ops_size = summaries["ops"]["quantization"]["tensor"]["bits"]
         ops_quantized = self.calculate_quantized_percentage(
-            summaries["ops"]["quantization"]["tensor"]
+            summaries["ops"]["quantization"]["tensor"], "counts"
         )
 
         mem_access_total = summaries["mem_access"]["sparsity"]["single"]["counts"]
@@ -111,7 +111,7 @@ class ModelAnalysis:
         )
         mem_access_size = summaries["mem_access"]["quantization"]["tensor"]["bits"]
         mem_access_quantized = self.calculate_quantized_percentage(
-            summaries["mem_access"]["quantization"]["tensor"]
+            summaries["mem_access"]["quantization"]["tensor"], "counts"
         )
 
         return (
