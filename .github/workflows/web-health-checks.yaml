@@ -1,0 +1,48 @@
+name: Health Checks
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        pip install pytest requests
+
+    - name: Determine Tags
+      run: |
+        if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          echo "TAGS=main" >> $GITHUB_ENV
+        elif [[ "${GITHUB_REF##*/}" == release/* ]]; then
+          VERSION=$(grep 'version_base =' src/sparsezoo/version.py | sed -E "s/version_base = \"([0-9]+\.[0-9]+\.[0-9]+)\"/\1/")
+          echo "TAGS=release-$VERSION" >> $GITHUB_ENV
+        else
+          echo "TAGS=dev" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: Run Health Checks
+      run: |
+        testmo automation:run:submit \
+          --instance "$TESTMO_URL" \
+          --project-id 7 \
+          --name "SparseZoo Health Checks" \
+          --source "web" \
+          --results results/*.xml \
+          --tags TAGS \
+          -- pytest tests/automation/health/ --junitxml=results/test-results.xml
+      env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
