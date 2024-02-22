@@ -73,7 +73,7 @@ class MemoryAccessAnalysis:
         :returns: List of quantization analysis pydantic models for each grouping
          if the node has weights
         """
-        data = get_memeory_access_bits(self.model_graph, self.node, self.node_shape)
+        data = get_memory_access_bits(self.model_graph, self.node, self.node_shape)
         if data is not None:
             quantization_analysis_model = []
             for grouping, counts_dict in data.items():
@@ -152,7 +152,7 @@ def get_memory_access_counts(
         }
 
 
-def get_memeory_access_bits(
+def get_memory_access_bits(
     model_graph: ONNXGraph,
     node: NodeProto,
     node_shape: Dict,
@@ -164,12 +164,15 @@ def get_memeory_access_bits(
         )
         node_weight = get_node_weight(model_graph, node)
         precision = get_numpy_quantization_level(node_weight)
-        bits = memory_access_counts["single"]["counts"] * precision
-        bits_quant = bits * is_quantized_layer(model_graph, node)
+        counts = memory_access_counts["single"]["counts"]
+        bits = counts * precision
+        is_quantized = is_quantized_layer(model_graph, node)
 
         return {
             "tensor": {
                 "bits": bits,
-                "bits_quant": bits_quant,
+                "bits_quant": bits * is_quantized,
+                "counts": counts,
+                "counts_quant": counts * is_quantized,
             }
         }

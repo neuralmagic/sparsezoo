@@ -29,7 +29,7 @@ from sparsezoo.utils import (
     get_node_num_four_block_zeros_and_size,
     get_node_param_counts,
     get_node_weight,
-    get_node_weight_bits,
+    get_node_weight_precision,
     get_numpy_distribution_statistics,
     get_numpy_entropy,
     get_numpy_modes,
@@ -153,14 +153,16 @@ def get_parameter_bits(
     If the layer is quantized, assume all its elements in the ndarray
      are quantized
     """
-    node_weight = get_node_weight(model_graph, node)
-    if node_weight is not None and node_weight.size > 0:
-        bits = get_node_weight_bits(model_graph, node)
-
+    num_weights, _, _ = get_node_param_counts(node, model_graph)
+    if num_weights > 0:
+        precision = get_node_weight_precision(model_graph, node)
+        is_quantized = is_quantized_layer(model_graph, node)
         return {
             "tensor": {
-                "bits": bits,
-                "bits_quant": bits * is_quantized_layer(model_graph, node),
+                "counts": num_weights,
+                "counts_quant": num_weights * is_quantized,
+                "bits": num_weights * precision,
+                "bits_quant": num_weights * precision * is_quantized,
             },
         }
 
