@@ -153,16 +153,17 @@ def get_parameter_bits(
     If the layer is quantized, assume all its elements in the ndarray
      are quantized
     """
-    num_weights, _, _ = get_node_param_counts(node, model_graph)
+    num_weights, num_bias, num_sparse_weights = get_node_param_counts(node, model_graph)
     if num_weights > 0:
         precision = get_node_weight_precision(model_graph, node)
         is_quantized = is_quantized_layer(model_graph, node)
+        num_non_sparse_weights = num_weights - num_sparse_weights + num_bias
         return {
             "tensor": {
                 "counts": num_weights,
                 "counts_quant": num_weights * is_quantized,
-                "bits": num_weights * precision,
-                "bits_quant": num_weights * precision * is_quantized,
+                "bits": num_non_sparse_weights * precision,
+                "bits_quant": num_non_sparse_weights * precision * is_quantized,
             },
         }
 
