@@ -76,6 +76,7 @@ def save_onnx(
     model_path: str,
     max_external_file_size: int = 16e9,
     external_data_file: Optional[str] = None,
+    do_split_external_data: bool = True,
 ) -> bool:
     """
     Save model to the given path.
@@ -95,6 +96,8 @@ def save_onnx(
         specified in the variable EXTERNAL_ONNX_DATA_NAME
     :param max_external_file_size: The maximum file size in bytes of a single split
         external data out file. Defaults to 16000000000 (16e9 = 16GB)
+    :param do_split_external_data: True to split external data file into chunks of max
+    size max_external_file_size, false otherwise
     :return True if the model was saved with external data, False otherwise.
     """
     if external_data_file is not None:
@@ -112,7 +115,8 @@ def save_onnx(
             all_tensors_to_one_file=True,
             location=external_data_file,
         )
-        split_external_data(model_path, max_file_size=max_external_file_size)
+        if do_split_external_data:
+            split_external_data(model_path, max_file_size=max_external_file_size)
         return True
 
     if model.ByteSize() > DUMP_EXTERNAL_DATA_THRESHOLD:
@@ -132,7 +136,8 @@ def save_onnx(
             all_tensors_to_one_file=True,
             location=external_data_file,
         )
-        split_external_data(model_path, max_file_size=max_external_file_size)
+        if do_split_external_data:
+            split_external_data(model_path, max_file_size=max_external_file_size)
         return True
 
     onnx.save(model, model_path)
@@ -247,6 +252,9 @@ def split_external_data(
             f"{external_data_file_path} not found. {model_path} must have external "
             "data written to a single file in the same directory"
         )
+    if os.path.getsize(external_data_file_path) <= max_file_size:
+        # return immediately if file is small enough to not split
+        return
 
     # UPDATE: external data info of graph tensors so they point to the new split out
     # files with updated offsets
