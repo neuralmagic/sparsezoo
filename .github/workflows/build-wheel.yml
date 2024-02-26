@@ -3,10 +3,10 @@ on:
   pull_request:
     branches:
       - main
+      - 'release/*'
   push:
     branches:
       - main
-      - 'release/*' 
   schedule:
     - cron: '0 0 * * *'
 
@@ -20,10 +20,11 @@ concurrency:
   
 # if not dev or release, will create a nightly build
 # everything is pushed to internal unless created through a nightly scheduled cron job
+# missing release tag workflow/needs to be added in
 env:
   INTERNAL: ${{ github.event_name != 'schedule' }}
-  RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release/[0-9]+.[0-9]+' }}
-  DEV: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' ||  github.event.action == 'synchronize')}}
+  RELEASE: ${{ github.ref == 'refs/heads/release/[0-9]+.[0-9]+ && (github.event.action == 'opened' ||  github.event.action == 'synchronize')}}
+  DEV: ${{ github.ref == 'main' && (github.event.action == 'opened' ||  github.event.action == 'synchronize')}}
   NAME: ${{ github.event.number }} 
 
 jobs:
