@@ -23,7 +23,7 @@ concurrency:
 # missing release tag workflow/needs to be added in
 env:
   INTERNAL: ${{ github.event_name != 'schedule' }}
-  RELEASE: ${{ github.ref == 'refs/heads/release/[0-9]+.[0-9]+ && (github.event.action == 'opened' || github.event.action == 'synchronize')}}
+  RELEASE: ${{ github.ref == 'refs/heads/release/[0-9]+.[0-9]+' && (github.event.action == 'opened' || github.event.action == 'synchronize')}}
   DEV: ${{ github.ref == 'main' && (github.event.action == 'opened' || github.event.action == 'synchronize')}}
   NAME: ${{ github.event.number }} 
 
