@@ -16,11 +16,13 @@
 import concurrent.futures
 import logging
 import math
+import multiprocessing
 import os
 import re
 import shutil
 import threading
 from dataclasses import dataclass, field
+from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, Dict, Optional
 
@@ -92,6 +94,26 @@ class Downloader:
         self.chunk_bytes = chunk_bytes
         self.job_queues = Queue()
         self._lock = threading.Lock()
+        self.chunk_download_path = self.get_chunk_download_path(download_path)
+
+    def get_chunk_download_path(self, path: str) -> str:
+        """Get the path where chunks will be downloaded"""
+
+        # make the folder name from the model name and file to be downloaded
+        stub = path.split(os.path.sep)[-3]
+        path = "_".join(path.split(os.path.sep)[-2:])
+        file_name_as_folder = path.replace(".", "_")
+
+        # save the chunks on a different folder than the root model folder
+        return os.path.join(
+            str(Path.home()),
+            ".cache",
+            "sparsezoo",
+            "neuralmagic",
+            "chunks",
+            stub,
+            file_name_as_folder,
+        )
 
     def is_range_header_supported(self) -> bool:
         """Check if chunck download is supported"""
@@ -148,9 +170,11 @@ class Downloader:
             The jobs need to be executed by a worker or scheduler that processes the
              queued JobQueues.
         """
-        download_jobs: Queue = JobQueue(description="Downloading Chunks")
+        file_name = self.download_path.split(os.path.sep)[-1]
+        download_jobs: Queue = JobQueue(
+            description=f"Downloading Chunks for {file_name}"
+        )
         num_download_jobs = math.ceil(self.file_size / self.chunk_bytes)
-
         for job_id in range(num_download_jobs):
             start_byte = 0 if job_id == 0 else job_id * (self.chunk_bytes) + 1
             end_byte = (
@@ -161,8 +185,10 @@ class Downloader:
             bytes_range = f"bytes={start_byte}-{end_byte}"
 
             func_kwargs = {
-                "download_path": self.get_chunk_file_path(
-                    f"{job_id:05d}_{bytes_range}"
+                "download_path": (
+                    os.path.join(
+                        self.chunk_download_path, f"{job_id:05d}_{bytes_range}"
+                    )
                 ),
                 "headers": {
                     "Range": bytes_range,
@@ -237,7 +263,7 @@ class Downloader:
         )
         self.job_queues.put(job_queue)
 
-    def run(self, num_threads: int = 10) -> None:
+    def run(self, num_threads: int = 1) -> None:
         """
         Executes queued download jobs in parallel using multiple threads.
 
@@ -250,6 +276,9 @@ class Downloader:
          file chunks in parallel. Defaults to 10.
 
         """
+        available_threads = multiprocessing.cpu_count() - threading.active_count()
+        num_threads = max(available_threads // 2, num_threads)
+
         is_prev_job_queue_success = True
         while not self.job_queues.empty() and is_prev_job_queue_success:
             job_queue = self.job_queues.get()
@@ -295,23 +324,25 @@ class Downloader:
         with self._lock:
             job: Job = job_queue.get()
         success = False
+        err = ""
         while not success and job.retries < job.max_retries:
             try:
                 job.func(**job.func_kwargs, **kwargs)
                 success = True
             except Exception as _err:
+                err = _err
                 _LOGGER.debug(
                     f"{job.retries/self.max_retries}: "
                     "Failed running {self.func} with kwargs {job.func_kwargs}"
                 )
-                _LOGGER.debug(_err)
+                _LOGGER.error(_err)
                 job.retries += 1
                 if job.retries < job.max_retries:
                     job_queue.put(job)
 
         if not success:
             _LOGGER.debug(f"Chunk download failed after {self.max_retries} retries.")
-            raise ValueError
+            raise ValueError(err)
 
     def download_file(
         self,
@@ -339,7 +370,10 @@ class Downloader:
 
         """
         write_chunk_size = min(CHUNK_BYTES, self.file_size)
+        _LOGGER.debug("creating ", download_path)
+
         create_parent_dirs(download_path)
+
         response = requests.get(
             self.url, headers=headers, stream=True, allow_redirects=True
         )
@@ -358,11 +392,10 @@ class Downloader:
         :param progress_bar: tqdm object showing the progress of combining chunks
 
         """
-        parent_directory = os.path.dirname(download_path)
-        chunk_directory = os.path.join(parent_directory, "chunks")
+        _LOGGER.debug("Combing and deleting ", self.chunk_download_path)
 
         pattern = re.compile(r"\d+_bytes=")
-        files = os.listdir(chunk_directory)
+        files = os.listdir(self.chunk_download_path)
 
         chunk_files = [chunk_file for chunk_file in files if pattern.match(chunk_file)]
 
@@ -371,13 +404,13 @@ class Downloader:
         create_parent_dirs(self.download_path)
         with open(self.download_path, "wb") as combined_file:
             for file_path in sorted_chunk_files:
-                chunk_path = os.path.join(chunk_directory, file_path)
+                chunk_path = os.path.join(self.chunk_download_path, file_path)
                 with open(chunk_path, "rb") as infile:
                     data = infile.read()
                     combined_file.write(data)
                     progress_bar.update(len(data))
 
-        shutil.rmtree(chunk_directory)
+        shutil.rmtree(self.chunk_download_path)
 
     def get_chunk_file_path(self, file_range: str) -> str:
         """
