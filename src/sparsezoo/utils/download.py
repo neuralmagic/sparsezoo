@@ -22,6 +22,7 @@ import re
 import shutil
 import threading
 from dataclasses import dataclass, field
+from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, Dict, Optional
 
@@ -105,9 +106,8 @@ class Downloader:
 
         # save the chunks on a different folder than the root model folder
         return os.path.join(
-            os.path.abspath(
-                os.path.expanduser("~/.cache/sparsezoo/neuralmagic/chunks")
-            ),
+            str(Path.home()),
+            "chunks",
             stub,
             file_name_as_folder,
         )
