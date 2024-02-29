@@ -107,6 +107,9 @@ class Downloader:
         # save the chunks on a different folder than the root model folder
         return os.path.join(
             str(Path.home()),
+            ".cache",
+            "sparsezoo",
+            "neuralmagic",
             "chunks",
             stub,
             file_name_as_folder,
