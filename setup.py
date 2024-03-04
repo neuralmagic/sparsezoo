@@ -61,7 +61,7 @@ _dev_deps = [
     "flake8>=3.8.3",
     "flaky>=3.7.0",
     "isort>=5.7.0",
-    "pytest>=6.0.0",
+    "pytest>=6.0.0,<8.1.0",
     "wheel>=0.36.2",
     "matplotlib>=3.0.0",
 ]
