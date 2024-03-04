@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+  release:
+    types: [created, published]
   schedule:
     - cron: '0 0 * * *'
 
@@ -20,11 +22,11 @@ concurrency:
   cancel-in-progress: true
   
 # if not dev or release, will create a nightly build
-# everything is pushed to internal unless created through a nightly scheduled cron job
+# everything is pushed to internal unless created through a nightly scheduled cron job which creates the build or 
 # missing release tag workflow/needs to be added in
 env:
-  INTERNAL: ${{ github.event_name != 'schedule' }}
-  RELEASE: ${{ github.base_ref == 'refs/heads/release/[0-9]+.[0-9]+' && github.event_name == 'pull_request'}}
+  INTERNAL: ${{ github.event_name != 'schedule' && github.event_name != 'release'}}
+  RELEASE: ${{ github.event_name =='release' || (github.base_ref == 'release/**' && github.event_name == 'pull_request')}}
   DEV: ${{ github.base_ref == 'main' && github.event_name == 'pull_request'}}
   NAME: ${{ github.event.number }} 
 
