@@ -78,3 +78,10 @@ clean:
 	rm -rf dist;
 	rm -rf src/sparsezoo.egg-info;
 	find $(PYCHECKDIRS) | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf;
+
+
+coverage-report:
+	pytest --cov=sparsezoo --cov-report json
+
+coverage-badge:
+	coverage-badge -f -o ./.meta/coverage_badge.svg
