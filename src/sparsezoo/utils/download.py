@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, Dict, Optional
+from uuid import uuid4
 
 import requests
 from tqdm import tqdm
@@ -103,8 +104,12 @@ class Downloader:
         stub = path.split(os.path.sep)[-3]
         path = "_".join(path.split(os.path.sep)[-2:])
         file_name_as_folder = path.replace(".", "_")
+        file_id = str(uuid4())[:4]
 
+        # Note: parallel download may cause multiple processes to download
+        # the same file
         # save the chunks on a different folder than the root model folder
+        # ~/.cache/sparsezoo/neuralmagic/chunks/stub/file_id/tokenizer_json/{chunk1, ...} # noqa
         return os.path.join(
             str(Path.home()),
             ".cache",
@@ -112,6 +117,7 @@ class Downloader:
             "neuralmagic",
             "chunks",
             stub,
+            file_id,
             file_name_as_folder,
         )
 
@@ -410,7 +416,7 @@ class Downloader:
                     combined_file.write(data)
                     progress_bar.update(len(data))
 
-        shutil.rmtree(self.chunk_download_path)
+        shutil.rmtree(os.path.dirname(self.chunk_download_path))
 
     def get_chunk_file_path(self, file_range: str) -> str:
         """
