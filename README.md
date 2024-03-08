@@ -411,10 +411,6 @@ For a more in-depth read, check out [SparseZoo documentation.](https://docs.neur
 - Documentation: [SparseML,](https://docs.neuralmagic.com/sparseml/) [SparseZoo,](https://docs.neuralmagic.com/sparsezoo/) [Sparsify,](https://docs.neuralmagic.com/sparsify/) [DeepSparse](https://docs.neuralmagic.com/deepsparse/)
 - Neural Magic: [Blog,](https://www.neuralmagic.com/blog/) [Resources](https://www.neuralmagic.com/resources/)
 
-### Tests
-
-
-
 ### Release History
 
 Official builds are hosted on PyPI
