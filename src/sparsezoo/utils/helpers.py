@@ -13,10 +13,12 @@
 # limitations under the License.
 
 import glob
+import importlib
 import logging
 import os
+import re
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, Type
 
 
 __all__ = [
@@ -107,3 +109,29 @@ def disable_request_logs():
 
     for logger, original_disabled_state in zip(loggers, original_disabled_states):
         logger.disabled = original_disabled_state
+
+
+def import_from_path(path: str) -> Type[Any]:
+    """
+    Import the module and the name of the function/class separated by :
+    Examples:
+      path = "/path/to/file.py:func_name"
+      path = "/path/to/file:class_name"
+      path = "path.to.file:func"
+    :param path: path including the file path and object name
+    :return Function or class object
+    """
+    path, class_name = path.split(":")
+    _path = path
+
+    path = path.split(".py")[0]
+    path = re.sub(r"/+", ".", path)
+    try:
+        module = importlib.import_module(path)
+    except ImportError:
+        raise ImportError(f"Cannot find module with path {_path}")
+
+    try:
+        return getattr(module, class_name)
+    except AttributeError:
+        raise AttributeError(f"Cannot find {class_name} in {_path}")
