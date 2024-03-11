@@ -28,6 +28,7 @@ __all__ = [
     "remove_tar_duplicates",
     "convert_to_bool",
     "disable_request_logs",
+    "import_from_path",
 ]
 
 
@@ -115,16 +116,16 @@ def import_from_path(path: str) -> Type[Any]:
     """
     Import the module and the name of the function/class separated by :
     Examples:
-      path = "/path/to/file.py:func_name"
-      path = "/path/to/file:class_name"
-      path = "path.to.file:func"
+      path = "/path/to/file.py:func_or_class_name"
+      path = "/path/to/file:focn"
+      path = "path.to.file:focn"
     :param path: path including the file path and object name
     :return Function or class object
     """
-    path, class_name = path.split(":")
-    _path = path
+    original_path, class_name = path.split(":")
+    _path = original_path
 
-    path = path.split(".py")[0]
+    path = original_path.split(".py")[0]
     path = re.sub(r"/+", ".", path)
     try:
         module = importlib.import_module(path)
