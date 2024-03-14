@@ -45,14 +45,14 @@ jobs:
           aws-region: us-east-1 
       - name: Build PyPi Wheel
         id: build-wheel
-        uses: neuralmagic/nm-actions/actions/pypi_build@pypi-actions
+        uses: neuralmagic/nm-actions/actions/pypi_build
         with:
           dev: $DEV
           release: $RELEASE
           name: $NAME
       - name: Push to s3 bucket
         id: push-wheel
-        uses: neuralmagic/nm-actions/actions/s3_push@pypi-actions
+        uses: neuralmagic/nm-actions/actions/s3_push
         with:
           filename: dist/*.whl
           internal: $INTERNAL
