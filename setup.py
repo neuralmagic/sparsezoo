@@ -65,7 +65,6 @@ _dev_deps = [
     "beautifulsoup4==4.9.3",
     "black==22.12.0",
     "flake8>=3.8.3",
-    "flaky>=3.7.0",
     "isort>=5.7.0",
     "pytest>=6.0.0",
     "wheel>=0.36.2",
