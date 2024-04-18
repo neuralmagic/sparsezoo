@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy
 import yaml
 from onnx import ModelProto, NodeProto
-from pydantic import ConfigDict, BaseModel, Field, PositiveFloat, PositiveInt
+from pydantic import BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt
 
 from sparsezoo import Model
 from sparsezoo.analyze_v1.utils.helpers import numpy_array_representer
@@ -200,7 +200,8 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
     )
 
     num_cores: Optional[int] = Field(
-        None, description="The number of cores to use for benchmarking, can also take "
+        None,
+        description="The number of cores to use for benchmarking, can also take "
         "in a `None` value, which represents all cores",
     )
 

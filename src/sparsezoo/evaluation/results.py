@@ -99,8 +99,9 @@ class Result(BaseModel):
         description="Evaluation result represented in the unified, structured format"
     )
     raw: Any = Field(
-        None, description="Evaluation result represented in the raw format "
-        "(characteristic for the specific evaluation integration)"
+        None,
+        description="Evaluation result represented in the raw format "
+        "(characteristic for the specific evaluation integration)",
     )
 
 

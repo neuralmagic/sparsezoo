@@ -14,7 +14,7 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import field_validator, BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from sparsezoo.analyze_v2.schemas.utils import type_validator
 

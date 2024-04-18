@@ -19,7 +19,7 @@ Representation of feature status for a logical grouping of features
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from sparsezoo.utils.standardization.feature_status import FeatureStatus
 from sparsezoo.utils.standardization.markdown_utils import create_markdown_table

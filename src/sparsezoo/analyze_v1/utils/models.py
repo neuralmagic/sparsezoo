@@ -13,7 +13,7 @@
 # limitations under the License.
 import logging
 import textwrap
-from typing import Dict, List, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -30,6 +30,7 @@ __all__ = [
 ]
 
 _LOGGER = logging.getLogger(__name__)
+PrintOrderType = ClassVar[List[str]]
 
 
 class PropertyBaseModel(BaseModel):
@@ -104,8 +105,9 @@ class NodeIO(BaseModel):
 
     name: str = Field(description="Name of the input/output in onnx model graph")
     shape: Optional[List[Union[None, int]]] = Field(
-        None, description="Shape of the input/output in onnx model graph (assuming a "
-        "batch size of 1)"
+        None,
+        description="Shape of the input/output in onnx model graph (assuming a "
+        "batch size of 1)",
     )
     dtype: Optional[str] = Field(
         None, description="Data type of the values from the input/output"
@@ -235,7 +237,7 @@ class Entry(BaseModel):
     A BaseModel with subtraction and pretty_print support
     """
 
-    _print_order: List[str] = []
+    _print_order: PrintOrderType = []
 
     def __sub__(self, other):
         """
@@ -306,7 +308,7 @@ class BaseEntry(Entry):
     sparsity: float
     quantized: float
 
-    _print_order = ["sparsity", "quantized"]
+    _print_order: PrintOrderType = ["sparsity", "quantized"]
 
 
 class NamedEntry(BaseEntry):
@@ -318,7 +320,7 @@ class NamedEntry(BaseEntry):
     total: float
     size: int
 
-    _print_order = ["name", "total", "size"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["name", "total", "size"] + BaseEntry._print_order
 
 
 class TypedEntry(BaseEntry):
@@ -329,7 +331,7 @@ class TypedEntry(BaseEntry):
     type: str
     size: int
 
-    _print_order = ["type", "size"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["type", "size"] + BaseEntry._print_order
 
 
 class ModelEntry(BaseEntry):
@@ -338,7 +340,7 @@ class ModelEntry(BaseEntry):
     """
 
     model: str
-    _print_order = ["model"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["model"] + BaseEntry._print_order
 
 
 class SizedModelEntry(ModelEntry):
@@ -347,8 +349,8 @@ class SizedModelEntry(ModelEntry):
     """
 
     count: int
-    size: int
-    _print_order = ModelEntry._print_order + ["count", "size"]
+    size: Union[int, float]
+    _print_order: PrintOrderType = ModelEntry._print_order + ["count", "size"]
 
 
 class PerformanceEntry(BaseEntry):
@@ -361,7 +363,7 @@ class PerformanceEntry(BaseEntry):
     throughput: float
     supported_graph: float
 
-    _print_order = [
+    _print_order: PrintOrderType = [
         "model",
         "latency",
         "throughput",
@@ -377,7 +379,7 @@ class NodeTimingEntry(Entry):
     node_name: str
     avg_runtime: float
 
-    _print_order = [
+    _print_order: PrintOrderType = [
         "node_name",
         "avg_runtime",
     ] + Entry._print_order
