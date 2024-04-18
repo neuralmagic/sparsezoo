@@ -104,11 +104,11 @@ class NodeIO(BaseModel):
 
     name: str = Field(description="Name of the input/output in onnx model graph")
     shape: Optional[List[Union[None, int]]] = Field(
-        description="Shape of the input/output in onnx model graph (assuming a "
+        None, description="Shape of the input/output in onnx model graph (assuming a "
         "batch size of 1)"
     )
     dtype: Optional[str] = Field(
-        description="Data type of the values from the input/output"
+        None, description="Data type of the values from the input/output"
     )
 
 
@@ -220,9 +220,9 @@ class ParameterComponent(BaseModel):
     """
 
     alias: str = Field(description="The type of parameter (weight, bias)")
-    name: Optional[str] = Field(description="The name of the parameter")
+    name: Optional[str] = Field(None, description="The name of the parameter")
     shape: Optional[List[Union[None, int]]] = Field(
-        description="The shape of the parameter"
+        None, description="The shape of the parameter"
     )
     parameter_summary: ParameterSummary = Field(
         description="A summary of the parameter"

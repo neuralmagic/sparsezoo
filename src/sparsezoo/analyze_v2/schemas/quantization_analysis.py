@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 
 from sparsezoo.analyze_v2.schemas.utils import type_validator
 
@@ -40,10 +40,13 @@ class QuantizationSummaryAnalysisSchema(BaseModel):
         None, description="Percentage of counts_sparse over counts"
     )
 
-    @validator("*", pre=True)
+    @field_validator("*", mode="before")
+    @classmethod
     def validate_types(cls, value):
         return type_validator(value)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("percent", pre=True, always=True)
     def calculate_percent_if_none(cls, value, values):
         if value is None:

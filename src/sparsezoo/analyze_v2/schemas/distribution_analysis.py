@@ -14,26 +14,26 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field
 
 from sparsezoo.analyze_v2.schemas.utils import type_validator
 
 
 class DistributionAnalysisSchema(BaseModel):
     counts: Optional[int] = Field(..., description="Total number of parameters")
-    mean: Optional[float]
-    median: Optional[float]
-    modes: Optional[List]
-    sum_val: Optional[float]
-    min_val: Optional[float]
-    max_val: Optional[float]
-    percentiles: Optional[Dict[float, float]]
-    std_dev: Optional[float]
-    skewness: Optional[float]
-    kurtosis: Optional[float]
-    entropy: Optional[float]
-    bin_width: Optional[float]
-    num_bins: Optional[int]
+    mean: Optional[float] = None
+    median: Optional[float] = None
+    modes: Optional[List] = None
+    sum_val: Optional[float] = None
+    min_val: Optional[float] = None
+    max_val: Optional[float] = None
+    percentiles: Optional[Dict[float, float]] = None
+    std_dev: Optional[float] = None
+    skewness: Optional[float] = None
+    kurtosis: Optional[float] = None
+    entropy: Optional[float] = None
+    bin_width: Optional[float] = None
+    num_bins: Optional[int] = None
     hist: Optional[List[float]] = Field(
         ..., description="Frequency of the parameters, with respect to the bin edges"
     )
@@ -41,6 +41,7 @@ class DistributionAnalysisSchema(BaseModel):
         ..., description="Lower bound edges of each bin"
     )
 
-    @validator("*", pre=True)
+    @field_validator("*", mode="before")
+    @classmethod
     def validate_types(cls, value):
         return type_validator(value)
