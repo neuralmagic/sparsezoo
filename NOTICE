@@ -28,12 +28,13 @@ Models that are derivatives of other model frameworks are indicated as such belo
 * BioBERT https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * CodeGen Mono https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * CodeGen Multi https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
+* Code Llama  https://github.com/meta-llama/llama/blob/main/LICENSE (meta-llama)
 * DistilBERT https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * EfficientNet https://github.com/tensorflow/tpu/blob/master/LICENSE (sparseml)
 * EfficientNetv2 https://github.com/tensorflow/tpu/blob/master/LICENSE (sparseml)
 * Inceptionv3 https://github.com/pytorch/vision/blob/main/LICENSE  (sparseml)
-* Llama 2  https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
-* Mistral  https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
+* Llama 2 https://github.com/meta-llama/llama/blob/main/LICENSE (meta-llama)
+* Mistral https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * mnistnet https://github.com/mtn/mnistnet/blob/master/LICENSE (sparseml)
 * MobileBERT https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * MobileNetv1 https://github.com/osmr/imgclsmob/blob/956b4ebab0bbf98de4e1548287df5197a3c7154e/LICENSE (sparseml)
@@ -47,8 +48,8 @@ Models that are derivatives of other model frameworks are indicated as such belo
 * SecureBERT https://github.com/huggingface/transformers/blob/main/LICENSE (huggingface)
 * SSD https://github.com/weiliu89/caffe/blob/master/LICENSE (sparseml)
 * VGG https://creativecommons.org/licenses/by/4.0/ (sparseml)
-* YOLACT https://github.com/dbolya/yolact/blob/master/LICENSE (dbolya) 
-* YOLOv3, YOLOv5, YOLOv8  https://github.com/neuralmagic/sparseml/blob/master/LICENSE-ULTRALYTICS (ultralytics)
+* YOLACT https://github.com/dbolya/yolact/blob/master/LICENSE (dbolya)
+* YOLOv3, YOLOv5, YOLOv8 https://github.com/neuralmagic/sparseml/blob/master/LICENSE-ULTRALYTICS (ultralytics)
 
 Package dependencies are defined in the Python setup.py file in this repository's top-level directory and have their own Apache-compatible licenses and terms.
 

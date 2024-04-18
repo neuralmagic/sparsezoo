@@ -30,6 +30,7 @@ from setuptools import find_packages, setup
 
 # default variables to be overwritten by the version.py file
 is_release = None
+is_dev = None
 version = "unknown"
 version_base = version
 
@@ -37,7 +38,12 @@ version_base = version
 exec(open(os.path.join("src", "sparsezoo", "version.py")).read())
 print(f"loaded version {version} from src/sparsezoo/version.py")
 
-_PACKAGE_NAME = "sparsezoo" if is_release else "sparsezoo-nightly"
+if is_release:
+    _PACKAGE_NAME = "sparsezoo"
+elif is_dev:
+    _PACKAGE_NAME = "sparsezoo-dev"
+else:
+    _PACKAGE_NAME = "sparsezoo-nightly"
 
 _deps = [
     "numpy>=1.0.0",
