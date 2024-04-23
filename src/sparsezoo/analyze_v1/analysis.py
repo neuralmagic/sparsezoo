@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy
 import yaml
 from onnx import ModelProto, NodeProto
-from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
+from pydantic import BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt
 
 from sparsezoo import Model
 from sparsezoo.analyze_v1.utils.helpers import numpy_array_representer
@@ -200,6 +200,7 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
     )
 
     num_cores: Optional[int] = Field(
+        None,
         description="The number of cores to use for benchmarking, can also take "
         "in a `None` value, which represents all cores",
     )
@@ -311,9 +312,7 @@ class NodeAnalysis(YAMLSerializableBaseModel):
     zero_point: Union[int, numpy.ndarray] = Field(
         description="Node zero point for quantization, default zero"
     )
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_node(

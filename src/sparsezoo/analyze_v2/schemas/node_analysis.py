@@ -14,7 +14,7 @@
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from sparsezoo.analyze_v2.schemas.memory_access_analysis import (
     MemoryAccessAnalysisSchema,
@@ -33,6 +33,7 @@ class NodeAnalysisSchema(BaseModel):
     params: ParameterAnalysisSchema
     mem_access: MemoryAccessAnalysisSchema
 
-    @validator("input", "output", pre=True)
+    @field_validator("input", "output", mode="before")
+    @classmethod
     def validate_types(cls, value):
         return [val for val in value]
