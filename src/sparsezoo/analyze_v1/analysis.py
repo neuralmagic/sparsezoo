@@ -103,6 +103,13 @@ class YAMLSerializableBaseModel(BaseModel):
     A BaseModel that adds a .yaml(...) function to all child classes
     """
 
+    model_config = ConfigDict(protected_namespaces=())
+
+    def dict(self, *args, **kwargs) -> Dict[str, Any]:
+        # alias for model_dump for pydantic v2 upgrade
+        # to allow for easier migration
+        return self.model_dump(*args, **kwargs)
+
     def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
         """
         :param file_path: optional file path to save yaml to
@@ -111,7 +118,7 @@ class YAMLSerializableBaseModel(BaseModel):
         """
         file_stream = None if file_path is None else open(file_path, "w")
         ret = yaml.dump(
-            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+            self.model_dump(), stream=file_stream, allow_unicode=True, sort_keys=False
         )
 
         if file_stream is not None:
@@ -127,7 +134,7 @@ class YAMLSerializableBaseModel(BaseModel):
         """
         with open(file_path, "r") as file:
             dict_obj = yaml.safe_load(file)
-        return cls.parse_obj(dict_obj)
+        return cls.model_validate(dict_obj)
 
     @classmethod
     def parse_yaml_raw(cls, yaml_raw: str):
@@ -136,7 +143,7 @@ class YAMLSerializableBaseModel(BaseModel):
         :return: instance of ModelAnalysis class
         """
         dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
-        return cls.parse_obj(dict_obj)
+        return cls.model_validate(dict_obj)
 
 
 @dataclass
