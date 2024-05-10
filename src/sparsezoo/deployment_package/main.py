@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import doctest
-
 
 __all__ = [
     "deployment_package",
@@ -59,7 +57,3 @@ def deployment_package(
         "stub": stub,
         "metrics": metrics,
     }
-
-
-if __name__ == "__main__":
-    doctest.testmod()

@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from sparsezoo.utils.standardization.feature_status import FeatureStatus
 from sparsezoo.utils.standardization.feature_status_table import FeatureStatusTable

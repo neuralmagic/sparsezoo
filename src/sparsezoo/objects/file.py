@@ -95,7 +95,7 @@ class File:
         elif not os.path.exists(self._path):
             self.download()
 
-        return self._path
+        return self._path or self.path
 
     @classmethod
     def from_dict(

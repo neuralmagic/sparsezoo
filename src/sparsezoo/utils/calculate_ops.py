@@ -114,7 +114,7 @@ def get_ops_dict(
 
     if node.op_type in ["Gemm", "MatMul", "MatMulInteger", "QLinearMatMul"]:
         if input_shapes is None:
-            _LOGGER.warn(
+            _LOGGER.debug(
                 "Invalid shape, skipping "
                 f"{'four block ' if is_four_block_sparse else ''}ops calculation"
                 f" for {node.name}"
@@ -146,7 +146,7 @@ def get_ops_dict(
 
     if node.op_type in ["Conv", "ConvInteger", "QLinearConv"]:
         if input_shapes is None:
-            _LOGGER.warn(
+            _LOGGER.debug(
                 "Invalid shape, skipping "
                 f"{'four block ' if is_four_block_sparse else ''}ops calculation"
                 f" for {node.name}"
@@ -195,10 +195,23 @@ def _get_gemm_dense_sparse_ops(
     :param is_four_block_sparse: true if the weight is four block sparse
     :return: number of dense and sparse operations performed
     """
-    if is_four_block_sparse:
-        weight_blocks = group_four_block(weight, pad_value=zero_point)
-        num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
+    is_channel_wise_quantized = isinstance(zero_point, numpy.ndarray)
+    if is_channel_wise_quantized:
+        # Broadcast zero_point per channel
+        zero_point = numpy.broadcast_to(zero_point, weight.shape)
 
+    if is_four_block_sparse:
+        weight_blocks = group_four_block(weight)
+        if is_channel_wise_quantized:
+            # Group zero_point in the same way as weight
+            zero_point_blocks = group_four_block(zero_point)
+            num_zeros_per_block = numpy.count_nonzero(
+                weight_blocks == zero_point_blocks, axis=1
+            )
+        else:
+            num_zeros_per_block = numpy.count_nonzero(
+                weight_blocks == zero_point, axis=1
+            )
         num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
         num_non_zero_blocks = numpy.count_nonzero(num_zeros_per_block != 4, axis=0)
 

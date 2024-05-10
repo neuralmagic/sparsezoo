@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import shutil
+import tarfile
 import warnings
 from collections import defaultdict
 from pathlib import Path
@@ -29,8 +30,8 @@ from sparsezoo.model.result_utils import (
     ThroughputResults,
     ValidationResult,
 )
-from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz
-from sparsezoo.utils import BASE_API_URL, convert_to_bool, save_numpy
+from sparsezoo.objects import Directory, File, NumpyDirectory, OnnxGz, Recipes
+from sparsezoo.utils import convert_to_bool, save_numpy
 
 
 __all__ = [
@@ -57,6 +58,8 @@ ALLOWED_FILE_TYPES = {
     "benchmarking",
     "outputs",
     "onnx_gz",
+    "benchmark",
+    "metrics",
 }
 
 _LOGGER = logging.getLogger(__name__)
@@ -141,7 +144,7 @@ def load_files_from_stub(
         fields=[
             "model_id",
             "model_onnx_size_compressed_bytes",
-            "files",
+            "files(version: 2)",
             "benchmark_results",
             "training_results",
             "repo_name",
@@ -156,9 +159,9 @@ def load_files_from_stub(
         )
     if matching_models > 1:
         _LOGGER.warning(
-            f"{len(models)} found from the stub: {stub}"
-            "Using the first model to obtain metadata."
-            "Proceed with caution"
+            f"{len(models)} found from the stub: {stub}."
+            " Using the first model to obtain metadata."
+            " Proceed with caution..."
         )
 
     if matching_models:
@@ -167,9 +170,11 @@ def load_files_from_stub(
         model_id = model["model_id"]
 
         files = model.get("files")
+        if len(files) == 0:
+            raise ValueError(f"No files found for stub {stub}")
+
         include_file_download_url(files)
         files = restructure_request_json(request_json=files)
-
         if params is not None:
             files = filter_files(files=files, params=params)
 
@@ -307,7 +312,7 @@ def save_outputs_to_tar(
 
     path = os.path.join(
         os.path.dirname(sample_inputs.path),
-        f"sample_outputs_{engine_type}",
+        f"sample-outputs_{engine_type}",
     )
     if not os.path.exists(path):
         os.mkdir(path)
@@ -341,6 +346,7 @@ def restructure_request_json(
         that will not be filtered out during restructuring
     :return: restructured files
     """
+
     # create `training` folder
     training_dicts_list = fetch_from_request_json(
         request_json, "file_type", "framework"
@@ -381,28 +387,17 @@ def restructure_request_json(
             file_dict_deployment["file_type"] = "deployment"
             request_json.append(file_dict_deployment)
 
-    # create recipes
-    recipe_dicts_list = fetch_from_request_json(request_json, "file_type", "recipe")
-    for (idx, file_dict) in recipe_dicts_list:
-        display_name = file_dict["display_name"]
-        # make sure that recipe name has a
-        # format `recipe_{...}`.
-        prefix = "recipe_"
-        if not display_name.startswith(prefix):
-            display_name = prefix + display_name
-            file_dict["display_name"] = display_name
-            request_json[idx] = file_dict
-
     # restructure inputs/labels/originals/outputs directories
     # use `sample-inputs.tar.gz` to simulate non-existent directories
 
     files_to_create = [
-        "sample_inputs.tar.gz",
-        "sample_labels.tar.gz",
-        "sample_originals.tar.gz",
-        "sample_outputs.tar.gz",
+        "deployment.tar.gz",
+        "sample-inputs.tar.gz",
+        "sample-labels.tar.gz",
+        "sample-originals.tar.gz",
+        "sample-outputs.tar.gz",
     ]
-    types = ["inputs", "labels", "originals", "outputs"]
+    types = ["deployment", "inputs", "labels", "originals", "outputs"]
     for file_name, type in zip(files_to_create, types):
         data = fetch_from_request_json(
             request_json, "display_name", file_name.replace("_", "-")
@@ -571,16 +566,26 @@ def _copy_file_contents(
             _copy_and_overwrite(file.path, copy_path, shutil.copytree)
     else:
         # for the structured directories/files
-        if isinstance(file, list):
-            for _file in file:
+        if isinstance(file, Recipes):
+            for _file in file.recipes:
                 copy_path = os.path.join(output_dir, os.path.basename(_file.path))
                 _copy_and_overwrite(_file.path, copy_path, shutil.copyfile)
         elif isinstance(file, OnnxGz):
-            # copy all contents of unzipped onnx.tar.gz file to top level of output
-            onnx_gz_path = (
-                os.path.dirname(file.path) if os.path.isfile(file.path) else file.path
-            )
-            shutil.copytree(onnx_gz_path, output_dir, dirs_exist_ok=True)
+            # download and unzip model.onnx.tar.gz
+            model_gz_path = Path(file.path).with_name("model.onnx.tar.gz")
+
+            # copy all contents of unzipped model.onnx.tar.gz file to
+            #  top level of output
+            for name in tarfile.open(model_gz_path).getnames():
+                unzipped_file_path = model_gz_path.with_name(name)
+                copy_location = Path(output_dir) / name
+                _copy_and_overwrite(
+                    str(unzipped_file_path), str(copy_location), shutil.copyfile
+                )
+            # copy the model.onnx.tar.gz file to the top level of output
+            tar_copy_path = Path(output_dir) / model_gz_path.name
+            _copy_and_overwrite(str(model_gz_path), str(tar_copy_path), shutil.copyfile)
+
         elif isinstance(file, Directory):
             copy_path = os.path.join(output_dir, os.path.basename(file.path))
             _copy_and_overwrite(file.path, copy_path, shutil.copytree)
@@ -598,9 +603,8 @@ def _copy_and_overwrite(from_path, to_path, func):
 
 def include_file_download_url(files: List[Dict]):
     for file in files:
-        file["url"] = get_file_download_url(
-            model_id=file["model_id"], file_name=file["display_name"]
-        )
+        file["url"] = get_file_download_url(file["download_url"])
+        del file["download_url"]
 
 
 def get_model_metadata_from_stub(stub: str) -> Dict[str, str]:
@@ -636,15 +640,12 @@ def is_stub(candidate: str) -> bool:
 
 
 def get_file_download_url(
-    model_id: str,
-    file_name: str,
-    base_url: str = BASE_API_URL,
+    download_url: str,
 ):
     """Url to download a file"""
-    download_url = f"{base_url}/v2/models/{model_id}/files/{file_name}"
-
     # important, do not remove
     if convert_to_bool(os.getenv("SPARSEZOO_TEST_MODE")):
-        download_url += "?increment_download=False"
+        delimiter = "&" if "?" in download_url else "?"
+        download_url += f"{delimiter}increment_download=False"
 
     return download_url

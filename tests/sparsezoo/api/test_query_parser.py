@@ -148,7 +148,7 @@ from sparsezoo import QueryParser
                 "fields": (
                     "modelId displayName benchmarkResults "
                     "{ batchSize deviceInfo numCores recordedUnits recordedValue } "
-                    "files { displayName fileSize modelId fileType } "
+                    "files { displayName downloadUrl fileSize fileType modelId } "
                 ),
             },
         ),
@@ -170,6 +170,18 @@ from sparsezoo import QueryParser
                 "fields": (
                     "modelId similarModelsRepoNames { displayName repoNamespace } "
                 ),
+            },
+        ),
+        (
+            {
+                "operation_body": "models",
+                "arguments": {"stub": "zoo:mobilenet_v2-1.0-imagenet-base"},
+                "fields": {"analysis": {"analysisId": None}},
+            },
+            {
+                "operation_body": "models",
+                "arguments": '(stub: "zoo:mobilenet_v2-1.0-imagenet-base",)',
+                "fields": "analysis { analysisId } ",
             },
         ),
     ],

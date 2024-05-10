@@ -12,26 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-import os
-from typing import Any, Dict, Optional, Tuple, Union
+import re
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
-import onnx
-from onnx import ModelProto, NodeProto, numpy_helper
+from onnx import NodeProto, numpy_helper
 from onnx.helper import get_attribute_value
 
 from sparsezoo.utils import ONNXGraph
-from sparsezoo.utils.helpers import clean_path
 
-
-_LOGGER = logging.getLogger(__name__)
 
 __all__ = [
-    "onnx_includes_external_data",
-    "save_onnx",
-    "validate_onnx",
-    "load_model",
     "get_layer_and_op_counts",
     "get_node_four_block_sparsity",
     "get_node_num_four_block_zeros_and_size",
@@ -49,144 +40,18 @@ __all__ = [
     "group_four_block",
     "extract_node_id",
     "get_node_attributes",
-    "EXTERNAL_ONNX_DATA_NAME",
+    "get_ops_count_from_ops_dict",
+    "get_node_input_feature_name",
+    "get_numpy_percentiles",
+    "get_numpy_modes",
+    "get_numpy_entropy",
+    "get_numpy_distribution_statistics",
+    "get_numpy_quantization_level",
+    "get_numpy_bits",
+    "get_node_weight_precision",
+    "get_node_param_counts",
+    "get_node_kernel_shape",
 ]
-
-EXTERNAL_ONNX_DATA_NAME = "model.data"
-
-
-def onnx_includes_external_data(model: ModelProto) -> bool:
-    """
-    Check whether the ModelProto in memory includes the external
-    data or not.
-
-    If the model.onnx does not contain the external data, then the
-    initializers of the model are pointing to the external data file
-    (they are not empty)
-
-    :param model: the ModelProto to check
-    :return True if the model was loaded with external data, False otherwise.
-    """
-
-    initializers = model.graph.initializer
-
-    is_data_saved_to_disk = any(
-        initializer.external_data for initializer in initializers
-    )
-    is_data_included_in_model = not is_data_saved_to_disk
-
-    return is_data_included_in_model
-
-
-def save_onnx(
-    model: ModelProto,
-    model_path: str,
-    external_data_file: Optional[str] = None,
-) -> bool:
-    """
-    Save model to the given path.
-
-    If the model's size is larger than the maximum protobuf size:
-        -   it will be saved with external data
-    If the model's size is smaller than the maximum protobuf size:
-        -   and the user nevertheless specifies 'external_data_file',
-            the model will be saved with external data.
-
-    :param model: The model to save.
-    :param model_path: The path to save the model to.
-    :param external_data_file: The optional name save the external data to. Must be
-        relative to the directory `model` is saved to. If the model is too
-        large to be saved as a single protobuf, and this argument is None,
-        the external data file will be coerced to take the default name
-        specified in the variable EXTERNAL_ONNX_DATA_NAME
-    :return True if the model was saved with external data, False otherwise.
-    """
-    if external_data_file is not None:
-        _LOGGER.debug(f"Saving with external data: {external_data_file}")
-        _check_for_old_external_data(
-            model_path=model_path, external_data_file=external_data_file
-        )
-        onnx.save(
-            model,
-            model_path,
-            save_as_external_data=True,
-            all_tensors_to_one_file=True,
-            location=external_data_file,
-        )
-        return True
-
-    if model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
-        external_data_file = external_data_file or EXTERNAL_ONNX_DATA_NAME
-        _LOGGER.warning(
-            "The ONNX model is too large to be saved as a single protobuf. "
-            f"Saving with external data: {external_data_file}"
-        )
-        _check_for_old_external_data(
-            model_path=model_path, external_data_file=external_data_file
-        )
-        onnx.save(
-            model,
-            model_path,
-            save_as_external_data=True,
-            all_tensors_to_one_file=True,
-            location=external_data_file,
-        )
-        return True
-
-    onnx.save(model, model_path)
-    return False
-
-
-def validate_onnx(model: Union[str, ModelProto]):
-    """
-    Validate that a file at a given path is a valid ONNX model.
-    Raises a ValueError if not a valid ONNX model.
-
-    :param model: the model proto or path to the model
-        ONNX file to check for validation
-    """
-    try:
-        onnx_model = load_model(model)
-        if onnx_model.ByteSize() > onnx.checker.MAXIMUM_PROTOBUF:
-            if isinstance(model, str):
-                onnx.checker.check_model(model)
-            else:
-                _LOGGER.warning(
-                    "Attempting to validate an in-memory ONNX model with "
-                    f"size > {onnx.checker.MAXIMUM_PROTOBUF} bytes."
-                    "`validate_onnx` skipped, as large ONNX models cannot "
-                    "be validated in-memory. To validate this model, save "
-                    "it to disk and call `validate_onnx` on the file path."
-                )
-            return
-        onnx.checker.check_model(onnx_model)
-    except Exception as err:
-        if not onnx_includes_external_data(model):
-            _LOGGER.warning(
-                "Attempting to validate an in-memory ONNX model "
-                "that has been loaded without external data. "
-                "This is currently not supported by the ONNX checker. "
-                "The validation will be skipped."
-            )
-            return
-        raise ValueError(f"Invalid onnx model: {err}")
-
-
-def load_model(model: Union[str, ModelProto]) -> ModelProto:
-    """
-    Load an ONNX model from an onnx model file path. If a ModelProto
-    is given, then it is returned.
-
-    :param model: the model proto or path to the model ONNX file to check for loading
-    :return: the loaded ONNX ModelProto
-    """
-    if isinstance(model, ModelProto):
-        return model
-
-    if isinstance(model, str):
-        return onnx.load(clean_path(model))
-
-    raise ValueError(f"unknown type given for model: {type(model)}")
 
 
 def get_node_attributes(node: NodeProto) -> Dict[str, Any]:
@@ -285,12 +150,21 @@ def get_node_num_zeros_and_size(
     if weight is None:
         return 0, 0
 
-    num_zeros = numpy.count_nonzero(weight == zero_point)
+    is_channel_wise_quantized = (
+        isinstance(zero_point, numpy.ndarray) and zero_point.ndim > 0
+    )
+    if is_channel_wise_quantized:
+        # Broadcast zero point to match weight shape
+        broadcasted_zero_point = numpy.broadcast_to(zero_point, weight.shape)
+        num_zeros = numpy.count_nonzero(weight == broadcasted_zero_point)
+        del broadcasted_zero_point
+    else:
+        num_zeros = numpy.count_nonzero(weight == zero_point)
 
     return num_zeros, weight.size
 
 
-def group_four_block(array: numpy.ndarray, pad_value: bool = True) -> numpy.ndarray:
+def group_four_block(array: numpy.ndarray) -> numpy.ndarray:
     """
     :param array: array to group into four blocks
     :param pad_value: value to pad remainder block with
@@ -340,16 +214,28 @@ def get_node_num_four_block_zeros_and_size(
         return 0, 0
 
     # Group into blocks
-    weight_blocks = group_four_block(weight, pad_value=zero_point)
+    weight_blocks = group_four_block(weight)
 
     # Count non-zero blocks
-    num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
-    num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
+    if isinstance(zero_point, numpy.ndarray):
+        # Channel-wise quantized case
+        # Group zero point into blocks like the weight
+        zero_point_blocks = group_four_block(
+            numpy.broadcast_to(zero_point, weight.shape)
+        )
+        num_zeros_per_block = numpy.count_nonzero(
+            weight_blocks == zero_point_blocks, axis=1
+        )
+    else:
+        num_zeros_per_block = numpy.count_nonzero(weight_blocks == zero_point, axis=1)
 
+    num_zero_blocks = numpy.count_nonzero(num_zeros_per_block == 4, axis=0)
     return num_zero_blocks, weight_blocks.shape[0]
 
 
-def get_zero_point(model_graph: ONNXGraph, node: NodeProto) -> int:
+def get_zero_point(
+    model_graph: ONNXGraph, node: NodeProto
+) -> Union[int, numpy.ndarray]:
     """
     :param model_graph: instance of ONNXGraph that contains the given node
     :param node: node to find zero point of
@@ -375,10 +261,7 @@ def get_zero_point(model_graph: ONNXGraph, node: NodeProto) -> int:
         zero_point = get_initializer_value(
             model_graph, node, zero_point_initializer_name
         )
-        if zero_point.ndim != 0:
-            raise NotImplementedError("Channel-wise zero points are not supported")
-
-        return int(zero_point)
+        return int(zero_point) if zero_point.ndim == 0 else zero_point
     else:
         return 0
 
@@ -520,12 +403,15 @@ def get_node_weight(
     :param node: node to which parameter belongs to
     :return: a numpy array of param value, None if not found
     """
-
     initializer_name = get_node_weight_name(model_graph, node)
     weight = get_initializer_value(model_graph, node, initializer_name)
+
     if initializer_name is not None and weight is None and node.op_type != "Gather":
         raise Exception(f"Parameter for {node.name} not found")
 
+    # some weights are not accessible, and returns the zero_points, which are scalars
+    if weight is not None and weight.ndim in [0, 1]:
+        return None
     return weight
 
 
@@ -587,17 +473,113 @@ def _get_node_input(
         return default
 
 
-def _check_for_old_external_data(model_path: str, external_data_file: str):
-    old_external_data_file = os.path.join(
-        os.path.dirname(model_path), external_data_file
-    )
-    if os.path.exists(old_external_data_file):
-        _LOGGER.warning(
-            f"Attempting to save external data for a model: {model_path} "
-            f"to a directory:{os.path.dirname(model_path)} "
-            f"that already contains external data file: {external_data_file}. "
-            "The external data file will be overwritten."
-        )
-        os.remove(old_external_data_file)
+def get_node_param_counts(
+    node: NodeProto, model_graph: ONNXGraph
+) -> Tuple[int, int, int]:
+    """
+    :return: total number of params, number of bias, total sparse params
+    """
+    sparse_params, params = get_node_num_zeros_and_size(model_graph, node)
+    node_bias = get_node_bias(model_graph, node)
+    bias = node_bias.size if node_bias is not None else 0
+    return params, bias, sparse_params
 
-    return
+
+def get_node_weight_precision(
+    model_graph: ONNXGraph,
+    node: NodeProto,
+) -> int:
+    """Get the precision of the node in number of bits"""
+    node_weight = get_node_weight(model_graph, node)
+    return get_numpy_quantization_level(node_weight)
+
+
+def get_numpy_bits(arr: numpy.ndarray) -> int:
+    """Get the total bits required to store the arr"""
+    precision = get_numpy_quantization_level(arr)
+    return int(arr.size * precision)
+
+
+def get_numpy_quantization_level(arr: numpy.ndarray) -> int:
+    """return the quantization precision of the array"""
+    dtype_int_match = re.search(r"\d+", str(arr.dtype))
+    if (
+        dtype_int_match.group()
+        and int(dtype_int_match.group()) < 16
+        and numpy.unique(arr).size > 1
+    ):
+        # log2 of the difference between the max and the min, convert float to int
+        return int(numpy.ceil(numpy.log2(numpy.max(arr) - numpy.min(arr))))
+
+    return int(dtype_int_match.group())
+
+
+def get_numpy_distribution_statistics(
+    arr: numpy.ndarray, epsilon: float = 1e-10
+) -> Tuple[int, int]:
+    """Remove dimensions and compute the statistics"""
+    flatten_arr = arr.flatten()
+    mean_val = numpy.mean(flatten_arr)
+    std_dev = numpy.std(flatten_arr)
+    n = len(flatten_arr)
+
+    skewness = (numpy.sum((flatten_arr - mean_val) ** 3) / n) / max(
+        std_dev**3, epsilon
+    )
+    kurtosis = (numpy.sum((flatten_arr - mean_val) ** 4) / n) / max(
+        std_dev**4, epsilon
+    ) - 3
+
+    return skewness, kurtosis
+
+
+def get_numpy_entropy(arr: numpy.ndarray) -> float:
+    """Remove dimensions and compute the overall entropy"""
+    flatten_arr = arr.flatten()
+    flatten_arr = numpy.abs(flatten_arr)
+    flatten_arr = flatten_arr[flatten_arr != 0]
+    probs = flatten_arr / numpy.sum(flatten_arr)
+
+    return -numpy.sum(probs * numpy.log2(probs))
+
+
+def get_numpy_modes(arr: numpy.ndarray) -> List[Union[int, float]]:
+    unique_values, counts = numpy.unique(arr.flatten(), return_counts=True)
+    max_value_indices = numpy.where(counts == numpy.max(counts))
+    mode = unique_values[max_value_indices]
+    return mode.tolist()
+
+
+def get_numpy_percentiles(
+    arr: numpy.ndarray, percentiles: List[int] = [10, 25, 50, 75, 90]
+) -> Dict[int, float]:
+    """Get the percentiles of the elements inside the array"""
+    return dict(
+        [
+            (percentile, value)
+            for percentile, value in zip(
+                percentiles, numpy.percentile(arr, percentiles).tolist()
+            )
+        ]
+    )
+
+
+def get_node_input_feature_name(node: NodeProto) -> str:
+    """
+    :return the node input feature X name
+    """
+    return node.input[0]
+
+
+def get_node_kernel_shape(node: NodeProto) -> List[int]:
+    for attr in node.attribute:
+        if "kernel" in attr.name:
+            return attr.ints
+    return []
+
+
+def get_ops_count_from_ops_dict(
+    key: str,
+    ops_dict: Dict,
+) -> int:
+    return sum(value[key] for value in ops_dict.values())

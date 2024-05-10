@@ -16,7 +16,7 @@ limitations under the License.
 
 # Developing SparseZoo
 
-SparseZoo is developed and tested using Python 3.8-3.10.
+SparseZoo is developed and tested using Python 3.8-3.11.
 To develop sparsezoo, you will also need the development dependencies and to follow the styling guidelines.
 
 Here are some details to get started.

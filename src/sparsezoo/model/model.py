@@ -15,6 +15,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy
@@ -35,6 +36,7 @@ from sparsezoo.objects import (
     File,
     NumpyDirectory,
     OnnxGz,
+    Recipes,
     SelectDirectory,
     is_directory,
 )
@@ -87,6 +89,7 @@ class Model(Directory):
             _setup_args = self.initialize_model_from_stub(stub=self.source)
             files, path, url, validation_results, compressed_size = _setup_args
             if download_path is not None:
+                download_path = str(Path(download_path).expanduser().resolve())
                 path = download_path  # overwrite cache path with user input
         else:
             # initializing the model from the path
@@ -110,12 +113,14 @@ class Model(Directory):
         self.sample_originals: Directory = self._directory_from_files(
             files,
             directory_class=Directory,
-            display_name="sample_originals",
+            allow_multiple_outputs=True,
+            display_name="sample-originals",
         )
         self.sample_inputs: NumpyDirectory = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample_inputs",
+            display_name="sample-inputs",
+            allow_multiple_outputs=True,
         )
 
         self.model_card: File = self._file_from_files(files, display_name="model.md")
@@ -123,7 +128,7 @@ class Model(Directory):
         self.sample_outputs = self._directory_from_files(
             files,
             directory_class=NumpyDirectory,
-            display_name="sample_outputs",
+            display_name="sample-outputs",
             allow_multiple_outputs=True,
             regex=True,
         )
@@ -133,14 +138,24 @@ class Model(Directory):
             ] = self._sample_outputs_list_to_dict(self.sample_outputs)
 
         self.sample_labels: Directory = self._directory_from_files(
-            files, directory_class=Directory, display_name="sample_labels"
+            files,
+            directory_class=Directory,
+            allow_multiple_outputs=True,
+            display_name="sample-labels",
         )
 
+        self.deployment_tar: SelectDirectory = self._directory_from_files(
+            files,
+            directory_class=SelectDirectory,
+            display_name="deployment.tar.gz",
+        )
         self.deployment: SelectDirectory = self._directory_from_files(
             files,
             directory_class=SelectDirectory,
             display_name="deployment",
             stub_params=self.stub_params,
+            allow_multiple_outputs=True,
+            tar_directory=self.deployment_tar,
         )
 
         self.onnx_folder: Directory = self._directory_from_files(
@@ -150,14 +165,12 @@ class Model(Directory):
 
         self.logs: Directory = self._directory_from_files(files, display_name="logs")
 
-        self.recipes: SelectDirectory = self._directory_from_files(
-            files,
-            directory_class=SelectDirectory,
-            display_name="recipe",
-            stub_params=self.stub_params,
+        recipe_file_list = self._file_from_files(
+            files, display_name="^recipe", regex=True
         )
+        self.recipes = Recipes(recipe_file_list, stub_params=self.stub_params)
 
-        self._onnx_gz: Directory = self._directory_from_files(
+        self._onnx_gz: OnnxGz = self._directory_from_files(
             files, directory_class=OnnxGz, display_name="model.onnx.tar.gz"
         )
         self.onnx_model: File = (
@@ -170,7 +183,12 @@ class Model(Directory):
         self.benchmarks: File = self._file_from_files(
             files, display_name="benchmarks.yaml"
         )
+        self.benchmark: File = self._file_from_files(
+            files, display_name="benchmark.yaml"
+        )
         self.eval_results: File = self._file_from_files(files, display_name="eval.yaml")
+
+        self.metrics: File = self._file_from_files(files, display_name="metrics.yaml")
 
         # plaintext validation metrics optionally parsed from a zoo stub
         self.validation_results: Optional[
@@ -179,6 +197,30 @@ class Model(Directory):
 
         # compressed file size on disk in bytes
         self.compressed_size: Optional[int] = compressed_size
+
+        # if there are multiple deployment directories
+        # (this may happen due to the presence of both e.g.:
+        # - deployment directory
+        # - deployment.tar.gz file
+        # we need to choose one (they are identical at this point)
+        self.sample_originals = (
+            self.sample_originals[0]
+            if isinstance(self.sample_originals, list)
+            else self.sample_originals
+        )
+        self.sample_inputs = (
+            self.sample_inputs[0]
+            if isinstance(self.sample_inputs, list)
+            else self.sample_inputs
+        )
+        self.sample_labels = (
+            self.sample_labels[0]
+            if isinstance(self.sample_labels, list)
+            else self.sample_labels
+        )
+        self.deployment = (
+            self.deployment[0] if isinstance(self.deployment, list) else self.deployment
+        )
 
         # sorting name of `sample_inputs` and `sample_output` files,
         # so that they have same one-to-one correspondence when we jointly
@@ -206,7 +248,9 @@ class Model(Directory):
             "onnx_model": self.onnx_model,
             "analysis": self.analysis,
             "benchmarks": self.benchmarks,
+            "benchmark": self.benchmark,
             "eval_results": self.eval_results,
+            "metrics": self.metrics,
         }
 
         self.inference_runner = InferenceRunner(
@@ -231,6 +275,21 @@ class Model(Directory):
             this Model was initialized from
         """
         return self._stub_params
+
+    @property
+    def path(self) -> str:
+        """
+        Download(if not already downloaded) and return the local path of the model
+
+        :return: the local path of the model
+        """
+        # download the model if not already downloaded
+        super().path
+
+        # extract onnx_model if it is a tar.gz
+        self.onnx_model.path
+
+        return self._path
 
     def generate_outputs(
         self, engine_type: str, save_to_tar: bool = False
@@ -294,6 +353,8 @@ class Model(Directory):
                             f"Attempted to download file {key}, "
                             f"but it is `None`. The file is being skipped..."
                         )
+            # extract the onnx model if needed
+            self.onnx_model.path
 
         return all(downloads)
 
@@ -452,7 +513,7 @@ class Model(Directory):
     def _get_directory(
         self,
         file: Dict[str, Any],
-        directory_class: Directory,
+        directory_class: type(Directory),
         display_name: Optional[str] = None,
         regex: Optional[bool] = False,
         **kwargs,
@@ -584,15 +645,15 @@ class Model(Directory):
         files: List[Dict[str, Any]],
         directory_class: Union[Directory, NumpyDirectory] = Directory,
         display_name: Optional[str] = None,
-        regex: Optional[bool] = False,
-        allow_multiple_outputs: Optional[bool] = False,
+        regex: bool = False,
+        allow_multiple_outputs: bool = False,
         **kwargs: object,
-    ) -> Union[Directory, None]:
+    ) -> Union[List[Union[Directory, Any, None]], List[Directory], None]:
 
         # Takes a list of file dictionaries and returns
         # a Directory() object, if successful,
         # otherwise None.
-        if all([file_dict.get("file_type") for file_dict in files]):
+        if all(file_dict.get("file_type") for file_dict in files):
             # if file_dict is retrieved from the API as `request_json`
             # first check if a directory can be created from the
             # "loose" files (alternative to parsing a .tar.gz file as
@@ -638,7 +699,9 @@ class Model(Directory):
             return directories_found[0]
 
     def _download(
-        self, file: Union[File, List[File], Dict[Any, File]], directory_path: str
+        self,
+        file: Union[File, Recipes, Dict[Any, File]],
+        directory_path: str,
     ) -> bool:
 
         if isinstance(file, File):
@@ -649,22 +712,23 @@ class Model(Directory):
                 )
             ):
                 file.download(destination_path=directory_path)
-                return True
+                validations = True
             else:
                 _LOGGER.warning(
                     f"Failed to download file {file.name}. The url of the file is None."
                 )
-                return False
+                validations = False
 
-        elif isinstance(file, list):
-            validations = (self._download(_file, directory_path) for _file in file)
-            return all(validations)
+        elif isinstance(file, Recipes):
+            validations = all(
+                self._download(_file, directory_path) for _file in file.recipes
+            )
 
         else:
-            validations = (
+            validations = all(
                 self._download(_file, directory_path) for _file in file.values()
             )
-            return all(validations)
+        return validations
 
     def _sample_outputs_list_to_dict(
         self,
@@ -674,7 +738,7 @@ class Model(Directory):
         if not isinstance(directories, list):
             # if found a single 'sample_outputs' directory,
             # assume it should be mapped to its the native framework
-            expected_name = "sample_outputs"
+            expected_name = "sample-outputs"
             if directories.name not in [expected_name, expected_name + ".tar.gz"]:
                 raise ValueError(
                     "Found single folder (or tar.gz archive)"
@@ -684,17 +748,18 @@ class Model(Directory):
             engine_to_numpydir_map["framework"] = directories
 
         else:
-            # if found multiple 'sample_outputs' directories,
+            # if found multiple 'sample-outputs' directories,
             # use directory name to relate it with the appropriate
             # inference engine
             for directory in directories:
                 engine_name = directory.name.split("_")[-1]
                 if engine_name.endswith(".tar.gz"):
                     engine_name = engine_name.replace(".tar.gz", "")
-                if engine_name not in ENGINES:
+                if engine_name not in ENGINES and engine_name != "sample-outputs":
                     raise ValueError(
-                        f"The name of the 'sample_outputs' directory should "
-                        f"end with an engine name (one of the {ENGINES}). "
+                        f"The name of the sample-outputs directory should be"
+                        f"`sample-outputs` or shoud start with `sample-outputs_` and "
+                        f"end with an engine name (one of the {ENGINES})."
                         f"However, the name is {directory.name}."
                     )
                 engine_to_numpydir_map[engine_name] = directory
@@ -732,9 +797,7 @@ class Model(Directory):
             return None
         else:
             files = [
-                File.from_dict(
-                    file, parent_directory=os.path.join(parent_directory, display_name)
-                )
+                File.from_dict(file, parent_directory=parent_directory)
                 for file in files
             ]
             directory = directory_class(

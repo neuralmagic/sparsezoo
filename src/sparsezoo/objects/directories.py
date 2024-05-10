@@ -18,8 +18,10 @@ Class objects for standardization and validation of a model folder structure
 
 
 import logging
-import os.path
+import tarfile
 from collections import OrderedDict
+from contextlib import contextmanager
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import numpy
@@ -34,6 +36,7 @@ __all__ = [
     "NumpyDirectory",
     "SelectDirectory",
     "OnnxGz",
+    "AliasedSelectDirectory",
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -194,6 +197,9 @@ class SelectDirectory(Directory):
     :param parent_directory: path of the parent SelectDirectory
     :param stub_params: dictionary of zoo stub params that this directory
         was specified with
+    :param tar_directory: optional pointer to the tar_directory
+        of this directory. By default, when downloading the directory
+        in question, we should download and extract the tarball.
     """
 
     def __init__(
@@ -204,6 +210,7 @@ class SelectDirectory(Directory):
         url: Optional[str] = None,
         parent_directory: Optional[str] = None,
         stub_params: Optional[Dict[str, str]] = None,
+        tar_directory: Optional[Directory] = None,
     ):
         self._default, self._available = None, None
 
@@ -214,7 +221,7 @@ class SelectDirectory(Directory):
             url=url,
             parent_directory=parent_directory,
         )
-
+        self.tar_directory = tar_directory
         self._stub_params = stub_params or {}
         self.files_dict = self.files_to_dictionary()
 
@@ -276,6 +283,73 @@ class SelectDirectory(Directory):
         self._available = value
 
 
+class AliasedSelectDirectory(SelectDirectory):
+    """
+    A select directory that can be aliased to download a different
+    file but still point to the same path. This is especially
+    beneficial for cases where a tarball must be downloaded and extracted
+    but the directory should point to one of the directory
+    within the tarball.
+
+    :param files: list of files contained within the SelectDirectory
+    :param name: name of the SelectDirectory
+    :param path: path of the SelectDirectory
+    :param url: url of the SelectDirectory
+    :param parent_directory: path of the parent SelectDirectory
+    :param stub_params: dictionary of zoo stub params that this directory
+        was specified with
+    :param download_alias: name of the file to download
+    """
+
+    def __init__(self, *args, download_alias: Optional[str] = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.download_alias = download_alias
+
+    @contextmanager
+    def _override_name(self):
+        """
+        A context manager to temporarily override the name of the directory
+        to the download alias.
+        """
+        old_name = self.name
+        if self.download_alias:
+            self.name = self.download_alias
+        yield
+        self.name = old_name
+
+    def download(self, *args, **kwargs):
+        """
+        Override the download method to temporarily override the name
+        of the directory to the download alias.
+        """
+        with self._override_name():
+            return super().download(*args, **kwargs)
+
+    @property
+    def path(self):
+        """
+        Override the path property to download and extract
+        the download alias file but point to the path of the
+        actual expected file
+
+        :raises FileNotFoundError: if the expected file does not
+            exist, (it wasn't downloaded or extracted)
+        :return: path to the expected file
+        """
+        super().path
+        actual_file_path = (
+            Path(self._path).with_name(self.name)
+            if self._path.endswith(self.download_alias)
+            else Path(self._path)
+        )
+        if not actual_file_path.exists():
+            raise FileNotFoundError(
+                f"The directory {actual_file_path} should have been "
+                "downloaded but does not exist"
+            )
+        return str(actual_file_path)
+
+
 class OnnxGz(Directory):
     """
     Special class to handle onnx.model.tar.gz files.
@@ -283,14 +357,91 @@ class OnnxGz(Directory):
     available however, when the `path` property is accessed, it will point only
     to the `model.onnx` as this is the expected behavior for loading an onnx model
     with or without external data.
+
+    Class Invariants:
+        - `self.name` attribute of this class will point to the name of the onnx file
+        - `self._path` and `self.path` will point to the path of the extracted
+            onnx model
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        return f"OnnxGz(name={self.name}, path={self._path})"
 
     @property
     def path(self):
-        _ = super().path  # call self.path to download initial file if not already
+        """
+        Assumptions:
+            - the tarball must contain atleast one `model.onnx` file
+            - the tarball may or may not contain additional external data or
+                onnx model file(s)
+            - the tarball will be extracted to the same directory as the tarball
+
+        :post-condition: self._path will point to the path of the extracted
+            onnx model, and it exists
+        :return: path to the onnx model
+        """
+
+        expected_path: Path = (
+            Path(self._path)
+            if self._path is not None
+            else Path(self.parent_directory) / "model.onnx.tar.gz"
+        )
+
+        # _path can also point to parent directory of the tarball when
+        #  this object is initialized from files
+        if expected_path.is_dir():
+            # point expected to model.onnx.tar.gz
+            expected_path = expected_path / "model.onnx.tar.gz"
+
+        # point path to model.onnx.tar.gz before download/unzip
+        self._path = str(expected_path)
+
+        if not expected_path.exists():
+            # download the tarball if it does not exist
+            self.download()
+
+        self._check_if_extracted()
         if self.is_archive:
+            # if the tarball is not extracted, extract it
             self.unzip()
-        if os.path.isdir(self._path) and "model.onnx" in os.listdir(self._path):
-            # if unzipped into a directory, refer directly to model.onnx
-            self._path = os.path.join(self._path, "model.onnx")
+
+        onnx_model_path = expected_path.with_name(name="model.onnx")
+        if not onnx_model_path.exists():
+            raise FileNotFoundError(
+                f"Expected to find model.onnx at {onnx_model_path}, "
+                "but it does not exist."
+            )
+
+        # point _path to model.onnx
+        self._path = str(onnx_model_path)
         return self._path
+
+    def _check_if_extracted(self):
+        """
+        set `is_archive` to False if the tarball is extracted, else set it to
+        True. Condition for being extracted is that all members of the tarball
+        are extracted and exist as files in the same directory as the tarball.
+        """
+        # expected file will point to the tarball
+        expected_path: Path = (
+            Path(self._path)
+            if self._path is not None
+            else Path(self.parent_directory) / "model.onnx.tar.gz"
+        )
+
+        if expected_path.is_dir():
+            # point expected to model.onnx.tar.gz
+            expected_path = expected_path / "model.onnx.tar.gz"
+
+        model_gz_path = expected_path.with_name(name="model.onnx.tar.gz")
+        # assert all members of  model.onnx.tar.gz have been extracted
+        for zipped_filename in tarfile.open(model_gz_path).getnames():
+            unzipped_file_path = expected_path.with_name(zipped_filename)
+            if not unzipped_file_path.exists():
+                _LOGGER.debug(f"{unzipped_file_path} does not exist, was it extracted?")
+                self.is_archive = True
+                return
+        self.is_archive = False

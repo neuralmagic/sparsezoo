@@ -18,50 +18,50 @@ import tempfile
 import pytest
 
 from sparsezoo.model import Model, load_files_from_stub, setup_model
+from sparsezoo.objects import Directory
 
 
 EXPECTED_IC_FILES = {
-    "originals": {"sample_originals.tar.gz"},
-    "outputs": {"sample_outputs.tar.gz"},
-    "recipe": {"recipe_original.md", "recipe_transfer_learn.md"},
-    "labels": {"sample_labels.tar.gz"},
+    "originals": {"sample-originals.tar.gz"},
+    "outputs": {"sample-outputs.tar.gz"},
+    "recipe": {"recipe.md", "recipe_transfer_learn.md"},
+    "labels": {"sample-labels.tar.gz"},
     "onnx": {"model.onnx"},
-    "training": {"model.pth"},
+    "training": {"training/model.pth"},
     "card": {"model.md"},
-    "inputs": {"sample_inputs.tar.gz"},
+    "inputs": {"sample-inputs.tar.gz"},
     "deployment": {"model.onnx"},
 }
 EXPECTED_NLP_FILES = {
-    "outputs": {"sample_outputs.tar.gz"},
-    "recipe": {"recipe_original.md"},
+    "outputs": {"sample-outputs.tar.gz"},
+    "recipe": {"recipe.md"},
     "onnx": {"model.onnx"},
     "training": {
-        "pytorch_model.bin",
-        "training_args.bin",
-        "tokenizer_config.json",
-        "tokenizer.json",
-        "vocab.txt",
-        "special_tokens_map.json",
-        "config.json",
+        "training/pytorch_model.bin",
+        "training/training_args.bin",
+        "training/tokenizer_config.json",
+        "training/tokenizer.json",
+        "training/vocab.txt",
+        "training/special_tokens_map.json",
+        "training/config.json",
     },
     "card": {"model.md"},
-    "inputs": {"sample_inputs.tar.gz"},
+    "inputs": {"sample-inputs.tar.gz"},
     "deployment": {
-        "model.onnx",
-        "tokenizer.json",
-        "config.json",
-        "tokenizer_config.json",
+        "deployment/model.onnx",
+        "deployment/tokenizer.json",
+        "deployment/config.json",
     },
 }
 EXPECTED_YOLO_FILES = {
-    "originals": {"sample_originals.tar.gz"},
-    "outputs": {"sample_outputs.tar.gz"},
-    "recipe": {"recipe_original.md", "recipe_transfer_learn.md"},
+    "originals": {"sample-originals.tar.gz"},
+    "outputs": {"sample-outputs.tar.gz"},
+    "recipe": {"recipe.md", "recipe_transfer_learn.md"},
     "onnx": {"model.onnx"},
-    "training": {"model.ckpt.pt", "model.pt"},
+    "training": {"training/model.pt"},
     "card": {"model.md"},
-    "inputs": {"sample_inputs.tar.gz"},
-    "deployment": {"model.onnx"},
+    "inputs": {"sample-inputs.tar.gz"},
+    "deployment": {"deployment/model.onnx"},
 }
 
 
@@ -109,19 +109,34 @@ def test_load_files_from_stub(stub, expected_files):
     assert repo_namespace is not None
 
 
+def check_extraneous_files(expected_files, temp_dir, ignore_external_data):
+    files_in_directory = set(os.listdir(temp_dir.name))
+    extra_files = files_in_directory - expected_files
+    for file in extra_files:
+        # ignore model.onnx.tar.gz and model.data files
+        valid_extra_file = ignore_external_data and (
+            "model.onnx.tar.gz" in file or "model.data" in file
+        )
+        assert valid_extra_file, f"Unexpected extra file found: {file}"
+
+
 @pytest.mark.parametrize(
-    "stub",
+    "stub, ignore_external_data",
     [
-        "zoo:nlp/question_answering/distilbert-none/pytorch/huggingface/squad/pruned80_quant-none-vnni"  # noqa E501
+        (
+            "zoo:nlp/question_answering/distilbert-none/pytorch/"
+            "huggingface/squad/pruned80_quant-none-vnni",
+            False,
+        ),
     ],
 )
 class TestSetupModel:
     @pytest.fixture()
-    def setup(self, stub):
+    def setup(self, stub, ignore_external_data):
         # setup
         temp_dir = tempfile.TemporaryDirectory(dir="/tmp")
         download_dir = tempfile.TemporaryDirectory(dir="/tmp")
-        yield stub, temp_dir, download_dir
+        yield stub, temp_dir, download_dir, ignore_external_data
         temp_dir.cleanup()
         download_dir.cleanup()
 
@@ -130,6 +145,7 @@ class TestSetupModel:
             stub,
             temp_dir,
             download_dir,
+            ignore_external_data,
         ) = setup
 
         model = Model(stub, download_dir.name)
@@ -137,7 +153,6 @@ class TestSetupModel:
         deployment_path = model.deployment.path
         onnx_model_path = model.onnx_model.path
         sample_inputs_path = model.sample_inputs.path
-        recipes_path = model.recipes.path
 
         setup_model(
             output_dir=temp_dir.name,
@@ -146,23 +161,25 @@ class TestSetupModel:
             onnx_model=onnx_model_path,
             sample_inputs=sample_inputs_path,
             # TODO: .path() needs to be supported for dict-like obj
-            # sample_outputs=model.sample_outputs.path,
-            recipes=recipes_path,
+            sample_outputs=model.sample_output.path
+            if isinstance(model.sample_outputs, Directory)
+            else None,
         )
 
-        assert {
+        expected_files = {
             "training",
             "deployment",
-            "recipe",
+            "recipe.md",
             "model.onnx",
-            "sample_inputs.tar.gz",
-        } == set(os.listdir(temp_dir.name))
+            "model.onnx.tar.gz",
+            "sample-inputs",
+        }
+        check_extraneous_files(expected_files, temp_dir, ignore_external_data)
 
     def test_setup_model_from_objects(self, setup):
-        stub, temp_dir, download_dir = setup
+        stub, temp_dir, download_dir, ignore_external_data = setup
         model = Model(stub, download_dir.name)
         model.download()
-        model.sample_inputs.unzip()
 
         training = model.training
         deployment = model.deployment
@@ -180,11 +197,13 @@ class TestSetupModel:
             recipes=recipes,
         )
 
-        assert {
+        expected_files = {
             "training",
             "deployment",
-            "recipe",
+            "recipe.md",
             "model.onnx",
-            "sample_inputs",
-        } == set(os.listdir(temp_dir.name))
+            "model.onnx.tar.gz",
+            "sample-inputs",
+        }
+        check_extraneous_files(expected_files, temp_dir, ignore_external_data)
         download_dir.cleanup()

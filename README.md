@@ -14,7 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<h1><img alt="tool icon" src="https://raw.githubusercontent.com/neuralmagic/sparsezoo/main/docs/source/icon-sparsezoo.png" />&nbsp;&nbsp;SparseZoo</h1>
+<h1 style="display: flex; align-items: center;" >
+     <img width="100" height="100" alt="tool icon" src="https://neuralmagic.com/wp-content/uploads/2024/03/icon_SparseZoo-003.svg" />
+      <span>&nbsp;&nbsp;SparseZoo</span>
+  </h1>
 
 <h3>Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes</h3>
 
@@ -22,7 +25,7 @@ limitations under the License.
     <a href="https://docs.neuralmagic.com/sparsezoo">
         <img alt="Documentation" src="https://img.shields.io/badge/documentation-darkred?&style=for-the-badge&logo=read-the-docs" height=25>
     </a>
-    <a href="https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ/">
+    <a href="https://neuralmagic.com/community/">
         <img src="https://img.shields.io/badge/slack-purple?style=for-the-badge&logo=slack" height=25>
     </a>
     <a href="https://github.com/neuralmagic/sparsezoo/issues">
@@ -64,6 +67,18 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 <img alt="SparseZoo Flow" src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
 
+
+## 🚨 New SparseZoo Models 🚨
+### 🎃 October 2023 🎃
+**Generative AI**
+- Sparse MPT Models - [21 variants](https://sparsezoo.neuralmagic.com/?architectures=mpt&ungrouped=true)
+    - ⚡ Highlighted Model ⚡ :  [mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized](https://sparsezoo.neuralmagic.com/models/mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized?hardware=deepsparse-c6i.12xlarge&comparison=mpt-7b-gsm8k_mpt_pretrain-base)
+- Sparse OPT Models - [12 variants](https://sparsezoo.neuralmagic.com/?architectures=opt&ungrouped=true)
+    - ⚡ Highlighted Model ⚡ :  [opt-6.7b-opt_pretrain-pruned50_quantW8A8](https://sparsezoo.neuralmagic.com/models/opt-6.7b-opt_pretrain-pruned50_quantW8A8?hardware=deepsparse-c6i.12xlarge&comparison=opt-6.7b-opt_pretrain-base)
+- Sparse Codegen (mono,multi) Models - [10 variants](https://sparsezoo.neuralmagic.com/?ungrouped=true&architectures=codegen_mono%2Ccodegen_multi)
+    - ⚡ Highlighted Model ⚡ :  [codegen_multi-350m-bigquery_thepile-pruned50_quantized](https://sparsezoo.neuralmagic.com/models/codegen_multi-350m-bigquery_thepile-pruned50_quantized?hardware=deepsparse-c6i.12xlarge&comparison=codegen_multi-350m-bigquery_thepile-base) 
+ 
+
 ## Highlights
 
 - [Model Stub Architecture Overview](https://docs.neuralmagic.com/sparsezoo/source/models.html)
@@ -72,7 +87,7 @@ The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the P
 
 ## Installation
 
-This repository is tested on Python 3.8-3.10, and Linux/Debian systems.
+This repository is tested on Python 3.8-3.11, and Linux/Debian systems.
 It is recommended to install in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep your system in order.
 
 Install with pip using:
@@ -420,7 +435,7 @@ We appreciate contributions to the code, examples, integrations, and documentati
 
 ### Join
 
-For user help or questions about SparseZoo, sign up or log in to our [**Neural Magic Community Slack**](https://join.slack.com/t/discuss-neuralmagic/shared_invite/zt-q1a1cnvo-YBoICSIw3L1dmQpjBeDurQ). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
+For user help or questions about SparseZoo, sign up or log in to our [**Neural Magic Community Slack**](https://neuralmagic.com/community/). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
 
 You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
 

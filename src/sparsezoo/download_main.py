@@ -62,8 +62,7 @@ def parse_args():
     parser.add_argument(
         "model_stub",
         type=str,
-        help="Path to a SparseZoo model stub i.e. "
-        "zoo:cv/classification/resnet_v1-50/pytorch/sparseml/imagenet/pruned-moderate",
+        help="Path to a SparseZoo model stub i.e. " "zoo:opt-1.3b-opt_pretrain-base",
     )
 
     parser.add_argument(

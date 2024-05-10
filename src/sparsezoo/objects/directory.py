@@ -65,7 +65,7 @@ class Directory(File):
             name=name, path=path, url=url, parent_directory=parent_directory
         )
 
-        if self._unpack():
+        if self._unpack() or force:
             self.unzip(force=force)
 
     @classmethod
@@ -168,18 +168,26 @@ class Directory(File):
                     "Please make sure that `destination_path` argument is not None."
                 )
 
+        # If tar_directory is not None, then we are downloading
+        # the directory as a tar archive file
+        target_directory = (
+            self if getattr(self, "tar_directory", None) is None else self.tar_directory
+        )
+
         # Directory can represent a tar file.
-        if self.is_archive:
-            new_file_path = os.path.join(destination_path, self.name)
+        # In this case, we download the tar file and unzip it.
+        if target_directory.is_archive:
+            new_file_path = os.path.join(destination_path, target_directory.name)
             for attempt in range(retries):
                 try:
                     download_file(
-                        url_path=self.url,
+                        url_path=target_directory.url,
                         dest_path=new_file_path,
                         overwrite=overwrite,
                     )
 
-                    self._path = new_file_path
+                    target_directory._path = new_file_path
+                    target_directory.unzip()
                     return
 
                 except Exception as err:
@@ -192,13 +200,15 @@ class Directory(File):
 
         # Directory can represent a folder or directory.
         else:
-            for file in self.files:
+            for file in target_directory.files:
                 file.download(
-                    destination_path=os.path.join(destination_path, self.name)
+                    destination_path=destination_path,
                 )
-                file._path = os.path.join(destination_path, self.name, file.name)
+                file._path = os.path.join(
+                    destination_path, target_directory.name, file.name
+                )
 
-        self._path = os.path.join(destination_path, self.name)
+        target_directory._path = os.path.join(destination_path, target_directory.name)
 
     def get_file(self, file_name: str) -> Optional[File]:
         """
@@ -212,7 +222,7 @@ class Directory(File):
         for file in self.files:
             if file is None:
                 continue
-            if file.name == file_name:
+            if os.path.basename(file.name) == file_name:
                 return file
             if isinstance(file, Directory):
                 file = file.get_file(file_name=file_name)
@@ -284,17 +294,36 @@ class Directory(File):
             )
 
         name = ".".join(self.name.split(".")[:-2])
-        path = os.path.join(extract_directory, name)
-
-        if not os.path.exists(path) or force:  # do not re-unzip if not forced
+        is_model_gz = name == "model.onnx"
+        path = (
+            extract_directory if is_model_gz else os.path.join(extract_directory, name)
+        )
+        # if is_model_gz then path would point to the tarfile(s)
+        # parent directory and must be unzipped irrespective of existence
+        if (
+            is_model_gz or not os.path.exists(path) or force
+        ):  # do not re-unzip if not forced
             tar = tarfile.open(self._path, "r")
             for member in tar.getmembers():
                 member.name = os.path.basename(member.name)
                 tar.extract(member=member, path=path)
                 files.append(
-                    File(name=member.name, path=os.path.join(path, member.name))
+                    File(
+                        name=member.name,
+                        path=os.path.join(path, member.name),
+                        parent_directory=path,
+                    )
                 )
             tar.close()
+        # if path already exists, then the tar archive has already been unzipped
+        # and we can just use the files in the directory
+        elif os.path.exists(path):
+            for file in os.listdir(path):
+                files.append(
+                    File(
+                        name=file, path=os.path.join(path, file), parent_directory=path
+                    )
+                )
 
         self.name = name
         self.files = files
@@ -340,7 +369,7 @@ def is_directory(file: File) -> bool:
 def _possibly_convert_files_to_directories(files: List[File]) -> List[File]:
     return [
         Directory.from_file(file)
-        if (is_directory(file) and not isinstance(file, Directory))
+        if not isinstance(file, Directory) and is_directory(file)
         else file
         for file in files
     ]

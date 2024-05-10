@@ -22,16 +22,16 @@ import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy
-import onnx
 import yaml
 from onnx import ModelProto, NodeProto
-from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
+from pydantic import BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt
 
 from sparsezoo import Model
-from sparsezoo.analyze.utils.models import (
+from sparsezoo.analyze_v1.utils.helpers import numpy_array_representer
+from sparsezoo.analyze_v1.utils.models import (
     DenseSparseOps,
     Entry,
     ModelEntry,
@@ -68,6 +68,7 @@ from sparsezoo.utils import (
     is_parameterized_prunable_layer,
     is_quantized_layer,
     is_sparse_layer,
+    load_model,
 )
 
 
@@ -93,11 +94,21 @@ TARGETED_LINEAR_OP_TYPES = {
     "Gemm",
 }
 
+# add numpy array representer to yaml
+yaml.add_representer(numpy.ndarray, numpy_array_representer)
+
 
 class YAMLSerializableBaseModel(BaseModel):
     """
     A BaseModel that adds a .yaml(...) function to all child classes
     """
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    def dict(self, *args, **kwargs) -> Dict[str, Any]:
+        # alias for model_dump for pydantic v2 upgrade
+        # to allow for easier migration
+        return self.model_dump(*args, **kwargs)
 
     def yaml(self, file_path: Optional[str] = None) -> Union[str, None]:
         """
@@ -107,7 +118,7 @@ class YAMLSerializableBaseModel(BaseModel):
         """
         file_stream = None if file_path is None else open(file_path, "w")
         ret = yaml.dump(
-            self.dict(), stream=file_stream, allow_unicode=True, sort_keys=False
+            self.model_dump(), stream=file_stream, allow_unicode=True, sort_keys=False
         )
 
         if file_stream is not None:
@@ -123,7 +134,7 @@ class YAMLSerializableBaseModel(BaseModel):
         """
         with open(file_path, "r") as file:
             dict_obj = yaml.safe_load(file)
-        return cls.parse_obj(dict_obj)
+        return cls.model_validate(dict_obj)
 
     @classmethod
     def parse_yaml_raw(cls, yaml_raw: str):
@@ -132,7 +143,7 @@ class YAMLSerializableBaseModel(BaseModel):
         :return: instance of ModelAnalysis class
         """
         dict_obj = yaml.safe_load(yaml_raw)  # unsafe: needs to load numpy
-        return cls.parse_obj(dict_obj)
+        return cls.model_validate(dict_obj)
 
 
 @dataclass
@@ -196,6 +207,7 @@ class BenchmarkScenario(YAMLSerializableBaseModel):
     )
 
     num_cores: Optional[int] = Field(
+        None,
         description="The number of cores to use for benchmarking, can also take "
         "in a `None` value, which represents all cores",
     )
@@ -304,9 +316,10 @@ class NodeAnalysis(YAMLSerializableBaseModel):
     )
     sparse_node: bool = Field(description="Does the node have sparse weights")
     quantized_node: bool = Field(description="Does the node have quantized weights")
-    zero_point: int = Field(
+    zero_point: Union[int, numpy.ndarray] = Field(
         description="Node zero point for quantization, default zero"
     )
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_node(
@@ -910,16 +923,20 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             analyze
         :return: instance of cls
         """
+        path = None
         if isinstance(onnx_file_path, ModelProto):
             model_onnx = onnx_file_path
             model_name = ""
         else:
-            model_onnx = onnx.load(onnx_file_path)
+            # initially do not load the external data, if present
+            # as not required for node analysis
+            model_onnx = load_model(onnx_file_path, load_external_data=False)
             model_name = str(onnx_file_path)
+            path = onnx_file_path
 
-        model_graph = ONNXGraph(model_onnx)
-
-        node_analyses = cls.analyze_nodes(model_graph)
+        # returns the node analysis and the model graph after loading the model with
+        # external data
+        node_analyses, model_graph = cls.analyze_nodes(model_onnx, path=path)
 
         layer_counts, op_counts = get_layer_and_op_counts(model_graph)
         layer_counts.update(op_counts)
@@ -1305,6 +1322,8 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             result = ModelAnalysis.from_onnx(Path(file_path) / "model.onnx")
 
         elif file_path.startswith("zoo:"):
+            # download and extract deployment directory
+            Model(file_path).deployment.path
             result = ModelAnalysis.from_onnx(
                 Model(file_path).deployment.get_file("model.onnx").path
             )
@@ -1356,12 +1375,19 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             print(f"{footer_key}: {footer_value}")
 
     @staticmethod
-    def analyze_nodes(model_graph: ONNXGraph) -> List[NodeAnalysis]:
+    def analyze_nodes(
+        model: ModelProto, path: Optional[str] = None
+    ) -> Tuple[List[NodeAnalysis], ONNXGraph]:
         """
         :param: model that contains the nodes to be analyzed
-        :return: list of node analyses from model graph
+        :return: list of node analyses from model graph and ONNXGraph of loaded model
         """
-        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model_graph.model)
+        node_shapes, node_dtypes = extract_node_shapes_and_dtypes(model, path)
+
+        if path:
+            model = load_model(path)
+
+        model_graph = ONNXGraph(model)
 
         nodes = []
         for node in model_graph.nodes:
@@ -1373,7 +1399,7 @@ class ModelAnalysis(YAMLSerializableBaseModel):
             )
             nodes.append(node_analysis)
 
-        return nodes
+        return nodes, model_graph
 
 
 def _get_param_count_summary(analysis: ModelAnalysis) -> CountSummary:

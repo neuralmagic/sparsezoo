@@ -13,9 +13,9 @@
 # limitations under the License.
 import logging
 import textwrap
-from typing import Dict, List, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 __all__ = [
@@ -30,58 +30,7 @@ __all__ = [
 ]
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class PropertyBaseModel(BaseModel):
-    """
-    https://github.com/samuelcolvin/pydantic/issues/935#issuecomment-1152457432
-
-    Workaround for serializing properties with pydantic until
-    https://github.com/samuelcolvin/pydantic/issues/935
-    is solved
-    """
-
-    @classmethod
-    def get_properties(cls):
-        return [
-            prop
-            for prop in dir(cls)
-            if isinstance(getattr(cls, prop), property)
-            and prop not in ("__values__", "fields")
-        ]
-
-    def dict(
-        self,
-        *,
-        include: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,  # noqa: F821
-        exclude: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,  # noqa: F821
-        by_alias: bool = False,
-        skip_defaults: bool = None,
-        exclude_unset: bool = False,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-    ) -> "DictStrAny":  # noqa: F821
-        attribs = super().dict(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            skip_defaults=skip_defaults,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-        )
-        props = self.get_properties()
-        # Include and exclude properties
-        if include:
-            props = [prop for prop in props if prop in include]
-        if exclude:
-            props = [prop for prop in props if prop not in exclude]
-
-        # Update the attribute dict with the properties
-        if props:
-            attribs.update({prop: getattr(self, prop) for prop in props})
-
-        return attribs
+PrintOrderType = ClassVar[List[str]]
 
 
 class NodeCounts(BaseModel):
@@ -104,15 +53,16 @@ class NodeIO(BaseModel):
 
     name: str = Field(description="Name of the input/output in onnx model graph")
     shape: Optional[List[Union[None, int]]] = Field(
+        None,
         description="Shape of the input/output in onnx model graph (assuming a "
-        "batch size of 1)"
+        "batch size of 1)",
     )
     dtype: Optional[str] = Field(
-        description="Data type of the values from the input/output"
+        None, description="Data type of the values from the input/output"
     )
 
 
-class ZeroNonZeroParams(PropertyBaseModel):
+class ZeroNonZeroParams(BaseModel):
     """
     Pydantic model for specifying the number zero and non-zero operations and the
     associated sparsity
@@ -125,20 +75,22 @@ class ZeroNonZeroParams(PropertyBaseModel):
         description="The number of parameters whose value is zero", default=0
     )
 
+    @computed_field(repr=True, return_type=Union[int, float])
     @property
     def sparsity(self):
         total_values = self.total
         if total_values > 0:
             return self.zero / total_values
         else:
-            return 0
+            return 0.0
 
+    @computed_field(repr=True, return_type=int)
     @property
     def total(self):
         return self.non_zero + self.zero
 
 
-class DenseSparseOps(PropertyBaseModel):
+class DenseSparseOps(BaseModel):
     """
     Pydantic model for specifying the number dense and sparse operations and the
     associated operation sparsity
@@ -153,6 +105,7 @@ class DenseSparseOps(PropertyBaseModel):
         default=0,
     )
 
+    @computed_field(repr=True, return_type=Union[int, float])
     @property
     def sparsity(self):
         total_ops = self.sparse + self.dense
@@ -220,9 +173,9 @@ class ParameterComponent(BaseModel):
     """
 
     alias: str = Field(description="The type of parameter (weight, bias)")
-    name: Optional[str] = Field(description="The name of the parameter")
+    name: Optional[str] = Field(None, description="The name of the parameter")
     shape: Optional[List[Union[None, int]]] = Field(
-        description="The shape of the parameter"
+        None, description="The shape of the parameter"
     )
     parameter_summary: ParameterSummary = Field(
         description="A summary of the parameter"
@@ -235,7 +188,7 @@ class Entry(BaseModel):
     A BaseModel with subtraction and pretty_print support
     """
 
-    _print_order: List[str] = []
+    _print_order: PrintOrderType = []
 
     def __sub__(self, other):
         """
@@ -306,7 +259,7 @@ class BaseEntry(Entry):
     sparsity: float
     quantized: float
 
-    _print_order = ["sparsity", "quantized"]
+    _print_order: PrintOrderType = ["sparsity", "quantized"]
 
 
 class NamedEntry(BaseEntry):
@@ -318,7 +271,7 @@ class NamedEntry(BaseEntry):
     total: float
     size: int
 
-    _print_order = ["name", "total", "size"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["name", "total", "size"] + BaseEntry._print_order
 
 
 class TypedEntry(BaseEntry):
@@ -329,7 +282,7 @@ class TypedEntry(BaseEntry):
     type: str
     size: int
 
-    _print_order = ["type", "size"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["type", "size"] + BaseEntry._print_order
 
 
 class ModelEntry(BaseEntry):
@@ -338,7 +291,7 @@ class ModelEntry(BaseEntry):
     """
 
     model: str
-    _print_order = ["model"] + BaseEntry._print_order
+    _print_order: PrintOrderType = ["model"] + BaseEntry._print_order
 
 
 class SizedModelEntry(ModelEntry):
@@ -347,8 +300,8 @@ class SizedModelEntry(ModelEntry):
     """
 
     count: int
-    size: int
-    _print_order = ModelEntry._print_order + ["count", "size"]
+    size: Union[int, float]
+    _print_order: PrintOrderType = ModelEntry._print_order + ["count", "size"]
 
 
 class PerformanceEntry(BaseEntry):
@@ -361,7 +314,7 @@ class PerformanceEntry(BaseEntry):
     throughput: float
     supported_graph: float
 
-    _print_order = [
+    _print_order: PrintOrderType = [
         "model",
         "latency",
         "throughput",
@@ -377,7 +330,7 @@ class NodeTimingEntry(Entry):
     node_name: str
     avg_runtime: float
 
-    _print_order = [
+    _print_order: PrintOrderType = [
         "node_name",
         "avg_runtime",
     ] + Entry._print_order

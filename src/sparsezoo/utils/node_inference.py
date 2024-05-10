@@ -18,7 +18,8 @@ NOTE: Adapted from sparseml/onnx/utils/helpers.py
 
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, NamedTuple, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import numpy
 import onnx
@@ -60,13 +61,14 @@ NodeDataType = NamedTuple(
 
 
 def extract_nodes_shapes_and_dtypes_ort(
-    model: ModelProto,
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
     Creates a modified model to expose intermediate outputs and runs an ONNX Runtime
     InferenceSession to obtain the output shape of each node.
 
     :param model: an ONNX model
+    :param path: absolute path to the original onnx model
     :return: a list of NodeArg with their shape exposed
     """
     import onnxruntime
@@ -79,11 +81,31 @@ def extract_nodes_shapes_and_dtypes_ort(
         )
         model_copy.graph.output.append(intermediate_layer_value_info)
 
+    # using the ModelProto does not work for large models when running the session
+    # have to save again and pass the new path to the inference session
     sess_options = onnxruntime.SessionOptions()
     sess_options.log_severity_level = 3
-    sess = onnxruntime.InferenceSession(
-        model_copy.SerializeToString(), sess_options, providers=["CPUExecutionProvider"]
-    )
+
+    # figure out if the current model has external data
+    has_external_data = False
+    for initializer in model.graph.initializer:
+        if initializer.HasField("data_location") and initializer.data_location == 1:
+            has_external_data = True
+            break
+
+    if path:
+        parent_dir = Path(path).parent.absolute()
+        new_path = parent_dir / "model_new.onnx"
+        onnx.save(model_copy, new_path, save_as_external_data=has_external_data)
+        sess = onnxruntime.InferenceSession(
+            new_path, sess_options, providers=onnxruntime.get_available_providers()
+        )
+    else:
+        sess = onnxruntime.InferenceSession(
+            model_copy.SerializeToString(),
+            sess_options,
+            providers=onnxruntime.get_available_providers(),
+        )
 
     input_value_dict = {}
     for input in model_copy.graph.input:
@@ -166,19 +188,20 @@ def extract_nodes_shapes_and_dtypes_shape_inference(
 
 
 def extract_nodes_shapes_and_dtypes(
-    model: ModelProto,
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, List[List[int]]], Dict[str, numpy.dtype]]:
     """
     Uses ONNX Runtime or shape inference to infer output shapes and dtypes from model
 
     :param model: model to extract output values from
+    :param path: absolute path to the original onnx model
     :return: output shapes and output data types
     """
     output_shapes = None
     output_dtypes = None
 
     try:
-        output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes_ort(model)
+        output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes_ort(model, path)
     except Exception as err:
         _LOGGER.warning(f"Extracting shapes using ONNX Runtime session failed: {err}")
 
@@ -306,18 +329,19 @@ def collate_output_dtypes(
 
 
 def extract_node_shapes_and_dtypes(
-    model: ModelProto,
+    model: ModelProto, path: Optional[str] = None
 ) -> Tuple[Dict[str, NodeShape], Dict[str, NodeDataType]]:
     """
     Extracts the shape and dtype information for each node as NodeShape objects
     and numpy dtypes.
 
     :param model: the loaded onnx.ModelProto to extract node shape information from
+    :param path: absolute path to the original onnx model
     :return: a mapping of node id to a NodeShape object
     """
 
     # Obtains output shapes for each model's node
-    output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes(model)
+    output_shapes, output_dtypes = extract_nodes_shapes_and_dtypes(model, path)
 
     # Package output shapes into each node's inputs and outputs
     node_shapes = collate_output_shapes(model, output_shapes)
@@ -358,8 +382,20 @@ def extract_shape(proto: Any) -> Union[None, Tuple[Union[int, None], ...]]:
 
     for dim in tensor_type.shape.dim:
         if dim.HasField("dim_value"):
-            shape.append(dim.dim_value)
+            value = dim.dim_value
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1)  # batch, past_sequence_len
+        elif dim.HasField("dim_param"):
+            value = dim.dim_param
+            if isinstance(value, int) or isinstance(value, float):
+                shape.append(value)
+            else:
+                shape.append(1)  # batch, past_sequence_len
         else:
+            _LOGGER.warning(
+                "Could not fimd dim_value or dim_param in tensor_type.shape.dim"
+            )
             shape.append(None)
-
     return tuple(shape)
