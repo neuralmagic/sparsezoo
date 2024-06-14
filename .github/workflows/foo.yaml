@@ -1,0 +1,18 @@
+name: Use Echo Action
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'release/*'
+
+jobs:
+  my-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Use Echo Action from nmstore
+        uses: neuralmagic/nmstore/tests/stuff@pilot
