@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'release/*'
+      - 'relbuild'
 
   workflow_dispatch:
     inputs:
@@ -11,6 +12,7 @@ on:
         description: "git tag, commit or branch name for the release"
         type: string
         required: true
+        default: 'relbuild'
 
 jobs:
   build-release-wheel:
