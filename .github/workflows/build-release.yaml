@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: "wheel-compressed-tensors"
+          name: "wheel-sparsezoo"
           path: ${{ steps.build.outputs.whlname }}
           retention-days: 7
 
@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: "tar-compressed-tensors"
+          name: "tar-sparsezoo"
           path: ${{ steps.build.outputs.tarname }}
           retention-days: 7
       
