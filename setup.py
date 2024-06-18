@@ -46,7 +46,7 @@ else:
     _PACKAGE_NAME = "sparsezoo-nightly"
 
 _deps = [
-    "numpy>=1.0.0",
+    "numpy>=1.17.0,<2.0",
     "onnx>=1.5.0,<1.15.0",
     "pyyaml>=5.1.0",
     "requests>=2.0.0",
