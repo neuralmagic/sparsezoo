@@ -21,38 +21,21 @@ limitations under the License.
 
 <h3>Neural network model repository for highly sparse and sparse-quantized models with matching sparsification recipes</h3>
 
-<p>
-    <a href="https://docs.neuralmagic.com/sparsezoo">
-        <img alt="Documentation" src="https://img.shields.io/badge/documentation-darkred?&style=for-the-badge&logo=read-the-docs" height=25>
-    </a>
-    <a href="https://neuralmagic.com/community/">
-        <img src="https://img.shields.io/badge/slack-purple?style=for-the-badge&logo=slack" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/issues">
-        <img src="https://img.shields.io/badge/support%20forums-navy?style=for-the-badge&logo=github" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/actions/workflows/test-check.yaml">
-        <img alt="Main" src="https://img.shields.io/github/workflow/status/neuralmagic/sparsezoo/Test%20Checks/main?label=build&style=for-the-badge" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/releases">
-        <img alt="GitHub release" src="https://img.shields.io/github/release/neuralmagic/sparsezoo.svg?style=for-the-badge" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/neuralmagic/sparsezoo.svg?color=lightgray&style=for-the-badge" height=25>
-    </a>
-    <a href="https://github.com/neuralmagic/sparsezoo/blob/main/CODE_OF_CONDUCT.md">
-        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg?color=yellow&style=for-the-badge" height=25>
-    </a>
-    <a href="https://www.youtube.com/channel/UCo8dO_WMGYbWCRnj_Dxr4EA">
-        <img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=25>
-    </a>
-     <a href="https://medium.com/limitlessai">
-        <img src="https://img.shields.io/badge/medium-%2312100E.svg?&style=for-the-badge&logo=medium&logoColor=white" height=25>
-    </a>
-    <a href="https://twitter.com/neuralmagic">
-        <img src="https://img.shields.io/twitter/follow/neuralmagic?color=darkgreen&label=Follow&style=social" height=25>
-    </a>
-</p>
+## 🚨 2025 End of Life Announcement: DeepSparse, SparseML, SparseZoo, and Sparsify
+
+Dear Community,
+
+We’re reaching out with heartfelt thanks and important news. Following [Neural Magic’s acquisition by Red Hat in January 2025](https://www.redhat.com/en/about/press-releases/red-hat-completes-acquisition-neural-magic-fuel-optimized-generative-ai-innovation-across-hybrid-cloud), we’re shifting our focus to commercial and open-source offerings built around [vLLM (virtual large language models)](https://www.redhat.com/en/topics/ai/what-is-vllm).
+
+As part of this transition, we have ceased development and will deprecate the community versions of **DeepSparse (including DeepSparse Enterprise), SparseML, SparseZoo, and Sparsify on June 2, 2025**. After that, these tools will no longer receive updates or support.
+
+From day one, our mission was to democratize AI through efficient, accessible tools. We’ve learned so much from your feedback, creativity, and collaboration—watching these tools become vital parts of your ML journeys has meant the world to us.
+
+Though we’re winding down the community editions, we remain committed to our original values. Now as part of Red Hat, we’re excited to evolve our work around vLLM and deliver even more powerful solutions to the ML community.
+
+To learn more about our next chapter, visit [ai.redhat.com](ai.redhat.com). Thank you for being part of this incredible journey.
+
+_With gratitude, The Neural Magic Team (now part of Red Hat)_
 
 ## Overview
 
@@ -66,18 +49,6 @@ Recipe-driven approaches built around sparsification algorithms allow you to use
 The [GitHub repository](https://github.com/neuralmagic/sparsezoo) contains the Python API code to handle the connection and authentication to the cloud.
 
 <img alt="SparseZoo Flow" src="https://docs.neuralmagic.com/docs/source/infographics/sparsezoo.png" width="960px" />
-
-
-## 🚨 New SparseZoo Models 🚨
-### 🎃 October 2023 🎃
-**Generative AI**
-- Sparse MPT Models - [21 variants](https://sparsezoo.neuralmagic.com/?architectures=mpt&ungrouped=true)
-    - ⚡ Highlighted Model ⚡ :  [mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized](https://sparsezoo.neuralmagic.com/models/mpt-7b-gsm8k_mpt_pretrain-pruned80_quantized?hardware=deepsparse-c6i.12xlarge&comparison=mpt-7b-gsm8k_mpt_pretrain-base)
-- Sparse OPT Models - [12 variants](https://sparsezoo.neuralmagic.com/?architectures=opt&ungrouped=true)
-    - ⚡ Highlighted Model ⚡ :  [opt-6.7b-opt_pretrain-pruned50_quantW8A8](https://sparsezoo.neuralmagic.com/models/opt-6.7b-opt_pretrain-pruned50_quantW8A8?hardware=deepsparse-c6i.12xlarge&comparison=opt-6.7b-opt_pretrain-base)
-- Sparse Codegen (mono,multi) Models - [10 variants](https://sparsezoo.neuralmagic.com/?ungrouped=true&architectures=codegen_mono%2Ccodegen_multi)
-    - ⚡ Highlighted Model ⚡ :  [codegen_multi-350m-bigquery_thepile-pruned50_quantized](https://sparsezoo.neuralmagic.com/models/codegen_multi-350m-bigquery_thepile-pruned50_quantized?hardware=deepsparse-c6i.12xlarge&comparison=codegen_multi-350m-bigquery_thepile-base) 
- 
 
 ## Highlights
 
@@ -427,16 +398,4 @@ Additionally, more information can be found via [GitHub Releases.](https://githu
 
 The project is licensed under the [Apache License Version 2.0.](https://github.com/neuralmagic/sparsezoo/blob/main/LICENSE)
 
-## Community
 
-### Contribute
-
-We appreciate contributions to the code, examples, integrations, and documentation as well as bug reports and feature requests! [Learn how here.](https://github.com/neuralmagic/sparsezoo/blob/main/CONTRIBUTING.md)
-
-### Join
-
-For user help or questions about SparseZoo, sign up or log in to our [**Neural Magic Community Slack**](https://neuralmagic.com/community/). We are growing the community member by member and happy to see you there. Bugs, feature requests, or additional questions can also be posted to our [GitHub Issue Queue.](https://github.com/neuralmagic/sparsezoo/issues)
-
-You can get the latest news, webinar and event invites, research papers, and other ML Performance tidbits by [subscribing](https://neuralmagic.com/subscribe/) to the Neural Magic community.
-
-For more general questions about Neural Magic, please fill out this [form.](http://neuralmagic.com/contact/)
